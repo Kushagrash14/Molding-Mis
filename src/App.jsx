@@ -1,0 +1,545 @@
+import { useEffect, useState, useMemo } from "react";
+import {
+  SEED_MASTER,
+  USERS,
+  SEED_ENTRIES,
+  MACHINES,
+  SHIFTS,
+  REASON_CODES,
+  LOCATIONS,
+  PLANTS,
+} from "./data/seedData.js";
+import { todayStr, getProductionShiftDate, isShiftEntryLocked } from "./lib/calculations.js";
+import { loadState, saveState, loadSession, saveSession } from "./lib/storage.js";
+import {
+  getUserAccessiblePlants,
+  getUserAccessibleLocations,
+} from "./lib/permissions.js";
+
+import TopBar from "./components/TopBar.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import EntryForm from "./components/EntryForm.jsx";
+import EntriesTable from "./components/EntriesTable.jsx";
+import EditModal from "./components/EditModal.jsx";
+import Dashboard from "./components/Dashboard.jsx";
+import MasterAdmin from "./components/MasterAdmin.jsx";
+import AuditLogView from "./components/AuditLogView.jsx";
+import LoginScreen from "./components/LoginScreen.jsx";
+
+const TABS_BY_ROLE = {
+  operator: [
+    ["entry", "New entry"],
+    ["mine", "My entries"],
+  ],
+  supervisor: [["browse", "Plant entries"]],
+  admin: [
+    ["all", "All entries"],
+    ["master", "Master data"],
+    ["dashboard", "Dashboard"],
+    ["audit", "Audit log"],
+  ],
+};
+
+export default function App() {
+  const saved = loadState();
+
+  const [master, setMaster] = useState(saved?.master ?? SEED_MASTER);
+  const [machines, setMachines] = useState(() => {
+    const loaded = saved?.machines ?? MACHINES;
+    return loaded.map((m) => {
+      if (!m.plant_id) {
+        const seedM = MACHINES.find((sm) => sm.machine_id === m.machine_id);
+        return { ...m, plant_id: seedM?.plant_id || PLANTS[0]?.plant_id || "PLANT-U01" };
+      }
+      return m;
+    });
+  });
+  const [shifts, setShifts] = useState(() => {
+    const loaded = saved?.shifts;
+    // Migrate if missing or legacy defaults (old 8h Shift A with 06:00, or shift_id === "A" / "C")
+    if (
+      !loaded ||
+      !Array.isArray(loaded) ||
+      loaded.length === 0 ||
+      loaded.some((s) => s.shift_id === "A" || s.shift_id === "C" || (s.start_time === "06:00" && s.end_time === "14:00"))
+    ) {
+      return SHIFTS;
+    }
+    return loaded.map((s) => {
+      if (!s.start_time || !s.end_time || !s.planned_hours) {
+        const seedS = SHIFTS.find((ss) => ss.shift_id === s.shift_id);
+        if (seedS) return { ...s, ...seedS };
+        return {
+          ...s,
+          name: s.name || `Shift ${s.shift_id}`,
+          start_time: s.start_time || "07:00",
+          end_time: s.end_time || "19:00",
+          break_mins: s.break_mins || 0,
+          planned_hours: s.planned_hours || 12.0,
+          code: s.code || `Shift ${s.shift_id} (07:00–19:00 · 12.0h)`,
+        };
+      }
+      return s;
+    });
+  });
+  const [reasonCodes, setReasonCodes] = useState(() => {
+    const loaded = saved?.reasonCodes ?? REASON_CODES;
+    if (!loaded.some((r) => r.reason_id === "udt_others")) {
+      return [
+        ...loaded,
+        { reason_id: "udt_others", name: "OTHERS", category: "unplanned_dt", unit: "min" },
+      ];
+    }
+    return loaded;
+  });
+  const [locations, setLocations] = useState(() => {
+    const loaded = saved?.locations;
+    if (!loaded || loaded.some((l) => l.location_id === "LOC-AHM" || l.name === "Ahmednagar" || l.state)) {
+      return LOCATIONS;
+    }
+    return loaded;
+  });
+  const [plants, setPlants] = useState(() => {
+    const loaded = saved?.plants;
+    if (!loaded || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
+      return PLANTS;
+    }
+    return loaded;
+  });
+  const [users, setUsers] = useState(() => {
+    const loaded = saved?.users ?? USERS;
+    // Purge demo users (priya, ramesh, suresh)
+    const filtered = loaded.filter(
+      (u) =>
+        !["u_priya", "u_ramesh", "u_suresh"].includes(u.id) &&
+        !["priya", "ramesh", "suresh"].includes(u.username)
+    );
+    const list = [...filtered];
+    // Ensure all seed accounts from USERS are present
+    for (const su of USERS) {
+      if (!list.some((u) => u.id === su.id || u.email?.toLowerCase() === su.email?.toLowerCase())) {
+        list.push(su);
+      }
+    }
+    return list.map((u) => {
+      if (u.username === "admin" || u.id === "u_admin") {
+        return {
+          ...u,
+          id: "u_admin",
+          username: "admin",
+          email: "software.2040@pgel.in",
+          employee_code: u.employee_code || "PG-001",
+          name: "System Administrator",
+          role: "admin",
+          assigned_location_id: "all",
+          assigned_location_ids: ["all"],
+          assigned_plant_ids: ["all"],
+        };
+      }
+      return u;
+    });
+  });
+
+  const [selectedPlantId, setSelectedPlantId] = useState(
+    saved?.selectedPlantId ?? PLANTS[0]?.plant_id ?? "PLANT-U01"
+  );
+
+  const [entries, setEntries] = useState(saved?.entries ?? SEED_ENTRIES);
+  const [auditLog, setAuditLog] = useState(saved?.auditLog ?? []);
+  
+  // Session State: authenticated user from localStorage session, or null (prompts login)
+  const [currentUser, setCurrentUser] = useState(() => {
+    const sess = loadSession();
+    if (sess) {
+      const loadedUsers = saved?.users ?? USERS;
+      const match = loadedUsers.find(
+        (u) => u.id === sess.id || u.username?.toLowerCase() === sess.username?.toLowerCase()
+      );
+      if (match) {
+        const seedMatch = USERS.find((su) => su.username === match.username || su.id === match.id);
+        const assignedLocId = match.assigned_location_id ?? seedMatch?.assigned_location_id ?? "all";
+        const assignedLocIds =
+          match.assigned_location_ids ??
+          (match.assigned_location_id ? [match.assigned_location_id] : seedMatch?.assigned_location_ids ?? ["all"]);
+        const assignedPlants = match.assigned_plant_ids ?? seedMatch?.assigned_plant_ids ?? ["all"];
+        return {
+          ...match,
+          assigned_location_id: assignedLocId,
+          assigned_location_ids: assignedLocIds,
+          assigned_plant_ids: assignedPlants,
+        };
+      }
+      return sess;
+    }
+    return null;
+  });
+
+  // Calculate accessible plants & locations for the logged-in user
+  const accessiblePlants = useMemo(() => {
+    return getUserAccessiblePlants(currentUser, plants, locations);
+  }, [currentUser, plants, locations]);
+
+  const accessibleLocations = useMemo(() => {
+    return getUserAccessibleLocations(currentUser, plants, locations);
+  }, [currentUser, plants, locations]);
+
+  // Ensure active plant is within user's accessible scope
+  useEffect(() => {
+    if (currentUser && accessiblePlants.length > 0) {
+      if (!accessiblePlants.some((p) => p.plant_id === selectedPlantId)) {
+        setSelectedPlantId(accessiblePlants[0].plant_id);
+      }
+    }
+  }, [currentUser, accessiblePlants, selectedPlantId]);
+
+  // Strictly filter entries visible to currentUser based on assigned plant scope
+  const authorizedEntries = useMemo(() => {
+    if (!currentUser) return [];
+    if (
+      currentUser.assigned_plant_ids?.includes("all") ||
+      currentUser.assigned_location_id === "all" ||
+      (Array.isArray(currentUser.assigned_location_ids) &&
+        currentUser.assigned_location_ids.includes("all"))
+    ) {
+      return entries;
+    }
+    return entries.filter((e) => accessiblePlants.some((p) => p.plant_id === e.plant_id));
+  }, [entries, currentUser, accessiblePlants]);
+
+  const [tab, setTab] = useState(() => {
+    const sess = loadSession();
+    if (sess?.role === "operator") return "entry";
+    if (sess?.role === "supervisor") return "browse";
+    if (sess?.role === "admin") return "all";
+    return "entry";
+  });
+  const [editing, setEditing] = useState(null);
+
+  // Persist master data, config, and entries to localStorage
+  useEffect(() => {
+    saveState({
+      master,
+      machines,
+      shifts,
+      reasonCodes,
+      locations,
+      plants,
+      selectedPlantId,
+      entries,
+      auditLog,
+      users,
+    });
+  }, [
+    master,
+    machines,
+    shifts,
+    reasonCodes,
+    locations,
+    plants,
+    selectedPlantId,
+    entries,
+    auditLog,
+    users,
+  ]);
+
+  // Lock system: any submitted entry outside the eligible shift window (older than 12h grace window) gets locked automatically.
+  useEffect(() => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.status === "submitted" && isShiftEntryLocked(e, shifts)
+          ? { ...e, status: "locked", locked_at: new Date().toISOString() }
+          : e
+      )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shifts]);
+
+  function handleLogin(user) {
+    setCurrentUser(user);
+    saveSession(user);
+    setTab(
+      user.role === "operator" ? "entry" : user.role === "supervisor" ? "browse" : "all"
+    );
+  }
+
+  function handleLogout() {
+    setCurrentUser(null);
+    saveSession(null);
+    setTab("entry");
+  }
+
+  function addEntry(entry) {
+    setEntries((prev) => {
+      const idx = prev.findIndex(
+        (e) =>
+          e.entry_id === entry.entry_id ||
+          (e.shift_date === entry.shift_date &&
+            e.shift_id === entry.shift_id &&
+            e.machine_id === entry.machine_id &&
+            (!entry.plant_id || e.plant_id === entry.plant_id))
+      );
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...prev[idx], ...entry, entry_id: prev[idx].entry_id };
+        return next;
+      }
+      return [...prev, entry];
+    });
+  }
+
+  function runLockJob() {
+    let count = 0;
+    setEntries((prev) =>
+      prev.map((e) => {
+        if (e.status === "submitted" && isShiftEntryLocked(e, shifts)) {
+          count++;
+          return { ...e, status: "locked", locked_at: new Date().toISOString() };
+        }
+        return e;
+      })
+    );
+    alert(
+      count > 0
+        ? `${count} historical entry(ies) past 12h grace window locked.`
+        : "All submitted entries are within active shift or 12h grace window."
+    );
+  }
+
+  function saveEdit(original, updated) {
+    setEntries((prev) => prev.map((e) => (e.entry_id === original.entry_id ? updated : e)));
+    if (original.status === "locked") {
+      setAuditLog((prev) => [
+        ...prev,
+        {
+          id: "A-" + Date.now(),
+          entry_id: original.entry_id,
+          action: "update",
+          summary: `Admin edited locked entry ${original.entry_id} (${original.sap_code}, ${original.shift_date}) — OK prod ${original.ok_prod} → ${updated.ok_prod}, run hour ${original.run_hour} → ${updated.run_hour}`,
+          changed_by: currentUser.id,
+          changed_by_name: currentUser.name,
+          changed_at: new Date().toISOString(),
+        },
+      ]);
+    }
+    setEditing(null);
+  }
+
+  function tryEdit(entry) {
+    const isLocked = entry.status === "locked" || isShiftEntryLocked(entry, shifts);
+    if (currentUser?.role !== "admin" && isLocked) {
+      alert("This entry is older than 12 hours and is locked. Operators cannot edit locked records.");
+      return;
+    }
+    setEditing(entry);
+  }
+
+  // If user is not authenticated, present the enterprise Login Screen
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        users={users}
+        onLogin={handleLogin}
+        plants={plants}
+        locations={locations}
+      />
+    );
+  }
+
+  const role = currentUser.role;
+  const tabs = TABS_BY_ROLE[role] || TABS_BY_ROLE.operator;
+
+  return (
+    <div>
+      <TopBar
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        role={role}
+        onRunLockJob={runLockJob}
+        shifts={shifts}
+        locations={accessibleLocations}
+        plants={accessiblePlants}
+        selectedPlantId={selectedPlantId}
+        onPlantChange={setSelectedPlantId}
+      />
+
+      <div className="shell">
+        <Sidebar tabs={tabs} activeTab={tab} onTabChange={setTab} currentUser={currentUser} />
+
+        <main className="content">
+          {tab === "entry" && (
+            <EntryForm
+              entries={authorizedEntries}
+              master={master}
+              machines={machines}
+              shifts={shifts}
+              reasonCodes={reasonCodes}
+              locations={accessibleLocations}
+              plants={accessiblePlants}
+              selectedPlantId={selectedPlantId}
+              onSubmit={addEntry}
+              currentUser={currentUser}
+            />
+          )}
+
+          {tab === "mine" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>My Shift Entries</h2>
+                  <p>Unlocked entries can be updated; locked entries render as protected records.</p>
+                </div>
+              </div>
+              <EntriesTable
+                entries={authorizedEntries}
+                master={master}
+                machines={machines}
+                shifts={shifts}
+                locations={accessibleLocations}
+                plants={accessiblePlants}
+                reasonCodes={reasonCodes}
+                viewerRole="operator"
+                scopeToUser={currentUser.id}
+                onEdit={tryEdit}
+              />
+            </div>
+          )}
+
+          {tab === "browse" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>Plant Entries Register</h2>
+                  <p>Supervisor floor view — real-time monitoring across all machines and shifts.</p>
+                </div>
+              </div>
+              <EntriesTable
+                entries={authorizedEntries}
+                master={master}
+                machines={machines}
+                shifts={shifts}
+                locations={accessibleLocations}
+                plants={accessiblePlants}
+                reasonCodes={reasonCodes}
+                viewerRole="supervisor"
+                onEdit={() => {}}
+              />
+            </div>
+          )}
+
+          {tab === "all" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>Master Shift Entries Register</h2>
+                  <p>Plant Admin view — Full override and edit access with silent audit logging.</p>
+                </div>
+              </div>
+              {authorizedEntries.filter((e) => e.status === "locked").length === 0 && authorizedEntries.length > 0 && (
+                <div className="banner">
+                  <strong>Tip —</strong> entries automatically lock once their shift date is past
+                  cutoff. Use &quot;Shift Cutoff Lock&quot; in the top bar to force-check now.
+                </div>
+              )}
+              <EntriesTable
+                entries={authorizedEntries}
+                master={master}
+                machines={machines}
+                shifts={shifts}
+                locations={accessibleLocations}
+                plants={accessiblePlants}
+                reasonCodes={reasonCodes}
+                viewerRole="admin"
+                onEdit={tryEdit}
+              />
+            </div>
+          )}
+
+          {tab === "master" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>Plant Master Data Management</h2>
+                  <p>
+                    Manage Locations &amp; Plants, Products (SAP Master), Machines, Shift timings, and
+                    Downtime/Rejection reason codes.
+                  </p>
+                </div>
+              </div>
+              <MasterAdmin
+                master={master}
+                setMaster={setMaster}
+                machines={machines}
+                setMachines={setMachines}
+                shifts={shifts}
+                setShifts={setShifts}
+                reasonCodes={reasonCodes}
+                setReasonCodes={setReasonCodes}
+                locations={locations}
+                setLocations={setLocations}
+                plants={plants}
+                setPlants={setPlants}
+                users={users}
+                setUsers={setUsers}
+                entries={entries}
+              />
+            </div>
+          )}
+
+          {tab === "dashboard" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>Plant Performance &amp; OEE Dashboard</h2>
+                  <p>
+                    Aggregated metrics, Pareto analysis, and financial indicators rolled up from logged
+                    entries.
+                  </p>
+                </div>
+              </div>
+              <Dashboard
+                entries={authorizedEntries}
+                master={master}
+                machines={machines}
+                shifts={shifts}
+                reasonCodes={reasonCodes}
+                locations={accessibleLocations}
+                plants={accessiblePlants}
+                initialPlantId={selectedPlantId}
+              />
+            </div>
+          )}
+
+          {tab === "audit" && (
+            <div>
+              <div className="page-head">
+                <div>
+                  <h2>Plant Security &amp; Audit Trail</h2>
+                  <p>
+                    Complete historical log of every administrative override made to locked shift
+                    records.
+                  </p>
+                </div>
+              </div>
+              <AuditLogView log={auditLog} />
+            </div>
+          )}
+        </main>
+      </div>
+
+      {editing && (
+        <EditModal
+          entry={editing}
+          master={master}
+          machines={machines}
+          shifts={shifts}
+          reasonCodes={reasonCodes}
+          locations={locations}
+          plants={plants}
+          currentUser={currentUser}
+          onClose={() => setEditing(null)}
+          onSave={saveEdit}
+        />
+      )}
+    </div>
+  );
+}
