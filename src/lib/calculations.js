@@ -94,6 +94,16 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     };
   }
 
+  // Resolve product master if master is an array
+  let itemMaster = master;
+  if (Array.isArray(master)) {
+    const sap =
+      entry.sap_code ||
+      entry.primary_sap_code ||
+      (entry.runs && entry.runs[0] && entry.runs[0].sap_code);
+    itemMaster = master.find((x) => x.sap_code === sap) || null;
+  }
+
   // Single run calculation
   let total_rej = 0;
   let planned_dt = 0;
@@ -122,7 +132,9 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
 
   // Col M: TGT = Shots/hr * (Run Hour - Planned DT - Unplanned DT) * Running Cavity
   const net_run_time = Math.max(0, run_hour - planned_dt - unplanned_dt);
-  const tgt = master ? Math.round(master.shots_per_hour * net_run_time * running_cavity) : 0;
+  const shotsPerHour = Number(itemMaster?.shots_per_hour || entry.shots_per_hour || 0);
+  const rawTgt = Math.round(shotsPerHour * net_run_time * running_cavity);
+  const tgt = isNaN(rawTgt) ? 0 : rawTgt;
 
   // Col AZ: Quality Rate = OK Prod / (OK Prod + Total Rej)
   const total_produced = ok_prod + total_rej;
@@ -140,7 +152,7 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const oee = quality_rate * availability * productivity;
 
   // Col BD & BE & BF: Values (INR)
-  const price = master ? master.price : 0;
+  const price = Number(itemMaster?.price || entry.price || 0);
   const ok_prod_price = price * ok_prod;
   const rej_price = price * total_rej;
   const prod_plan_amt = price * tgt;
@@ -148,8 +160,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const shortfall_loss = Math.max(0, tgt - ok_prod) * price;
 
   // Col BG, BH, BI, BJ, BK, BL: Weights (in KG)
-  const part_wt = master ? master.part_wt : 0;
-  const run_wt = master ? master.run_wt : 0;
+  const part_wt = Number(itemMaster?.part_wt || entry.part_wt || 0);
+  const run_wt = Number(itemMaster?.run_wt || entry.run_wt || 0);
   const net_wt = part_wt + (running_cavity > 0 ? run_wt / running_cavity : 0);
   const ok_prod_wt = part_wt * ok_prod;
   const rej_wt = part_wt * total_rej;
@@ -163,7 +175,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     : 0;
 
   // Manpower Variance
-  const manpower_variance = master ? (Number(entry.hr_mp_declare) || 0) - master.manpower : 0;
+  const stdManpower = Number(itemMaster?.manpower || 2);
+  const manpower_variance = (Number(entry.hr_mp_declare) || 0) - stdManpower;
 
   return {
     total_rej,

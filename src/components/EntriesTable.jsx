@@ -258,7 +258,7 @@ export default function EntriesTable({
               </tr>
             )}
             {sorted.map((e) => {
-              const metrics = computeMetrics(e, master);
+              const metrics = computeMetrics(e, master, reasonCodes);
               const isEntryLocked = e.status === "locked" || isEntryPastTwelveHours(e, shifts);
               const canEdit =
                 viewerRole === "admin" ||
@@ -346,9 +346,9 @@ export default function EntriesTable({
                       </span>
                     )}
                   </td>
-                  <td>{metrics.tgt.toLocaleString()}</td>
+                  <td>{Number(metrics.tgt || 0).toLocaleString()}</td>
                   <td style={{ fontWeight: 700, color: "#16a34a" }}>
-                    {Number(e.ok_prod).toLocaleString()}
+                    {Number(e.ok_prod || 0).toLocaleString()}
                   </td>
                   <td
                     style={{
