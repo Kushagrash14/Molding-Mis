@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { computeMetrics, calculateHoursBetween, pct } from "../lib/calculations.js";
 import SearchableSapSelect from "./SearchableSapSelect.jsx";
+import RejectionModal from "./RejectionModal.jsx";
+import DowntimeModal from "./DowntimeModal.jsx";
 
 /**
  * Generates selectable start times for Mold #(idx+1) between prevRun.startTime and thisRun.endTime in 30-min increments.
@@ -125,6 +127,9 @@ export default function MoldRunCard({
     }
     return opts;
   }, [idx, prevRun, run.end_time, run.start_time, shiftStart]);
+
+  const [showRejModal, setShowRejModal] = useState(false);
+  const [showDtModal, setShowDtModal] = useState(false);
 
   return (
     <div
@@ -539,20 +544,21 @@ export default function MoldRunCard({
           )
         )}
 
-        {/* Operational Inputs (Run Hours, Cavity, Manpower, OK Production) */}
+        {/* Operational Inputs (Run Hours, Cavity, Manpower, OK Production, Rejections, Downtime) */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: "14px",
-            marginBottom: "18px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+            gap: "10px",
+            marginBottom: "12px",
+            alignItems: "end",
           }}
         >
           {/* Machine Run Hours (Actual Run Hours) */}
-          <div className="form-row">
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px" }}>
               <span style={{ fontWeight: 700, color: "#1e40af" }}>Run Hours</span>
-              <span style={{ fontSize: "11px", color: "#64748b", fontWeight: 700 }}>
+              <span style={{ fontSize: "10.5px", color: "#64748b", fontWeight: 700 }}>
                 Max: {maxHours.toFixed(1)}h
               </span>
             </label>
@@ -575,18 +581,20 @@ export default function MoldRunCard({
               }}
               placeholder=""
               style={{
-                height: "38px",
+                height: "36px",
                 fontWeight: 800,
                 color: "#1e40af",
                 background: "#f0fdf4",
                 borderColor: "#3b82f6",
+                padding: "0 8px",
+                fontSize: "13.5px",
               }}
             />
           </div>
 
           {/* Running Cavity */}
-          <div className="form-row">
-            <label>Running Cavity</label>
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: "11.5px" }}>Running Cavity</label>
             <input
               type="number"
               min="1"
@@ -600,13 +608,13 @@ export default function MoldRunCard({
                 )
               }
               placeholder={isFormReadOnly || !machine || !run.sap_code ? "—" : "e.g. 2"}
-              style={{ height: "38px" }}
+              style={{ height: "36px", padding: "0 8px", fontSize: "13.5px" }}
             />
           </div>
 
           {/* Manpower Declared */}
-          <div className="form-row">
-            <label>Manpower Declared</label>
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: "11.5px" }}>Manpower</label>
             <input
               type="number"
               min="1"
@@ -619,17 +627,17 @@ export default function MoldRunCard({
                 )
               }
               placeholder={isFormReadOnly || !machine || !run.sap_code ? "—" : "e.g. 2"}
-              style={{ height: "38px" }}
+              style={{ height: "36px", padding: "0 8px", fontSize: "13.5px" }}
             />
           </div>
 
           {/* OK Production */}
-          <div className="form-row">
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 700, color: "#166534" }}>
-              <span>OK Production (qty)</span>
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 700, color: "#166534", fontSize: "11.5px" }}>
+              <span>OK Prod (qty)</span>
               {runMetrics?.tgt > 0 && (
-                <span style={{ fontSize: "11px", color: "#1d4ed8", fontWeight: 800 }}>
-                  🎯 Target: {runMetrics.tgt.toLocaleString()} pcs
+                <span style={{ fontSize: "10.5px", color: "#1d4ed8", fontWeight: 800 }}>
+                  🎯 {runMetrics.tgt.toLocaleString()}
                 </span>
               )}
             </label>
@@ -641,171 +649,259 @@ export default function MoldRunCard({
               onChange={(e) => updateRun("ok_prod", e.target.value)}
               placeholder={isFormReadOnly || !machine || !run.sap_code ? "—" : ""}
               style={{
-                height: "38px",
+                height: "36px",
                 fontWeight: 800,
-                fontSize: "14px",
+                fontSize: "13.5px",
                 borderColor: run.ok_prod ? "#16a34a" : undefined,
+                padding: "0 8px",
               }}
             />
           </div>
+
+          {/* Add Rejection Button */}
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px", fontWeight: 700, color: "#dc2626" }}>
+              <span>Rejections</span>
+              {runMetrics.total_rej > 0 && (
+                <span style={{ fontSize: "10.5px", color: "#dc2626", fontWeight: 800 }}>
+                  {runMetrics.total_rej} pcs
+                </span>
+              )}
+            </label>
+            <button
+              type="button"
+              disabled={isFormReadOnly || !machine || !run.sap_code}
+              onClick={() => setShowRejModal(true)}
+              style={{
+                height: "36px",
+                width: "100%",
+                borderRadius: "6px",
+                fontSize: "12.5px",
+                fontWeight: 700,
+                cursor: isFormReadOnly || !machine || !run.sap_code ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                padding: "0 8px",
+                boxSizing: "border-box",
+                background: runMetrics.total_rej > 0 ? "#fef2f2" : "#ffffff",
+                border: runMetrics.total_rej > 0 ? "1.5px solid #ef4444" : "1.5px dashed #cbd5e1",
+                color: runMetrics.total_rej > 0 ? "#b91c1c" : "#475569",
+                transition: "all 0.15s ease",
+              }}
+              title="Click to add or manage rejections"
+            >
+              <span style={{ fontSize: "14px" }}>🔴</span>
+              <span>
+                {runMetrics.total_rej > 0
+                  ? `Rejections (${runMetrics.total_rej})`
+                  : "+ Add Rejection"}
+              </span>
+            </button>
+          </div>
+
+          {/* Add Downtime Button */}
+          <div className="form-row" style={{ marginBottom: 0 }}>
+            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px", fontWeight: 700, color: "#0284c7" }}>
+              <span>Downtime</span>
+              {totalDowntimeMins > 0 && (
+                <span style={{ fontSize: "10.5px", color: "#0284c7", fontWeight: 800 }}>
+                  {totalDowntimeMins}m
+                </span>
+              )}
+            </label>
+            <button
+              type="button"
+              disabled={isFormReadOnly || !machine || !run.sap_code}
+              onClick={() => setShowDtModal(true)}
+              style={{
+                height: "36px",
+                width: "100%",
+                borderRadius: "6px",
+                fontSize: "12.5px",
+                fontWeight: 700,
+                cursor: isFormReadOnly || !machine || !run.sap_code ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                padding: "0 8px",
+                boxSizing: "border-box",
+                background: totalDowntimeMins > 0 ? "#f0f9ff" : "#ffffff",
+                border: totalDowntimeMins > 0 ? "1.5px solid #0284c7" : "1.5px dashed #cbd5e1",
+                color: totalDowntimeMins > 0 ? "#0369a1" : "#475569",
+                transition: "all 0.15s ease",
+              }}
+              title="Click to add or manage downtime"
+            >
+              <span style={{ fontSize: "14px" }}>⏱️</span>
+              <span>
+                {totalDowntimeMins > 0
+                  ? `Downtime (${totalDowntimeMins >= 60 ? `${Math.floor(totalDowntimeMins / 60)}h ${totalDowntimeMins % 60}m` : `${totalDowntimeMins}m`})`
+                  : "+ Add Downtime"}
+              </span>
+            </button>
+          </div>
         </div>
 
-        {/* Rejections for this mold */}
-        <fieldset style={{ marginTop: "18px" }}>
-          <legend
+        {/* Compact Logged Items Chip Summary Bar */}
+        {(runMetrics.total_rej > 0 || totalDowntimeMins > 0) && (
+          <div
             style={{
-              fontWeight: 700,
-              color: "var(--danger, #ef4444)",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              flexWrap: "wrap",
+              gap: "6px",
+              padding: "8px 12px",
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: "6px",
+              marginBottom: "14px",
+              fontSize: "12px",
             }}
           >
-            <span>
-              🔴 REJECTIONS FOR MOLD #{idx + 1} ({rejectionReasons.length} DEFECT TYPES)
+            <span style={{ fontWeight: 700, color: "#64748b", marginRight: "4px" }}>
+              Logged:
             </span>
-            {runMetrics.total_rej > 0 && (
-              <span className="badge-count red">{runMetrics.total_rej} PCS LOGGED</span>
-            )}
-          </legend>
-          <div className="reason-grid">
-            {rejectionReasons.map((r) => {
-              const hasVal = Number((run.reasons || {})[r.reason_id]) > 0;
-              return (
-                <div
-                  className={`reason-row ${hasVal ? "has-val rej-active" : ""}`}
-                  key={r.reason_id}
-                >
-                  <div className="rname-wrap">
-                    <span className="rname">{r.name}</span>
-                  </div>
-                  <div className="r-input-wrap">
-                    <input
-                      type="number"
-                      min="0"
-                      disabled={isFormReadOnly || !machine || !run.sap_code}
-                      value={(run.reasons || {})[r.reason_id] || ""}
-                      onChange={(e) => handleRunReasonChange(r.reason_id, e.target.value)}
-                      placeholder={isFormReadOnly || !machine || !run.sap_code ? "—" : "0"}
-                    />
-                    <span className="unit-label">pcs</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </fieldset>
 
-        {/* Downtime for this mold */}
-        <fieldset style={{ marginTop: "18px" }}>
-          <legend
-            style={{
-              fontWeight: 700,
-              color: "var(--brand-primary, #0284c7)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <span>
-              ⏱️ DOWNTIME FOR MOLD #{idx + 1} ({downtimeReasons.length} REASONS)
-            </span>
-            {totalDowntimeMins > 0 && (
-              <span className="badge-count blue">
-                {totalDowntimeMins} MINS ({totalDowntimeHrs.toFixed(2)} HRS)
-              </span>
-            )}
-          </legend>
-          <div className="reason-grid">
-            {downtimeReasons.map((r) => {
-              const hasVal = Number((run.reasons || {})[r.reason_id]) > 0;
-              const isOthers = r.reason_id === "udt_others";
-              return (
-                <div
-                  className={`reason-row ${hasVal ? "has-val pdt-active" : ""}`}
+            {/* Rejection Chips */}
+            {rejectionReasons
+              .filter((r) => Number((run.reasons || {})[r.reason_id]) > 0)
+              .map((r) => (
+                <span
                   key={r.reason_id}
-                  style={
-                    isOthers && hasVal
-                      ? {
-                          gridColumn: "1 / -1",
-                          flexDirection: "column",
-                          alignItems: "stretch",
-                          gap: "6px",
-                        }
-                      : undefined
-                  }
+                  onClick={() => !isFormReadOnly && setShowRejModal(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    color: "#991b1b",
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontWeight: 600,
+                    cursor: !isFormReadOnly ? "pointer" : "default",
+                  }}
+                  title="Click to edit rejections"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      gap: "8px",
-                    }}
-                  >
-                    <div className="rname-wrap">
-                      <span className="rname">{r.name}</span>
-                    </div>
-                    <div className="r-input-wrap">
-                      <input
-                        type="number"
-                        min="0"
-                        disabled={isFormReadOnly || !machine || !run.sap_code}
-                        value={(run.reasons || {})[r.reason_id] || ""}
-                        onChange={(e) => handleRunReasonChange(r.reason_id, e.target.value)}
-                        placeholder={isFormReadOnly || !machine || !run.sap_code ? "—" : "0"}
-                      />
-                      <span className="unit-label">min</span>
-                    </div>
-                  </div>
-
-                  {isOthers && hasVal && (
-                    <div style={{ width: "100%", marginTop: "4px" }}>
-                      <input
-                        type="text"
-                        disabled={isFormReadOnly || !machine || !run.sap_code}
-                        value={run.other_dt_remark || ""}
-                        onChange={(e) => handleRunOtherRemark(e.target.value)}
-                        placeholder="Specify reason for Others downtime (Mandatory)..."
-                        style={{
-                          width: "100%",
-                          height: "36px",
-                          fontSize: "12.5px",
-                          padding: "6px 10px",
-                          borderRadius: "6px",
-                          border: !(run.other_dt_remark || "").trim()
-                            ? "1.5px solid #ef4444"
-                            : "1.5px solid #cbd5e1",
-                          background: isFormReadOnly
-                            ? "#f8fafc"
-                            : !(run.other_dt_remark || "").trim()
-                            ? "#fff5f5"
-                            : "#ffffff",
-                          color: "#0f172a",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                      {!isFormReadOnly && !(run.other_dt_remark || "").trim() && (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#ef4444",
-                            fontWeight: 700,
-                            marginTop: "2px",
-                            display: "block",
-                          }}
-                        >
-                          * Mandatory: Please type the reason for Others downtime on Mold #{idx + 1}.
-                        </span>
-                      )}
-                    </div>
+                  <span>🔴 {r.name}: <strong>{run.reasons[r.reason_id]} pcs</strong></span>
+                  {!isFormReadOnly && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRunReasonChange(r.reason_id, 0);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#ef4444",
+                        cursor: "pointer",
+                        fontSize: "11px",
+                        padding: 0,
+                        fontWeight: 800,
+                      }}
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
                   )}
-                </div>
-              );
-            })}
+                </span>
+              ))}
+
+            {/* Downtime Chips */}
+            {downtimeReasons
+              .filter((r) => Number((run.reasons || {})[r.reason_id]) > 0)
+              .map((r) => {
+                const mins = Number(run.reasons[r.reason_id]);
+                const isPDT = r.category === "planned_dt";
+                const h = Math.floor(mins / 60);
+                const m = mins % 60;
+                const durStr = h > 0 && m > 0 ? `${h}h ${m}m` : h > 0 ? `${h}h` : `${m}m`;
+
+                return (
+                  <span
+                    key={r.reason_id}
+                    onClick={() => !isFormReadOnly && setShowDtModal(true)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      background: isPDT ? "#f0f9ff" : "#fff7ed",
+                      border: isPDT ? "1px solid #bae6fd" : "1px solid #fed7aa",
+                      color: isPDT ? "#0369a1" : "#c2410c",
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      fontWeight: 600,
+                      cursor: !isFormReadOnly ? "pointer" : "default",
+                    }}
+                    title="Click to edit downtime"
+                  >
+                    <span>
+                      {isPDT ? "📅" : "⚠️"} {r.name}: <strong>{durStr}</strong>
+                      {r.reason_id === "udt_others" && run.other_dt_remark
+                        ? ` (${run.other_dt_remark})`
+                        : ""}
+                    </span>
+                    {!isFormReadOnly && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRunReasonChange(r.reason_id, 0);
+                          if (r.reason_id === "udt_others") {
+                            handleRunOtherRemark("");
+                          }
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: isPDT ? "#0284c7" : "#ea580c",
+                          cursor: "pointer",
+                          fontSize: "11px",
+                          padding: 0,
+                          fontWeight: 800,
+                        }}
+                        title="Remove"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </span>
+                );
+              })}
           </div>
-        </fieldset>
+        )}
+
+        {/* Rejection Modal */}
+        <RejectionModal
+          isOpen={showRejModal}
+          onClose={() => setShowRejModal(false)}
+          idx={idx}
+          sapCode={run.sap_code}
+          materialDescription={run.material_description || runMaster?.material_description}
+          rejectionReasons={rejectionReasons}
+          reasons={run.reasons || {}}
+          onUpdateReason={handleRunReasonChange}
+          isReadOnly={isFormReadOnly}
+        />
+
+        {/* Downtime Modal */}
+        <DowntimeModal
+          isOpen={showDtModal}
+          onClose={() => setShowDtModal(false)}
+          idx={idx}
+          sapCode={run.sap_code}
+          materialDescription={run.material_description || runMaster?.material_description}
+          downtimeReasons={downtimeReasons}
+          reasons={run.reasons || {}}
+          otherDtRemark={run.other_dt_remark || ""}
+          onUpdateReason={handleRunReasonChange}
+          onUpdateOtherRemark={handleRunOtherRemark}
+          isReadOnly={isFormReadOnly}
+        />
 
         {/* Compact Production & Financial Summary Strip */}
         {Boolean(machine && run.sap_code && runMaster) && (
