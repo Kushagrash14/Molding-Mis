@@ -6,6 +6,7 @@ export default function MetricsPreview({
   target,
   hasProduct = true,
   isLocked = false,
+  showTargetAndLoss = true,
 }) {
   if (!hasProduct || !m || (!m.tgt && !okProd && isLocked)) {
     return (
@@ -107,32 +108,38 @@ export default function MetricsPreview({
 
       {/* Target & Financial Line */}
       <div className="cockpit-stats-bar">
-        <div className="c-stat">
-          <span className="cs-label">TARGET (TGT)</span>
-          <span className="cs-val">{m.tgt.toLocaleString()} pcs</span>
-          <span style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>
-            Actual: <strong style={{ color: "#16a34a" }}>{(Number(okProd) || m.ok_prod || 0).toLocaleString()} pcs</strong>
-          </span>
-        </div>
+        {showTargetAndLoss && (
+          <div className="c-stat">
+            <span className="cs-label">TARGET (TGT)</span>
+            <span className="cs-val">{m.tgt.toLocaleString()} pcs</span>
+            <span style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>
+              Actual: <strong style={{ color: "#16a34a" }}>{(Number(okProd) || m.ok_prod || 0).toLocaleString()} pcs</strong>
+            </span>
+          </div>
+        )}
         <div className="c-stat">
           <span className="cs-label">ACTUAL OK PROD</span>
           <span className="cs-val text-green">
             {(Number(okProd) || m.ok_prod || 0).toLocaleString()} pcs
           </span>
-          <span style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>
-            {targetCompletion.toFixed(1)}% achieved
-          </span>
+          {showTargetAndLoss && (
+            <span style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>
+              {targetCompletion.toFixed(1)}% achieved
+            </span>
+          )}
         </div>
         <div className="c-stat">
           <span className="cs-label">OK PROD AMOUNT</span>
           <span className="cs-val text-green">{inr(m.ok_prod_price)}</span>
         </div>
-        <div className="c-stat">
-          <span className="cs-label">SHORTFALL LOSS</span>
-          <span className="cs-val text-warn">
-            {m.shortfall_loss > 0 ? inr(m.shortfall_loss) : "₹0"}
-          </span>
-        </div>
+        {showTargetAndLoss && (
+          <div className="c-stat">
+            <span className="cs-label">SHORTFALL LOSS</span>
+            <span className="cs-val text-warn">
+              {m.shortfall_loss > 0 ? inr(m.shortfall_loss) : "₹0"}
+            </span>
+          </div>
+        )}
         <div className="c-stat">
           <span className="cs-label">REJECTION SCRAP</span>
           <span className="cs-val text-danger">

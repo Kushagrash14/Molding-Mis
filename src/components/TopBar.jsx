@@ -2,6 +2,16 @@ import { useEffect, useState, useMemo } from "react";
 import { USERS } from "../data/seedData.js";
 import { getActiveShift, getProductionShiftDate, formatShiftDateDisplay } from "../lib/calculations.js";
 
+const ICONS = {
+  entry: "✍️",
+  mine: "📋",
+  browse: "🏭",
+  all: "📑",
+  master: "⚙️",
+  dashboard: "📊",
+  audit: "🛡️",
+};
+
 function getInitials(name = "") {
   if (!name) return "PG";
   const parts = name.trim().split(/\s+/);
@@ -20,6 +30,9 @@ export default function TopBar({
   selectedPlantId,
   onPlantChange,
   userId,
+  tabs = [],
+  activeTab = "entry",
+  onTabChange = () => {},
 }) {
   const activeUser = currentUser || USERS.find((u) => u.id === userId) || USERS[0];
   const userRole = role || activeUser.role;
@@ -65,14 +78,36 @@ export default function TopBar({
         <div className="brand-divider" />
         <div className="brand-text">
           <div className="brand-header-row">
-            <span className="brand-company">PG ELECTROPLAST</span>
-            <span className="brand-inline-divider" />
             <div className="brand-feature-pill title-pill">
               <span className="pill-accent-bar purple" />
-              <span className="pill-text-title">Smart Molding Production MIS</span>
+              <span className="pill-text-title">MoldSense-Manual MIS</span>
             </div>
           </div>
         </div>
+
+        {/* Vertical Divider line in front of MoldSense MIS */}
+        {tabs.length > 0 && <div className="brand-divider" />}
+
+        {/* Top Navigation Tabs */}
+        {tabs.length > 0 && (
+          <nav className="topbar-nav-tabs">
+            {tabs.map(([key, label]) => {
+              const icon = ICONS[key] || "📌";
+              const isActive = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`topbar-tab-btn ${isActive ? "active" : ""}`}
+                  onClick={() => onTabChange(key)}
+                >
+                  <span className="topbar-tab-icon">{icon}</span>
+                  <span className="topbar-tab-label">{label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
       </div>
 
       <div className="topbar-controls">

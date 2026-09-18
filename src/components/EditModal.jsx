@@ -364,7 +364,7 @@ export default function EditModal({
           </div>
         </fieldset>
 
-        <MetricsPreview m={metrics} />
+        <MetricsPreview m={metrics} showTargetAndLoss={currentUser?.role !== "operator"} />
 
         <div
           style={{

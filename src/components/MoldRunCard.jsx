@@ -66,6 +66,7 @@ export default function MoldRunCard({
   setOpenSearchableDropdown = null,
   onSapTriggerClick = null,
   onOpenPrevMoldModal = null,
+  currentUser = null,
   updateRun,
   handleRunSapChange,
   handleRunReasonChange,
@@ -130,6 +131,7 @@ export default function MoldRunCard({
 
   const [showRejModal, setShowRejModal] = useState(false);
   const [showDtModal, setShowDtModal] = useState(false);
+  const [isSapDropdownOpen, setIsSapDropdownOpen] = useState(false);
 
   return (
     <div
@@ -140,7 +142,9 @@ export default function MoldRunCard({
         borderRadius: "10px",
         marginBottom: "22px",
         boxShadow: "0 2px 5px rgba(0, 0, 0, 0.04)",
-        overflow: "hidden",
+        overflow: "visible",
+        position: "relative",
+        zIndex: isSapDropdownOpen || openSearchableDropdown ? 1000 : Math.max(1, 20 - idx),
       }}
     >
       {/* Mold Card Header Bar */}
@@ -152,6 +156,8 @@ export default function MoldRunCard({
           padding: "12px 18px",
           background: "#f8fafc",
           borderBottom: "1.5px solid #e2e8f0",
+          borderTopLeftRadius: "9px",
+          borderTopRightRadius: "9px",
           flexWrap: "wrap",
           gap: "10px",
         }}
@@ -342,6 +348,7 @@ export default function MoldRunCard({
               forceOpen={openSearchableDropdown}
               onCloseForceOpen={() => setOpenSearchableDropdown && setOpenSearchableDropdown(false)}
               onTriggerClick={onSapTriggerClick}
+              onOpenChange={setIsSapDropdownOpen}
             />
           </div>
 
@@ -635,7 +642,7 @@ export default function MoldRunCard({
           <div className="form-row" style={{ marginBottom: 0 }}>
             <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 700, color: "#166534", fontSize: "11.5px" }}>
               <span>OK Prod (qty)</span>
-              {runMetrics?.tgt > 0 && (
+              {currentUser?.role === "admin" && runMetrics?.tgt > 0 && (
                 <span style={{ fontSize: "10.5px", color: "#1d4ed8", fontWeight: 800 }}>
                   🎯 {runMetrics.tgt.toLocaleString()}
                 </span>
@@ -795,15 +802,18 @@ export default function MoldRunCard({
                         handleRunReasonChange(r.reason_id, 0);
                       }}
                       style={{
-                        background: "none",
-                        border: "none",
-                        color: "#ef4444",
+                        background: "#fee2e2",
+                        border: "1px solid #fca5a5",
+                        color: "#dc2626",
                         cursor: "pointer",
-                        fontSize: "11px",
-                        padding: 0,
-                        fontWeight: 800,
+                        fontSize: "11.5px",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                        fontWeight: 900,
+                        marginLeft: "4px",
+                        lineHeight: 1,
                       }}
-                      title="Remove"
+                      title={`Remove ${r.name}`}
                     >
                       ✕
                     </button>
@@ -856,15 +866,18 @@ export default function MoldRunCard({
                           }
                         }}
                         style={{
-                          background: "none",
-                          border: "none",
-                          color: isPDT ? "#0284c7" : "#ea580c",
+                          background: "#fee2e2",
+                          border: "1px solid #fca5a5",
+                          color: "#dc2626",
                           cursor: "pointer",
-                          fontSize: "11px",
-                          padding: 0,
-                          fontWeight: 800,
+                          fontSize: "11.5px",
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          fontWeight: 900,
+                          marginLeft: "4px",
+                          lineHeight: 1,
                         }}
-                        title="Remove"
+                        title={`Remove ${r.name}`}
                       >
                         ✕
                       </button>
@@ -902,68 +915,6 @@ export default function MoldRunCard({
           onUpdateOtherRemark={handleRunOtherRemark}
           isReadOnly={isFormReadOnly}
         />
-
-        {/* Compact Production & Financial Summary Strip */}
-        {Boolean(machine && run.sap_code && runMaster) && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-              padding: "10px 16px",
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: "8px",
-              marginTop: "16px",
-              flexWrap: "wrap",
-              fontSize: "12.5px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-              <span>
-                Target: <strong>{runMetrics.tgt.toLocaleString()} pcs</strong>
-              </span>
-              <span>
-                Actual: <strong style={{ color: "#16a34a" }}>{Number(run.ok_prod || 0).toLocaleString()} pcs</strong>
-              </span>
-              <span
-                style={{
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  background: Number(run.ok_prod || 0) >= runMetrics.tgt && runMetrics.tgt > 0 ? "#dcfce7" : "#f1f5f9",
-                  color: Number(run.ok_prod || 0) >= runMetrics.tgt && runMetrics.tgt > 0 ? "#15803d" : "#475569",
-                  border: Number(run.ok_prod || 0) >= runMetrics.tgt && runMetrics.tgt > 0 ? "1px solid #86efac" : "1px solid #cbd5e1",
-                }}
-              >
-                {runMetrics.tgt > 0
-                  ? `${Math.min(100, Math.round(((Number(run.ok_prod) || 0) / runMetrics.tgt) * 100))}% achieved`
-                  : "0% achieved"}
-              </span>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", color: "#475569", flexWrap: "wrap" }}>
-              <span>
-                Value: <strong style={{ color: "#15803d" }}>₹{Math.round(runMetrics.ok_prod_price || 0).toLocaleString()}</strong>
-              </span>
-              {runMetrics.shortfall_loss > 0 && (
-                <span>
-                  Loss: <strong style={{ color: "#dc2626" }}>₹{Math.round(runMetrics.shortfall_loss || 0).toLocaleString()}</strong>
-                </span>
-              )}
-              {runMetrics.rej_price > 0 && (
-                <span>
-                  Scrap: <strong style={{ color: "#d97706" }}>₹{Math.round(runMetrics.rej_price || 0).toLocaleString()}</strong>
-                </span>
-              )}
-              <span>
-                Material: <strong>{(runMetrics.total_consumption || 0).toFixed(1)} kg</strong>
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

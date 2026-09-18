@@ -1202,6 +1202,7 @@ export default function EntryForm({
                     }
                   : null
               }
+              currentUser={currentUser}
               updateRun={(fieldOrObj, val) => updateRun(idx, fieldOrObj, val)}
               handleRunSapChange={(newSap) => handleRunSapChange(idx, newSap)}
               handleRunReasonChange={(reasonId, val) => handleRunReasonChange(idx, reasonId, val)}

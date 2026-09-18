@@ -17,7 +17,6 @@ import {
 } from "./lib/permissions.js";
 
 import TopBar from "./components/TopBar.jsx";
-import Sidebar from "./components/Sidebar.jsx";
 import EntryForm from "./components/EntryForm.jsx";
 import EntriesTable from "./components/EntriesTable.jsx";
 import EditModal from "./components/EditModal.jsx";
@@ -360,11 +359,12 @@ export default function App() {
         plants={accessiblePlants}
         selectedPlantId={selectedPlantId}
         onPlantChange={setSelectedPlantId}
+        tabs={tabs}
+        activeTab={tab}
+        onTabChange={setTab}
       />
 
       <div className="shell">
-        <Sidebar tabs={tabs} activeTab={tab} onTabChange={setTab} currentUser={currentUser} />
-
         <main className="content">
           {tab === "entry" && (
             <EntryForm
@@ -382,26 +382,18 @@ export default function App() {
           )}
 
           {tab === "mine" && (
-            <div>
-              <div className="page-head">
-                <div>
-                  <h2>My Shift Entries</h2>
-                  <p>Unlocked entries can be updated; locked entries render as protected records.</p>
-                </div>
-              </div>
-              <EntriesTable
-                entries={authorizedEntries}
-                master={master}
-                machines={machines}
-                shifts={shifts}
-                locations={accessibleLocations}
-                plants={accessiblePlants}
-                reasonCodes={reasonCodes}
-                viewerRole="operator"
-                scopeToUser={currentUser.id}
-                onEdit={tryEdit}
-              />
-            </div>
+            <EntriesTable
+              entries={authorizedEntries}
+              master={master}
+              machines={machines}
+              shifts={shifts}
+              locations={accessibleLocations}
+              plants={accessiblePlants}
+              reasonCodes={reasonCodes}
+              viewerRole={currentUser.role || "operator"}
+              scopeToUser={currentUser.id}
+              onEdit={tryEdit}
+            />
           )}
 
           {tab === "browse" && (

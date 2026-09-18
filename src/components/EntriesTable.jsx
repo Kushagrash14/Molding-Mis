@@ -80,6 +80,7 @@ export default function EntriesTable({
           locations,
           reasonCodes,
           filterInfo: scopeLabel,
+          viewerRole,
         });
 
         setExportSuccess(true);
@@ -104,6 +105,7 @@ export default function EntriesTable({
       machines,
       plants,
       reasonCodes,
+      viewerRole,
     });
   }
 
@@ -233,14 +235,14 @@ export default function EntriesTable({
               <th>Shift</th>
               <th>Machine</th>
               <th>SAP Code</th>
-              <th>TGT</th>
+              {viewerRole !== "operator" && <th>TGT</th>}
               <th>OK Prod</th>
               <th>Total Rej</th>
               <th>Avail</th>
               <th title="Performance (BB)">Perf</th>
               <th>Quality</th>
               <th>OEE</th>
-              <th>Shortfall Loss</th>
+              {viewerRole !== "operator" && <th>Shortfall Loss</th>}
               <th>Status</th>
               {viewerRole === "admin" && <th>Entered By</th>}
               <th>Action</th>
@@ -250,7 +252,7 @@ export default function EntriesTable({
             {sorted.length === 0 && (
               <tr className="empty-row">
                 <td
-                  colSpan={viewerRole === "admin" ? 16 : 15}
+                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 13 : 15}
                   style={{ textAlign: "center", padding: "28px", color: "var(--ink-faint)" }}
                 >
                   No matching shift entries found.
@@ -346,7 +348,7 @@ export default function EntriesTable({
                       </span>
                     )}
                   </td>
-                  <td>{Number(metrics.tgt || 0).toLocaleString()}</td>
+                  {viewerRole !== "operator" && <td>{Number(metrics.tgt || 0).toLocaleString()}</td>}
                   <td style={{ fontWeight: 700, color: "#16a34a" }}>
                     {Number(e.ok_prod || 0).toLocaleString()}
                   </td>
@@ -386,15 +388,17 @@ export default function EntriesTable({
                       {pct(metrics.oee)}
                     </span>
                   </td>
-                  <td
-                    style={{
-                      color:
-                        metrics.shortfall_loss > 0 ? "var(--warn, #d97706)" : "var(--ink-faint)",
-                      fontWeight: metrics.shortfall_loss > 0 ? 600 : 400,
-                    }}
-                  >
-                    {metrics.shortfall_loss > 0 ? inr(metrics.shortfall_loss) : "—"}
-                  </td>
+                  {viewerRole !== "operator" && (
+                    <td
+                      style={{
+                        color:
+                          metrics.shortfall_loss > 0 ? "var(--warn, #d97706)" : "var(--ink-faint)",
+                        fontWeight: metrics.shortfall_loss > 0 ? 600 : 400,
+                      }}
+                    >
+                      {metrics.shortfall_loss > 0 ? inr(metrics.shortfall_loss) : "—"}
+                    </td>
+                  )}
                   <td>
                     <Pill status={isEntryLocked ? "locked" : e.status} />
                   </td>

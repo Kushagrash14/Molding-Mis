@@ -12,6 +12,7 @@ export function exportProductionToExcel({
   locations = [],
   reasonCodes = [],
   filterInfo = "All Records",
+  viewerRole = "admin",
 }) {
   if (entries.length === 0) {
     alert("No records available to export.");
@@ -113,7 +114,7 @@ export function exportProductionToExcel({
       m ? m.material_description : "—",
       Number(e.running_cavity) || 0,
       Number(e.run_hour) || 0,
-      metrics.tgt,
+      viewerRole === "operator" ? "—" : metrics.tgt,
       Number(e.ok_prod) || 0,
       metrics.total_rej,
       totalProd,
@@ -126,7 +127,7 @@ export function exportProductionToExcel({
       m ? m.price : 0,
       Math.round(metrics.ok_prod_price),
       Math.round(metrics.rej_price),
-      Math.round(metrics.shortfall_loss),
+      viewerRole === "operator" ? "—" : Math.round(metrics.shortfall_loss),
       Number(metrics.total_consumption.toFixed(2)),
       metrics.tool_change_count,
       `${e.hr_mp_declare || 0} / ${m ? m.manpower : 0}`,
@@ -150,7 +151,7 @@ export function exportProductionToExcel({
     "",
     "",
     "",
-    sumTgt,
+    viewerRole === "operator" ? "—" : sumTgt,
     sumOk,
     sumRej,
     sumOk + sumRej,
@@ -163,7 +164,7 @@ export function exportProductionToExcel({
     "",
     sumOkVal,
     sumRejVal,
-    sumShortfall,
+    viewerRole === "operator" ? "—" : sumShortfall,
     Number(sumMatKg.toFixed(2)),
     "",
     "",
@@ -348,6 +349,7 @@ export function exportProductionToCSV({
   machines = [],
   plants = [],
   reasonCodes = [],
+  viewerRole = "admin",
 }) {
   if (entries.length === 0) {
     alert("No records available to export.");
@@ -389,7 +391,7 @@ export function exportProductionToCSV({
       `"${e.shift_id}"`,
       `"${mc}"`,
       `"${e.sap_code}"`,
-      res.tgt,
+      viewerRole === "operator" ? '"—"' : res.tgt,
       e.ok_prod,
       res.total_rej,
       `"${pct(res.availability)}"`,
@@ -397,7 +399,7 @@ export function exportProductionToCSV({
       `"${pct(res.quality_rate)}"`,
       `"${pct(res.oee)}"`,
       Math.round(res.ok_prod_price),
-      Math.round(res.shortfall_loss),
+      viewerRole === "operator" ? '"—"' : Math.round(res.shortfall_loss),
       `"${e.status}"`,
       `"${e.entered_by_name || e.entered_by}"`,
     ];

@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 
 export default function DowntimeModal({
   isOpen,
@@ -27,6 +28,9 @@ export default function DowntimeModal({
   const [hours, setHours] = useState("");
   const [minutes, setMinutes] = useState("");
   const [remark, setRemark] = useState(otherDtRemark || "");
+  const [justAddedMsg, setJustAddedMsg] = useState(null);
+
+  const hoursInputRef = useRef(null);
 
   // Update selectedReasonId when categoryTab changes if current selected reason is not in this category
   const activeReasonInList = filteredReasons.some((r) => r.reason_id === selectedReasonId);
@@ -42,17 +46,24 @@ export default function DowntimeModal({
     }))
     .filter((r) => r.minutes > 0);
 
-  const plannedMins = loggedDowntimes
-    .filter((r) => r.category === "planned_dt")
-    .reduce((sum, r) => sum + r.minutes, 0);
-  const unplannedMins = loggedDowntimes
-    .filter((r) => r.category === "unplanned_dt")
-    .reduce((sum, r) => sum + r.minutes, 0);
+  const plannedLogged = loggedDowntimes.filter((r) => r.category === "planned_dt");
+  const unplannedLogged = loggedDowntimes.filter((r) => r.category === "unplanned_dt");
+
+  const plannedMins = plannedLogged.reduce((sum, r) => sum + r.minutes, 0);
+  const unplannedMins = unplannedLogged.reduce((sum, r) => sum + r.minutes, 0);
   const totalMins = plannedMins + unplannedMins;
 
   const inputHoursNum = Number(hours || 0);
   const inputMinutesNum = Number(minutes || 0);
   const entryTotalMins = inputHoursNum * 60 + inputMinutesNum;
+
+  function formatDuration(mins) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h > 0 && m > 0) return `${h}h ${m}m (${mins} min)`;
+    if (h > 0) return `${h}h (${mins} min)`;
+    return `${m} mins`;
+  }
 
   function handleAdd() {
     if (!currentReasonId) return;
@@ -66,22 +77,45 @@ export default function DowntimeModal({
     }
 
     const currentVal = Number(reasons[currentReasonId] || 0);
+    const reasonObj = downtimeReasons.find((r) => r.reason_id === currentReasonId);
+    const reasonName = reasonObj?.name || "Downtime";
+    const addedFormatted = formatDuration(entryTotalMins);
+
     onUpdateReason(currentReasonId, currentVal + entryTotalMins);
     if (currentReasonId === "udt_others") {
       onUpdateOtherRemark(remark.trim());
     }
 
+    setJustAddedMsg(`Added ${addedFormatted} for "${reasonName}" (${categoryTab === "planned_dt" ? "Planned" : "Unplanned"})!`);
     setHours("");
     setMinutes("");
     if (currentReasonId === "udt_others") {
       setRemark("");
     }
+
+    // Auto-focus back to hours input
+    setTimeout(() => {
+      if (hoursInputRef.current) {
+        hoursInputRef.current.focus();
+      }
+    }, 50);
   }
 
   function handleRemove(reasonId) {
     onUpdateReason(reasonId, 0);
     if (reasonId === "udt_others") {
       onUpdateOtherRemark("");
+    }
+    setJustAddedMsg(null);
+  }
+
+  function handleClearAll() {
+    if (window.confirm(`Are you sure you want to remove all logged downtimes for Mold #${idx + 1}?`)) {
+      loggedDowntimes.forEach((r) => {
+        onUpdateReason(r.reason_id, 0);
+      });
+      onUpdateOtherRemark("");
+      setJustAddedMsg(null);
     }
   }
 
@@ -90,21 +124,13 @@ export default function DowntimeModal({
     onUpdateReason(reasonId, clean);
   }
 
-  function formatDuration(mins) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}m (${mins} min)`;
-    if (h > 0) return `${h}h (${mins} min)`;
-    return `${m} mins`;
-  }
-
-  return (
+  return createPortal(
     <div className="modal-back" onClick={onClose} style={{ zIndex: 1050 }}>
       <div
         className="modal"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: "680px",
+          maxWidth: "700px",
           width: "94%",
           padding: "22px",
           borderRadius: "14px",
@@ -137,6 +163,45 @@ export default function DowntimeModal({
           </button>
         </div>
 
+        {/* Just Added Success Banner */}
+        {justAddedMsg && (
+          <div
+            style={{
+              background: "#f0fdf4",
+              border: "1px solid #86efac",
+              color: "#166534",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              fontSize: "12.5px",
+              fontWeight: 700,
+              marginBottom: "14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>✓</span>
+              <span>{justAddedMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setJustAddedMsg(null)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#166534",
+                cursor: "pointer",
+                fontWeight: 800,
+                fontSize: "13px",
+              }}
+              title="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Category Question / Tabs */}
         {!isReadOnly && (
           <div
@@ -156,11 +221,16 @@ export default function DowntimeModal({
                 marginBottom: "10px",
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
+                justifyContent: "space-between",
               }}
             >
-              <span>❓</span>
-              <span>What type of downtime do you want to add?</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>❓</span>
+                <span>Select Downtime Category to Add:</span>
+              </div>
+              <span style={{ fontSize: "11px", color: "#64748b" }}>
+                {categoryTab === "planned_dt" ? "5 Planned Reasons" : "16 Unplanned Reasons"}
+              </span>
             </div>
 
             {/* PDT vs UDT Toggle Buttons */}
@@ -169,6 +239,7 @@ export default function DowntimeModal({
                 type="button"
                 onClick={() => {
                   setCategoryTab("planned_dt");
+                  setJustAddedMsg(null);
                   const pdtFirst = downtimeReasons.find((r) => r.category === "planned_dt");
                   if (pdtFirst) setSelectedReasonId(pdtFirst.reason_id);
                 }}
@@ -183,19 +254,26 @@ export default function DowntimeModal({
                   justifyContent: "center",
                   gap: "8px",
                   transition: "all 0.15s ease",
-                  border: categoryTab === "planned_dt" ? "2px solid #0284c7" : "1.5px solid #cbd5e1",
+                  border: categoryTab === "planned_dt" ? "2.5px solid #0284c7" : "1.5px solid #cbd5e1",
                   background: categoryTab === "planned_dt" ? "#e0f2fe" : "#ffffff",
                   color: categoryTab === "planned_dt" ? "#0369a1" : "#64748b",
+                  boxShadow: categoryTab === "planned_dt" ? "0 2px 4px rgba(2, 132, 199, 0.15)" : "none",
                 }}
               >
                 <span>📅</span>
                 <span>Planned Downtime (PDT)</span>
+                {plannedLogged.length > 0 && (
+                  <span style={{ fontSize: "11px", background: "#0284c7", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>
+                    {plannedLogged.length}
+                  </span>
+                )}
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   setCategoryTab("unplanned_dt");
+                  setJustAddedMsg(null);
                   const udtFirst = downtimeReasons.find((r) => r.category === "unplanned_dt");
                   if (udtFirst) setSelectedReasonId(udtFirst.reason_id);
                 }}
@@ -210,13 +288,19 @@ export default function DowntimeModal({
                   justifyContent: "center",
                   gap: "8px",
                   transition: "all 0.15s ease",
-                  border: categoryTab === "unplanned_dt" ? "2px solid #ea580c" : "1.5px solid #cbd5e1",
+                  border: categoryTab === "unplanned_dt" ? "2.5px solid #ea580c" : "1.5px solid #cbd5e1",
                   background: categoryTab === "unplanned_dt" ? "#ffedd5" : "#ffffff",
                   color: categoryTab === "unplanned_dt" ? "#c2410c" : "#64748b",
+                  boxShadow: categoryTab === "unplanned_dt" ? "0 2px 4px rgba(234, 88, 12, 0.15)" : "none",
                 }}
               >
                 <span>⚠️</span>
                 <span>Unplanned Downtime (UDT)</span>
+                {unplannedLogged.length > 0 && (
+                  <span style={{ fontSize: "11px", background: "#ea580c", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>
+                    {unplannedLogged.length}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -226,9 +310,24 @@ export default function DowntimeModal({
                 background: "#ffffff",
                 border: categoryTab === "planned_dt" ? "1.5px solid #bae6fd" : "1.5px solid #fed7aa",
                 borderRadius: "8px",
-                padding: "12px",
+                padding: "14px",
               }}
             >
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  color: categoryTab === "planned_dt" ? "#0369a1" : "#c2410c",
+                  marginBottom: "8px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {categoryTab === "planned_dt"
+                  ? (plannedMins > 0 ? "➕ Add Another Planned Downtime" : "➕ Add Planned Downtime")
+                  : (unplannedMins > 0 ? "➕ Add Another Unplanned Downtime" : "➕ Add Unplanned Downtime")}
+              </div>
+
               <div
                 style={{
                   display: "grid",
@@ -248,11 +347,14 @@ export default function DowntimeModal({
                       marginBottom: "4px",
                     }}
                   >
-                    Reason ({categoryTab === "planned_dt" ? "Planned" : "Unplanned"})
+                    Select Reason ({categoryTab === "planned_dt" ? "Planned" : "Unplanned"})
                   </label>
                   <select
                     value={currentReasonId}
-                    onChange={(e) => setSelectedReasonId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedReasonId(e.target.value);
+                      setJustAddedMsg(null);
+                    }}
                     style={{
                       width: "100%",
                       height: "38px",
@@ -265,11 +367,14 @@ export default function DowntimeModal({
                       color: "#0f172a",
                     }}
                   >
-                    {filteredReasons.map((r) => (
-                      <option key={r.reason_id} value={r.reason_id}>
-                        {r.name}
-                      </option>
-                    ))}
+                    {filteredReasons.map((r) => {
+                      const existingMins = Number(reasons[r.reason_id] || 0);
+                      return (
+                        <option key={r.reason_id} value={r.reason_id}>
+                          {r.name} {existingMins > 0 ? `(${formatDuration(existingMins)} logged)` : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -288,11 +393,15 @@ export default function DowntimeModal({
                   </label>
                   <div style={{ position: "relative" }}>
                     <input
+                      ref={hoursInputRef}
                       type="number"
                       min="0"
                       step="1"
                       value={hours}
-                      onChange={(e) => setHours(e.target.value)}
+                      onChange={(e) => {
+                        setHours(e.target.value);
+                        setJustAddedMsg(null);
+                      }}
                       placeholder="0"
                       style={{
                         width: "100%",
@@ -341,7 +450,16 @@ export default function DowntimeModal({
                       max="59"
                       step="1"
                       value={minutes}
-                      onChange={(e) => setMinutes(e.target.value)}
+                      onChange={(e) => {
+                        setMinutes(e.target.value);
+                        setJustAddedMsg(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAdd();
+                        }
+                      }}
                       placeholder="0"
                       style={{
                         width: "100%",
@@ -370,7 +488,7 @@ export default function DowntimeModal({
                   </div>
                 </div>
 
-                {/* Add Button */}
+                {/* Add / Add Another Button */}
                 <div>
                   <button
                     type="button"
@@ -381,17 +499,26 @@ export default function DowntimeModal({
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "6px",
-                      padding: "0 14px",
+                      padding: "0 16px",
                       fontSize: "13px",
                       fontWeight: 700,
                       cursor: "pointer",
                       whiteSpace: "nowrap",
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "6px",
+                      boxShadow:
+                        categoryTab === "planned_dt"
+                          ? "0 1px 3px rgba(2, 132, 199, 0.3)"
+                          : "0 1px 3px rgba(234, 88, 12, 0.3)",
                     }}
                   >
-                    <span>+</span> Add
+                    <span>+</span>
+                    <span>
+                      {categoryTab === "planned_dt"
+                        ? (plannedMins > 0 ? "Add Another" : "Add PDT")
+                        : (unplannedMins > 0 ? "Add Another" : "Add UDT")}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -402,7 +529,7 @@ export default function DowntimeModal({
                   style={{
                     marginTop: "8px",
                     fontSize: "12px",
-                    color: "#0369a1",
+                    color: categoryTab === "planned_dt" ? "#0369a1" : "#c2410c",
                     fontWeight: 700,
                     display: "flex",
                     alignItems: "center",
@@ -412,10 +539,9 @@ export default function DowntimeModal({
                   <span>⏱️ Duration to add:</span>
                   <span
                     style={{
-                      background: "#e0f2fe",
+                      background: categoryTab === "planned_dt" ? "#e0f2fe" : "#ffedd5",
                       padding: "2px 8px",
                       borderRadius: "4px",
-                      color: "#0369a1",
                     }}
                   >
                     {inputHoursNum > 0 ? `${inputHoursNum}h ` : ""}
@@ -469,22 +595,49 @@ export default function DowntimeModal({
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "8px",
+              flexWrap: "wrap",
+              gap: "6px",
             }}
           >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  color: "#475569",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Logged Downtimes ({loggedDowntimes.length})
+              </span>
+              {loggedDowntimes.length > 0 && !isReadOnly && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  style={{
+                    background: "#fee2e2",
+                    border: "1px solid #fca5a5",
+                    color: "#dc2626",
+                    borderRadius: "4px",
+                    padding: "2px 8px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                  title="Remove all downtimes"
+                >
+                  <span>✕</span> Remove All
+                </button>
+              )}
+            </div>
+
             <span
               style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "#475569",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Logged Downtimes ({loggedDowntimes.length})
-            </span>
-            <span
-              style={{
-                fontSize: "12px",
+                fontSize: "12.5px",
                 fontWeight: 800,
                 color: totalMins > 0 ? "#0369a1" : "#64748b",
               }}
@@ -505,7 +658,7 @@ export default function DowntimeModal({
                 fontSize: "13px",
               }}
             >
-              No downtime recorded yet for Mold #{idx + 1}.
+              No downtime recorded yet for Mold #{idx + 1}. Select Planned or Unplanned above to add.
             </div>
           ) : (
             <div
@@ -522,11 +675,13 @@ export default function DowntimeModal({
                   <tr style={{ background: "#f1f5f9", textAlign: "left", color: "#475569" }}>
                     <th style={{ padding: "8px 12px", fontWeight: 700, width: "80px" }}>Type</th>
                     <th style={{ padding: "8px 12px", fontWeight: 700 }}>Reason / Description</th>
-                    <th style={{ padding: "8px 12px", fontWeight: 700, width: "130px", textAlign: "right" }}>
+                    <th style={{ padding: "8px 12px", fontWeight: 700, width: "120px", textAlign: "right" }}>
                       Duration
                     </th>
                     {!isReadOnly && (
-                      <th style={{ padding: "8px 12px", width: "45px", textAlign: "center" }}></th>
+                      <th style={{ padding: "8px 12px", width: "95px", textAlign: "center" }}>
+                        Action
+                      </th>
                     )}
                   </tr>
                 </thead>
@@ -605,28 +760,30 @@ export default function DowntimeModal({
                           )}
                         </td>
 
-                        {/* Delete Action */}
+                        {/* Dedicated, prominent Remove Cross Button */}
                         {!isReadOnly && (
                           <td style={{ padding: "8px 12px", textAlign: "center" }}>
                             <button
                               type="button"
                               onClick={() => handleRemove(r.reason_id)}
-                              title="Remove this downtime"
+                              title={`Remove ${r.name}`}
                               style={{
                                 background: "#fee2e2",
-                                border: "none",
-                                borderRadius: "4px",
-                                width: "26px",
-                                height: "26px",
-                                color: "#dc2626",
+                                border: "1px solid #fca5a5",
+                                borderRadius: "6px",
+                                padding: "3px 10px",
+                                color: "#b91c1c",
                                 cursor: "pointer",
-                                fontSize: "13px",
+                                fontSize: "12px",
+                                fontWeight: 700,
                                 display: "inline-flex",
                                 alignItems: "center",
-                                justifyItems: "center",
+                                gap: "4px",
+                                transition: "all 0.15s ease",
                               }}
                             >
-                              ✕
+                              <span style={{ fontWeight: 900 }}>✕</span>
+                              <span>Remove</span>
                             </button>
                           </td>
                         )}
@@ -704,6 +861,7 @@ export default function DowntimeModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

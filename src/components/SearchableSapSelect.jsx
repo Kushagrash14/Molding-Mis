@@ -12,12 +12,18 @@ export default function SearchableSapSelect({
   forceOpen = false,
   onCloseForceOpen = null,
   onTriggerClick = null,
+  onOpenChange = null,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [highlightIdx, setHighlightIdx] = useState(0);
   const wrapperRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  // Notify parent component of open state
+  useEffect(() => {
+    if (onOpenChange) onOpenChange(isOpen);
+  }, [isOpen, onOpenChange]);
 
   // Sync external forceOpen
   useEffect(() => {
@@ -127,7 +133,7 @@ export default function SearchableSapSelect({
     <div
       ref={wrapperRef}
       onKeyDown={handleKeyDown}
-      style={{ position: "relative", width: "100%" }}
+      style={{ position: "relative", width: "100%", zIndex: isOpen ? 100 : 1 }}
     >
       {/* Trigger Box (Looks like standard form input) */}
       <div
@@ -239,17 +245,17 @@ export default function SearchableSapSelect({
         <div
           style={{
             position: "absolute",
-            top: "calc(100% + 4px)",
+            top: "calc(100% + 5px)",
             left: 0,
-            minWidth: "380px",
-            maxWidth: "min(520px, 92vw)",
+            minWidth: "420px",
+            maxWidth: "min(560px, 94vw)",
             background: "#ffffff",
             border: "1.5px solid #cbd5e1",
-            borderRadius: "8px",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-            zIndex: 9999,
+            borderRadius: "10px",
+            boxShadow: "0 16px 36px -4px rgba(15, 23, 42, 0.22), 0 6px 16px -2px rgba(15, 23, 42, 0.10)",
+            zIndex: 99999,
             overflow: "hidden",
-            maxHeight: "360px",
+            maxHeight: "340px",
             display: "flex",
             flexDirection: "column",
           }}
