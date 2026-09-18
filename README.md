@@ -1,100 +1,47 @@
-# Production & OEE Tracker — Prototype
+# PG Electroplast — Injection Molding Production & OEE Tracking MIS
 
-A React (Vite) prototype of the shop-floor shift entry and OEE tracking
-system described in the implementation plan — digitizing the existing
-injection-molding production Excel sheet.
+A full-stack enterprise shop-floor production, downtime, rejection, and OEE tracking system designed for injection molding manufacturing plants.
 
-This is a **frontend-only prototype**. Data is kept in the browser
-(`localStorage`), not a real database, so it's meant for demoing the
-workflow and UI to stakeholders and for extending into the real backend
-described in the plan (Postgres schema, calc engine, lock system, RBAC).
+---
 
-## Getting started
+## Features
 
+- **Shopfloor Entry Form**: Fast, error-proof multi-mold entry supporting mid-shift mold changes with automatic time window calculations.
+- **SAP Product Master**: Live auto-fill for 1,146+ SAP products with standard cavities, shots/hr, cycle times, part weight, runner weight, and price.
+- **Defect & Downtime Tracking**: Modal-based fast entry for 13 rejection defect types and 21 planned/unplanned downtime reasons.
+- **Real-Time OEE Engine**: Live calculation of Availability (A), Performance (P), Quality Rate (Q), and Overall Equipment Effectiveness (OEE %).
+- **Enterprise RBAC**: Role-based access control for Operators, Supervisors, and Plant Administrators.
+- **Audit Logging**: Silent tracking of all post-lock adjustments and supervisor overrides.
+- **Centralized Cloud Database**: AWS RDS (MySQL) relational backend with multi-plant and multi-machine support.
+
+---
+
+## Getting Started
+
+### Local Development:
 ```bash
 npm install
 npm run dev
 ```
 
-Open the printed local URL (usually `http://localhost:5173`). The app
-opens automatically.
-
-To build a production bundle:
-
+### Production Build:
 ```bash
 npm run build
-npm run preview   # serve the built files locally to check the build
 ```
 
-## What's implemented
+---
 
-- **Shift entry form** — select a SAP code, auto-fill mould/part master
-  data, log run hour / OK production / downtime / rejections, see OEE and
-  every derived metric calculate live using the same formulas as the
-  server-side calc engine in the plan.
-- **Lock system** — a submitted entry automatically locks once its shift
-  date is no longer "today" (simulates the hourly cutoff cron job). Locked
-  entries render as plain read-only data for operators — no lock icon, no
-  "contact admin" message, by design.
-- **Admin override** — admins can edit any entry directly, including
-  locked ones, with every override written to a silent audit log.
-- **Role-based screens** — switch the "USER" dropdown in the top bar
-  between an operator, a supervisor, and admin to see each role's screen.
-- **Dashboard** — average OEE, downtime pareto, rejection pareto, and
-  manpower-variance count, rolled up from logged entries.
-- **Master data admin** — add new SAP code / part / mould rows.
+## AWS Deployment
 
-## Project structure
+See [AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md) for full deployment instructions on AWS EC2 with AWS RDS (MySQL).
 
-```
-src/
-  main.jsx              entry point
-  App.jsx                top-level state + screen routing
-  index.css              design tokens + all component styles
-  data/
-    seedData.js           master data, machines, shifts, reasons, demo users
-  lib/
-    calculations.js        the OEE calc engine (§4 of the plan)
-    storage.js              localStorage persistence layer
-  components/
-    TopBar.jsx
-    Sidebar.jsx
-    EntryForm.jsx
-    EntriesTable.jsx
-    EditModal.jsx
-    Dashboard.jsx
-    MasterAdmin.jsx
-    AuditLogView.jsx
-    Pill.jsx
-    MetricsPreview.jsx
-```
+---
 
-## Moving this to production
+## Tech Stack
 
-This prototype intentionally keeps every server-side concept
-(`lib/calculations.js`, `lib/storage.js`) isolated so it's a small swap to
-wire up a real backend:
+- **Frontend**: React 18, Vite 5
+- **Backend API**: Node.js, Express
+- **Database**: AWS RDS MySQL
+- **Process Manager**: PM2
+- **Web Server**: Nginx Reverse Proxy
 
-1. Replace `lib/storage.js` with real API calls (`POST /api/v1/entries`,
-   `PATCH /api/v1/entries/{id}`, etc.) — see the implementation plan for
-   the full API surface.
-2. Move `computeMetrics` server-side so it's the single source of truth,
-   as the plan specifies — the client can still call it for the live
-   preview, but the server value must be authoritative on save.
-3. Replace the client-side "today" lock check with the real hourly cron
-   job against the database.
-4. Add real authentication in place of the demo user dropdown.
-5. Swap `data/seedData.js` for the real `sap_master`, `machines`,
-   `shift_master`, and `reason_codes` tables.
-
-See the full **Shop-Floor Production & OEE Tracking System — Implementation
-Plan** document for the complete database schema, API surface, RBAC
-matrix, and phased rollout plan this prototype is built from.
-
-## Tech stack
-
-- React 18
-- Vite 5
-- No external UI or state-management libraries — plain CSS custom
-  properties + React state, kept deliberately light so it's easy to read
-  and extend.

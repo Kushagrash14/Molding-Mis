@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Shop-floor production & OEE tracking prototype for an injection molding plant.",
+  "description": "PG Electroplast Injection Molding Production & OEE Tracking MIS System",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

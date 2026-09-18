@@ -1,16 +1,10 @@
-// Prototype persistence — browser localStorage only.
-//
-// This stands in for the Postgres-backed API described in the implementation
-// plan (production_entries, audit_log, sap_master tables). Swap loadState /
-// saveState for real API calls when wiring this UI up to a backend; every
-// component in this project only depends on this module's shape, not on
-// localStorage directly, so that swap stays contained to this one file.
+// Production state and local cache layer
 
 const STORAGE_KEY = "oee_production_state_v4";
 
 export function loadState() {
   try {
-    // Clear old prototype storage if present
+    // Clear legacy version cache if present
     localStorage.removeItem("oee_prototype_state_v2");
     localStorage.removeItem("oee_production_state_v3");
     const raw = localStorage.getItem(STORAGE_KEY);
