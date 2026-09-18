@@ -21,8 +21,8 @@ const transporter = nodemailer.createTransport({
   port: Number(process.env.SMTP_PORT) || 587,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || "verify.software2040@pgel.in",
-    pass: process.env.SMTP_PASS || "fmdrdczrxkpjrbsv",
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
   tls: {
     ciphers: "SSLv3",
@@ -51,7 +51,7 @@ app.post("/api/send-otp", async (req, res) => {
     console.log(`[AUTH] Generated OTP for ${email}: ${otp}`);
 
     const mailOptions = {
-      from: `"PGEL Production Portal" <${process.env.SMTP_USER || "verify.software2040@pgel.in"}>`,
+      from: `"PGEL Production Portal" <${process.env.SMTP_USER || "no-reply@pgel.in"}>`,
       to: email,
       subject: `🔐 PGEL Portal Verification Code: ${otp}`,
       html: `
