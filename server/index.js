@@ -75,35 +75,25 @@ app.post("/api/send-otp", async (req, res) => {
       `,
     };
 
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log(`[AUTH] OTP email sent successfully to ${email}`);
-    } catch (mailErr) {
-      console.error("[AUTH] SMTP dispatch notice:", mailErr.message);
-    }
+    await transporter.sendMail(mailOptions);
+    console.log(`[AUTH] OTP email successfully dispatched to ${email}`);
 
     return res.json({
       success: true,
       message: "Verification code sent to your registered email address.",
     });
   } catch (err) {
-    console.error("[AUTH] Send OTP error:", err);
-    return res.status(500).json({ success: false, error: err.message });
+    console.error("[AUTH] Send OTP error:", err.message);
+    return res.status(500).json({ success: false, error: `Email delivery failed (${err.message}). Please check SMTP settings.` });
   }
 });
 
-// Verify OTP
+// Verify OTP (Strict: Only genuine 6-digit cryptographic OTP from email)
 app.post("/api/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
     const cleanEmail = (email || "").toLowerCase().trim();
     const cleanOtp = (otp || "").toString().trim();
-
-    // Universal bypass master key for instant admin/emergency access
-    if (cleanOtp === "123456" || cleanOtp === "000000") {
-      activeOtps.delete(cleanEmail);
-      return res.json({ success: true, message: "Authorized" });
-    }
 
     const record = activeOtps.get(cleanEmail);
     if (!record) {
