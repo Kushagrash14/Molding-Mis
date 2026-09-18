@@ -357,7 +357,6 @@ export default function MoldRunCard({
             <label>Material Description</label>
             <div
               className="readonly-field"
-              title={runMaster?.material_description || run.material_description || ""}
               style={{
                 fontWeight: 600,
                 overflow: "hidden",
@@ -376,7 +375,6 @@ export default function MoldRunCard({
             <label>Std Cavity</label>
             <div
               className="readonly-field"
-              title={runMaster ? `${runMaster.cavity || 1} Cavity · ${runMaster.shots_per_hour || 60} Shots/hr` : ""}
               style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", justifyContent: "center", fontWeight: 700 }}
             >
               {runMaster ? runMaster.cavity || 1 : "—"}
@@ -399,10 +397,7 @@ export default function MoldRunCard({
           {/* 5. Live Availability */}
           <div className="form-row">
             <label>Avail (A)</label>
-            <div
-              className="oee-metric-box"
-              title="Availability = (Actual Run Hours - Unplanned DT) / (Planned Base - Planned DT)"
-            >
+            <div className="oee-metric-box">
               {pct(runMetrics?.availability)}
             </div>
           </div>
@@ -410,10 +405,7 @@ export default function MoldRunCard({
           {/* 6. Live Performance */}
           <div className="form-row">
             <label>Perf (P)</label>
-            <div
-              className="oee-metric-box"
-              title="Performance = (Actual OK Prod + Total Rej) / Target"
-            >
+            <div className="oee-metric-box">
               {pct(runMetrics?.productivity)}
             </div>
           </div>
@@ -421,10 +413,7 @@ export default function MoldRunCard({
           {/* 7. Live Quality Rate */}
           <div className="form-row">
             <label>Quality (Q)</label>
-            <div
-              className="oee-metric-box"
-              title="Quality Rate = OK Prod / (OK Prod + Total Rejections)"
-            >
+            <div className="oee-metric-box">
               {pct(runMetrics?.quality_rate)}
             </div>
           </div>
@@ -432,10 +421,7 @@ export default function MoldRunCard({
           {/* 8. Live OEE */}
           <div className="form-row">
             <label>OEE %</label>
-            <div
-              className="oee-metric-box"
-              title={`OEE = ${pct(runMetrics?.availability)} (A) × ${pct(runMetrics?.productivity)} (P) × ${pct(runMetrics?.quality_rate)} (Q)`}
-            >
+            <div className="oee-metric-box">
               {pct(runMetrics?.oee)}
             </div>
           </div>
