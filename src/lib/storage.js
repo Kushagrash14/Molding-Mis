@@ -6,16 +6,17 @@
 // component in this project only depends on this module's shape, not on
 // localStorage directly, so that swap stays contained to this one file.
 
-const STORAGE_KEY = "oee_production_state_v3";
+const STORAGE_KEY = "oee_production_state_v4";
 
 export function loadState() {
   try {
     // Clear old prototype storage if present
     localStorage.removeItem("oee_prototype_state_v2");
+    localStorage.removeItem("oee_production_state_v3");
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.master && parsed.master.length < 50) {
+    if (parsed && parsed.master && parsed.master.length < 1000) {
       localStorage.removeItem(STORAGE_KEY);
       return null;
     }
