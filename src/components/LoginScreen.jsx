@@ -22,6 +22,31 @@ export default function LoginScreen({ onLogin, users = [] }) {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
+  const [cloudUsers, setCloudUsers] = useState(users);
+
+  // Sync users from AWS Cloud on mount
+  useEffect(() => {
+    fetch("/api/users")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.success && Array.isArray(data.users) && data.users.length > 0) {
+          setCloudUsers(data.users);
+        }
+      })
+      .catch((err) => console.log("Cloud users sync fallback to props:", err));
+  }, []);
+
+  useEffect(() => {
+    if (users && users.length > 0) {
+      setCloudUsers((prev) => {
+        const map = new Map(prev.map((u) => [u.id, u]));
+        for (const u of users) {
+          map.set(u.id, { ...(map.get(u.id) || {}), ...u });
+        }
+        return Array.from(map.values());
+      });
+    }
+  }, [users]);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -35,11 +60,11 @@ export default function LoginScreen({ onLogin, users = [] }) {
   }, [resendTimer]);
 
   // Strictly match registered PGEL personnel
-  function findRegisteredUser(cleanStr) {
+  function findRegisteredUser(cleanStr, userList = cloudUsers) {
     const q = cleanStr.trim().toLowerCase();
     if (!q) return null;
     return (
-      users.find(
+      userList.find(
         (u) =>
           u.email?.toLowerCase() === q ||
           u.employee_code?.toLowerCase() === q ||
@@ -63,7 +88,23 @@ export default function LoginScreen({ onLogin, users = [] }) {
       return;
     }
 
-    const matched = findRegisteredUser(clean);
+    // Try in-memory first
+    let matched = findRegisteredUser(clean, cloudUsers);
+
+    // If not found, immediately query AWS Cloud in case another PC just added this user
+    if (!matched) {
+      try {
+        const uRes = await fetch("/api/users");
+        const uData = await uRes.json();
+        if (uData?.success && Array.isArray(uData.users) && uData.users.length > 0) {
+          setCloudUsers(uData.users);
+          matched = findRegisteredUser(clean, uData.users);
+        }
+      } catch (checkErr) {
+        console.warn("Live cloud check warning:", checkErr);
+      }
+    }
+
     if (!matched) {
       setError(`No registered employee account found for "${clean}". Please contact Plant Administrator.`);
       return;

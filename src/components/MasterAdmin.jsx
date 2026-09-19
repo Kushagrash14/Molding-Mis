@@ -226,22 +226,26 @@ export default function MasterAdmin({
       return;
     }
 
-    setMaster((prev) => [
-      ...prev,
-      {
-        ...newProduct,
-        sap_code: cleanSap,
-        part_no: newProduct.part_no.trim(),
-        material_description: newProduct.material_description.trim(),
-        cavity: Number(newProduct.cavity) || 1,
-        shots_per_hour: Number(newProduct.shots_per_hour) || 60,
-        price: Number(newProduct.price) || 0,
-        part_wt: Number(newProduct.part_wt) || 0,
-        run_wt: Number(newProduct.run_wt) || 0,
-        manpower: Number(newProduct.manpower) || 2,
-        plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
-      },
-    ]);
+    const prodObj = {
+      ...newProduct,
+      sap_code: cleanSap,
+      part_no: newProduct.part_no.trim(),
+      material_description: newProduct.material_description.trim(),
+      cavity: Number(newProduct.cavity) || 1,
+      shots_per_hour: Number(newProduct.shots_per_hour) || 60,
+      price: Number(newProduct.price) || 0,
+      part_wt: Number(newProduct.part_wt) || 0,
+      run_wt: Number(newProduct.run_wt) || 0,
+      manpower: Number(newProduct.manpower) || 2,
+      plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
+    };
+
+    setMaster((prev) => [...prev, prodObj]);
+    fetch("/api/master/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prodObj),
+    }).catch((err) => console.error("Cloud product save error:", err));
 
     setNewProduct({
       sap_code: "",
@@ -262,12 +266,20 @@ export default function MasterAdmin({
     setMaster((prev) =>
       prev.map((m) => (m.sap_code === editingProduct.sap_code ? editingProduct : m))
     );
+    fetch("/api/master/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editingProduct),
+    }).catch((err) => console.error("Cloud product update error:", err));
     setEditingProduct(null);
   }
 
   function handleDeleteProduct(sap_code) {
     if (confirm(`Are you sure you want to remove SAP product "${sap_code}" from Master?`)) {
       setMaster((prev) => prev.filter((m) => m.sap_code !== sap_code));
+      fetch(`/api/master/products/${encodeURIComponent(sap_code)}`, {
+        method: "DELETE",
+      }).catch((err) => console.error("Cloud product delete error:", err));
     }
   }
 
@@ -286,14 +298,19 @@ export default function MasterAdmin({
       return;
     }
 
-    setMachines((prev) => [
-      ...prev,
-      {
-        machine_id: cleanId,
-        machine_no: cleanName,
-        plant_id: newMachine.plant_id || plants[0]?.plant_id || "1040",
-      },
-    ]);
+    const mcObj = {
+      machine_id: cleanId,
+      machine_no: cleanName,
+      plant_id: newMachine.plant_id || plants[0]?.plant_id || "1040",
+    };
+
+    setMachines((prev) => [...prev, mcObj]);
+    fetch("/api/master/machines", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(mcObj),
+    }).catch((err) => console.error("Cloud machine save error:", err));
+
     setNewMachine({
       machine_id: "",
       machine_no: "",
@@ -306,6 +323,11 @@ export default function MasterAdmin({
     setMachines((prev) =>
       prev.map((m) => (m.machine_id === editingMachine.machine_id ? editingMachine : m))
     );
+    fetch("/api/master/machines", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editingMachine),
+    }).catch((err) => console.error("Cloud machine update error:", err));
     setEditingMachine(null);
   }
 
@@ -319,6 +341,9 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete Machine "${machine_id}"?`)) {
       setMachines((prev) => prev.filter((m) => m.machine_id !== machine_id));
+      fetch(`/api/master/machines/${encodeURIComponent(machine_id)}`, {
+        method: "DELETE",
+      }).catch((err) => console.error("Cloud machine delete error:", err));
     }
   }
 
@@ -606,6 +631,12 @@ export default function MasterAdmin({
     };
 
     setUsers((prev) => [...prev, createdUser]);
+    fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(createdUser),
+    }).catch((err) => console.error("Cloud user save error:", err));
+
     setNewUser({
       username: "",
       email: "",
@@ -614,8 +645,8 @@ export default function MasterAdmin({
       role: "operator",
       department: "",
       scope_type: "custom",
-      assigned_plant_ids: [plants[0]?.plant_id || "PLANT-U02"],
-      assigned_location_ids: [locations[0]?.location_id || "LOC-GN"],
+      assigned_plant_ids: [plants[0]?.plant_id || "1040"],
+      assigned_location_ids: [locations[0]?.location_id || "LOC-PUN"],
     });
   }
 
@@ -665,7 +696,7 @@ export default function MasterAdmin({
       assignedPlants = validPlants;
       assignedLocs = (editingUser.assigned_location_ids || []).filter((id) => id !== "all");
       const firstPlant = plants.find((p) => assignedPlants.includes(p.plant_id));
-      assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-GN";
+      assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-PUN";
     }
 
     const updated = {
@@ -676,6 +707,11 @@ export default function MasterAdmin({
     };
 
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated),
+    }).catch((err) => console.error("Cloud user update error:", err));
     setEditingUser(null);
   }
 
@@ -687,6 +723,9 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete user "${target?.name || id}"?`)) {
       setUsers((prev) => prev.filter((u) => u.id !== id));
+      fetch(`/api/users/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }).catch((err) => console.error("Cloud user delete error:", err));
     }
   }
 

@@ -292,6 +292,61 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shifts]);
 
+  // Central AWS Cloud Sync: fetch initial bootstrap and poll every 15s
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncFromCloud() {
+      try {
+        const res = await fetch("/api/bootstrap");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!isMounted) return;
+
+        if (Array.isArray(data.users) && data.users.length > 0) {
+          setUsers(data.users);
+        }
+        if (Array.isArray(data.entries)) {
+          setEntries(data.entries);
+        }
+        if (Array.isArray(data.master) && data.master.length > 0) {
+          setMaster(data.master);
+        }
+        if (Array.isArray(data.machines) && data.machines.length > 0) {
+          setMachines(data.machines);
+        }
+        if (Array.isArray(data.shifts) && data.shifts.length > 0) {
+          setShifts(data.shifts);
+        }
+        if (Array.isArray(data.plants) && data.plants.length > 0) {
+          setPlants(data.plants);
+        }
+        if (Array.isArray(data.locations) && data.locations.length > 0) {
+          setLocations(data.locations);
+        }
+        if (Array.isArray(data.reasonCodes) && data.reasonCodes.length > 0) {
+          setReasonCodes(data.reasonCodes);
+        }
+        if (Array.isArray(data.auditLog)) {
+          setAuditLog(data.auditLog);
+        }
+      } catch (err) {
+        console.log("Cloud sync silent fallback to cache:", err.message);
+      }
+    }
+
+    syncFromCloud();
+    const interval = setInterval(syncFromCloud, 15000);
+    const handleFocus = () => syncFromCloud();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
   function handleLogin(user) {
     setCurrentUser(user);
     saveSession(user);
@@ -307,22 +362,36 @@ export default function App() {
   }
 
   function addEntry(entry) {
+    const entryToSave = {
+      ...entry,
+      entry_id: entry.entry_id || `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      plant_id: entry.plant_id || selectedPlantId || "1040",
+      updated_at: new Date().toISOString(),
+    };
+
     setEntries((prev) => {
       const idx = prev.findIndex(
         (e) =>
-          e.entry_id === entry.entry_id ||
-          (e.shift_date === entry.shift_date &&
-            e.shift_id === entry.shift_id &&
-            e.machine_id === entry.machine_id &&
-            (!entry.plant_id || e.plant_id === entry.plant_id))
+          e.entry_id === entryToSave.entry_id ||
+          (e.shift_date === entryToSave.shift_date &&
+            e.shift_id === entryToSave.shift_id &&
+            e.machine_id === entryToSave.machine_id &&
+            (!entryToSave.plant_id || e.plant_id === entryToSave.plant_id))
       );
       if (idx >= 0) {
         const next = [...prev];
-        next[idx] = { ...prev[idx], ...entry, entry_id: prev[idx].entry_id };
+        next[idx] = { ...prev[idx], ...entryToSave, entry_id: prev[idx].entry_id };
         return next;
       }
-      return [...prev, entry];
+      return [entryToSave, ...prev];
     });
+
+    // Save directly to AWS Cloud
+    fetch("/api/entries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entryToSave),
+    }).catch((err) => console.error("Cloud save entry error:", err));
   }
 
   function runLockJob() {
@@ -345,21 +414,27 @@ export default function App() {
 
   function saveEdit(original, updated) {
     setEntries((prev) => prev.map((e) => (e.entry_id === original.entry_id ? updated : e)));
+    let auditObj = null;
     if (original.status === "locked") {
-      setAuditLog((prev) => [
-        ...prev,
-        {
-          id: "A-" + Date.now(),
-          entry_id: original.entry_id,
-          action: "update",
-          summary: `Admin edited locked entry ${original.entry_id} (${original.sap_code}, ${original.shift_date}) — OK prod ${original.ok_prod} → ${updated.ok_prod}, run hour ${original.run_hour} → ${updated.run_hour}`,
-          changed_by: currentUser.id,
-          changed_by_name: currentUser.name,
-          changed_at: new Date().toISOString(),
-        },
-      ]);
+      auditObj = {
+        id: "A-" + Date.now(),
+        entry_id: original.entry_id,
+        action: "update",
+        summary: `Admin edited locked entry ${original.entry_id} (${original.sap_code}, ${original.shift_date}) — OK prod ${original.ok_prod} → ${updated.ok_prod}, run hour ${original.run_hour} → ${updated.run_hour}`,
+        changed_by: currentUser.id,
+        changed_by_name: currentUser.name,
+        changed_at: new Date().toISOString(),
+      };
+      setAuditLog((prev) => [auditObj, ...prev]);
     }
     setEditing(null);
+
+    // Save directly to AWS Cloud
+    fetch(`/api/entries/${original.entry_id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...updated, auditEntry: auditObj }),
+    }).catch((err) => console.error("Cloud update entry error:", err));
   }
 
   function tryEdit(entry) {

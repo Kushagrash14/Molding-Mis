@@ -5,6 +5,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { pool, testConnection } from "./db.js";
+import { cloudStorage } from "./storage.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -138,255 +139,145 @@ app.post("/api/verify-otp", async (req, res) => {
 });
 
 // Bootstrap initial data for frontend
-app.get("/api/bootstrap", async (req, res) => {
+app.get("/api/bootstrap", (req, res) => {
   try {
-    const [locations] = await pool.query("SELECT * FROM locations ORDER BY name ASC");
-    const [plants] = await pool.query("SELECT * FROM plants ORDER BY name ASC");
-    const [users] = await pool.query("SELECT id, username, email, employee_code, name, role, department, assigned_location_ids, assigned_plant_ids FROM users");
-    const [shifts] = await pool.query("SELECT * FROM shifts ORDER BY shift_id ASC");
-    const [machines] = await pool.query("SELECT * FROM machines ORDER BY machine_no ASC");
-    const [products] = await pool.query("SELECT * FROM products ORDER BY sap_code ASC");
-    const [reasonCodes] = await pool.query("SELECT * FROM reason_codes");
-
-    // Fetch entries with multi-mold runs
-    const [entryRows] = await pool.query("SELECT * FROM production_entries ORDER BY shift_date DESC, created_at DESC LIMIT 500");
-    const entryIds = entryRows.map((e) => e.entry_id);
-
-    let runsMap = {};
-    if (entryIds.length > 0) {
-      const [runs] = await pool.query("SELECT * FROM mold_runs WHERE entry_id IN (?) ORDER BY run_index ASC", [entryIds]);
-      const runIds = runs.map((r) => r.run_id);
-
-      let reasonsMap = {};
-      if (runIds.length > 0) {
-        const [reasons] = await pool.query("SELECT * FROM run_reasons WHERE run_id IN (?)", [runIds]);
-        for (const r of reasons) {
-          if (!reasonsMap[r.run_id]) reasonsMap[r.run_id] = {};
-          reasonsMap[r.run_id][r.reason_id] = Number(r.value);
-        }
-      }
-
-      for (const r of runs) {
-        if (!runsMap[r.entry_id]) runsMap[r.entry_id] = [];
-        runsMap[r.entry_id].push({
-          run_id: r.run_id,
-          run_index: r.run_index,
-          start_time: r.start_time,
-          end_time: r.end_time,
-          sap_code: r.sap_code,
-          material_description: r.material_description,
-          part_no: r.part_no,
-          running_cavity: r.running_cavity,
-          hr_mp_declare: r.hr_mp_declare,
-          prod_mp_declare: r.prod_mp_declare,
-          ok_prod: r.ok_prod,
-          run_hour: Number(r.run_hour),
-          other_dt_remark: r.other_dt_remark,
-          is_continued: Boolean(r.is_continued),
-          reasons: reasonsMap[r.run_id] || {},
-        });
-      }
-    }
-
-    const entries = entryRows.map((e) => ({
-      entry_id: e.entry_id,
-      plant_id: e.plant_id,
-      machine_id: e.machine_id,
-      shift_date: e.shift_date ? new Date(e.shift_date).toISOString().slice(0, 10) : "",
-      shift_id: e.shift_id,
-      status: e.status,
-      entered_by: e.entered_by,
-      entered_by_name: e.entered_by_name,
-      locked_at: e.locked_at,
-      created_at: e.created_at,
-      updated_at: e.updated_at,
-      runs: runsMap[e.entry_id] || [],
-    }));
-
-    const [auditLogs] = await pool.query("SELECT * FROM audit_logs ORDER BY changed_at DESC LIMIT 200");
-
-    res.json({
-      locations,
-      plants,
-      users: users.map((u) => ({
-        ...u,
-        assigned_location_ids: typeof u.assigned_location_ids === "string" ? JSON.parse(u.assigned_location_ids) : u.assigned_location_ids,
-        assigned_plant_ids: typeof u.assigned_plant_ids === "string" ? JSON.parse(u.assigned_plant_ids) : u.assigned_plant_ids,
-      })),
-      shifts,
-      machines,
-      master: products,
-      reasonCodes,
-      entries,
-      auditLog: auditLogs,
-    });
+    const data = cloudStorage.getBootstrap();
+    res.json(data);
   } catch (err) {
     console.error("Bootstrap error:", err);
     res.status(500).json({ error: "Failed to load bootstrap data", details: err.message });
   }
 });
 
-// Create new production entry
-app.post("/api/entries", async (req, res) => {
-  const conn = await pool.getConnection();
+// Users API (Cloud-persisted for all PCs)
+app.get("/api/users", (req, res) => {
   try {
-    const { entry_id, plant_id, machine_id, shift_date, shift_id, status = "submitted", entered_by, entered_by_name, runs = [] } = req.body;
-
-    if (!entry_id || !machine_id || !shift_date || !shift_id) {
-      return res.status(400).json({ error: "Missing required entry fields" });
-    }
-
-    await conn.beginTransaction();
-
-    // Insert entry
-    await conn.query(
-      `INSERT INTO production_entries (entry_id, plant_id, machine_id, shift_date, shift_id, status, entered_by, entered_by_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [entry_id, plant_id, machine_id, shift_date, shift_id, status, entered_by || "u_operator", entered_by_name || "Operator"]
-    );
-
-    // Insert runs & reasons
-    for (let i = 0; i < runs.length; i++) {
-      const r = runs[i];
-      const runId = r.run_id || `${entry_id}_run_${i + 1}`;
-
-      await conn.query(
-        `INSERT INTO mold_runs (run_id, entry_id, run_index, start_time, end_time, sap_code, material_description, part_no, running_cavity, hr_mp_declare, prod_mp_declare, ok_prod, run_hour, other_dt_remark, is_continued)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          runId,
-          entry_id,
-          i + 1,
-          r.start_time || "07:00",
-          r.end_time || "19:00",
-          r.sap_code,
-          r.material_description || null,
-          r.part_no || null,
-          Number(r.running_cavity) || 1,
-          Number(r.hr_mp_declare) || 0,
-          Number(r.prod_mp_declare) || 0,
-          Number(r.ok_prod) || 0,
-          Number(r.run_hour) || 0,
-          r.other_dt_remark || null,
-          r.is_continued ? 1 : 0,
-        ]
-      );
-
-      if (r.reasons && typeof r.reasons === "object") {
-        for (const [reason_id, val] of Object.entries(r.reasons)) {
-          const numVal = Number(val);
-          if (numVal > 0) {
-            await conn.query(
-              `INSERT INTO run_reasons (run_id, reason_id, value) VALUES (?, ?, ?)`,
-              [runId, reason_id, numVal]
-            );
-          }
-        }
-      }
-    }
-
-    await conn.commit();
-    res.json({ success: true, entry_id });
+    res.json({ success: true, users: cloudStorage.getUsers() });
   } catch (err) {
-    await conn.rollback();
-    console.error("Save entry error:", err);
-    res.status(500).json({ error: "Failed to save entry", details: err.message });
-  } finally {
-    conn.release();
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Update production entry
-app.put("/api/entries/:id", async (req, res) => {
-  const conn = await pool.getConnection();
+app.post("/api/users", (req, res) => {
   try {
-    const entryId = req.params.id;
-    const { status, runs = [], auditEntry } = req.body;
-
-    await conn.beginTransaction();
-
-    if (status) {
-      await conn.query("UPDATE production_entries SET status = ? WHERE entry_id = ?", [status, entryId]);
-    }
-
-    // Replace runs if provided
-    if (runs && runs.length > 0) {
-      await conn.query("DELETE FROM mold_runs WHERE entry_id = ?", [entryId]);
-
-      for (let i = 0; i < runs.length; i++) {
-        const r = runs[i];
-        const runId = r.run_id || `${entryId}_run_${i + 1}`;
-
-        await conn.query(
-          `INSERT INTO mold_runs (run_id, entry_id, run_index, start_time, end_time, sap_code, material_description, part_no, running_cavity, hr_mp_declare, prod_mp_declare, ok_prod, run_hour, other_dt_remark, is_continued)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            runId,
-            entryId,
-            i + 1,
-            r.start_time || "07:00",
-            r.end_time || "19:00",
-            r.sap_code,
-            r.material_description || null,
-            r.part_no || null,
-            Number(r.running_cavity) || 1,
-            Number(r.hr_mp_declare) || 0,
-            Number(r.prod_mp_declare) || 0,
-            Number(r.ok_prod) || 0,
-            Number(r.run_hour) || 0,
-            r.other_dt_remark || null,
-            r.is_continued ? 1 : 0,
-          ]
-        );
-
-        if (r.reasons && typeof r.reasons === "object") {
-          for (const [reason_id, val] of Object.entries(r.reasons)) {
-            const numVal = Number(val);
-            if (numVal > 0) {
-              await conn.query(
-                `INSERT INTO run_reasons (run_id, reason_id, value) VALUES (?, ?, ?)`,
-                [runId, reason_id, numVal]
-              );
-            }
-          }
-        }
-      }
-    }
-
-    // Insert audit entry if provided
-    if (auditEntry) {
-      await conn.query(
-        `INSERT INTO audit_logs (id, entry_id, action, summary, changed_by, changed_by_name)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          auditEntry.id || `aud_${Date.now()}`,
-          entryId,
-          auditEntry.action || "UPDATE",
-          auditEntry.summary || "Entry updated",
-          auditEntry.changed_by || "u_admin",
-          auditEntry.changed_by_name || "Admin",
-        ]
-      );
-    }
-
-    await conn.commit();
-    res.json({ success: true, entry_id: entryId });
+    const user = cloudStorage.saveUser(req.body);
+    res.json({ success: true, user });
   } catch (err) {
-    await conn.rollback();
-    console.error("Update entry error:", err);
-    res.status(500).json({ error: "Failed to update entry", details: err.message });
-  } finally {
-    conn.release();
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/users/:id", (req, res) => {
+  try {
+    const ok = cloudStorage.deleteUser(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Entries API (Cloud-persisted for all PCs)
+app.get("/api/entries", (req, res) => {
+  try {
+    res.json({ success: true, entries: cloudStorage.getEntries() });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/entries", (req, res) => {
+  try {
+    const saved = cloudStorage.saveEntry(req.body);
+    res.json({ success: true, entry: saved });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/entries/batch", (req, res) => {
+  try {
+    const list = Array.isArray(req.body) ? req.body : (req.body.entries || []);
+    const processed = cloudStorage.saveEntriesBatch(list);
+    res.json({ success: true, entries: processed, count: processed.length });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.put("/api/entries/:id", (req, res) => {
+  try {
+    const updated = cloudStorage.saveEntry({ ...req.body, entry_id: req.params.id });
+    if (req.body.auditEntry) {
+      cloudStorage.addAuditLog(req.body.auditEntry);
+    }
+    res.json({ success: true, entry: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/entries/:id", (req, res) => {
+  try {
+    const ok = cloudStorage.deleteEntry(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Master Products API
+app.post("/api/master/products", (req, res) => {
+  try {
+    const product = cloudStorage.saveProduct(req.body);
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/master/products/:sap_code", (req, res) => {
+  try {
+    const ok = cloudStorage.deleteProduct(req.params.sap_code);
+    res.json({ success: ok });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Master Machines API
+app.post("/api/master/machines", (req, res) => {
+  try {
+    const machine = cloudStorage.saveMachine(req.body);
+    res.json({ success: true, machine });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/master/machines/:id", (req, res) => {
+  try {
+    const ok = cloudStorage.deleteMachine(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 
 // Run lock-cutoff
-app.post("/api/lock-cutoff", async (req, res) => {
+app.post("/api/lock-cutoff", (req, res) => {
   try {
-    const [result] = await pool.query(
-      "UPDATE production_entries SET status = 'locked', locked_at = NOW() WHERE status = 'submitted' AND created_at < DATE_SUB(NOW(), INTERVAL 12 HOUR)"
-    );
-    res.json({ success: true, lockedCount: result.affectedRows });
+    const entries = cloudStorage.getEntries();
+    const cutoff = Date.now() - 12 * 60 * 60 * 1000;
+    let lockedCount = 0;
+    for (const e of entries) {
+      if (e.status === "submitted" && new Date(e.created_at || 0).getTime() < cutoff) {
+        e.status = "locked";
+        e.locked_at = new Date().toISOString();
+        cloudStorage.saveEntry(e);
+        lockedCount++;
+      }
+    }
+    res.json({ success: true, lockedCount });
   } catch (err) {
     res.status(500).json({ error: "Lock cutoff error", details: err.message });
   }
