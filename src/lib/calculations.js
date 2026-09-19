@@ -555,3 +555,44 @@ export function getPreviousShiftInfo(machineId, shiftDate, shiftId, entries = []
   return null;
 }
 
+/**
+ * Generates selectable handover / start time intervals between two mold runs.
+ */
+export function getStartTimeOptions(prevStartStr, curEndStr, shiftStartStr, prevIdx = 1, curIdx = 2) {
+  if (!prevStartStr || !curEndStr || !shiftStartStr) return [];
+  function t2m(t) {
+    const [h, m] = (t || "07:00").split(":").map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+  function m2t(m) {
+    let norm = ((m % 1440) + 1440) % 1440;
+    const h = Math.floor(norm / 60);
+    const min = norm % 60;
+    return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+  }
+  function getOffset(t, start) {
+    let diff = t2m(t) - t2m(start);
+    if (diff < 0) diff += 1440;
+    return diff;
+  }
+
+  const prevStartOffset = getOffset(prevStartStr, shiftStartStr);
+  let curEndOffset = getOffset(curEndStr, shiftStartStr);
+  if (curEndOffset === 0) curEndOffset = 1440;
+  const totalShiftStartMin = t2m(shiftStartStr);
+
+  const options = [];
+  for (let m = prevStartOffset + 30; m <= curEndOffset - 30; m += 30) {
+    const timeStr = m2t(totalShiftStartMin + m);
+    const durPrev = ((m - prevStartOffset) / 60).toFixed(1);
+    const durCur = ((curEndOffset - m) / 60).toFixed(1);
+    options.push({
+      time: timeStr,
+      durPrev,
+      durCur,
+      label: `${timeStr} (Mold #${prevIdx}: ${durPrev}h · Mold #${curIdx}: ${durCur}h)`,
+    });
+  }
+  return options;
+}
+

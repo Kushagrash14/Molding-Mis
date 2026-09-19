@@ -100,7 +100,8 @@ async function main() {
       price DECIMAL(10,2) DEFAULT 1.00,
       part_wt DECIMAL(8,4) DEFAULT 0.0000,
       run_wt DECIMAL(8,4) DEFAULT 0.0000,
-      manpower INT DEFAULT 1
+      manpower INT DEFAULT 1,
+      plant_id VARCHAR(50) DEFAULT '1040'
     ) ENGINE=InnoDB;
   `);
 
@@ -250,7 +251,7 @@ async function main() {
   const batchSize = 100;
   for (let i = 0; i < SEED_MASTER.length; i += batchSize) {
     const chunk = SEED_MASTER.slice(i, i + batchSize);
-    const placeholders = chunk.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ");
+    const placeholders = chunk.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ");
     const values = chunk.flatMap((p) => [
       p.sap_code,
       p.part_no || "",
@@ -261,10 +262,11 @@ async function main() {
       p.part_wt || 0,
       p.run_wt || 0,
       p.manpower || 1,
+      p.plant_id || "1040",
     ]);
 
     await db.query(
-      `INSERT INTO products (sap_code, part_no, material_description, cavity, shots_per_hour, price, part_wt, run_wt, manpower)
+      `INSERT INTO products (sap_code, part_no, material_description, cavity, shots_per_hour, price, part_wt, run_wt, manpower, plant_id)
        VALUES ${placeholders}
        ON DUPLICATE KEY UPDATE
          part_no = VALUES(part_no),
@@ -274,7 +276,8 @@ async function main() {
          price = VALUES(price),
          part_wt = VALUES(part_wt),
          run_wt = VALUES(run_wt),
-         manpower = VALUES(manpower)`,
+         manpower = VALUES(manpower),
+         plant_id = VALUES(plant_id)`,
       values
     );
   }

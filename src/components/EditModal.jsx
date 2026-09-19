@@ -70,7 +70,7 @@ export default function EditModal({
 
     const updated = {
       ...form,
-      plant_id: form.plant_id || entry.plant_id || "PLANT-U02",
+      plant_id: form.plant_id || entry.plant_id || plants[0]?.plant_id || "1040",
       ok_prod: Number(form.ok_prod),
       run_hour: Number(form.run_hour),
       running_cavity: Number(form.running_cavity),
@@ -154,7 +154,7 @@ export default function EditModal({
           <div className="form-row">
             <label>Plant / Unit</label>
             <select
-              value={form.plant_id || entry.plant_id || "PLANT-U02"}
+              value={form.plant_id || entry.plant_id || plants[0]?.plant_id || "1040"}
               disabled={currentUser.role !== "admin"}
               onChange={(e) => update("plant_id", e.target.value)}
             >

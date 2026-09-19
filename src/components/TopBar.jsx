@@ -1,6 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { USERS } from "../data/seedData.js";
-import { getActiveShift, getProductionShiftDate, formatShiftDateDisplay } from "../lib/calculations.js";
+import {
+  getActiveShift,
+  getProductionShiftDate,
+  formatShiftDateDisplay,
+  todayStr,
+} from "../lib/calculations.js";
 
 const ICONS = {
   entry: "✍️",
@@ -29,6 +34,10 @@ export default function TopBar({
   plants = [],
   selectedPlantId,
   onPlantChange,
+  selectedShiftDate,
+  onShiftDateChange,
+  selectedShiftId,
+  onShiftChange,
   userId,
   tabs = [],
   activeTab = "entry",
@@ -111,17 +120,17 @@ export default function TopBar({
       </div>
 
       <div className="topbar-controls">
-        {/* Plant Badge or Switcher */}
+        {/* Plant Badge or Switcher (Compact) */}
         {plants.length === 1 ? (
           <div
             className="topbar-chip"
-            title={`Assigned to ${activePlant.name || "this unit"}`}
+            title={`Assigned to ${activePlant.name} (${activeLocation.name || ""})`}
           >
             <span className="chip-icon">🏭</span>
-            <span className="chip-text">{activePlant.name}</span>
+            <span className="chip-text">{activePlant.name || activePlant.plant_id}</span>
           </div>
         ) : plants.length > 1 && onPlantChange ? (
-          <div className="topbar-chip">
+          <div className="topbar-chip" title="Select Plant Unit">
             <span className="chip-icon">🏭</span>
             <select
               className="topbar-chip-select"
@@ -131,8 +140,8 @@ export default function TopBar({
               {plants.map((p) => {
                 const loc = locations.find((l) => l.location_id === p.location_id);
                 return (
-                  <option key={p.plant_id} value={p.plant_id}>
-                    {p.name} {loc ? `(${loc.name})` : ""}
+                  <option key={p.plant_id} value={p.plant_id} title={loc?.name || ""}>
+                    {p.name || p.plant_id}
                   </option>
                 );
               })}
@@ -140,30 +149,37 @@ export default function TopBar({
           </div>
         ) : null}
 
-        {/* Unified Live Shift & Telemetry Cockpit Bar */}
+        {/* Shift Selector Pill (Compact) */}
+        <div className="topbar-chip topbar-shift-chip" title="Active Manufacturing Shift">
+          <span className="live-dot" />
+          <select
+            className="topbar-chip-select shift-select"
+            value={selectedShiftId || activeShift?.shift_id || "1"}
+            onChange={(e) => onShiftChange && onShiftChange(e.target.value)}
+          >
+            {shifts.map((s) => (
+              <option key={s.shift_id} value={s.shift_id}>
+                {`Shift ${s.shift_id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Shift Date Picker Chip (Compact & Clean) */}
+        <div className="topbar-chip topbar-date-chip" title="Shift Production Date">
+          <input
+            type="date"
+            className="topbar-date-native-input"
+            value={selectedShiftDate || prodDate}
+            max={todayStr()}
+            onChange={(e) => onShiftDateChange && onShiftDateChange(e.target.value)}
+          />
+        </div>
+
+        {/* Real-time Clock Telemetry */}
         <div className="topbar-telemetry-bar">
-          <div className="telemetry-shift-item">
-            <span className="live-dot" />
-            <span className="telemetry-shift-name">
-              {activeShift?.name || `Shift ${activeShift?.shift_id || "1"}`}
-            </span>
-            <span className="telemetry-shift-time">
-              {activeShift?.start_time && activeShift?.end_time
-                ? `${activeShift.start_time}–${activeShift.end_time}`
-                : "07:00–19:00"}
-            </span>
-          </div>
-
-          <span className="telemetry-pipe" />
-
-          <div className="telemetry-date-item">
-            <span className="telemetry-date-label">Today</span>
-            <span className="telemetry-date-text">{formatShiftDateDisplay(prodDate)}</span>
-          </div>
-
-          <span className="telemetry-pipe" />
-
           <div className="telemetry-clock-item">
+            <span className="telemetry-clock-label">LIVE</span>
             <span className="telemetry-clock-text">{timeStr}</span>
           </div>
         </div>

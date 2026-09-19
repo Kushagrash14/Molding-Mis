@@ -3,6 +3,7 @@
 export const SEED_MASTER = [
   {
     "sap_code": "7010000205",
+    "plant_id": "1040",
     "part_no": "MBL66498405",
     "material_description": "CAP DECOR(CAP COVER)DEEP PURPLE",
     "cavity": 4,
@@ -14,6 +15,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000206",
+    "plant_id": "1040",
     "part_no": "MBL66798310",
     "material_description": "CAP DECOR(CAP COVER)SCARLET RED",
     "cavity": 4,
@@ -25,6 +27,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000213",
+    "plant_id": "1040",
     "part_no": "MBL66498415",
     "material_description": "CAP DECOR(CAP COVER)FAWN GREY",
     "cavity": 4,
@@ -36,6 +39,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000222",
+    "plant_id": "1040",
     "part_no": "MBF63103802",
     "material_description": "BUSH ORION MBF63103802",
     "cavity": 8,
@@ -47,6 +51,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000224",
+    "plant_id": "1040",
     "part_no": "MDG62322901",
     "material_description": "FAN EMERALD-1,2",
     "cavity": 2,
@@ -58,6 +63,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000225",
+    "plant_id": "1040",
     "part_no": "MDX64531901",
     "material_description": "NOZZEL OMEGA-5P(MDX64531901)",
     "cavity": 2,
@@ -69,6 +75,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000226",
+    "plant_id": "1040",
     "part_no": "4984JF3001A",
     "material_description": "BUSH DOOR HINGE",
     "cavity": 8,
@@ -80,6 +87,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000227",
+    "plant_id": "1040",
     "part_no": "MKC67471903",
     "material_description": "WINDOW TRAY VS6",
     "cavity": 2,
@@ -91,6 +99,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000228",
+    "plant_id": "1040",
     "part_no": "MJS65318603",
     "material_description": "TRAY DRAWER VS6",
     "cavity": 2,
@@ -102,6 +111,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000229",
+    "plant_id": "1040",
     "part_no": "MDQ66713703",
     "material_description": "FRAME HOME BAR",
     "cavity": 1,
@@ -113,6 +123,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000230",
+    "plant_id": "1040",
     "part_no": "MBL67238405",
     "material_description": "CAP DECOR RL BLACK",
     "cavity": 1,
@@ -124,6 +135,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000231",
+    "plant_id": "1040",
     "part_no": "MJS65373201",
     "material_description": "TRAY FRESH ROOM OP3",
     "cavity": 1,
@@ -135,6 +147,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000232",
+    "plant_id": "1040",
     "part_no": "MJS62213502",
     "material_description": "EGG TRAY 6 SLOT",
     "cavity": 4,
@@ -146,6 +159,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000242",
+    "plant_id": "1040",
     "part_no": "MBL66498409",
     "material_description": "CAP DECOR(CAP COVER)SOLID NOBLE SILVER",
     "cavity": 4,
@@ -157,6 +171,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000320",
+    "plant_id": "1040",
     "part_no": "PI24PL016200",
     "material_description": "HARIZONTAL LOUVER VANE_1_24K",
     "cavity": 2,
@@ -168,6 +183,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000321",
+    "plant_id": "1040",
     "part_no": "12122000000445@201119900949CMI",
     "material_description": "PIPE CLAMP BOARD 11D 12K",
     "cavity": 4,
@@ -179,6 +195,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000287",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "16K F11 PANEL(CMI)",
     "cavity": 1,
@@ -190,6 +207,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000363",
+    "plant_id": "1040",
     "part_no": "2011C1030563.",
     "material_description": "EVAPORATOR LEFT SUPPORT 12F 22K",
     "cavity": 2,
@@ -201,6 +219,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000365",
+    "plant_id": "1040",
     "part_no": "2011C1028805@CMI",
     "material_description": "A4 PANEL 16K",
     "cavity": 1,
@@ -212,6 +231,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000402",
+    "plant_id": "1040",
     "part_no": "12122000004903@201132790685",
     "material_description": "CHASSIS 16K GREY",
     "cavity": 1,
@@ -223,6 +243,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003042",
+    "plant_id": "1040",
     "part_no": "M1S1308000005-CMI-59",
     "material_description": "F6 DISPLAY BOX 12F 16K",
     "cavity": 2,
@@ -234,6 +255,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000367",
+    "plant_id": "1040",
     "part_no": "12100303000064",
     "material_description": "WIRE CLAMP(P CLAMP TYPE)B170221",
     "cavity": 8,
@@ -245,6 +267,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000368",
+    "plant_id": "1040",
     "part_no": "12122000000610@12122000000610.",
     "material_description": "EVAPORATER LEFT SUPPORTER",
     "cavity": 2,
@@ -256,6 +279,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000369",
+    "plant_id": "1040",
     "part_no": "12122000006694@201119901024.",
     "material_description": "COVER OF ELECTRICAL EQUIPMENT",
     "cavity": 4,
@@ -267,6 +291,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000370",
+    "plant_id": "1040",
     "part_no": "12122000006693",
     "material_description": "ELECTRONIC PARTS COVER BOARD 24K 12F",
     "cavity": 2,
@@ -278,6 +303,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000371",
+    "plant_id": "1040",
     "part_no": "M2S1310500026 MI-61",
     "material_description": "F8 PANEL 12F 16K",
     "cavity": 1,
@@ -289,6 +315,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000372",
+    "plant_id": "1040",
     "part_no": "BN-XSH-12F-CMI-66",
     "material_description": "DISPLAY BOX 12F",
     "cavity": 2,
@@ -300,6 +327,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000374",
+    "plant_id": "1040",
     "part_no": "2011C1032654@CMI",
     "material_description": "VOLUTE TONGUE 12K 12F BLACK",
     "cavity": 1,
@@ -311,6 +339,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000375",
+    "plant_id": "1040",
     "part_no": "2011C1032655@CMI",
     "material_description": "CHASSIS 12K 12F BLACK",
     "cavity": 1,
@@ -322,6 +351,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000376",
+    "plant_id": "1040",
     "part_no": "2011C1032657@CMI",
     "material_description": "VERTICAL LOUVER 12K 12F BLACK",
     "cavity": 2,
@@ -333,6 +363,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000377",
+    "plant_id": "1040",
     "part_no": "2011C1032431@CMI",
     "material_description": "FRONT PANEL 12K INDUS",
     "cavity": 1,
@@ -344,6 +375,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000378",
+    "plant_id": "1040",
     "part_no": "2011C1032432@CMI",
     "material_description": "FRAME 12K INDUS",
     "cavity": 1,
@@ -355,6 +387,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000379",
+    "plant_id": "1040",
     "part_no": "2011C1032433@CMI",
     "material_description": "HORIZONTAL LOUVER 12 K INDUS",
     "cavity": 2,
@@ -366,6 +399,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000380",
+    "plant_id": "1040",
     "part_no": "201132591055",
     "material_description": "FRAME 12F 12K",
     "cavity": 1,
@@ -377,6 +411,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000381",
+    "plant_id": "1040",
     "part_no": "201132591119",
     "material_description": "HORIZONTAL LOUVER 12F 12K",
     "cavity": 2,
@@ -388,6 +423,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000382",
+    "plant_id": "1040",
     "part_no": "2011325A5456",
     "material_description": "FRONT PANEL 12K 12F F11",
     "cavity": 1,
@@ -399,6 +435,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000383",
+    "plant_id": "1040",
     "part_no": "2011C1029645",
     "material_description": "FRONT PANEL 12K 12F A4",
     "cavity": 1,
@@ -410,6 +447,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000361",
+    "plant_id": "1040",
     "part_no": "12122000003614@CMI",
     "material_description": "FRAME 16K",
     "cavity": 1,
@@ -421,6 +459,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000392",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SENSOR HOLDER(ROOM TEMP)-PG IDU 18K",
     "cavity": 4,
@@ -432,6 +471,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000393",
+    "plant_id": "1040",
     "part_no": "PI18PL000300",
     "material_description": "BUSH SWING MOTOR",
     "cavity": 8,
@@ -443,6 +483,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000394",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00340",
     "material_description": "FRONT GRILLE 18K",
     "cavity": 1,
@@ -454,6 +495,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000395",
+    "plant_id": "1040",
     "part_no": "PI18PL003000",
     "material_description": "INLET FACIA 18K",
     "cavity": 1,
@@ -465,6 +507,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000396",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00323",
     "material_description": "CHASSIS 18K",
     "cavity": 1,
@@ -476,6 +519,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000397",
+    "plant_id": "1040",
     "part_no": "PI12PL004800",
     "material_description": "HORIZONTAL VANE 12K",
     "cavity": 2,
@@ -487,6 +531,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000398",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00353",
     "material_description": "18K INLET FACIA PANEL-5",
     "cavity": 1,
@@ -498,6 +543,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000399",
+    "plant_id": "1040",
     "part_no": "PI24PL016300",
     "material_description": "AIR FILTER_24K IDU",
     "cavity": 1,
@@ -509,6 +555,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000400",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00329",
     "material_description": "BEARING HOLDER",
     "cavity": 8,
@@ -520,6 +567,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000401",
+    "plant_id": "1040",
     "part_no": "12122000005516@201133090980",
     "material_description": "MOTOR BEARING COVER B120105 24K",
     "cavity": 2,
@@ -531,6 +579,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003040",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FRAME INDUS 12F 16K",
     "cavity": 1,
@@ -542,6 +591,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000404",
+    "plant_id": "1040",
     "part_no": "2023C1035154.",
     "material_description": "FRONT X-PANEL 16K 12F",
     "cavity": 1,
@@ -553,6 +603,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000406",
+    "plant_id": "1040",
     "part_no": "2023C1035156.",
     "material_description": "LED COVER 16K",
     "cavity": 1,
@@ -564,6 +615,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000405",
+    "plant_id": "1040",
     "part_no": "2011C1035155.",
     "material_description": "LED DIFFUSER 16K",
     "cavity": 1,
@@ -575,6 +627,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000364",
+    "plant_id": "1040",
     "part_no": "12122000008147@CMI",
     "material_description": "MOTOR COVER 16K",
     "cavity": 2,
@@ -586,6 +639,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000407",
+    "plant_id": "1040",
     "part_no": "2023C1035197.",
     "material_description": "FRONT X-PANEL 12K 12F",
     "cavity": 1,
@@ -597,6 +651,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000408",
+    "plant_id": "1040",
     "part_no": "2011C1035198.",
     "material_description": "LED DIFFUSER 12K",
     "cavity": 1,
@@ -608,6 +663,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000409",
+    "plant_id": "1040",
     "part_no": "2011C1035199.",
     "material_description": "LED COVER 12K",
     "cavity": 1,
@@ -619,6 +675,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000410",
+    "plant_id": "1040",
     "part_no": "W10872874",
     "material_description": "FC GLASS SHELF",
     "cavity": 1,
@@ -630,6 +687,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000411",
+    "plant_id": "1040",
     "part_no": "W10907100",
     "material_description": "POM SUPPORT",
     "cavity": 4,
@@ -641,6 +699,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000412",
+    "plant_id": "1040",
     "part_no": "W10472231.",
     "material_description": "SLEEVE TOP HINGE",
     "cavity": 4,
@@ -652,6 +711,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000413",
+    "plant_id": "1040",
     "part_no": "W10418687",
     "material_description": "BULB LENS W10418687",
     "cavity": 4,
@@ -663,6 +723,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000414",
+    "plant_id": "1040",
     "part_no": "W10633811.",
     "material_description": "LOCK FREEZER FRAME",
     "cavity": 4,
@@ -674,6 +735,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000415",
+    "plant_id": "1040",
     "part_no": "W10371691",
     "material_description": "OXYGEN SCAVENGER FRONT",
     "cavity": 1,
@@ -685,6 +747,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000416",
+    "plant_id": "1040",
     "part_no": "W10372005",
     "material_description": "OXYGEN SCAVENGER BACK",
     "cavity": 1,
@@ -696,6 +759,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000417",
+    "plant_id": "1040",
     "part_no": "W11088012",
     "material_description": "GLASS SHELF TRIM L60",
     "cavity": 1,
@@ -707,6 +771,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000418",
+    "plant_id": "1040",
     "part_no": "W11088069",
     "material_description": "GLASS SHELF TRIM L55",
     "cavity": 1,
@@ -718,6 +783,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000419",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER DOCKET GREY",
     "cavity": 1,
@@ -729,6 +795,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000420",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "POM SUPPORT GREY",
     "cavity": 4,
@@ -740,6 +807,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000421",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00341",
     "material_description": "FILTER 18K",
     "cavity": 1,
@@ -751,6 +819,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000422",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00326",
     "material_description": "VERTICAL VANE L 18K",
     "cavity": 1,
@@ -762,6 +831,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000423",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00325",
     "material_description": "VERTICAL VANE R 18K",
     "cavity": 1,
@@ -773,6 +843,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000424",
+    "plant_id": "1040",
     "part_no": "PO20PL005200",
     "material_description": "P20 FAN",
     "cavity": 1,
@@ -784,6 +855,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000425",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FILTER 12K IDU",
     "cavity": 1,
@@ -795,6 +867,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000426",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "STUDIO BODY BOTTOM BLACK(A085701)",
     "cavity": 1,
@@ -806,6 +879,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000427",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "STUDIO+ BLADE TRIM-NAT(MOLDED)(A1X0806)",
     "cavity": 2,
@@ -817,6 +891,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000428",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "STUDIO+ BLADE TRIM-BROWN MOLDED(A1X0806)",
     "cavity": 2,
@@ -828,6 +903,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000429",
+    "plant_id": "1040",
     "part_no": "W10418686",
     "material_description": "DOOR STOPPER-GEN Y",
     "cavity": 4,
@@ -839,6 +915,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000430",
+    "plant_id": "1040",
     "part_no": "W10881616",
     "material_description": "WATER DOCKET",
     "cavity": 1,
@@ -850,6 +927,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000431",
+    "plant_id": "1040",
     "part_no": "12122000004632@12122000004632",
     "material_description": "RIGHT COVER OF ELEC CONTROL BOX B170217",
     "cavity": 1,
@@ -861,6 +939,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000432",
+    "plant_id": "1040",
     "part_no": "12122000004639",
     "material_description": "LEFT COVER OF ELEC CONTROL BOX B170218",
     "cavity": 1,
@@ -872,6 +951,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000433",
+    "plant_id": "1040",
     "part_no": "12122000007318@201132300130",
     "material_description": "WIRE CLAMP B170220",
     "cavity": 8,
@@ -883,6 +963,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000434",
+    "plant_id": "1040",
     "part_no": "12122000004577@CMI",
     "material_description": "ELECTRONIC CONTROL BOX TOP B170216",
     "cavity": 1,
@@ -894,6 +975,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000436",
+    "plant_id": "1040",
     "part_no": "201133090285@2011C1032658",
     "material_description": "BIG BUSH1 B120112",
     "cavity": 16,
@@ -905,6 +987,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000437",
+    "plant_id": "1040",
     "part_no": "201119900950",
     "material_description": "SCREW CAP B120110",
     "cavity": 8,
@@ -916,6 +999,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000438",
+    "plant_id": "1040",
     "part_no": "12122000000344@201132590888",
     "material_description": "ANTI POWER SHAFT B120111",
     "cavity": 16,
@@ -927,6 +1011,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000439",
+    "plant_id": "1040",
     "part_no": "201132591086@12122000005020",
     "material_description": "ELECTRICAL CONTROL BOX COVER",
     "cavity": 8,
@@ -938,6 +1023,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000945",
+    "plant_id": "1040",
     "part_no": "213455FOX",
     "material_description": "LIGHT PIPE",
     "cavity": 2,
@@ -949,6 +1035,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002108",
+    "plant_id": "1040",
     "part_no": "2011C1032413@CMI",
     "material_description": "FLAP LHS INDUS 18K",
     "cavity": 1,
@@ -960,6 +1047,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002186",
+    "plant_id": "1040",
     "part_no": "W10484547",
     "material_description": "PEDESTAL BASE SHERRY WINE GEN-Y",
     "cavity": 1,
@@ -971,6 +1059,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002192",
+    "plant_id": "1040",
     "part_no": "W11192046",
     "material_description": "FACIA CUM BASKET 200L-PURPLE",
     "cavity": 1,
@@ -982,6 +1071,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002469",
+    "plant_id": "1040",
     "part_no": "W10872877",
     "material_description": "COVER AIR DIFFUSER",
     "cavity": 1,
@@ -993,6 +1083,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002509",
+    "plant_id": "1040",
     "part_no": "A006001",
     "material_description": "IMPALA BLADE (MOLDED PART) A006001",
     "cavity": 2,
@@ -1004,6 +1095,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002510",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "IMPALA BLADE COVER (MOLDED PART) A006101",
     "cavity": 2,
@@ -1015,6 +1107,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002324",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "RHINO ENCLOSURE MOULDED PART",
     "cavity": 2,
@@ -1026,6 +1119,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002514",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PLASTIC SLEEVE FOR SABER -MOULDED",
     "cavity": 2,
@@ -1037,6 +1131,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002874",
+    "plant_id": "1040",
     "part_no": "MBL67198706",
     "material_description": "CAP DECOR FU BLACK",
     "cavity": 1,
@@ -1048,6 +1143,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002875",
+    "plant_id": "1040",
     "part_no": "MBL67198805",
     "material_description": "CAP DECOR FL BLACK",
     "cavity": 1,
@@ -1059,6 +1155,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002876",
+    "plant_id": "1040",
     "part_no": "W10872866",
     "material_description": "PLANUM FRONT ORION",
     "cavity": 1,
@@ -1070,6 +1167,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002877",
+    "plant_id": "1040",
     "part_no": "W10872876",
     "material_description": "BRACKET ICE TRAY",
     "cavity": 1,
@@ -1081,6 +1179,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002878",
+    "plant_id": "1040",
     "part_no": "W10881619",
     "material_description": "COVER WATER DOCKET",
     "cavity": 1,
@@ -1092,6 +1191,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002879",
+    "plant_id": "1040",
     "part_no": "W10881621",
     "material_description": "IT ICE TRAY",
     "cavity": 2,
@@ -1103,6 +1203,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002880",
+    "plant_id": "1040",
     "part_no": "W10881618",
     "material_description": "FRAME ICE TRAY",
     "cavity": 1,
@@ -1114,6 +1215,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002881",
+    "plant_id": "1040",
     "part_no": "W10881617",
     "material_description": "KNOB ICE TRAY",
     "cavity": 2,
@@ -1125,6 +1227,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002884",
+    "plant_id": "1040",
     "part_no": "W10874863",
     "material_description": "CRISPER COVER HONEY COMB",
     "cavity": 1,
@@ -1136,6 +1239,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002885",
+    "plant_id": "1040",
     "part_no": "W10873233",
     "material_description": "CRISPER COVER W10873233",
     "cavity": 1,
@@ -1147,6 +1251,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002886",
+    "plant_id": "1040",
     "part_no": "W10898451",
     "material_description": "GASKET SUPPORT",
     "cavity": 1,
@@ -1158,6 +1263,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002887",
+    "plant_id": "1040",
     "part_no": "W10872457",
     "material_description": "DECO PLATE HOUSING",
     "cavity": 1,
@@ -1169,6 +1275,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002888",
+    "plant_id": "1040",
     "part_no": "W10898947.",
     "material_description": "DOOR STOPPER ORION MIDEL W10898947",
     "cavity": 1,
@@ -1180,6 +1287,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002889",
+    "plant_id": "1040",
     "part_no": "W10764805",
     "material_description": "FACIA CUM BASKET 200L BLACK",
     "cavity": 1,
@@ -1191,6 +1299,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002890",
+    "plant_id": "1040",
     "part_no": "W10418565",
     "material_description": "HINGE SIDE LEG ASSY GEN Y",
     "cavity": 1,
@@ -1202,6 +1311,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002891",
+    "plant_id": "1040",
     "part_no": "W10497549",
     "material_description": "NON HINGE SIDE LEG ASSY GEN Y",
     "cavity": 1,
@@ -1213,6 +1323,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002892",
+    "plant_id": "1040",
     "part_no": "W10728284",
     "material_description": "DOOR STOPPER L70",
     "cavity": 4,
@@ -1224,6 +1335,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002893",
+    "plant_id": "1040",
     "part_no": "W10591742",
     "material_description": "FREEZER DOOR BACK PLATE",
     "cavity": 1,
@@ -1235,6 +1347,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002894",
+    "plant_id": "1040",
     "part_no": "W10418579",
     "material_description": "FREEZER DOOR GEN Y",
     "cavity": 1,
@@ -1246,6 +1359,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002895",
+    "plant_id": "1040",
     "part_no": "W10489605",
     "material_description": "FACIA PEDESTAL SHERRY WINE GENY",
     "cavity": 1,
@@ -1257,6 +1371,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002896",
+    "plant_id": "1040",
     "part_no": "W10689066",
     "material_description": "PEDESTAL BASE SHERRY GRAY GENY",
     "cavity": 1,
@@ -1268,6 +1383,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002897",
+    "plant_id": "1040",
     "part_no": "W10689141",
     "material_description": "FACIA CUM BASKET PEDESTAL GRAY GENY",
     "cavity": 1,
@@ -1279,6 +1395,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002898",
+    "plant_id": "1040",
     "part_no": "W10746567",
     "material_description": "GLAIDE TRAY L60",
     "cavity": 1,
@@ -1290,6 +1407,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002899",
+    "plant_id": "1040",
     "part_no": "P78320071",
     "material_description": "COVER AIR DIFFUSER GREY",
     "cavity": 1,
@@ -1301,6 +1419,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002900",
+    "plant_id": "1040",
     "part_no": "P78170140",
     "material_description": "CRISPER COVER GREY",
     "cavity": 1,
@@ -1312,6 +1431,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002901",
+    "plant_id": "1040",
     "part_no": "P78170143",
     "material_description": "GASKET SUPPORT GREY",
     "cavity": 1,
@@ -1323,6 +1443,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002902",
+    "plant_id": "1040",
     "part_no": "P78170144",
     "material_description": "BRACKET ICE TRY GREY",
     "cavity": 1,
@@ -1334,6 +1455,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002903",
+    "plant_id": "1040",
     "part_no": "P78170147",
     "material_description": "FC GLASS SHELF GREY",
     "cavity": 1,
@@ -1345,6 +1467,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002904",
+    "plant_id": "1040",
     "part_no": "P78170148",
     "material_description": "PLENUM FRONT L70 GREY",
     "cavity": 1,
@@ -1356,6 +1479,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002905",
+    "plant_id": "1040",
     "part_no": "P78170149",
     "material_description": "FRAME ICE TRAY GREY",
     "cavity": 1,
@@ -1367,6 +1491,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002906",
+    "plant_id": "1040",
     "part_no": "P78170152",
     "material_description": "KNOB ICE TRAY GREY",
     "cavity": 2,
@@ -1378,6 +1503,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002907",
+    "plant_id": "1040",
     "part_no": "P78170153",
     "material_description": "IT ICE TRAY GREY",
     "cavity": 2,
@@ -1389,6 +1515,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002908",
+    "plant_id": "1040",
     "part_no": "P78170154",
     "material_description": "LINK ICE TRAY ORION GREY",
     "cavity": 2,
@@ -1400,6 +1527,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002909",
+    "plant_id": "1040",
     "part_no": "P78170155",
     "material_description": "PEDESTAL FACIA CUM BASKET PURPLE",
     "cavity": 1,
@@ -1411,6 +1539,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002910",
+    "plant_id": "1040",
     "part_no": "W11394832",
     "material_description": "PEDESTAL FACIA CUM BASKET BLACK BLACK",
     "cavity": 1,
@@ -1422,6 +1551,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002911",
+    "plant_id": "1040",
     "part_no": "W11394833",
     "material_description": "PEDESTAL FACIA CUM BASKET WINE WINE",
     "cavity": 1,
@@ -1433,6 +1563,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002912",
+    "plant_id": "1040",
     "part_no": "W11394834",
     "material_description": "PEDESTAL FACIA CUM BASKET BLUE BLUE",
     "cavity": 1,
@@ -1444,6 +1575,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002914",
+    "plant_id": "1040",
     "part_no": "W11191989",
     "material_description": "PEDESTAL BASE MASS PURPLE",
     "cavity": 1,
@@ -1455,6 +1587,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002915",
+    "plant_id": "1040",
     "part_no": "W10753082",
     "material_description": "PEDESTAL BASE BLACK",
     "cavity": 1,
@@ -1466,6 +1599,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002916",
+    "plant_id": "1040",
     "part_no": "W10753086",
     "material_description": "PEDESTAL BASE MASS BLUE",
     "cavity": 1,
@@ -1477,6 +1611,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002917",
+    "plant_id": "1040",
     "part_no": "W10689139A",
     "material_description": "FACIA CUM BASKET NEW BLUE GENY",
     "cavity": 1,
@@ -1488,6 +1623,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002918",
+    "plant_id": "1040",
     "part_no": "W11423546.",
     "material_description": "PLENUM FRONT L60 GREY",
     "cavity": 1,
@@ -1499,6 +1635,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002919",
+    "plant_id": "1040",
     "part_no": "W11423538.",
     "material_description": "GLIDE TRAY  L60 GREY",
     "cavity": 1,
@@ -1510,6 +1647,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002920",
+    "plant_id": "1040",
     "part_no": "W11423695",
     "material_description": "DYNACOOL FRONT COVER L60 GRAY",
     "cavity": 2,
@@ -1521,6 +1659,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002921",
+    "plant_id": "1040",
     "part_no": "W11423694",
     "material_description": "DYNACOOL CENTER COVER  L60 GRAY",
     "cavity": 2,
@@ -1532,6 +1671,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002922",
+    "plant_id": "1040",
     "part_no": "W10746566",
     "material_description": "GLIDE TRAY FRAME GENX",
     "cavity": 1,
@@ -1543,6 +1683,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002923",
+    "plant_id": "1040",
     "part_no": "W11192022",
     "material_description": "FACIA CUM BASKET GENY PURPLE",
     "cavity": 1,
@@ -1554,6 +1695,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002924",
+    "plant_id": "1040",
     "part_no": "W10830742",
     "material_description": "DYNACOOL HOUSING REFRESH LH",
     "cavity": 4,
@@ -1565,6 +1707,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002925",
+    "plant_id": "1040",
     "part_no": "W10785771",
     "material_description": "DYNACOOL HOUSING REFRESH RH",
     "cavity": 4,
@@ -1576,6 +1719,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002926",
+    "plant_id": "1040",
     "part_no": "W10874863A",
     "material_description": "CRISPER COVER HONEY COMB GRAY",
     "cavity": 1,
@@ -1587,6 +1731,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002927",
+    "plant_id": "1040",
     "part_no": "A1X0142",
     "material_description": "BOTTOM COVER STUDIO BLACK",
     "cavity": 1,
@@ -1598,6 +1743,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002928",
+    "plant_id": "1040",
     "part_no": "A076501",
     "material_description": "CHUTNEY  HANDLE MG1 UPPER TRIM",
     "cavity": 1,
@@ -1609,6 +1755,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002929",
+    "plant_id": "1040",
     "part_no": "A076701",
     "material_description": "CHUTNEY HANDLE MG1 LOWER WITH NUT INSERT",
     "cavity": 1,
@@ -1620,6 +1767,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002930",
+    "plant_id": "1040",
     "part_no": "A076101",
     "material_description": "LIQUIDIZER HANDLE MG1 UPPER TRIM",
     "cavity": 1,
@@ -1631,6 +1779,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002931",
+    "plant_id": "1040",
     "part_no": "A076301",
     "material_description": "LIQUIDIZER HANDLE MG1 LOWER WITH INSERT",
     "cavity": 1,
@@ -1642,6 +1791,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002932",
+    "plant_id": "1040",
     "part_no": "A069701",
     "material_description": "BOTTOM TRANSPERT",
     "cavity": 2,
@@ -1653,6 +1803,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002933",
+    "plant_id": "1040",
     "part_no": "A069601.",
     "material_description": "BOTTOM OPAQUE",
     "cavity": 2,
@@ -1664,6 +1815,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002934",
+    "plant_id": "1040",
     "part_no": "A069501",
     "material_description": "DIFFUSEER LENS JAGUAR",
     "cavity": 2,
@@ -1675,6 +1827,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002935",
+    "plant_id": "1040",
     "part_no": "A109801.",
     "material_description": "LIGHT GUIDE INSERT JAGUAR",
     "cavity": 2,
@@ -1686,6 +1839,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002936",
+    "plant_id": "1040",
     "part_no": "A069401.",
     "material_description": "LIGHT GUIDE JAGUAR",
     "cavity": 2,
@@ -1697,6 +1851,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002937",
+    "plant_id": "1040",
     "part_no": "A071801",
     "material_description": "SPRING HOLDER GLOSS WHITE",
     "cavity": 4,
@@ -1708,6 +1863,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002938",
+    "plant_id": "1040",
     "part_no": "A080901",
     "material_description": "LINK EFFICIO EXHAUST 200MM GLOSS WHITE",
     "cavity": 4,
@@ -1719,6 +1875,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002939",
+    "plant_id": "1040",
     "part_no": "A071301",
     "material_description": "WIRE CLAMP EFFICIO EXHAUST GLOSS WHITE",
     "cavity": 4,
@@ -1730,6 +1887,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002940",
+    "plant_id": "1040",
     "part_no": "A080301",
     "material_description": "BODY EFFICIO EXHAUST 200MM GLOSS WHITE",
     "cavity": 1,
@@ -1741,6 +1899,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002941",
+    "plant_id": "1040",
     "part_no": "A080701",
     "material_description": "BLADE EFFICIO EXHAUST 200MM GLOSS WHITE",
     "cavity": 1,
@@ -1752,6 +1911,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002942",
+    "plant_id": "1040",
     "part_no": "A081101",
     "material_description": "FLAP EFFICIO EXHAUST 200MM GLOSS WHITE",
     "cavity": 2,
@@ -1763,6 +1923,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002943",
+    "plant_id": "1040",
     "part_no": "A081201",
     "material_description": "FRONT COVER EXHAUST 200MM GLOSS WHITE",
     "cavity": 1,
@@ -1774,6 +1935,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002944",
+    "plant_id": "1040",
     "part_no": "A081301",
     "material_description": "FRONT GRILL EXHAUST 200MM GLOSS WHITE",
     "cavity": 1,
@@ -1785,6 +1947,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002945",
+    "plant_id": "1040",
     "part_no": "78320045",
     "material_description": "STUDIO BODY BOTTOM BROWN (A085701)",
     "cavity": 1,
@@ -1796,6 +1959,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002946",
+    "plant_id": "1040",
     "part_no": "A071701.",
     "material_description": "LINK EFFICIO EXHAUST 150MM GLOSS WHITE",
     "cavity": 2,
@@ -1807,6 +1971,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002947",
+    "plant_id": "1040",
     "part_no": "A071001.",
     "material_description": "BODY EFFICIO EXHAUST 150MM GLOSS WHITE",
     "cavity": 1,
@@ -1818,6 +1983,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002948",
+    "plant_id": "1040",
     "part_no": "A071501.",
     "material_description": "BLADE EFFICIO EXHAUST 150MM GLOSS WHITE",
     "cavity": 1,
@@ -1829,6 +1995,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002949",
+    "plant_id": "1040",
     "part_no": "A072001.",
     "material_description": "FLAP EFFICIO EXHAUST 150MM GLOSS WHITE",
     "cavity": 2,
@@ -1840,6 +2007,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002950",
+    "plant_id": "1040",
     "part_no": "A072101.",
     "material_description": "FRONT COVER EXHAUST 150MM GLOSS WHITE",
     "cavity": 1,
@@ -1851,6 +2019,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002951",
+    "plant_id": "1040",
     "part_no": "A072201.",
     "material_description": "FRONT GRILL EXHAUST 150MM GLOSS WHITE",
     "cavity": 1,
@@ -1862,6 +2031,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002952",
+    "plant_id": "1040",
     "part_no": "A145601",
     "material_description": "EXHAUST NUT WHITE",
     "cavity": 2,
@@ -1873,6 +2043,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002953",
+    "plant_id": "1040",
     "part_no": "A156502",
     "material_description": "LIQUIDIZER HANDLE MG1.0 ONLY LOWER",
     "cavity": 2,
@@ -1884,6 +2055,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002954",
+    "plant_id": "1040",
     "part_no": "A156503",
     "material_description": "LIQUIDIZER HANDLE MG1.0 ONLY UPPER",
     "cavity": 2,
@@ -1895,6 +2067,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002957",
+    "plant_id": "1040",
     "part_no": "P78320022",
     "material_description": "BODY EFFICIO EXHAUST 200MM GLOSS BLACK",
     "cavity": 1,
@@ -1906,6 +2079,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002958",
+    "plant_id": "1040",
     "part_no": "P78320025",
     "material_description": "BLADE EFFICIO EXHAUST 200MM GLOSS BLACK",
     "cavity": 1,
@@ -1917,6 +2091,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002959",
+    "plant_id": "1040",
     "part_no": "P78320028",
     "material_description": "FLAP EFFICIO EXHAUST 200MM GLOSS BLACK",
     "cavity": 2,
@@ -1928,6 +2103,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002960",
+    "plant_id": "1040",
     "part_no": "P78320031",
     "material_description": "FRONT COVER EFF EXHAST 200MM GLOSS BLACK",
     "cavity": 1,
@@ -1939,6 +2115,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002962",
+    "plant_id": "1040",
     "part_no": "P78320053",
     "material_description": "LINK EFFICIO EXHAUST 150MM GLOSS BLACK",
     "cavity": 2,
@@ -1950,6 +2127,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002963",
+    "plant_id": "1040",
     "part_no": "P78320056",
     "material_description": "BODY EFFICIO EXHAUST 150MM GLOSS BLACK",
     "cavity": 1,
@@ -1961,6 +2139,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002964",
+    "plant_id": "1040",
     "part_no": "P78320059",
     "material_description": "BLADE EFFICIO EXHAUST 150MM GLOSS BLACK.",
     "cavity": 1,
@@ -1972,6 +2151,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002965",
+    "plant_id": "1040",
     "part_no": "P78320062",
     "material_description": "FLAP EFFICIO EXHAUST 150MM GLOSS BLACK",
     "cavity": 2,
@@ -1983,6 +2163,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002966",
+    "plant_id": "1040",
     "part_no": "P78320065",
     "material_description": "FRONT COVER EFF EXHST 150MM BLACK",
     "cavity": 1,
@@ -1994,6 +2175,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002967",
+    "plant_id": "1040",
     "part_no": "P78320068",
     "material_description": "FRONT CVR GRILL EFF EXHST 150MM BLACK",
     "cavity": 1,
@@ -2005,6 +2187,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002968",
+    "plant_id": "1040",
     "part_no": "P78320071",
     "material_description": "EXHAUST NUT BLACK",
     "cavity": 2,
@@ -2016,6 +2199,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002985",
+    "plant_id": "1040",
     "part_no": "MDX64072001",
     "material_description": "GRILLE FAN OMEGA-5P(DUAL)",
     "cavity": 1,
@@ -2027,6 +2211,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002986",
+    "plant_id": "1040",
     "part_no": "MCQ67104701",
     "material_description": "DAMPER MOTOR SUPPOTER OMEGA-5 (FRONT)",
     "cavity": 2,
@@ -2038,6 +2223,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002987",
+    "plant_id": "1040",
     "part_no": "MHN63202001",
     "material_description": "SHROUD FREEZER OMEGA-5P(DUAL)",
     "cavity": 1,
@@ -2049,6 +2235,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002988",
+    "plant_id": "1040",
     "part_no": "MJS64291901",
     "material_description": "TRAY VEGETABLEOMEGA-5",
     "cavity": 1,
@@ -2060,6 +2247,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002989",
+    "plant_id": "1040",
     "part_no": "MHN63783802",
     "material_description": "SHROUD FREEZER VT-11",
     "cavity": 1,
@@ -2071,6 +2259,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002990",
+    "plant_id": "1040",
     "part_no": "MCZ65387703",
     "material_description": "DUCT CONNECTOR VT-6N",
     "cavity": 2,
@@ -2082,6 +2271,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002991",
+    "plant_id": "1040",
     "part_no": "MDX64431901",
     "material_description": "GRILL FAN OMEGA-5(MDX64431901)",
     "cavity": 1,
@@ -2093,6 +2283,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002992",
+    "plant_id": "1040",
     "part_no": "MAN61928406",
     "material_description": "BASKET HALF LARGE IVORY",
     "cavity": 2,
@@ -2104,6 +2295,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002993",
+    "plant_id": "1040",
     "part_no": "MBL67480001",
     "material_description": "CAP DECOR FREEZER (I-MICOM) ALPHA-78L",
     "cavity": 2,
@@ -2115,6 +2307,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002994",
+    "plant_id": "1040",
     "part_no": "MBL67479901",
     "material_description": "CAP DECO FU SN SILVER ALPHA-78L",
     "cavity": 2,
@@ -2126,6 +2319,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002995",
+    "plant_id": "1040",
     "part_no": "MJB63049801",
     "material_description": "STOPPER DOOR EMERALD 1/2-PJT",
     "cavity": 4,
@@ -2137,6 +2331,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002996",
+    "plant_id": "1040",
     "part_no": "MBL67479902",
     "material_description": "CAP DECO FU BLACK ALPHA-78",
     "cavity": 2,
@@ -2148,6 +2343,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002998",
+    "plant_id": "1040",
     "part_no": "MCK68490210",
     "material_description": "AURA 5 STAR COVER HING ROYAL BLUE",
     "cavity": 4,
@@ -2159,6 +2355,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002999",
+    "plant_id": "1040",
     "part_no": "MAZ62205601",
     "material_description": "BRACKET MOTOR OMEGA-5",
     "cavity": 4,
@@ -2170,6 +2367,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003000",
+    "plant_id": "1040",
     "part_no": "MBL67479903",
     "material_description": "CAP DECO FU SUPER WHITE ALPHA-78",
     "cavity": 2,
@@ -2181,6 +2379,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003001",
+    "plant_id": "1040",
     "part_no": "MJB63330101",
     "material_description": "STOPPER DOOR REF",
     "cavity": 4,
@@ -2192,6 +2391,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003002",
+    "plant_id": "1040",
     "part_no": "MHN63002001",
     "material_description": "SHROUD CT3",
     "cavity": 1,
@@ -2203,6 +2403,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003003",
+    "plant_id": "1040",
     "part_no": "MEB65432177",
     "material_description": "HANDLE BASE-R VS6 MATT BLACK ABS 380Q",
     "cavity": 2,
@@ -2214,6 +2415,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003005",
+    "plant_id": "1040",
     "part_no": "MCQ67104601",
     "material_description": "DAMPER MOTOR SUPPOTER OMEGA-5(REAR)",
     "cavity": 2,
@@ -2225,6 +2427,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003006",
+    "plant_id": "1040",
     "part_no": "MBL67500501",
     "material_description": "CAP DECOR REFRIGERATOR ALPHA-78L RL",
     "cavity": 2,
@@ -2236,6 +2439,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003007",
+    "plant_id": "1040",
     "part_no": "MDX65463002",
     "material_description": "GRILLE FAN DUAL VT-11",
     "cavity": 1,
@@ -2247,6 +2451,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003008",
+    "plant_id": "1040",
     "part_no": "MBL67479701",
     "material_description": "CAP DECO FL SN SILVER E-MICOM ALPHA-78L",
     "cavity": 2,
@@ -2258,6 +2463,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003009",
+    "plant_id": "1040",
     "part_no": "MHN63142001",
     "material_description": "SHROUD FREEZER OMEGA-5(MHN63142001)",
     "cavity": 1,
@@ -2269,6 +2475,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003010",
+    "plant_id": "1040",
     "part_no": "MBL67558204",
     "material_description": "CAP DECO S. N. SILVER WITH KEY ALPHA-78",
     "cavity": 2,
@@ -2280,6 +2487,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003011",
+    "plant_id": "1040",
     "part_no": "MBL67480003",
     "material_description": "CAP DECOR BLACK KNIGHT  ALPHA78",
     "cavity": 2,
@@ -2291,6 +2499,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003012",
+    "plant_id": "1040",
     "part_no": "MBL67500503",
     "material_description": "CAP DECO BLACK ALPHA-78",
     "cavity": 2,
@@ -2302,6 +2511,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003013",
+    "plant_id": "1040",
     "part_no": "MBL6755820",
     "material_description": "CAP DECO BLACK WITH KEY ALPHA-78",
     "cavity": 2,
@@ -2313,6 +2523,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003014",
+    "plant_id": "1040",
     "part_no": "ACQ88009413",
     "material_description": "AURA 5 STAR COVER HING DEEP RED",
     "cavity": 4,
@@ -2324,6 +2535,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003015",
+    "plant_id": "1040",
     "part_no": "MJS54580301",
     "material_description": "TRAY EGG ( MJS54580301)",
     "cavity": 4,
@@ -2335,6 +2547,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003016",
+    "plant_id": "1040",
     "part_no": "MBL67479702",
     "material_description": "CAP DECO FL BLACK ALPHA-78",
     "cavity": 2,
@@ -2346,6 +2559,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003017",
+    "plant_id": "1040",
     "part_no": "ACQ88009411",
     "material_description": "AURA 5 STAR COVER HING S N SILVER",
     "cavity": 4,
@@ -2357,6 +2571,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003018",
+    "plant_id": "1040",
     "part_no": "MBL67558202",
     "material_description": "CAP DECO SUPER WHITE W/O KEY ALPHA RU",
     "cavity": 2,
@@ -2368,6 +2583,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003019",
+    "plant_id": "1040",
     "part_no": "MBL67500502",
     "material_description": "CAP DECO SUPER WHITE ALPHA-78",
     "cavity": 2,
@@ -2379,6 +2595,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003020",
+    "plant_id": "1040",
     "part_no": "MBL66798311",
     "material_description": "ORION CAP DECO R COVER ROYAL BLUE",
     "cavity": 4,
@@ -2390,6 +2607,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003021",
+    "plant_id": "1040",
     "part_no": "MEY62733804",
     "material_description": "KNOB SHUTTER OMEGA-5",
     "cavity": 4,
@@ -2401,6 +2619,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003022",
+    "plant_id": "1040",
     "part_no": "MBL67480002",
     "material_description": "CAP DECOR SUPER WHITE ALPHA78",
     "cavity": 2,
@@ -2412,6 +2631,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003023",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ORION CAP DECO R COVER SCARLET RED",
     "cavity": 4,
@@ -2423,6 +2643,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003024",
+    "plant_id": "1040",
     "part_no": "MEB65432171",
     "material_description": "HANDLE BASE-R MILD NOBLE GREY",
     "cavity": 2,
@@ -2434,6 +2655,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003026",
+    "plant_id": "1040",
     "part_no": "MCK69958001",
     "material_description": "COVER DISPLAY ALPHA-78L",
     "cavity": 2,
@@ -2445,6 +2667,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003027",
+    "plant_id": "1040",
     "part_no": "3550JA2062",
     "material_description": "KNOB COVER 3550JA2062",
     "cavity": 2,
@@ -2456,6 +2679,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003028",
+    "plant_id": "1040",
     "part_no": "MDX37820901",
     "material_description": "GRILL FAN CT6",
     "cavity": 1,
@@ -2467,6 +2691,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003029",
+    "plant_id": "1040",
     "part_no": "MDX64071901",
     "material_description": "GRILL FAN CT3",
     "cavity": 1,
@@ -2478,6 +2703,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003031",
+    "plant_id": "1040",
     "part_no": "MBL67198705",
     "material_description": "CAP DECOR FU SN SILVER",
     "cavity": 1,
@@ -2489,6 +2715,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003032",
+    "plant_id": "1040",
     "part_no": "MBL67238404",
     "material_description": "CAP DECOR RL SN SILVER",
     "cavity": 1,
@@ -2500,6 +2727,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003033",
+    "plant_id": "1040",
     "part_no": "MBL67238502",
     "material_description": "CAP DECOR RU BLACK",
     "cavity": 1,
@@ -2511,6 +2739,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003034",
+    "plant_id": "1040",
     "part_no": "MBL67558205",
     "material_description": "CAP DECO BLACK WITHOUT KEY ALPHA-78 RU",
     "cavity": 2,
@@ -2522,6 +2751,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003035",
+    "plant_id": "1040",
     "part_no": "MBL67479703",
     "material_description": "CAP DECO FL SUPER WHITE ALPHA-78",
     "cavity": 2,
@@ -2533,6 +2763,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003036",
+    "plant_id": "1040",
     "part_no": "MCK68490225",
     "material_description": "COVER HINGE NOVA 5 STAR WESTERN BLACK",
     "cavity": 4,
@@ -2544,6 +2775,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003038",
+    "plant_id": "1040",
     "part_no": "MAN62590202",
     "material_description": "BASKET 1 LTR DIAMOUND MAN62590202",
     "cavity": 2,
@@ -2555,6 +2787,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003039",
+    "plant_id": "1040",
     "part_no": "MJS54580311",
     "material_description": "EGG TRAY NATURAL 6 SLOT",
     "cavity": 4,
@@ -2566,6 +2799,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001912",
+    "plant_id": "1040",
     "part_no": "2011C1034636",
     "material_description": "PLASTIC LOUVER SIDE FLAP RHS 12F16K INDU",
     "cavity": 1,
@@ -2577,6 +2811,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003041",
+    "plant_id": "1040",
     "part_no": "2011C1031550@CMI",
     "material_description": "FRONT PANEL 12K MA F11 1TON",
     "cavity": 1,
@@ -2588,6 +2823,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000403",
+    "plant_id": "1040",
     "part_no": "121220000085@2011324901450",
     "material_description": "VERTICAL LOUVER SMALL 16K GREY",
     "cavity": 2,
@@ -2599,6 +2835,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003044",
+    "plant_id": "1040",
     "part_no": "12122000A02168",
     "material_description": "FRONT PANEL 12F 22K-F8",
     "cavity": 1,
@@ -2610,6 +2847,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003045",
+    "plant_id": "1040",
     "part_no": "A162402",
     "material_description": "RHINO BOTTOM COVER OPAQUE BLK",
     "cavity": 2,
@@ -2621,6 +2859,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003046",
+    "plant_id": "1040",
     "part_no": "A070101",
     "material_description": "JAGUAR BLADE 1200MM- WHITE -MOULDED",
     "cavity": 2,
@@ -2632,6 +2871,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003047",
+    "plant_id": "1040",
     "part_no": "A070102",
     "material_description": "JAGUAR BLADE 1200MM- BLACK -MOULDED",
     "cavity": 2,
@@ -2643,6 +2883,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002140",
+    "plant_id": "1040",
     "part_no": "W10904719",
     "material_description": "POWER BOARD ENCLOSUSRE-W10904719",
     "cavity": 1,
@@ -2654,6 +2895,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003049",
+    "plant_id": "1040",
     "part_no": "A162302",
     "material_description": "RHINO BTM COVER TRANSPNT BLACK MOULDING",
     "cavity": 2,
@@ -2665,6 +2907,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003051",
+    "plant_id": "1040",
     "part_no": "A166901",
     "material_description": "SABER BTM COVER TRANSPNT MOULDED",
     "cavity": 2,
@@ -2676,6 +2919,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003052",
+    "plant_id": "1040",
     "part_no": "A166902",
     "material_description": "SABER  BTM COVER TRANSPNT TINT MOULDED",
     "cavity": 2,
@@ -2687,6 +2931,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003053",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BOTTOM OPAQUE  BLACK (A069601)",
     "cavity": 2,
@@ -2698,6 +2943,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003054",
+    "plant_id": "1040",
     "part_no": "A122605",
     "material_description": "MAPLE BASE COVER (RITZ BLUE)-MOULDED",
     "cavity": 1,
@@ -2709,6 +2955,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002511",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "MG1.1 ENCLOSURE BODY (MOLDED PART)",
     "cavity": 1,
@@ -2720,6 +2967,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003056",
+    "plant_id": "1040",
     "part_no": "W10872868",
     "material_description": "PLANUM BACK ORION",
     "cavity": 1,
@@ -2731,6 +2979,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003057",
+    "plant_id": "1040",
     "part_no": "W10891124",
     "material_description": "LINK -ICE TRAY ORION",
     "cavity": 2,
@@ -2742,6 +2991,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003058",
+    "plant_id": "1040",
     "part_no": "W10689139",
     "material_description": "FACIA CUM BASKET PEDESTAL BLUE GEN-Y",
     "cavity": 1,
@@ -2753,6 +3003,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003059",
+    "plant_id": "1040",
     "part_no": "W10764806",
     "material_description": "FACIA CUM BASKET 200L COSMIC GREY",
     "cavity": 1,
@@ -2764,6 +3015,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003072",
+    "plant_id": "1040",
     "part_no": "MBL67558201",
     "material_description": "CAP DECOR REFRI ALPHA-78L RU NT HOLE",
     "cavity": 2,
@@ -2775,6 +3027,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003073",
+    "plant_id": "1040",
     "part_no": "ACQ88009409",
     "material_description": "NOVA 5S COVER HING  SCARLET RED",
     "cavity": 4,
@@ -2786,6 +3039,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003078",
+    "plant_id": "1040",
     "part_no": "A181402",
     "material_description": "BASE COVER TF BLACK (A181402)",
     "cavity": 1,
@@ -2797,6 +3051,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003080",
+    "plant_id": "1040",
     "part_no": "A182302",
     "material_description": "BASE TF BLACK (A182302)",
     "cavity": 1,
@@ -2808,6 +3063,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003348",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BOTTOM TRANSPERT BLACK (A069701)",
     "cavity": 2,
@@ -2819,6 +3075,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003349",
+    "plant_id": "1040",
     "part_no": "A119403",
     "material_description": "MAPLE/COCOA ENCLUR BODY SNOW WHITE MOLD",
     "cavity": 1,
@@ -2830,6 +3087,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003374",
+    "plant_id": "1040",
     "part_no": "A080303",
     "material_description": "BODY EFFICIO EXHAUST 200MM GLOSS BROWN",
     "cavity": 1,
@@ -2841,6 +3099,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003380",
+    "plant_id": "1040",
     "part_no": "A081203",
     "material_description": "FRONT COVER EF EXHAUST 200M GLOSS BROWN",
     "cavity": 1,
@@ -2852,6 +3111,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003383",
+    "plant_id": "1040",
     "part_no": "A071503",
     "material_description": "BLADE EFFICIO EXHAUST 150MM GLOSS BROWN",
     "cavity": 2,
@@ -2863,6 +3123,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003386",
+    "plant_id": "1040",
     "part_no": "A072003",
     "material_description": "FLAP EFFICIO EXHAUST 150MM GLOSS BROWN",
     "cavity": 2,
@@ -2874,6 +3135,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003420",
+    "plant_id": "1040",
     "part_no": "A122607",
     "material_description": "MAPLE BASE COVER (FROSTY MINT)",
     "cavity": 1,
@@ -2885,6 +3147,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003048",
+    "plant_id": "1040",
     "part_no": "A119405",
     "material_description": "MAPLE ENCLOSURE BODY RITZ BLUE MOULDED",
     "cavity": 1,
@@ -2896,6 +3159,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003422",
+    "plant_id": "1040",
     "part_no": "A122606",
     "material_description": "MAPLE BASE COVER (PEBBLE GREY)",
     "cavity": 1,
@@ -2907,6 +3171,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003506",
+    "plant_id": "1040",
     "part_no": "A056901",
     "material_description": "BELT HOLDER A056901",
     "cavity": 8,
@@ -2918,6 +3183,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003523",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BEZEL LH MOLDED PART 65223-049",
     "cavity": 1,
@@ -2929,6 +3195,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003524",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BEZEL RH  MOLDED PART 65222-049",
     "cavity": 1,
@@ -2940,6 +3207,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003529",
+    "plant_id": "1040",
     "part_no": "A122608",
     "material_description": "MAPLE BASE COVER (FIERY RED) MOLDED",
     "cavity": 1,
@@ -2951,6 +3219,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000102",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "12K 12F F3 PANEL(CMI)",
     "cavity": 1,
@@ -2962,6 +3231,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000366",
+    "plant_id": "1040",
     "part_no": "12122000000085@CMI",
     "material_description": "VERTICAL LOUVER SMALL 16K/12K",
     "cavity": 2,
@@ -2973,6 +3243,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000131",
+    "plant_id": "1040",
     "part_no": "12100303000008@201102000305",
     "material_description": "SENSOR FIXING CLIP SINGLE SNAP(CMI)",
     "cavity": 4,
@@ -2984,6 +3255,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000141",
+    "plant_id": "1040",
     "part_no": "2011C1032435@CMI",
     "material_description": "PL LOUVER SIDE FLAP RHS 12F 12K-INDUS",
     "cavity": 1,
@@ -2995,6 +3267,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000142",
+    "plant_id": "1040",
     "part_no": "2011C1032436@CMI",
     "material_description": "PL LOUVER SIDE FLAP LHS 12F 12K-INDUS",
     "cavity": 1,
@@ -3006,6 +3279,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000239",
+    "plant_id": "1040",
     "part_no": "PI12PL003700",
     "material_description": "MOTOR COVER _12K-PI12PL003700",
     "cavity": 2,
@@ -3017,6 +3291,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000384",
+    "plant_id": "1040",
     "part_no": "201132490145",
     "material_description": "VOLUTE TONGUE 16K GREY",
     "cavity": 2,
@@ -3028,6 +3303,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000642",
+    "plant_id": "1040",
     "part_no": "PAC1I09PL00075",
     "material_description": "AIR FILTER_715MM IDU_9K",
     "cavity": 1,
@@ -3039,6 +3315,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000711",
+    "plant_id": "1040",
     "part_no": "78030166",
     "material_description": "HIDDEN DISPLAY BOX",
     "cavity": 2,
@@ -3050,6 +3327,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001288",
+    "plant_id": "1040",
     "part_no": "PAC1O20PL00868",
     "material_description": "CTL BOTTOM FRAME ODU (AC-110)",
     "cavity": 1,
@@ -3061,6 +3339,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001289",
+    "plant_id": "1040",
     "part_no": "PAC1O20PL00544",
     "material_description": "MEGMEET CTL BOTTOM FRAME ODU (AC-111)",
     "cavity": 1,
@@ -3072,6 +3351,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000112",
+    "plant_id": "1040",
     "part_no": "MCK69270620.",
     "material_description": "ORION COVER HING W/O ASSLY BLACK",
     "cavity": 2,
@@ -3083,6 +3363,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000114",
+    "plant_id": "1040",
     "part_no": "MCK69270607",
     "material_description": "ORION COVER HING W/O ASSLY DEEP PURPLE",
     "cavity": 2,
@@ -3094,6 +3375,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000115",
+    "plant_id": "1040",
     "part_no": "MCK69270619",
     "material_description": "ORION COVER HING W/O ASSLY DEEP RED",
     "cavity": 2,
@@ -3105,6 +3387,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000116",
+    "plant_id": "1040",
     "part_no": "MCK69270618",
     "material_description": "ORION COVER HING W/O ASSLY ROYAL BLUE",
     "cavity": 2,
@@ -3116,6 +3399,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000117",
+    "plant_id": "1040",
     "part_no": "MCK69270617",
     "material_description": "ORION COVER HING W/O ASSLY S N SILVER",
     "cavity": 2,
@@ -3127,6 +3411,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000118",
+    "plant_id": "1040",
     "part_no": "MCK69270609",
     "material_description": "ORION COVER HING W/O ASSLY SCARLET RED",
     "cavity": 2,
@@ -3138,6 +3423,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000119",
+    "plant_id": "1040",
     "part_no": "ABN73639712",
     "material_description": "SAPPHIRE CAP DECO LOWER ASSLY S N SILVER",
     "cavity": 2,
@@ -3149,6 +3435,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000120",
+    "plant_id": "1040",
     "part_no": "ABN73639719",
     "material_description": "SAPPHIRE CAP DECO LOWER ASSY ROYAL BLUE",
     "cavity": 2,
@@ -3160,6 +3447,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000121",
+    "plant_id": "1040",
     "part_no": "ABN73639717",
     "material_description": "SAPPHIRE CAP DECO LOWER SCARLET RED",
     "cavity": 2,
@@ -3171,6 +3459,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000122",
+    "plant_id": "1040",
     "part_no": "ABN73939018",
     "material_description": "SAPPHIRE CAP DECO UPPER ASSY ROYAL BLUE",
     "cavity": 2,
@@ -3182,6 +3471,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000123",
+    "plant_id": "1040",
     "part_no": "ABN73939005",
     "material_description": "SAPPHIRE CAP DECO UPPER BLACK",
     "cavity": 2,
@@ -3193,6 +3483,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000124",
+    "plant_id": "1040",
     "part_no": "ABN73939011",
     "material_description": "SAPPHIRE CAP DECO UPPER S N SILVER",
     "cavity": 2,
@@ -3204,6 +3495,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000125",
+    "plant_id": "1040",
     "part_no": "ABN73939016",
     "material_description": "SAPPHIRE CAP DECO UPPER SCARLET RED",
     "cavity": 2,
@@ -3215,6 +3507,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000127",
+    "plant_id": "1040",
     "part_no": "MCK68511405",
     "material_description": "SAPPHIRE COVER HING BLACK-MCK68511405",
     "cavity": 2,
@@ -3226,6 +3519,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000128",
+    "plant_id": "1040",
     "part_no": "MCK68511414",
     "material_description": "SAPPHIRE COVER HING W/O ASSLY ROYAL BLUE",
     "cavity": 2,
@@ -3237,6 +3531,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000129",
+    "plant_id": "1040",
     "part_no": "MCK68511411",
     "material_description": "SAPPHIRE COVER HING W/O ASSLY S N SILVER",
     "cavity": 2,
@@ -3248,6 +3543,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000130",
+    "plant_id": "1040",
     "part_no": "MCK68511410",
     "material_description": "SAPPHIRE COVER HING W/O ASSY SCARLET RED",
     "cavity": 2,
@@ -3259,6 +3555,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000131",
+    "plant_id": "1040",
     "part_no": "MCK68511412",
     "material_description": "SAPPHIRE COVER HING W/O ASSY SUPER WHITE",
     "cavity": 2,
@@ -3270,6 +3567,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000137",
+    "plant_id": "1040",
     "part_no": "AJP76437906",
     "material_description": "TRAY DRAWER ASSEMBLY VS6-AJP76437906",
     "cavity": 1,
@@ -3281,6 +3579,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000140",
+    "plant_id": "1040",
     "part_no": "MEY65462002",
     "material_description": "KNOB SHUTTER VT11-MEY65462002",
     "cavity": 2,
@@ -3292,6 +3591,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000145",
+    "plant_id": "1040",
     "part_no": "MAN62590107",
     "material_description": "OMEGA 1,2 BASKET,DOOR 2 LIT NEW GPPS",
     "cavity": 2,
@@ -3303,6 +3603,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000147",
+    "plant_id": "1040",
     "part_no": "MAN62648709",
     "material_description": "OMEGA 1,2 BASKET,DOOR F NEW GPPS",
     "cavity": 2,
@@ -3314,6 +3615,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000148",
+    "plant_id": "1040",
     "part_no": "MAN62590505",
     "material_description": "OMEGA 1,2 BASKET,DOOR NEW GPPS",
     "cavity": 2,
@@ -3325,6 +3627,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000152",
+    "plant_id": "1040",
     "part_no": "MAN64108505",
     "material_description": "OMEGA 5 BASKET,DOOR NEW GPPS C1",
     "cavity": 1,
@@ -3336,6 +3639,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000153",
+    "plant_id": "1040",
     "part_no": "MAN64108506",
     "material_description": "OMEGA 5 BASKET,DOOR NEW GPPS C2",
     "cavity": 1,
@@ -3347,6 +3651,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000154",
+    "plant_id": "1040",
     "part_no": "ACQ89947102",
     "material_description": "OMEGA 5 COVER ASSEMBLY,TV NEW GPPS",
     "cavity": 1,
@@ -3358,6 +3663,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000155",
+    "plant_id": "1040",
     "part_no": "MCK68227825",
     "material_description": "OMEGA 5 COVER HING DEEP PURPLE",
     "cavity": 2,
@@ -3369,6 +3675,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000156",
+    "plant_id": "1040",
     "part_no": "MCK68227810",
     "material_description": "OMEGA 5 COVER HING MCK68227810",
     "cavity": 2,
@@ -3380,6 +3687,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000157",
+    "plant_id": "1040",
     "part_no": "MCK68227820",
     "material_description": "OMEGA 5 COVER HING S N SILVER",
     "cavity": 2,
@@ -3391,6 +3699,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000159",
+    "plant_id": "1040",
     "part_no": "MCK68227828",
     "material_description": "OMEGA 5 COVER HINGE ROYAL BLUE",
     "cavity": 2,
@@ -3402,6 +3711,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000160",
+    "plant_id": "1040",
     "part_no": "MCK68227826",
     "material_description": "OMEGA 5 COVER HINGE SCARLET RED",
     "cavity": 2,
@@ -3413,6 +3723,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000161",
+    "plant_id": "1040",
     "part_no": "MCK68227822",
     "material_description": "OMEGA 5 COVER HINGE SUPER WHITE",
     "cavity": 2,
@@ -3424,6 +3735,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000163",
+    "plant_id": "1040",
     "part_no": "MCK68227805",
     "material_description": "OMEGA 7 CK COVER HING SUPER WHITE",
     "cavity": 2,
@@ -3435,6 +3747,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000164",
+    "plant_id": "1040",
     "part_no": "MCK68227817",
     "material_description": "OMEGA 7 COVER HING CK DEEP PURPLE",
     "cavity": 2,
@@ -3446,6 +3759,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000165",
+    "plant_id": "1040",
     "part_no": "MCK68227813",
     "material_description": "OMEGA 7 COVER HING CK MARINE BLUE",
     "cavity": 2,
@@ -3457,6 +3771,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000166",
+    "plant_id": "1040",
     "part_no": "MCK68227801",
     "material_description": "OMEGA 7 COVER HING CK S.N.SILVER",
     "cavity": 2,
@@ -3468,6 +3783,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000167",
+    "plant_id": "1040",
     "part_no": "MCK68227819",
     "material_description": "OMEGA 7 COVER HING CK SCARLET RED",
     "cavity": 2,
@@ -3479,6 +3795,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000168",
+    "plant_id": "1040",
     "part_no": "MJB63330101",
     "material_description": "OMEGA 7 DOOR STOPPER MJB63330101",
     "cavity": 4,
@@ -3490,6 +3807,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000175",
+    "plant_id": "1040",
     "part_no": "ABN74878211",
     "material_description": "ORION CAP DECO LOWER ASSLY BLACK",
     "cavity": 2,
@@ -3501,6 +3819,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000176",
+    "plant_id": "1040",
     "part_no": "ABN74878312",
     "material_description": "ORION CAP DECO UPPER ASSLY PEPPY",
     "cavity": 2,
@@ -3512,6 +3831,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000177",
+    "plant_id": "1040",
     "part_no": "ABN74878309",
     "material_description": "ORION CAP DECO UPPER ASSLY SCARLET RED",
     "cavity": 2,
@@ -3523,6 +3843,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000178",
+    "plant_id": "1040",
     "part_no": "MBL66798307",
     "material_description": "ORION CAP DECO UPPER COVER DEEP PURPLE",
     "cavity": 2,
@@ -3534,6 +3855,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000183",
+    "plant_id": "1040",
     "part_no": "MCK68511503",
     "material_description": "COVER DISPLAY PPFR GRADE-MCK68511503",
     "cavity": 4,
@@ -3545,6 +3867,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000185",
+    "plant_id": "1040",
     "part_no": "MCK69270629",
     "material_description": "COVER HINGE ORION FAWN GREY -MCK69270629",
     "cavity": 2,
@@ -3556,6 +3879,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000215",
+    "plant_id": "1040",
     "part_no": "MEA66353803",
     "material_description": "GUIDE RAIL R VT6 -MEA66353803",
     "cavity": 1,
@@ -3567,6 +3891,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000216",
+    "plant_id": "1040",
     "part_no": "MEA66353804",
     "material_description": "GUIDE RAIL-L VT-4/6(MEA66353804)",
     "cavity": 1,
@@ -3578,6 +3903,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000227",
+    "plant_id": "1040",
     "part_no": "ABN73639705",
     "material_description": "CAP DECO ASSY LOWER SHAPHAIER BLK NIGHT",
     "cavity": 2,
@@ -3589,6 +3915,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000228",
+    "plant_id": "1040",
     "part_no": "ABN73639706",
     "material_description": "CAP DECO ASSY LOWER SHAPHIER SUPER WHITE",
     "cavity": 2,
@@ -3600,6 +3927,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000229",
+    "plant_id": "1040",
     "part_no": "ABN73939009",
     "material_description": "CAP DECO ASSY UPPER SUPER WHITE SAPPHIRE",
     "cavity": 2,
@@ -3611,6 +3939,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000237",
+    "plant_id": "1040",
     "part_no": "MBL66498408",
     "material_description": "CAP DECOR(CAP COVER)SCARLET RED",
     "cavity": 4,
@@ -3622,6 +3951,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000248",
+    "plant_id": "1040",
     "part_no": "MBL66798314",
     "material_description": "CAP DECOR ORION FAWN GREY-MBL66798314",
     "cavity": 4,
@@ -3633,6 +3963,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000254",
+    "plant_id": "1040",
     "part_no": "MBN65188902",
     "material_description": "CASE,LAMP-MBN65188902",
     "cavity": 2,
@@ -3644,6 +3975,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000260",
+    "plant_id": "1040",
     "part_no": "MAN64208604",
     "material_description": "ALPHA 7,8 BASKET,DOOR CSKD NEW GPPS",
     "cavity": 2,
@@ -3655,6 +3987,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000261",
+    "plant_id": "1040",
     "part_no": "MAN64208603",
     "material_description": "ALPHA 7,8 BASKET,DOOR NEW GPPS",
     "cavity": 2,
@@ -3666,6 +3999,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000263",
+    "plant_id": "1040",
     "part_no": "MCK69997103",
     "material_description": "ALPHA 7,8 COVER,LAMP NEW GPPS",
     "cavity": 2,
@@ -3677,6 +4011,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000265",
+    "plant_id": "1040",
     "part_no": "MCK69996901.",
     "material_description": "ALPHA COVER LAMP(MCK69996901)",
     "cavity": 4,
@@ -3688,6 +4023,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000270",
+    "plant_id": "1040",
     "part_no": "MAN64891202",
     "material_description": "BASKET DOOR FL-MAN64891202",
     "cavity": 2,
@@ -3699,6 +4035,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000271",
+    "plant_id": "1040",
     "part_no": "MAN64892202",
     "material_description": "BASKET DOOR FU-MAN64892202",
     "cavity": 2,
@@ -3710,6 +4047,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000276",
+    "plant_id": "1040",
     "part_no": "MAN64891702",
     "material_description": "BASKET DOOR RU-MAN64891702",
     "cavity": 2,
@@ -3721,6 +4059,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000357",
+    "plant_id": "1040",
     "part_no": "A074301",
     "material_description": "JAR BASE MG 1.1-A074301",
     "cavity": 2,
@@ -3732,6 +4071,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000362",
+    "plant_id": "1040",
     "part_no": "A008901",
     "material_description": "LIGHT GUIDE DIFFUSER MG 1.1-A008901",
     "cavity": 4,
@@ -3743,6 +4083,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000365",
+    "plant_id": "1040",
     "part_no": "A009003",
     "material_description": "MG 1.1 KNOB ASSEMBLY(GLOSS BLACK)",
     "cavity": 4,
@@ -3754,6 +4095,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000371",
+    "plant_id": "1040",
     "part_no": "A2X0165",
     "material_description": "TPW BLADE ASSEMBLY MIDNIGHT BLACK",
     "cavity": 1,
@@ -3765,6 +4107,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000373",
+    "plant_id": "1040",
     "part_no": "A3X0031",
     "material_description": "TPW REAR COVER MIDNIGHT BLACK SWING",
     "cavity": 2,
@@ -3776,6 +4119,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000375",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TREX BLADE BUSH",
     "cavity": 4,
@@ -3787,6 +4131,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000382",
+    "plant_id": "1040",
     "part_no": "W11049892",
     "material_description": "SCREW ANCHOR BACK(00055)-W11049892",
     "cavity": 8,
@@ -3798,6 +4143,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000383",
+    "plant_id": "1040",
     "part_no": "W11049891",
     "material_description": "SCREW ANCHOR FRONT(00054)-W11049891",
     "cavity": 8,
@@ -3809,6 +4155,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000384",
+    "plant_id": "1040",
     "part_no": "W11536462.",
     "material_description": "SCREW CAP PLENUM TAJ W11536462(361)",
     "cavity": 4,
@@ -3820,6 +4167,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000385",
+    "plant_id": "1040",
     "part_no": "W11577265",
     "material_description": "SCREW CAP-PLENUM-GREY(415)-W11577265",
     "cavity": 4,
@@ -3831,6 +4179,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000388",
+    "plant_id": "1040",
     "part_no": "W10820180",
     "material_description": "SIDE POCKET HANDLE FC APOLLO GREY (29)",
     "cavity": 2,
@@ -3842,6 +4191,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000389",
+    "plant_id": "1040",
     "part_no": "W10900599",
     "material_description": "SIDE POCKET HANDLE FC APOLLO BLACK-00049",
     "cavity": 2,
@@ -3853,6 +4203,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000390",
+    "plant_id": "1040",
     "part_no": "W10869359",
     "material_description": "SIDE POCKET HANDLE FC APOLLO S WINE(33)",
     "cavity": 2,
@@ -3864,6 +4215,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000391",
+    "plant_id": "1040",
     "part_no": "W11429518",
     "material_description": "SIDE POCKET HANDLE-FC-APOLLO-BLUE(308)",
     "cavity": 2,
@@ -3875,6 +4227,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000392",
+    "plant_id": "1040",
     "part_no": "W11426010",
     "material_description": "SIDE POCKET HANDLE FC APOLLO PURPLE(307)",
     "cavity": 2,
@@ -3886,6 +4239,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000393",
+    "plant_id": "1040",
     "part_no": "W11082033",
     "material_description": "STOPPER CHILLER PAN LINER(00057)",
     "cavity": 4,
@@ -3897,6 +4251,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000394",
+    "plant_id": "1040",
     "part_no": "W11306052",
     "material_description": "STOPPER, CHILLER PAN,LINER,L70,GREY00125",
     "cavity": 4,
@@ -3908,6 +4263,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000395",
+    "plant_id": "1040",
     "part_no": "W11082015",
     "material_description": "SUMP CELEBRATION ASSY(00056)-W11082015",
     "cavity": 1,
@@ -3919,6 +4275,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000396",
+    "plant_id": "1040",
     "part_no": "W11306145",
     "material_description": "SUMP CELEBRATION ASSY, L70 GREY(00143)",
     "cavity": 1,
@@ -3930,6 +4287,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000397",
+    "plant_id": "1040",
     "part_no": "W11306239",
     "material_description": "TRACK ASM SHELF LH 440L460L GRY00148",
     "cavity": 1,
@@ -3941,6 +4299,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000398",
+    "plant_id": "1040",
     "part_no": "W11306251",
     "material_description": "TRACK ASM SHELF RH 440L460L GRY00149",
     "cavity": 1,
@@ -3952,6 +4311,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000399",
+    "plant_id": "1040",
     "part_no": "W11103513",
     "material_description": "TRACK ASSY ADAPTA SHELF LH 440L(87)",
     "cavity": 1,
@@ -3963,6 +4323,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000400",
+    "plant_id": "1040",
     "part_no": "W11103517",
     "material_description": "TRACK ASSY,ADAPTA SHELF LH 500L, L70-89",
     "cavity": 1,
@@ -3974,6 +4335,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000401",
+    "plant_id": "1040",
     "part_no": "W11103516",
     "material_description": "TRACK ASSY, ADAPTA SHELF RH 500L, L70-88",
     "cavity": 1,
@@ -3985,6 +4347,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000402",
+    "plant_id": "1040",
     "part_no": "W11306141",
     "material_description": "TRACK ASSY,TWIN CRISPER-LH,L70 GRY-00142",
     "cavity": 1,
@@ -3996,6 +4359,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000403",
+    "plant_id": "1040",
     "part_no": "W11306139",
     "material_description": "TRACK ASSY,TWIN CRISPER-RH,L70 GREY00141",
     "cavity": 1,
@@ -4007,6 +4371,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000404",
+    "plant_id": "1040",
     "part_no": "W11306034",
     "material_description": "TRACK ADAPTA SHELF LH 500L L70 GRY(124)",
     "cavity": 1,
@@ -4018,6 +4383,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000405",
+    "plant_id": "1040",
     "part_no": "W11103518",
     "material_description": "TRACK ASSY SHELF RH 440L460L,L70-90",
     "cavity": 1,
@@ -4029,6 +4395,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000406",
+    "plant_id": "1040",
     "part_no": "W11306033",
     "material_description": "TRACK ADAPTA SHELF RH 500L L70 GRY(123)",
     "cavity": 1,
@@ -4040,6 +4407,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000407",
+    "plant_id": "1040",
     "part_no": "W11408420",
     "material_description": "TRIVET BOTTLE RACK PRINTED-BOND60M(290)",
     "cavity": 2,
@@ -4051,6 +4419,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000408",
+    "plant_id": "1040",
     "part_no": "W10913489",
     "material_description": "TWIN CRISPER TRACK ASSY-LHORION(00051)",
     "cavity": 1,
@@ -4062,6 +4431,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000413",
+    "plant_id": "1040",
     "part_no": "W11032949",
     "material_description": "WEDGE ENDCAP(00052)-W11032949",
     "cavity": 4,
@@ -4073,6 +4443,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000424",
+    "plant_id": "1040",
     "part_no": "W11292061",
     "material_description": "MOLD OF TOD SENSOR CLIP(GEN X)(00119)",
     "cavity": 8,
@@ -4084,6 +4455,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000425",
+    "plant_id": "1040",
     "part_no": "W11550918",
     "material_description": "MOUNTING SUPPORTER EVAPORATOR REAR(345)",
     "cavity": 4,
@@ -4095,6 +4467,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000426",
+    "plant_id": "1040",
     "part_no": "W10875006",
     "material_description": "MULTI USE BIN(00040)-W10875006",
     "cavity": 2,
@@ -4106,6 +4479,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000427",
+    "plant_id": "1040",
     "part_no": "W11657847",
     "material_description": "MULTI USE BIN, L70,GREY(409)-W11657847",
     "cavity": 2,
@@ -4117,6 +4491,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000444",
+    "plant_id": "1040",
     "part_no": "W11043194.",
     "material_description": "POM SUPPORT, CHILLER PAN BACK(WHITE)",
     "cavity": 4,
@@ -4128,6 +4503,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000445",
+    "plant_id": "1040",
     "part_no": "78170146",
     "material_description": "POM SUPPORT,CHILLER PAN BACK GREY",
     "cavity": 4,
@@ -4139,6 +4515,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000446",
+    "plant_id": "1040",
     "part_no": "W11408418.",
     "material_description": "PRINTED TRIVET EASY RACK-BOND 50MM-00195",
     "cavity": 2,
@@ -4150,6 +4527,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000447",
+    "plant_id": "1040",
     "part_no": "W11657848",
     "material_description": "RC BOTTLE BIN 2L, L70,GREY(410)",
     "cavity": 2,
@@ -4161,6 +4539,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000448",
+    "plant_id": "1040",
     "part_no": "W11083428",
     "material_description": "RC BOTTLE BIN L70-BOTTOL RACK(00061)",
     "cavity": 2,
@@ -4172,6 +4551,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000449",
+    "plant_id": "1040",
     "part_no": "W11657895",
     "material_description": "RC BOTTLE BIN, L70(411)-W11657895",
     "cavity": 2,
@@ -4183,6 +4563,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000450",
+    "plant_id": "1040",
     "part_no": "W11085533",
     "material_description": "RC BOTTOM BIN GRAPHICS(72)-W11085533",
     "cavity": 2,
@@ -4194,6 +4575,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000451",
+    "plant_id": "1040",
     "part_no": "W11095411",
     "material_description": "RC BOTTOM ENDCAP SUB ASSY-L70 BLACK(82)",
     "cavity": 1,
@@ -4205,6 +4587,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000452",
+    "plant_id": "1040",
     "part_no": "W11095410",
     "material_description": "RC BOTTOM ENDCAP SUB ASSY-L70 TI GREY-81",
     "cavity": 1,
@@ -4216,6 +4599,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000453",
+    "plant_id": "1040",
     "part_no": "W11085529",
     "material_description": "RC TOP BIN GRAPHICS W11085529(00068)",
     "cavity": 2,
@@ -4227,6 +4611,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000454",
+    "plant_id": "1040",
     "part_no": "W11095335",
     "material_description": "RC TOP END CAP-L70 TI GREY(77)-W11095335",
     "cavity": 1,
@@ -4238,6 +4623,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000455",
+    "plant_id": "1040",
     "part_no": "W11095336",
     "material_description": "RC TOP END CAP-L70 BLACK(78)-W11095336",
     "cavity": 1,
@@ -4249,6 +4635,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000463",
+    "plant_id": "1040",
     "part_no": "W11095332",
     "material_description": "FC TOP END CAP-L70 BLACK(00076)",
     "cavity": 1,
@@ -4260,6 +4647,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000471",
+    "plant_id": "1040",
     "part_no": "W11085531",
     "material_description": "FLEXI BIN GRAPHICS(00070)-W11085531",
     "cavity": 2,
@@ -4271,6 +4659,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000473",
+    "plant_id": "1040",
     "part_no": "W11595524",
     "material_description": "FRAME ASSY FREEZER ZION GEN-Y(366)",
     "cavity": 1,
@@ -4282,6 +4671,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000474",
+    "plant_id": "1040",
     "part_no": "W11408824",
     "material_description": "FRAME GLASS SHELF 200L(00296)-W11408824",
     "cavity": 1,
@@ -4293,6 +4683,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000475",
+    "plant_id": "1040",
     "part_no": "W11408821.",
     "material_description": "FRAME GLASS SHELF GEN-Y(00295)",
     "cavity": 1,
@@ -4304,6 +4695,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000476",
+    "plant_id": "1040",
     "part_no": "W11657722",
     "material_description": "FREEZER BIN, L70(408)-W11657722",
     "cavity": 2,
@@ -4315,6 +4707,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000480",
+    "plant_id": "1040",
     "part_no": "W11083260",
     "material_description": "GLID TRAY REINFORCEMENT LH(00058)",
     "cavity": 1,
@@ -4326,6 +4719,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000481",
+    "plant_id": "1040",
     "part_no": "W11083261",
     "material_description": "GLID TRAY REINFORCEMENT RH(00059)",
     "cavity": 1,
@@ -4337,6 +4731,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000486",
+    "plant_id": "1040",
     "part_no": "W11184221",
     "material_description": "HALF SHELF TRIM W11184221 (104)",
     "cavity": 2,
@@ -4348,6 +4743,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000487",
+    "plant_id": "1040",
     "part_no": "W10815512",
     "material_description": "HANDLE BASE 190L BLACK(00027)-W10815512",
     "cavity": 2,
@@ -4359,6 +4755,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000488",
+    "plant_id": "1040",
     "part_no": "W10815506",
     "material_description": "HANDLE BASE COS GRAY(00025)-W10815506",
     "cavity": 2,
@@ -4370,6 +4767,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000489",
+    "plant_id": "1040",
     "part_no": "W11165759",
     "material_description": "HANDLE BASE GEN-Y PURPLE(99)-W11165759",
     "cavity": 2,
@@ -4381,6 +4779,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000490",
+    "plant_id": "1040",
     "part_no": "W11429532",
     "material_description": "HANDLE BASE NEW BLUE PRINTED GENY(312)",
     "cavity": 2,
@@ -4392,6 +4791,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000491",
+    "plant_id": "1040",
     "part_no": "W10815513",
     "material_description": "HANDLE BASE PRINTD IMPC SHERY WINE (28)",
     "cavity": 2,
@@ -4403,6 +4803,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000492",
+    "plant_id": "1040",
     "part_no": "W10673286",
     "material_description": "HINGE COVER GEN Y-SHERRY WINE(16)",
     "cavity": 2,
@@ -4414,6 +4815,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000493",
+    "plant_id": "1040",
     "part_no": "W10673285",
     "material_description": "HINGE COVER GEN Y-BLACK(00015)-W10673285",
     "cavity": 2,
@@ -4425,6 +4827,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000494",
+    "plant_id": "1040",
     "part_no": "W11429531",
     "material_description": "HINGE COVER NEW BLUE GENY(311)-W11429531",
     "cavity": 2,
@@ -4436,6 +4839,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000495",
+    "plant_id": "1040",
     "part_no": "W10673288",
     "material_description": "HINGE COVER Y-COSMIC GRAY(00018)",
     "cavity": 2,
@@ -4447,6 +4851,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000496",
+    "plant_id": "1040",
     "part_no": "W11306056",
     "material_description": "HOUSING RC LED-L70, GREY(00126)",
     "cavity": 1,
@@ -4458,6 +4863,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000497",
+    "plant_id": "1040",
     "part_no": "W11083466",
     "material_description": "HOUSING RC LED(00065)-W11083466",
     "cavity": 1,
@@ -4469,6 +4875,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000516",
+    "plant_id": "1040",
     "part_no": "W11342089",
     "material_description": "ENDCAP BTM ASSY BLACK GEN-Y(349)",
     "cavity": 2,
@@ -4480,6 +4887,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000517",
+    "plant_id": "1040",
     "part_no": "W11342088",
     "material_description": "ENDCAP BTM ASSY BLUE GEN-Y(350)",
     "cavity": 2,
@@ -4491,6 +4899,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000518",
+    "plant_id": "1040",
     "part_no": "W11342086",
     "material_description": "ENDCAP BTM ASSY COS GREY GEN-Y(352)",
     "cavity": 2,
@@ -4502,6 +4911,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000519",
+    "plant_id": "1040",
     "part_no": "W11593833",
     "material_description": "ENDCAP BTM ASSY PURPLE GEN-Y(348)",
     "cavity": 2,
@@ -4513,6 +4923,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000520",
+    "plant_id": "1040",
     "part_no": "W11342087",
     "material_description": "ENDCAP BTM ASSY SH WINE GEN-Y(351)",
     "cavity": 2,
@@ -4524,6 +4935,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000521",
+    "plant_id": "1040",
     "part_no": "W11394801",
     "material_description": "ENDCAP TOP ASSY MASS BLUE 200/215L-00176",
     "cavity": 2,
@@ -4535,6 +4947,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000522",
+    "plant_id": "1040",
     "part_no": "W11394799",
     "material_description": "ENDCAP TOP ASSY MASS GREY 200/215L-00173",
     "cavity": 2,
@@ -4546,6 +4959,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000523",
+    "plant_id": "1040",
     "part_no": "W11394797",
     "material_description": "ENDCAP TOP ASS MAS PURPLE 200/215L-00170",
     "cavity": 2,
@@ -4557,6 +4971,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000524",
+    "plant_id": "1040",
     "part_no": "W11158645.",
     "material_description": "ENDCAP TOP ASSY PURPLE GEN-Y(98)",
     "cavity": 2,
@@ -4568,6 +4983,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000525",
+    "plant_id": "1040",
     "part_no": "W10480277",
     "material_description": "ENDCAP TOP Y-COSMIC GREY(007)-W10480277",
     "cavity": 2,
@@ -4579,6 +4995,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000534",
+    "plant_id": "1040",
     "part_no": "W11095409",
     "material_description": "FC BOTTOM END CAP SUB ASSY-L70 BLACK(80)",
     "cavity": 1,
@@ -4590,6 +5007,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000535",
+    "plant_id": "1040",
     "part_no": "W11095408",
     "material_description": "FC BOTTOM END CAP SUB ASSY-L70TI GREY-79",
     "cavity": 1,
@@ -4601,6 +5019,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000538",
+    "plant_id": "1040",
     "part_no": "W11085509",
     "material_description": "FC TOP BIN GRAPHICS W11085509(00066)",
     "cavity": 2,
@@ -4612,6 +5031,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000539",
+    "plant_id": "1040",
     "part_no": "W11095331",
     "material_description": "FC TOP END CAP-L70 TI GREY(00075)",
     "cavity": 1,
@@ -4623,6 +5043,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000542",
+    "plant_id": "1040",
     "part_no": "W11306177",
     "material_description": "COVER AIR DIFFUSER COMPLEMENT GREY",
     "cavity": 2,
@@ -4634,6 +5055,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000543",
+    "plant_id": "1040",
     "part_no": "W11083445",
     "material_description": "COVER AIR DIFFUSER COMPLEMENT,WHITE00063",
     "cavity": 2,
@@ -4645,6 +5067,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000544",
+    "plant_id": "1040",
     "part_no": "W11408380",
     "material_description": "COVER CRISPER ASSY GEN-Y(00192)",
     "cavity": 1,
@@ -4656,6 +5079,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000545",
+    "plant_id": "1040",
     "part_no": "W11394828",
     "material_description": "COVER HINGE MASS BLUE(00184)-W11394828",
     "cavity": 2,
@@ -4667,6 +5091,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000546",
+    "plant_id": "1040",
     "part_no": "W11394829",
     "material_description": "COVER HINGE MASS GREY(00185)-W11394829",
     "cavity": 2,
@@ -4678,6 +5103,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000547",
+    "plant_id": "1040",
     "part_no": "W11394830",
     "material_description": "COVER HINGE MASS PURPLE(186)-W11394830",
     "cavity": 2,
@@ -4689,6 +5115,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000548",
+    "plant_id": "1040",
     "part_no": "W11158643",
     "material_description": "COVER HINGE PURPLE GEN-Y(97)-W11158643",
     "cavity": 2,
@@ -4700,6 +5127,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000549",
+    "plant_id": "1040",
     "part_no": "W11638994",
     "material_description": "CRISPER-GENX REFRESH TAJ(403)-W11638994",
     "cavity": 1,
@@ -4711,6 +5139,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000552",
+    "plant_id": "1040",
     "part_no": "W11408415.",
     "material_description": "CRISPER GEN-Y(00194)-W11408415.",
     "cavity": 1,
@@ -4722,6 +5151,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000553",
+    "plant_id": "1040",
     "part_no": "W11656080",
     "material_description": "CRISPER L60-GREY LINER(422)-W11656080",
     "cavity": 1,
@@ -4733,6 +5163,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000554",
+    "plant_id": "1040",
     "part_no": "W11656082",
     "material_description": "CRISPER L60 TAJ-AUSTRALIA(407)-W11656082",
     "cavity": 1,
@@ -4744,6 +5175,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000555",
+    "plant_id": "1040",
     "part_no": "W10913487",
     "material_description": "CRISPER TRACK ASSY-RHORION(00050)",
     "cavity": 1,
@@ -4755,6 +5187,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000556",
+    "plant_id": "1040",
     "part_no": "W10701219.",
     "material_description": "DC ICE TRAY(W10701219)-(22)-W10701219.",
     "cavity": 2,
@@ -4766,6 +5199,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000561",
+    "plant_id": "1040",
     "part_no": "W11232560.",
     "material_description": "DEFROST WATER TRAY-DWT PUNE(112)",
     "cavity": 1,
@@ -4777,6 +5211,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000562",
+    "plant_id": "1040",
     "part_no": "W10862140",
     "material_description": "DEFROST WATER TRAY GENX L60 VCC(00346)",
     "cavity": 1,
@@ -4788,6 +5223,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000563",
+    "plant_id": "1040",
     "part_no": "W10876136",
     "material_description": "DOOR BIN FREEZER BIN(00042)-W10876136",
     "cavity": 2,
@@ -4799,6 +5235,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000575",
+    "plant_id": "1040",
     "part_no": "W11533704",
     "material_description": "END CAP BOTTOM AURORA BLACK HIPS(344)",
     "cavity": 2,
@@ -4810,6 +5247,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000576",
+    "plant_id": "1040",
     "part_no": "W11429530",
     "material_description": "ENDCAP TOP ASSY NEW BLUE GEN Y(310)",
     "cavity": 2,
@@ -4821,6 +5259,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000592",
+    "plant_id": "1040",
     "part_no": "W10485238",
     "material_description": "ASSY ENDCAP TOP GEN Y-BLACK(00011)",
     "cavity": 2,
@@ -4832,6 +5271,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000593",
+    "plant_id": "1040",
     "part_no": "W10480771",
     "material_description": "ASSY ENDCAP TOP GEN Y-SHERRY WINE(00010)",
     "cavity": 2,
@@ -4843,6 +5283,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000594",
+    "plant_id": "1040",
     "part_no": "W11394800",
     "material_description": "AURORA ENDCAP TOP ASSY BLACK(00174)",
     "cavity": 2,
@@ -4854,6 +5295,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000595",
+    "plant_id": "1040",
     "part_no": "W11394798",
     "material_description": "AURORA ENDCAP TOP ASSY WINE(00171)",
     "cavity": 2,
@@ -4865,6 +5307,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000596",
+    "plant_id": "1040",
     "part_no": "W11394827",
     "material_description": "AURORA HINGE COVER BLACK(00183)",
     "cavity": 2,
@@ -4876,6 +5319,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000597",
+    "plant_id": "1040",
     "part_no": "W11394826",
     "material_description": "AURORA HINGE COVER WINE(00182)-W11394826",
     "cavity": 2,
@@ -4887,6 +5331,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000599",
+    "plant_id": "1040",
     "part_no": "W11409165",
     "material_description": "BIN MU GEN-Y(00297)-W11409165",
     "cavity": 2,
@@ -4898,6 +5343,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000600",
+    "plant_id": "1040",
     "part_no": "W11085512",
     "material_description": "BIN DOOR FC TOP PROTTON REFRESH L60(67)",
     "cavity": 2,
@@ -4909,6 +5355,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000601",
+    "plant_id": "1040",
     "part_no": "W11085534",
     "material_description": "BIN-DOOR-RC-BOTTOM-PROTTON REFRES-L60-73",
     "cavity": 2,
@@ -4920,6 +5367,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000602",
+    "plant_id": "1040",
     "part_no": "W11085532",
     "material_description": "BIN-DOOR-RC-MIDDLE-PROTTON REFRES-L60-71",
     "cavity": 2,
@@ -4931,6 +5379,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000603",
+    "plant_id": "1040",
     "part_no": "W11085530",
     "material_description": "BIN-DOOR-RC-TOP-PROTTON REFRESH-L60(69)",
     "cavity": 2,
@@ -4942,6 +5391,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000604",
+    "plant_id": "1040",
     "part_no": "W10875011",
     "material_description": "BOTTLE BIN RC-2LIT(00041)-W10875011",
     "cavity": 2,
@@ -4953,6 +5403,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000606",
+    "plant_id": "1040",
     "part_no": "W11306110",
     "material_description": "CENTER SUPPORT ASSY, L70 GREY(00140)",
     "cavity": 1,
@@ -4964,6 +5415,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000607",
+    "plant_id": "1040",
     "part_no": "W10884266",
     "material_description": "CENTER SUPPORT-VEGGIE CRISPER(00048)",
     "cavity": 1,
@@ -4975,6 +5427,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000608",
+    "plant_id": "1040",
     "part_no": "W11639849",
     "material_description": "CHILLER-GENX REFRESH MLR TAJ(402)",
     "cavity": 1,
@@ -4986,6 +5439,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000609",
+    "plant_id": "1040",
     "part_no": "W11657898",
     "material_description": "CHILLER FLAP, L70(413)-W11657898",
     "cavity": 1,
@@ -4997,6 +5451,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000610",
+    "plant_id": "1040",
     "part_no": "W10877934",
     "material_description": "CHILLER FLAP-ORION(00044)-W10877934",
     "cavity": 1,
@@ -5008,6 +5463,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000613",
+    "plant_id": "1040",
     "part_no": "W11184220",
     "material_description": "COLLECTOR-ICE-L55/L60/L70(333)-W11184220",
     "cavity": 1,
@@ -5019,6 +5475,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000614",
+    "plant_id": "1040",
     "part_no": "W11657896",
     "material_description": "COLLECTOR-ICE-L55/L60/L70,GREY(412)",
     "cavity": 1,
@@ -5030,6 +5487,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000615",
+    "plant_id": "1040",
     "part_no": "W11633483",
     "material_description": "COLLECTOR-ICE-L55/L60/L70-LV(357)",
     "cavity": 1,
@@ -5041,6 +5499,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000616",
+    "plant_id": "1040",
     "part_no": "W11426868",
     "material_description": "CONTROL BOX BASE BLACK(W11426868)",
     "cavity": 2,
@@ -5052,6 +5511,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000807",
+    "plant_id": "1040",
     "part_no": "0060255242A",
     "material_description": "HOLDER SENSOR-BM700-0060255242A",
     "cavity": 8,
@@ -5063,6 +5523,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000845",
+    "plant_id": "1040",
     "part_no": "0060617133",
     "material_description": "DRAWER SLIDER REINFORCEMENT-BM700",
     "cavity": 4,
@@ -5074,6 +5535,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000873",
+    "plant_id": "1040",
     "part_no": "1502107",
     "material_description": "ST.BASE LH S101-1502107",
     "cavity": 1,
@@ -5085,6 +5547,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000874",
+    "plant_id": "1040",
     "part_no": "1502106",
     "material_description": "ST.BASE RH S101-1502106",
     "cavity": 1,
@@ -5096,6 +5559,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000916",
+    "plant_id": "1040",
     "part_no": "70000-057I",
     "material_description": "PREPOSITION CLIP DIA-3.5(70000-0571)",
     "cavity": 8,
@@ -5107,6 +5571,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000920",
+    "plant_id": "1040",
     "part_no": "2422.3025",
     "material_description": "SCALP LH W601-2422.3025",
     "cavity": 1,
@@ -5118,6 +5583,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000925",
+    "plant_id": "1040",
     "part_no": "2422.3026",
     "material_description": "SCALP RH W601 -2422.3026",
     "cavity": 1,
@@ -5129,6 +5595,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000936",
+    "plant_id": "1040",
     "part_no": "1500643",
     "material_description": "SCORPIO ADAPTOR PLATE LH-1500643",
     "cavity": 1,
@@ -5140,6 +5607,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000937",
+    "plant_id": "1040",
     "part_no": "1500642",
     "material_description": "SCORPIO ADAPTOR PLATE RH-1500642",
     "cavity": 1,
@@ -5151,6 +5619,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000957",
+    "plant_id": "1040",
     "part_no": "2351.3023",
     "material_description": "GLASS HOLDER LH CONV-2351.3023",
     "cavity": 1,
@@ -5162,6 +5631,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000958",
+    "plant_id": "1040",
     "part_no": "2351.3024",
     "material_description": "GLASS HOLDER RH CONV-2351.3024",
     "cavity": 1,
@@ -5173,6 +5643,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000964",
+    "plant_id": "1040",
     "part_no": "1501653",
     "material_description": "HOUSING LH PAINTED BOLERO-1501653",
     "cavity": 1,
@@ -5184,6 +5655,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000965",
+    "plant_id": "1040",
     "part_no": "2351.3005L",
     "material_description": "HOUSING LH S201-2351.3005L",
     "cavity": 1,
@@ -5195,6 +5667,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000966",
+    "plant_id": "1040",
     "part_no": "1500383",
     "material_description": "HOUSING LH XYLO-1500383",
     "cavity": 1,
@@ -5206,6 +5679,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000971",
+    "plant_id": "1040",
     "part_no": "1501652",
     "material_description": "HOUSING RH PAINTED BOLERO-1501652",
     "cavity": 1,
@@ -5217,6 +5691,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000972",
+    "plant_id": "1040",
     "part_no": "2351.3006L",
     "material_description": "HOUSING RH S201-2351.3006L",
     "cavity": 1,
@@ -5228,6 +5703,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000973",
+    "plant_id": "1040",
     "part_no": "1500382",
     "material_description": "HOUSING RH XYLO-1500382",
     "cavity": 1,
@@ -5239,6 +5715,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001024",
+    "plant_id": "1040",
     "part_no": "2422.3033",
     "material_description": "CASE LOWER CAP LH(2422.3033)-2422.3033",
     "cavity": 1,
@@ -5250,6 +5727,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001025",
+    "plant_id": "1040",
     "part_no": "2422.3034",
     "material_description": "CASE LOWER CAP RH(2422.3034)-2422.3034",
     "cavity": 1,
@@ -5261,6 +5739,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001034",
+    "plant_id": "1040",
     "part_no": "2422.3003",
     "material_description": "CASE LOWER W601 LH(2422.3003)-2422.3003",
     "cavity": 1,
@@ -5272,6 +5751,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001035",
+    "plant_id": "1040",
     "part_no": "2422.3004",
     "material_description": "CASE LOWER W601 RH(2422.3004)-2422.3004",
     "cavity": 1,
@@ -5283,6 +5763,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001036",
+    "plant_id": "1040",
     "part_no": "2422.3005",
     "material_description": "CASE LOWER WITH CAMERA PROTR LH2422.3005",
     "cavity": 1,
@@ -5294,6 +5775,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001037",
+    "plant_id": "1040",
     "part_no": "2422.3006",
     "material_description": "CASE LOWER WITH CAMERA PROTR RH2422.3006",
     "cavity": 1,
@@ -5305,6 +5787,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001069",
+    "plant_id": "1040",
     "part_no": "2351.3019",
     "material_description": "CASE FRAME LH P FOLD-2351.3019",
     "cavity": 1,
@@ -5316,6 +5799,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001075",
+    "plant_id": "1040",
     "part_no": "2422.3019",
     "material_description": "CASE FRAME MANUAL FOLD LH(2422.3019)",
     "cavity": 1,
@@ -5327,6 +5811,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001077",
+    "plant_id": "1040",
     "part_no": "2422.3020",
     "material_description": "CASE FRAME MANUAL FOLD RH(2422.3020)",
     "cavity": 1,
@@ -5338,6 +5823,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001089",
+    "plant_id": "1040",
     "part_no": "2351.3020",
     "material_description": "CASE FRAME RH P FOLD-2351.3020",
     "cavity": 1,
@@ -5349,6 +5835,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001101",
+    "plant_id": "1040",
     "part_no": "2422.3011",
     "material_description": "BASE COVER LH -2422.3011",
     "cavity": 1,
@@ -5360,6 +5847,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001104",
+    "plant_id": "1040",
     "part_no": "2422.3017",
     "material_description": "BASE COVER LOWER RHP LH(2422.3017)",
     "cavity": 1,
@@ -5371,6 +5859,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001105",
+    "plant_id": "1040",
     "part_no": "2422.3018",
     "material_description": "BASE COVER LOWER RHP RH(2422.3018)",
     "cavity": 1,
@@ -5382,6 +5871,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001106",
+    "plant_id": "1040",
     "part_no": "2351.3010L",
     "material_description": "BASE COVER RH S201-2351.3010L",
     "cavity": 1,
@@ -5393,6 +5883,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001111",
+    "plant_id": "1040",
     "part_no": "2422.3012",
     "material_description": "BASE COVER RH -2422.3012",
     "cavity": 1,
@@ -5404,6 +5895,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001120",
+    "plant_id": "1040",
     "part_no": "2422.3015",
     "material_description": "BASE COVER UPPER RHP LH(2422.3015)",
     "cavity": 1,
@@ -5415,6 +5907,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001121",
+    "plant_id": "1040",
     "part_no": "2422.3016",
     "material_description": "BASE COVER UPPER RHP RH(2422.3016)",
     "cavity": 1,
@@ -5426,6 +5919,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001158",
+    "plant_id": "1040",
     "part_no": "2422.3009",
     "material_description": "BACKING PLATE LH(2422.3009)-2422.3009",
     "cavity": 1,
@@ -5437,6 +5931,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001159",
+    "plant_id": "1040",
     "part_no": "2409.3007",
     "material_description": "BACKING PLATE LH W501-2409.3007",
     "cavity": 1,
@@ -5448,6 +5943,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001166",
+    "plant_id": "1040",
     "part_no": "2422.3010",
     "material_description": "BACKING PLATE RH(2422.3010)-2422.3010",
     "cavity": 1,
@@ -5459,6 +5955,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001167",
+    "plant_id": "1040",
     "part_no": "2409.3008",
     "material_description": "BACKING PLATE RH W501-2409.3008",
     "cavity": 1,
@@ -5470,6 +5967,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001177",
+    "plant_id": "1040",
     "part_no": "2351.3009L",
     "material_description": "BASE COVER LH S201-2351.3009L",
     "cavity": 1,
@@ -5481,6 +5979,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001220",
+    "plant_id": "1040",
     "part_no": "65100-018G",
     "material_description": "GRIPPER HANDLE RH(65100-018G)-65100-018G",
     "cavity": 1,
@@ -5492,6 +5991,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001225",
+    "plant_id": "1040",
     "part_no": "65223-018H",
     "material_description": "LEVER HANDLE LH(65223-018H)-65223-018H",
     "cavity": 1,
@@ -5503,6 +6003,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001226",
+    "plant_id": "1040",
     "part_no": "65222-018H",
     "material_description": "LEVER HANDLE RH(65222-018H)-65222-018H",
     "cavity": 1,
@@ -5514,6 +6015,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001227",
+    "plant_id": "1040",
     "part_no": "45080Z-018",
     "material_description": "LEVER LH MTBD-45080Z-018-45080Z-018",
     "cavity": 4,
@@ -5525,6 +6027,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001229",
+    "plant_id": "1040",
     "part_no": "45067Z-018",
     "material_description": "LEVER RH(S101)BLUE-45067Z-018",
     "cavity": 4,
@@ -5536,6 +6039,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001230",
+    "plant_id": "1040",
     "part_no": "45079Z-018",
     "material_description": "LEVER RH BLACK MTBD-45079Z-018",
     "cavity": 4,
@@ -5547,6 +6051,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001232",
+    "plant_id": "1040",
     "part_no": "30000Z-023LG",
     "material_description": "LIGHT GUIDE-30000Z-023LG",
     "cavity": 2,
@@ -5558,6 +6063,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001237",
+    "plant_id": "1040",
     "part_no": "65091-025",
     "material_description": "MINDA CLIP-65091-025",
     "cavity": 8,
@@ -5569,6 +6075,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001238",
+    "plant_id": "1040",
     "part_no": "65091-016.",
     "material_description": "MINDA COVER-65091-016.",
     "cavity": 2,
@@ -5580,6 +6087,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001239",
+    "plant_id": "1040",
     "part_no": "65092-021C.",
     "material_description": "MINDA COVER INSERT LH-65092-021C.",
     "cavity": 4,
@@ -5591,6 +6099,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001240",
+    "plant_id": "1040",
     "part_no": "65091-021C.",
     "material_description": "MINDA COVER INSERT RH-65091-021C.",
     "cavity": 4,
@@ -5602,6 +6111,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001241",
+    "plant_id": "1040",
     "part_no": "65093-217D.",
     "material_description": "MINDA DUMMY STATOR RH-65093-217D.",
     "cavity": 2,
@@ -5613,6 +6123,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001242",
+    "plant_id": "1040",
     "part_no": "65091-018L.",
     "material_description": "MINDA LOCK LEVER-65091-018L.",
     "cavity": 8,
@@ -5624,6 +6135,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001244",
+    "plant_id": "1040",
     "part_no": "65100-021PF",
     "material_description": "PARKING FEATURE-65100-021PF",
     "cavity": 2,
@@ -5635,6 +6147,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001246",
+    "plant_id": "1040",
     "part_no": "70001-057H",
     "material_description": "PREPOSITION CLIP DIA-4.0-70001-057H",
     "cavity": 8,
@@ -5646,6 +6159,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001261",
+    "plant_id": "1040",
     "part_no": "65080-057SASY",
     "material_description": "BRACKET FRONT LH ASSY(S101)",
     "cavity": 1,
@@ -5657,6 +6171,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001263",
+    "plant_id": "1040",
     "part_no": "65079-057SASY",
     "material_description": "BRACKET FRONT RH ASSY(S101)",
     "cavity": 1,
@@ -5668,6 +6183,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001266",
+    "plant_id": "1040",
     "part_no": "65012B-057",
     "material_description": "BRACKET LH(U301)-65012B-057",
     "cavity": 2,
@@ -5679,6 +6195,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001267",
+    "plant_id": "1040",
     "part_no": "65223-057",
     "material_description": "BRACKET LH(65223-057)-65223-057",
     "cavity": 1,
@@ -5690,6 +6207,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001270",
+    "plant_id": "1040",
     "part_no": "65013B-057",
     "material_description": "BRACKET RH(U301)-65013B-057",
     "cavity": 2,
@@ -5701,6 +6219,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001271",
+    "plant_id": "1040",
     "part_no": "65222-057",
     "material_description": "BRACKET RH(65222-057)-65222-057",
     "cavity": 1,
@@ -5712,6 +6231,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001276",
+    "plant_id": "1040",
     "part_no": "1251Z-128B",
     "material_description": "CAP BODY-1251Z-128B",
     "cavity": 2,
@@ -5723,6 +6243,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001277",
+    "plant_id": "1040",
     "part_no": "4281Z-128PX",
     "material_description": "CAP PLASTICS-4281Z-128PX",
     "cavity": 4,
@@ -5734,6 +6255,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001285",
+    "plant_id": "1040",
     "part_no": "65012B-066",
     "material_description": "COUNTER WEIGHT LH(U301)-65012B-066",
     "cavity": 2,
@@ -5745,6 +6267,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001286",
+    "plant_id": "1040",
     "part_no": "65013B-066",
     "material_description": "COUNTER WEIGHT RH(U301)-65013B-066",
     "cavity": 2,
@@ -5756,6 +6279,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001299",
+    "plant_id": "1040",
     "part_no": "65101-018G",
     "material_description": "GRIPPER HANDLE LH(65101-018G)-65101-018G",
     "cavity": 1,
@@ -5767,6 +6291,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001335",
+    "plant_id": "1040",
     "part_no": "65223-049SASY",
     "material_description": "BEZEL LH(65223-049)-65223-049",
     "cavity": 1,
@@ -5778,6 +6303,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001336",
+    "plant_id": "1040",
     "part_no": "65222-049SASY",
     "material_description": "BEZEL RH(65222-049)-65222-049",
     "cavity": 1,
@@ -5789,6 +6315,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001395",
+    "plant_id": "1040",
     "part_no": "3012-5887-001",
     "material_description": "LCD/PCB SUPPORT(Q600)-3012-5887-001",
     "cavity": 2,
@@ -5800,6 +6327,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001404",
+    "plant_id": "1040",
     "part_no": "ESCSMD0074",
     "material_description": "PMD, BASE PLATE-ESCSMD0074",
     "cavity": 2,
@@ -5811,6 +6339,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001405",
+    "plant_id": "1040",
     "part_no": "ESCSMD0073",
     "material_description": "PMD, BOT COVER-ESCSMD0073",
     "cavity": 1,
@@ -5822,6 +6351,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001406",
+    "plant_id": "1040",
     "part_no": "ESCSMD0072",
     "material_description": "PMD, TOP COVER-ESCSMD0072",
     "cavity": 1,
@@ -5833,6 +6363,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001407",
+    "plant_id": "1040",
     "part_no": "ESHWWS0012",
     "material_description": "PMD, WASHER-ESHWWS0012",
     "cavity": 2,
@@ -5844,6 +6375,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001408",
+    "plant_id": "1040",
     "part_no": "3012-5818-001",
     "material_description": "REGISTER HOUSING(Q600)-3012-5818-001",
     "cavity": 2,
@@ -5855,6 +6387,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001431",
+    "plant_id": "1040",
     "part_no": "3012-5888-001",
     "material_description": "ANTI-POTTING BOX(Q600)-3012-5888-001",
     "cavity": 4,
@@ -5866,6 +6399,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001908",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "LOW WEIGHT FAN BLUE",
     "cavity": 1,
@@ -5877,6 +6411,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000362",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WIND GUIDE BOARD 16K",
     "cavity": 2,
@@ -5888,6 +6423,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001915",
+    "plant_id": "1040",
     "part_no": "2011C1025108@CMI",
     "material_description": "SEALING BOARD,PIPE OUT-2011C1025108@CMI",
     "cavity": 2,
@@ -5899,6 +6435,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001918",
+    "plant_id": "1040",
     "part_no": "2011C1025109@CMI",
     "material_description": "WIND INLET GUIDE CASSETTE B120154",
     "cavity": 2,
@@ -5910,6 +6447,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001967",
+    "plant_id": "1040",
     "part_no": "12122000006844@201135110801",
     "material_description": "CLAMP FOR FRONT NET CMI",
     "cavity": 8,
@@ -5921,6 +6459,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001974",
+    "plant_id": "1040",
     "part_no": "12100509000066@201142000002",
     "material_description": "EXTENDED WATER PIPE B120152",
     "cavity": 2,
@@ -5932,6 +6471,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003055",
+    "plant_id": "1040",
     "part_no": "A119410",
     "material_description": "MAPLE ENCLOSURE BODY PEACH BLOSM MOULDED",
     "cavity": 1,
@@ -5943,6 +6483,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002141",
+    "plant_id": "1040",
     "part_no": "W11691537",
     "material_description": "PROTECTION BOX NATURAL(ATHENA BOX VMPRO)",
     "cavity": 2,
@@ -5954,6 +6495,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002142",
+    "plant_id": "1040",
     "part_no": "W11083900",
     "material_description": "PROTECTION BOX-DECK-BOND BLACK W11083900",
     "cavity": 2,
@@ -5965,6 +6507,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002143",
+    "plant_id": "1040",
     "part_no": "W11127991",
     "material_description": "TAMPA BATMAN(W11127991)-W11127991",
     "cavity": 2,
@@ -5976,6 +6519,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002144",
+    "plant_id": "1040",
     "part_no": "W10910593",
     "material_description": "UI COVER-W10910593",
     "cavity": 2,
@@ -5987,6 +6531,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002145",
+    "plant_id": "1040",
     "part_no": "W11520635.",
     "material_description": "UI PANEL GALAXY TAJ_L55-W11520635.",
     "cavity": 2,
@@ -5998,6 +6543,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002198",
+    "plant_id": "1040",
     "part_no": "W10845564",
     "material_description": "BOX PROTECTION-W10845564",
     "cavity": 1,
@@ -6009,6 +6555,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002199",
+    "plant_id": "1040",
     "part_no": "W10845568",
     "material_description": "BOX PROTECTION NATURAL(W10845568)",
     "cavity": 2,
@@ -6020,6 +6567,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002203",
+    "plant_id": "1040",
     "part_no": "W11302733",
     "material_description": "CONTROL BOX BASE-W11302733",
     "cavity": 2,
@@ -6031,6 +6579,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002204",
+    "plant_id": "1040",
     "part_no": "W11677747",
     "material_description": "GALAXY FASCIA L60(W11677747)-W11677747",
     "cavity": 2,
@@ -6042,6 +6591,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002209",
+    "plant_id": "1040",
     "part_no": "W11516273",
     "material_description": "INT. UI FASCIA, RC, MF, L55, L60",
     "cavity": 2,
@@ -6053,6 +6603,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002210",
+    "plant_id": "1040",
     "part_no": "W11184545.",
     "material_description": "JABIL V MAX BATMAN TECHFRAME-W11184545.",
     "cavity": 2,
@@ -6064,6 +6615,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003421",
+    "plant_id": "1040",
     "part_no": "A119407",
     "material_description": "MAPLE COCOA ENCLOSURE FROSTY MINTMOULDED",
     "cavity": 1,
@@ -6075,6 +6627,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002212",
+    "plant_id": "1040",
     "part_no": "W11158978",
     "material_description": "JABIL V MAX TRAY-TECH FRM,ACU,GR LANTERN",
     "cavity": 2,
@@ -6086,6 +6639,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002215",
+    "plant_id": "1040",
     "part_no": "W11658480",
     "material_description": "POTTING TRAY-W11658480",
     "cavity": 2,
@@ -6097,6 +6651,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002216",
+    "plant_id": "1040",
     "part_no": "W11658482",
     "material_description": "POTTING TRAY-CUPA-W11658482",
     "cavity": 2,
@@ -6108,6 +6663,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002217",
+    "plant_id": "1040",
     "part_no": "W11260845",
     "material_description": "POTTING TRAY GREEN LANTERN-W11260845",
     "cavity": 2,
@@ -6119,6 +6675,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002211",
+    "plant_id": "1040",
     "part_no": "W11131402.",
     "material_description": "JABIL V MAX-PLASTIC ENCLOSURE-W11131402.",
     "cavity": 2,
@@ -6130,6 +6687,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002323",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "RHINO DECO-RING MOULDED PART",
     "cavity": 2,
@@ -6141,6 +6699,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002626",
+    "plant_id": "1040",
     "part_no": "A119435",
     "material_description": "ENCLOSURE WITHPRINT COCOA SEASAND IVORY",
     "cavity": 1,
@@ -6152,6 +6711,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002337",
+    "plant_id": "1040",
     "part_no": "A161101",
     "material_description": "SABER INTERNAL DÉCOR BOTTOM MOULDED PART",
     "cavity": 2,
@@ -6163,6 +6723,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002338",
+    "plant_id": "1040",
     "part_no": "A160701",
     "material_description": "SABER BODY COVER TRANSPARNT MOULDED PART",
     "cavity": 2,
@@ -6174,6 +6735,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002339",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SABER - BOTTOM COVER OPAQUE MOULDED PART",
     "cavity": 2,
@@ -6185,6 +6747,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002475",
+    "plant_id": "1040",
     "part_no": "2871.3001",
     "material_description": "BASE COVER LH M310",
     "cavity": 1,
@@ -6196,6 +6759,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002476",
+    "plant_id": "1040",
     "part_no": "2871.3002",
     "material_description": "BASE COVER RH M310",
     "cavity": 1,
@@ -6207,6 +6771,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002477",
+    "plant_id": "1040",
     "part_no": "2870.3001",
     "material_description": "CASE COVER LH M310",
     "cavity": 1,
@@ -6218,6 +6783,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002478",
+    "plant_id": "1040",
     "part_no": "2870.3002",
     "material_description": "CASE COVER RH M310",
     "cavity": 1,
@@ -6229,6 +6795,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002479",
+    "plant_id": "1040",
     "part_no": "2871.3005",
     "material_description": "BASE COVER UPPER LH M310",
     "cavity": 1,
@@ -6240,6 +6807,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002480",
+    "plant_id": "1040",
     "part_no": "2871.3006",
     "material_description": "BASE COVER UPPER RH M310",
     "cavity": 1,
@@ -6251,6 +6819,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002481",
+    "plant_id": "1040",
     "part_no": "2871.3003",
     "material_description": "BASE COVER LOWER LH M310",
     "cavity": 1,
@@ -6262,6 +6831,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002482",
+    "plant_id": "1040",
     "part_no": "2871.3004",
     "material_description": "BASE COVER LOWER RH M310",
     "cavity": 1,
@@ -6273,6 +6843,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002483",
+    "plant_id": "1040",
     "part_no": "2870.3003",
     "material_description": "BACKING PLATE LH W610",
     "cavity": 1,
@@ -6284,6 +6855,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002484",
+    "plant_id": "1040",
     "part_no": "2870.3004",
     "material_description": "BACKING PLATE RH W610",
     "cavity": 1,
@@ -6295,6 +6867,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002485",
+    "plant_id": "1040",
     "part_no": "2011C1034384@CMI",
     "material_description": "ODU FAN IMPELLER 425X122MM PG",
     "cavity": 1,
@@ -6306,6 +6879,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002486",
+    "plant_id": "1040",
     "part_no": "A008101",
     "material_description": "MG1.1 BASE COVER",
     "cavity": 1,
@@ -6317,6 +6891,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002487",
+    "plant_id": "1040",
     "part_no": "A008001",
     "material_description": "MG1.1 TOP COVER WITH NUT INSERT",
     "cavity": 1,
@@ -6328,6 +6903,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002498",
+    "plant_id": "1040",
     "part_no": "A119424",
     "material_description": "ENCLOSURE WITH LOGO MAPLE PEBBLE GREY",
     "cavity": 1,
@@ -6339,6 +6915,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002493",
+    "plant_id": "1040",
     "part_no": "A122609",
     "material_description": "MAPLE BASE COVER (SEASAND IVORY)",
     "cavity": 1,
@@ -6350,6 +6927,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002494",
+    "plant_id": "1040",
     "part_no": "A2X0010",
     "material_description": "THUMB SCREW TPW WHITE",
     "cavity": 4,
@@ -6361,6 +6939,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002495",
+    "plant_id": "1040",
     "part_no": "A2X0150",
     "material_description": "THUMB SCREW TPW BLACK",
     "cavity": 4,
@@ -6372,6 +6951,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002496",
+    "plant_id": "1040",
     "part_no": "A009101",
     "material_description": "RING ABS",
     "cavity": 2,
@@ -6383,6 +6963,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002492",
+    "plant_id": "1040",
     "part_no": "A007707",
     "material_description": "ENCLOSURE BODY WITH LOGO BLACK",
     "cavity": 1,
@@ -6394,6 +6975,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002503",
+    "plant_id": "1040",
     "part_no": "65092-217D.",
     "material_description": "MINDA DUMMY STATOR LH",
     "cavity": 2,
@@ -6405,6 +6987,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002504",
+    "plant_id": "1040",
     "part_no": "65094-049",
     "material_description": "HANDLE RH MTBD",
     "cavity": 4,
@@ -6416,6 +6999,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002505",
+    "plant_id": "1040",
     "part_no": "65095-049",
     "material_description": "HANDLE LH MTBD",
     "cavity": 4,
@@ -6427,6 +7011,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002509",
+    "plant_id": "1040",
     "part_no": "P98590043",
     "material_description": "CTL BOTTOM FRAME ODU BLUE STAR AC110",
     "cavity": 1,
@@ -6438,6 +7023,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002518",
+    "plant_id": "1040",
     "part_no": "2422.3001",
     "material_description": "CASE REAR LH W601",
     "cavity": 1,
@@ -6449,6 +7035,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002520",
+    "plant_id": "1040",
     "part_no": "MAN64891709",
     "material_description": "BASKET DOOR (MAN64891709)",
     "cavity": 2,
@@ -6460,6 +7047,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002521",
+    "plant_id": "1040",
     "part_no": "ACQ89947105",
     "material_description": "COVER ASSEMBLY TV (ACQ89947105)",
     "cavity": 1,
@@ -6471,6 +7059,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002522",
+    "plant_id": "1040",
     "part_no": "70001-269",
     "material_description": "INTERMEDIATE LOCKING LEVER-LH(70001-269)",
     "cavity": 8,
@@ -6482,6 +7071,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002523",
+    "plant_id": "1040",
     "part_no": "70001-269",
     "material_description": "INTERMEDIATE LOCKING LEVER-RH(70000-269)",
     "cavity": 8,
@@ -6493,6 +7083,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002526",
+    "plant_id": "1040",
     "part_no": "2351.3013L",
     "material_description": "LOWER COVER RHD S201 LH 2351.3013L",
     "cavity": 1,
@@ -6504,6 +7095,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002527",
+    "plant_id": "1040",
     "part_no": "2351.3014L",
     "material_description": "LOWER COVER RHD S201 RH (2351.3014L)",
     "cavity": 1,
@@ -6515,6 +7107,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002528",
+    "plant_id": "1040",
     "part_no": "2351.3017",
     "material_description": "MANUAL FOLD CASE FRAME S201 LH",
     "cavity": 1,
@@ -6526,6 +7119,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002529",
+    "plant_id": "1040",
     "part_no": "2351.3018",
     "material_description": "MANUAL FOLD CASE FRAME S201 RH",
     "cavity": 1,
@@ -6537,6 +7131,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002598",
+    "plant_id": "1040",
     "part_no": "12100302000046@201121990012",
     "material_description": "CLAMP FOR POWER INPUT WIRE CMI",
     "cavity": 8,
@@ -6548,6 +7143,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002614",
+    "plant_id": "1040",
     "part_no": "A159913",
     "material_description": "SABER BODY COVER OPAQUE MATTLE BLACK",
     "cavity": 2,
@@ -6559,6 +7155,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002615",
+    "plant_id": "1040",
     "part_no": "A178502",
     "material_description": "TREX TRIANGULAR NUT BLACK PP",
     "cavity": 2,
@@ -6570,6 +7167,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002616",
+    "plant_id": "1040",
     "part_no": "A181002",
     "material_description": "WALRUS NECK BASE BLACK RW (NEW)",
     "cavity": 2,
@@ -6581,6 +7179,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002617",
+    "plant_id": "1040",
     "part_no": "A179801",
     "material_description": "NECK BASE WHITE RW",
     "cavity": 2,
@@ -6592,6 +7191,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002619",
+    "plant_id": "1040",
     "part_no": "A119302",
     "material_description": "MOTOR STAND WITH NUT INSERT (A119302)",
     "cavity": 1,
@@ -6603,6 +7203,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002620",
+    "plant_id": "1040",
     "part_no": "A3X0037",
     "material_description": "TPW NECK BASE WALRUS BLACK-A3X0037",
     "cavity": 2,
@@ -6614,6 +7215,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002695",
+    "plant_id": "1040",
     "part_no": "A119405",
     "material_description": "ENCLOSURE BODY MAPLE RITZ BLUE",
     "cavity": 1,
@@ -6625,6 +7227,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002630",
+    "plant_id": "1040",
     "part_no": "A178402",
     "material_description": "WALRUS REAR COVER BLACK (NEW)",
     "cavity": 2,
@@ -6636,6 +7239,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002645",
+    "plant_id": "1040",
     "part_no": "1502027",
     "material_description": "CONTROL TOWER LH U301",
     "cavity": 1,
@@ -6647,6 +7251,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002311",
+    "plant_id": "1040",
     "part_no": "A119404",
     "material_description": "ENCLOSURE BODY MAPLE GLOSS BLACK",
     "cavity": 1,
@@ -6658,6 +7263,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002671",
+    "plant_id": "1040",
     "part_no": "W11325658",
     "material_description": "SCREW CAP- PLENUM-GREY (00155)",
     "cavity": 4,
@@ -6669,6 +7275,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002672",
+    "plant_id": "1040",
     "part_no": "W10689030",
     "material_description": "ASSY ENDCAP TOP BLUE (00020)",
     "cavity": 2,
@@ -6680,6 +7287,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002673",
+    "plant_id": "1040",
     "part_no": "W11214073",
     "material_description": "SIDE POCKET HANDLE BRACKET(00107)",
     "cavity": 2,
@@ -6691,6 +7299,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002674",
+    "plant_id": "1040",
     "part_no": "W10856946",
     "material_description": "SIDE POCKET HANDLE FC APOLLO BLUE(00032)",
     "cavity": 2,
@@ -6702,6 +7311,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002676",
+    "plant_id": "1040",
     "part_no": "W11667725",
     "material_description": "TRAY TECH FRAME BATMAN LUMINA",
     "cavity": 2,
@@ -6713,6 +7323,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002677",
+    "plant_id": "1040",
     "part_no": "A086301",
     "material_description": "JAGUAR TOP CANOPY GLOSS WHITE ASSY",
     "cavity": 2,
@@ -6724,6 +7335,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002678",
+    "plant_id": "1040",
     "part_no": "A086801",
     "material_description": "JAGUAR POWER SUPPLY BOX MATTE WHITE",
     "cavity": 2,
@@ -6735,6 +7347,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002679",
+    "plant_id": "1040",
     "part_no": "A086802",
     "material_description": "JAGUAR POWER SUPPLY BOX MATTE BLACK",
     "cavity": 2,
@@ -6746,6 +7359,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002680",
+    "plant_id": "1040",
     "part_no": "A179802",
     "material_description": "NECK BASE BLACK RW (A179802)",
     "cavity": 2,
@@ -6757,6 +7371,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002681",
+    "plant_id": "1040",
     "part_no": "A178302",
     "material_description": "TREX FACE PLATE BLACK PP (A178302)",
     "cavity": 4,
@@ -6768,6 +7383,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002682",
+    "plant_id": "1040",
     "part_no": "A178301",
     "material_description": "TREX FACE PLATE SNOW WHITE PP(A178301)",
     "cavity": 4,
@@ -6779,6 +7395,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002683",
+    "plant_id": "1040",
     "part_no": "A090802",
     "material_description": "CANOPY MIDDLE ASSEMBLY JAGUAR BLACK",
     "cavity": 1,
@@ -6790,6 +7407,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002684",
+    "plant_id": "1040",
     "part_no": "A098102",
     "material_description": "CANOPY PLATE ASSEMBLY JAGUAR BLACK",
     "cavity": 2,
@@ -6801,6 +7419,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002685",
+    "plant_id": "1040",
     "part_no": "A2X0015",
     "material_description": "TPW PD NECK BASE T-REX WHITE MOULDING",
     "cavity": 2,
@@ -6812,6 +7431,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002686",
+    "plant_id": "1040",
     "part_no": "A098101",
     "material_description": "CANOPY PLATE ASSEMBLY JAGUAR WHITE",
     "cavity": 2,
@@ -6823,6 +7443,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002687",
+    "plant_id": "1040",
     "part_no": "A090801",
     "material_description": "CANOPY MIDDLE ASSEMBLY JAGUAR WHITE",
     "cavity": 1,
@@ -6834,6 +7455,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002688",
+    "plant_id": "1040",
     "part_no": "A119436",
     "material_description": "COCOA ENCSR  BODY PEACHY BLOSM PAD PRTNG",
     "cavity": 1,
@@ -6845,6 +7467,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002689",
+    "plant_id": "1040",
     "part_no": "A122618",
     "material_description": "MAPLE BASE COVER ASSEMBLY PEACH BLOSSOM",
     "cavity": 1,
@@ -6856,6 +7479,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002690",
+    "plant_id": "1040",
     "part_no": "A122610",
     "material_description": "MAPLE BASE COVER (PEACH BLOSSOM)",
     "cavity": 1,
@@ -6867,6 +7491,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002691",
+    "plant_id": "1040",
     "part_no": "A086501",
     "material_description": "CANOPY JAGUAR BOTTOM WHITE",
     "cavity": 2,
@@ -6878,6 +7503,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002692",
+    "plant_id": "1040",
     "part_no": "A2X0074",
     "material_description": "TPW BLADE HOLDER TPW-MOULDING",
     "cavity": 2,
@@ -6889,6 +7515,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002693",
+    "plant_id": "1040",
     "part_no": "A3X0004",
     "material_description": "TPW NECK BASE WALRUS WHITE MOULDING",
     "cavity": 2,
@@ -6900,6 +7527,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002656",
+    "plant_id": "1040",
     "part_no": "A119434",
     "material_description": "COCOA ENCLOSR BODY FIERY RED PAD PRINTG",
     "cavity": 1,
@@ -6911,6 +7539,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002696",
+    "plant_id": "1040",
     "part_no": "A2X0175",
     "material_description": "TPW PD NECK BASE T-REX BLACK-MOULDING",
     "cavity": 2,
@@ -6922,6 +7551,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002702",
+    "plant_id": "1040",
     "part_no": "A160702",
     "material_description": "SABER BODY COVER TRANSPERENT BLACK TINT",
     "cavity": 2,
@@ -6933,6 +7563,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002703",
+    "plant_id": "1040",
     "part_no": "1C12821H01",
     "material_description": "MOLDED ADAPTER BRACKET SABIC PC LEXAN 94",
     "cavity": 2,
@@ -6944,6 +7575,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002704",
+    "plant_id": "1040",
     "part_no": "PLDF-Y023-00",
     "material_description": "PLASTIC -TOP FRAME BLUE GT 315 L 8D",
     "cavity": 1,
@@ -6955,6 +7587,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002705",
+    "plant_id": "1040",
     "part_no": "PLDF-Y027-00",
     "material_description": "PLASTIC -TOP FRAME RED GT 315 L 8D",
     "cavity": 1,
@@ -6966,6 +7599,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002707",
+    "plant_id": "1040",
     "part_no": "PLCF-Y003-00",
     "material_description": "PLASTIC TOP FRAME GT 315 L 8D GREY",
     "cavity": 1,
@@ -6977,6 +7611,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002708",
+    "plant_id": "1040",
     "part_no": "PLDF-Y028-00",
     "material_description": "PLASTIC -TOP FRAME RED GT 365 L 8D",
     "cavity": 1,
@@ -6988,6 +7623,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002709",
+    "plant_id": "1040",
     "part_no": "PLCF-Y002-00",
     "material_description": "PLASTIC TOP FRAME GT 365 L 8D GREY",
     "cavity": 1,
@@ -6999,6 +7635,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002710",
+    "plant_id": "1040",
     "part_no": "PLDF-Y208-00",
     "material_description": "PLASTIC-TOP FRAME HT 310DD HIPS WHITE",
     "cavity": 1,
@@ -7010,6 +7647,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002711",
+    "plant_id": "1040",
     "part_no": "PLCF-Y001-00",
     "material_description": "PLASTIC TOP FRAME GT 421 L 8D",
     "cavity": 1,
@@ -7021,6 +7659,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002712",
+    "plant_id": "1040",
     "part_no": "PLDF-Y025-00",
     "material_description": "PLASTIC TOP FRAME GT 421 L 8D  BLUE",
     "cavity": 1,
@@ -7032,6 +7671,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002713",
+    "plant_id": "1040",
     "part_no": "PLDF-Y030-00",
     "material_description": "PLASTIC -TOP FRAME RED GT 530 L 8D",
     "cavity": 1,
@@ -7043,6 +7683,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002714",
+    "plant_id": "1040",
     "part_no": "PLCF-Y000-00",
     "material_description": "PLASTIC TOP FRAME GT 530 L 8D GREY",
     "cavity": 1,
@@ -7054,6 +7695,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002715",
+    "plant_id": "1040",
     "part_no": "PLDF-Y029-00",
     "material_description": "PLASTIC -TOP FRAME RED GT 421 L 8D",
     "cavity": 1,
@@ -7065,6 +7707,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002716",
+    "plant_id": "1040",
     "part_no": "PLDF-Y290-00",
     "material_description": "PLASTIC TOP FRAME HT 396L CHFK HIPS",
     "cavity": 1,
@@ -7076,6 +7719,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002721",
+    "plant_id": "1040",
     "part_no": "AJP75494407",
     "material_description": "OMEGA 5 TRAY ASSEMBLY VEGETABLE",
     "cavity": 1,
@@ -7087,6 +7731,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002725",
+    "plant_id": "1040",
     "part_no": "GA1014720EX",
     "material_description": "FLAP FOR CHOGORI (AESTHETIC)",
     "cavity": 2,
@@ -7098,6 +7743,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002891",
+    "plant_id": "1040",
     "part_no": "A086302",
     "material_description": "JAGUAR TOP CANOPY MDNT BLK ASSEMBLY",
     "cavity": 2,
@@ -7109,6 +7755,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002892",
+    "plant_id": "1040",
     "part_no": "A086502",
     "material_description": "BOTTOM CANOPY JAGUAR  MIDNIGHT BLACK",
     "cavity": 2,
@@ -7120,6 +7767,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002938",
+    "plant_id": "1040",
     "part_no": "2351.3011L",
     "material_description": "UPPER COVER LH-S201",
     "cavity": 1,
@@ -7131,6 +7779,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002942",
+    "plant_id": "1040",
     "part_no": "A122603",
     "material_description": "BASE COVER MAPLE SNOW WHITE",
     "cavity": 1,
@@ -7142,6 +7791,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002943",
+    "plant_id": "1040",
     "part_no": "1500172",
     "material_description": "PROJECT U YOKE",
     "cavity": 4,
@@ -7153,6 +7803,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002944",
+    "plant_id": "1040",
     "part_no": "1500173",
     "material_description": "CENTER CAP U202",
     "cavity": 2,
@@ -7164,6 +7815,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002945",
+    "plant_id": "1040",
     "part_no": "1500179",
     "material_description": "TOP CAP U202",
     "cavity": 2,
@@ -7175,6 +7827,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002953",
+    "plant_id": "1040",
     "part_no": "A178401",
     "material_description": "REAR COVER TREX SNOW WHITE PP  A178401",
     "cavity": 2,
@@ -7186,6 +7839,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002954",
+    "plant_id": "1040",
     "part_no": "A181001",
     "material_description": "NECK BASE WALRUS SNOW WHITE A181001",
     "cavity": 2,
@@ -7197,6 +7851,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002955",
+    "plant_id": "1040",
     "part_no": "A178501",
     "material_description": "TRIANGULR NUT TREX SNOW WHITE PP A178501",
     "cavity": 2,
@@ -7208,6 +7863,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002956",
+    "plant_id": "1040",
     "part_no": "3111.3009",
     "material_description": "CASE FRAME POWER-FOLD LH ALTROZ3111.3009",
     "cavity": 1,
@@ -7219,6 +7875,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002958",
+    "plant_id": "1040",
     "part_no": "3111.3017",
     "material_description": "CASE FRAME MANUAL-FOLD LH ALTROZ",
     "cavity": 1,
@@ -7230,6 +7887,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002960",
+    "plant_id": "1040",
     "part_no": "3111.3007",
     "material_description": "BACKING PLATE LH ALTROZ 3111.3007",
     "cavity": 1,
@@ -7241,6 +7899,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002962",
+    "plant_id": "1040",
     "part_no": "3111.5005",
     "material_description": "BREAKFACE GASKET LH ALTROZ 3111.5005",
     "cavity": 1,
@@ -7252,6 +7911,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002964",
+    "plant_id": "1040",
     "part_no": "3111.3023",
     "material_description": "CAMERA BRACKET ALTROZ LH 3111.3023",
     "cavity": 1,
@@ -7263,6 +7923,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002970",
+    "plant_id": "1040",
     "part_no": "MAN64891207",
     "material_description": "VT6/7 BASKET DOOR MAN64891207",
     "cavity": 2,
@@ -7274,6 +7935,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002984",
+    "plant_id": "1040",
     "part_no": "2351.3007L",
     "material_description": "HOUSING COVER LH S201 2351.3007L",
     "cavity": 1,
@@ -7285,6 +7947,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002989",
+    "plant_id": "1040",
     "part_no": "A147501",
     "material_description": "HANDLE COCOA A147501",
     "cavity": 2,
@@ -7296,6 +7959,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003419",
+    "plant_id": "1040",
     "part_no": "A173502",
     "material_description": "ARIS BLADE 0.9 M",
     "cavity": 1,
@@ -7307,6 +7971,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000144",
+    "plant_id": "1040",
     "part_no": "2011C1032434@CMI",
     "material_description": "PLASTIC CECORATIVE STRIP INDUS 12K",
     "cavity": 2,
@@ -7318,6 +7983,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000016",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "LIGHT GUIDE INSERT BLACK",
     "cavity": 2,
@@ -7329,6 +7995,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003059",
+    "plant_id": "1040",
     "part_no": "1502111",
     "material_description": "BACKING PLATE LH S101 1502111",
     "cavity": 1,
@@ -7340,6 +8007,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003060",
+    "plant_id": "1040",
     "part_no": "1502110",
     "material_description": "BACKING PLATE RH S101 1502110",
     "cavity": 1,
@@ -7351,6 +8019,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002939",
+    "plant_id": "1040",
     "part_no": "2351.3012L",
     "material_description": "UPPER COVER RH-S201",
     "cavity": 1,
@@ -7362,6 +8031,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003077",
+    "plant_id": "1040",
     "part_no": "A181401",
     "material_description": "BASE COVER TF WHITE(A181401)",
     "cavity": 1,
@@ -7373,6 +8043,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003075",
+    "plant_id": "1040",
     "part_no": "GA1014360DX.",
     "material_description": "HEAD LAMP COVER ( MOLDED PART )",
     "cavity": 1,
@@ -7384,6 +8055,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002985",
+    "plant_id": "1040",
     "part_no": "2351.3008L",
     "material_description": "HOUSING COVER RH S201 2351.3008L",
     "cavity": 1,
@@ -7395,6 +8067,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000500",
+    "plant_id": "1040",
     "part_no": "W11611205",
     "material_description": "ENDCAP ASSY TOP-RC-W/O CH-L55TAJ BLU(15)",
     "cavity": 2,
@@ -7406,6 +8079,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000501",
+    "plant_id": "1040",
     "part_no": "W11611207",
     "material_description": "ENDCAP ASSY TOP-RC-W/O CH-L55TAJ-BLK(17)",
     "cavity": 2,
@@ -7417,6 +8091,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000502",
+    "plant_id": "1040",
     "part_no": "W11611206",
     "material_description": "ENDCAP ASSY TOP-RC-W/O CH-L55TAJ-GRY(16)",
     "cavity": 2,
@@ -7428,6 +8103,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000503",
+    "plant_id": "1040",
     "part_no": "W11611208",
     "material_description": "ENDCAP ASSY TOP-RC-W/OCH-L55-PURPLE(18)",
     "cavity": 2,
@@ -7439,6 +8115,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000514",
+    "plant_id": "1040",
     "part_no": "W11611193",
     "material_description": "ENDCAP ASSY-TOP-FC-DECO-L55TAJ-WINE(23)",
     "cavity": 2,
@@ -7450,6 +8127,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000515",
+    "plant_id": "1040",
     "part_no": "W11611188",
     "material_description": "ENDCAP ASSY-TOP-FC-L55 TAJ-WINE(1)",
     "cavity": 2,
@@ -7461,6 +8139,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000526",
+    "plant_id": "1040",
     "part_no": "W11611196",
     "material_description": "ENDCAPASSY-TOP-FC-DECO-L55TAJ-BLACK(26)",
     "cavity": 2,
@@ -7472,6 +8151,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000527",
+    "plant_id": "1040",
     "part_no": "W11611194",
     "material_description": "ENDCAPASSY-TOP-FC-DECO-L55TAJ-BLUE(24)",
     "cavity": 2,
@@ -7483,6 +8163,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000528",
+    "plant_id": "1040",
     "part_no": "W11611195",
     "material_description": "ENDCAPASSY-TOP-FC-DECO-L55TAJ-GREY(25)",
     "cavity": 2,
@@ -7494,6 +8175,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000529",
+    "plant_id": "1040",
     "part_no": "W11611191",
     "material_description": "ENDCAPASSY-TOP-FC-L55TAJ-BLACK(21)",
     "cavity": 2,
@@ -7505,6 +8187,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000530",
+    "plant_id": "1040",
     "part_no": "W11611189",
     "material_description": "ENDCAPASSY-TOP-FC-L55TAJ-BLUE(19)",
     "cavity": 2,
@@ -7516,6 +8199,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000531",
+    "plant_id": "1040",
     "part_no": "W11611190",
     "material_description": "ENDCAPASSY-TOP-FC-L55TAJ-GREY(20)",
     "cavity": 2,
@@ -7527,6 +8211,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000532",
+    "plant_id": "1040",
     "part_no": "W11611192",
     "material_description": "ENDCAPASSY-TOP-FC-L55TAJ-PURPLE(22)",
     "cavity": 2,
@@ -7538,6 +8223,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000598",
+    "plant_id": "1040",
     "part_no": "W11510359",
     "material_description": "BACK TRIM-L55 TAJ-W11510359-W11510359",
     "cavity": 2,
@@ -7549,6 +8235,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000612",
+    "plant_id": "1040",
     "part_no": "W11511213",
     "material_description": "COLLECTOR ICE PORTABLE L55 & L60 TAJ",
     "cavity": 1,
@@ -7560,6 +8247,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002653",
+    "plant_id": "1040",
     "part_no": "W11611197",
     "material_description": "ENDCAP ASSYTOP FC DECOL55 TAJ PURPLE(27)",
     "cavity": 2,
@@ -7571,6 +8259,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000578",
+    "plant_id": "1040",
     "part_no": "W11611192",
     "material_description": "ENDCAP ASSY-TOP-FC-L55 TAJ-PURPLE(396)",
     "cavity": 2,
@@ -7582,6 +8271,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000573",
+    "plant_id": "1040",
     "part_no": "W11611208.",
     "material_description": "END CAP ASSY TOPRC-WO CHROME-L55 TAJ-PUR",
     "cavity": 2,
@@ -7593,6 +8283,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000409",
+    "plant_id": "1040",
     "part_no": "W11511214",
     "material_description": "TWISTER ICE PORTABLE L55 & L60 WHITE",
     "cavity": 4,
@@ -7604,6 +8295,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000605",
+    "plant_id": "1040",
     "part_no": "W11511212",
     "material_description": "BRACKET ICE PORTABLE L55 & L60 WHITE",
     "cavity": 1,
@@ -7615,6 +8307,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000421",
+    "plant_id": "1040",
     "part_no": "W11512462",
     "material_description": "ICE TWISTER ASSY WHITE L55 TAJ(3)",
     "cavity": 1,
@@ -7626,6 +8319,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000618",
+    "plant_id": "1040",
     "part_no": "W11510358",
     "material_description": "COOL PAD L60 W11510358 (32)",
     "cavity": 1,
@@ -7637,6 +8331,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002652",
+    "plant_id": "1040",
     "part_no": "W11709841",
     "material_description": "ENDCAPASSY-BOTTOM-RC-L55-PURPLE(033)",
     "cavity": 1,
@@ -7648,6 +8343,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002651",
+    "plant_id": "1040",
     "part_no": "W11730733",
     "material_description": "END CAP ASSY-BOTTOM-RC-L55-BLACK(34)",
     "cavity": 1,
@@ -7659,6 +8355,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000572",
+    "plant_id": "1040",
     "part_no": "W11709840",
     "material_description": "ENDCAPASSLY BOTTOM RC HIPS GREY TAJ(35)",
     "cavity": 1,
@@ -7670,6 +8367,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002650",
+    "plant_id": "1040",
     "part_no": "W11710432",
     "material_description": "ENDCAPASSY-BOTTOM-RC-L55-BLUE(36)",
     "cavity": 1,
@@ -7681,6 +8379,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002649",
+    "plant_id": "1040",
     "part_no": "W11709815",
     "material_description": "END CAP ASSY-BOTTOM-FC-L55-PURPLE(37)",
     "cavity": 1,
@@ -7692,6 +8391,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002648",
+    "plant_id": "1040",
     "part_no": "W11730755",
     "material_description": "END CAP ASSY-BOTTOM-FC-L55-BLACK(38)",
     "cavity": 1,
@@ -7703,6 +8403,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002646",
+    "plant_id": "1040",
     "part_no": "W11709814",
     "material_description": "END CAP ASSY-BOTTOM-FC-L55-BLUE(40)",
     "cavity": 1,
@@ -7714,6 +8415,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000579",
+    "plant_id": "1040",
     "part_no": "W11611204",
     "material_description": "ENDCAP ASSY TOP-RC-W/CROME L55-WINE(14)",
     "cavity": 1,
@@ -7725,6 +8427,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002647",
+    "plant_id": "1040",
     "part_no": "W11709812",
     "material_description": "END CAP ASSY-BOTTOM-FC-L55-GREY(39)",
     "cavity": 1,
@@ -7736,6 +8439,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003388",
+    "plant_id": "1040",
     "part_no": "A072203",
     "material_description": "FRONT COVER GRIL EFI EXHA 150M GLOSBROWN",
     "cavity": 1,
@@ -7747,6 +8451,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003350",
+    "plant_id": "1040",
     "part_no": "A162301",
     "material_description": "RHINO  BTM CVR TRANSPRENT MOLD PART",
     "cavity": 2,
@@ -7758,6 +8463,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002941",
+    "plant_id": "1040",
     "part_no": "A162401",
     "material_description": "RHINO BOTTOM COVER OPAQUE MOULDED PART",
     "cavity": 2,
@@ -7769,6 +8475,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003385",
+    "plant_id": "1040",
     "part_no": "A071703",
     "material_description": "LINK EFFICIO EXHAUST 150MM GLOSS BROWN",
     "cavity": 2,
@@ -7780,6 +8487,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003384",
+    "plant_id": "1040",
     "part_no": "A145603",
     "material_description": "EXHAUST NUT BROWN",
     "cavity": 2,
@@ -7791,6 +8499,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003376",
+    "plant_id": "1040",
     "part_no": "A080703",
     "material_description": "BLADE EFFICIO EXHAUST 200MM GLOSS BROWN",
     "cavity": 1,
@@ -7802,6 +8511,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003379",
+    "plant_id": "1040",
     "part_no": "A081103",
     "material_description": "FLAP EFFICIO EXHAUST 200MM GLOSS BROWN",
     "cavity": 2,
@@ -7813,6 +8523,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003377",
+    "plant_id": "1040",
     "part_no": "A080903",
     "material_description": "LINK EFFICIO EXHAUST 200MM GLOSS BROWN",
     "cavity": 4,
@@ -7824,6 +8535,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003382",
+    "plant_id": "1040",
     "part_no": "A080303",
     "material_description": "BODY  EFFICIO EXHAUST 150MM GLOSS BROWN",
     "cavity": 1,
@@ -7835,6 +8547,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003381",
+    "plant_id": "1040",
     "part_no": "A081303",
     "material_description": "FRONT COVER GRILL EFI EX 200M GLOSSBROWN",
     "cavity": 1,
@@ -7846,6 +8559,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002961",
+    "plant_id": "1040",
     "part_no": "P78320034",
     "material_description": "FRONT CVR GRILL EFF EXHST 200MM BLACK",
     "cavity": 1,
@@ -7857,6 +8571,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003389",
+    "plant_id": "1040",
     "part_no": "A071802",
     "material_description": "SPRING HOLDER GLOSS BLACK",
     "cavity": 4,
@@ -7868,6 +8583,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002957",
+    "plant_id": "1040",
     "part_no": "3111.3010",
     "material_description": "CASE FRAME POWER-FOLD RH ALTROZ3111.3010",
     "cavity": 1,
@@ -7879,6 +8595,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002963",
+    "plant_id": "1040",
     "part_no": "3111.5006",
     "material_description": "BREAKFACE GASKET RH ALTROZ 3111.5006",
     "cavity": 1,
@@ -7890,6 +8607,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002955",
+    "plant_id": "1040",
     "part_no": "P78320016",
     "material_description": "LINK EFFICIO EXHAUST 200MM GLOSS BLACK",
     "cavity": 4,
@@ -7901,6 +8619,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000011",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "LIGHT GUIDE BLACK",
     "cavity": 2,
@@ -7912,6 +8631,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002884",
+    "plant_id": "1040",
     "part_no": "PLDF-Y274-00",
     "material_description": "PLASTIC TOP FRAME HT 310DD ABS GREY",
     "cavity": 1,
@@ -7923,6 +8643,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003064",
+    "plant_id": "1040",
     "part_no": "ABN74878216",
     "material_description": "CAP ASSLY DECOR ORION BLACK HIPS",
     "cavity": 4,
@@ -7934,6 +8655,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002519",
+    "plant_id": "1040",
     "part_no": "2422.3002",
     "material_description": "CASE REAR RH W601",
     "cavity": 1,
@@ -7945,6 +8667,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003097",
+    "plant_id": "1040",
     "part_no": "3111.3021",
     "material_description": "STI HOUSING LH ALTROZ 3111.3021",
     "cavity": 2,
@@ -7956,6 +8679,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003098",
+    "plant_id": "1040",
     "part_no": "3111.3022",
     "material_description": "STI HOUSING RH ALTROZ 3111.3022",
     "cavity": 2,
@@ -7967,6 +8691,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003074",
+    "plant_id": "1040",
     "part_no": "ACQ88009412",
     "material_description": "AURA 5STAR COVER HING DEEP PURPLE",
     "cavity": 4,
@@ -7978,6 +8703,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002965",
+    "plant_id": "1040",
     "part_no": "3111.3024",
     "material_description": "CAMERA BRACKET ALTROZ RH 3111.3024",
     "cavity": 1,
@@ -7989,6 +8715,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002959",
+    "plant_id": "1040",
     "part_no": "3111.3018",
     "material_description": "CASE FRAME MANUAL-FOLD RH ALTROZ",
     "cavity": 1,
@@ -8000,6 +8727,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002961",
+    "plant_id": "1040",
     "part_no": "3111.3008",
     "material_description": "BACKING PLATE RH ALTROZ 3111.3008",
     "cavity": 1,
@@ -8011,6 +8739,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003079",
+    "plant_id": "1040",
     "part_no": "A182301",
     "material_description": "BASE TF WHITE (A182301)",
     "cavity": 1,
@@ -8022,6 +8751,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002724",
+    "plant_id": "1040",
     "part_no": "GG1000080CX",
     "material_description": "FRONT MUDGUARD",
     "cavity": 1,
@@ -8033,6 +8763,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003111",
+    "plant_id": "1040",
     "part_no": "W11706511",
     "material_description": "TRAY DEFROST WATER GEN-Y BLACK W11706511",
     "cavity": 1,
@@ -8044,6 +8775,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002956",
+    "plant_id": "1040",
     "part_no": "P78320019",
     "material_description": "WIRE CLAMP EFFICIO EXHAUST GLOSS BLACK",
     "cavity": 4,
@@ -8055,6 +8787,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003065",
+    "plant_id": "1040",
     "part_no": "A147502",
     "material_description": "HANDLE SMALL JAR COCOA A147502",
     "cavity": 2,
@@ -8066,6 +8799,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002644",
+    "plant_id": "1040",
     "part_no": "1502026",
     "material_description": "CONTROL TOWER RH U301",
     "cavity": 1,
@@ -8077,6 +8811,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003375",
+    "plant_id": "1040",
     "part_no": "A071303",
     "material_description": "WIRE CLAMP EFFICIO EXHAUST BROWN",
     "cavity": 4,
@@ -8088,6 +8823,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002313",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ENCLOSURE BODY MAPLE PEBBLE GREY MOLD",
     "cavity": 1,
@@ -8099,6 +8835,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000611",
+    "plant_id": "1040",
     "part_no": "W11635104",
     "material_description": "COLLECTOR ICE PORTABLE L55 & L60 GREY",
     "cavity": 1,
@@ -8110,6 +8847,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002883",
+    "plant_id": "1040",
     "part_no": "PLDF-Y225-00",
     "material_description": "PLASTIC TOP FRAME BLACK GT 365 L 8D",
     "cavity": 1,
@@ -8121,6 +8859,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000244",
+    "plant_id": "1040",
     "part_no": "ABN74878313",
     "material_description": "CAP DECOR ASSLY ORION BLACK-ABN74878313",
     "cavity": 2,
@@ -8132,6 +8871,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010000208",
+    "plant_id": "1040",
     "part_no": "MBL66498412",
     "material_description": "CAP DÉCOR REF(COVER)WESTERN BLACK",
     "cavity": 4,
@@ -8143,6 +8883,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003605",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PLENUM FRONT GREY L55/L60 MOLDING",
     "cavity": 1,
@@ -8154,6 +8895,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002882",
+    "plant_id": "1040",
     "part_no": "PLDF-Y209-00",
     "material_description": "PLASTIC TOP FRAME HT 360DD HIPS WH",
     "cavity": 1,
@@ -8165,6 +8907,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003113",
+    "plant_id": "1040",
     "part_no": "MCK68490226",
     "material_description": "COVER HINGE 5 STAR FAWN GRAY MOLDING",
     "cavity": 4,
@@ -8176,6 +8919,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003602",
+    "plant_id": "1040",
     "part_no": "A180301",
     "material_description": "JAGUAR BLADE 900MM MARBLE WHITE",
     "cavity": 1,
@@ -8187,6 +8931,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000372",
+    "plant_id": "1040",
     "part_no": "A2X0071",
     "material_description": "TPW Blade Snow white",
     "cavity": 1,
@@ -8198,6 +8943,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003176",
+    "plant_id": "1040",
     "part_no": "1500648",
     "material_description": "FRICTION BLADE",
     "cavity": 8,
@@ -8209,6 +8955,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001362",
+    "plant_id": "1040",
     "part_no": "ESCSMD0048",
     "material_description": "WSD Smoke Chamber",
     "cavity": 2,
@@ -8220,6 +8967,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001360",
+    "plant_id": "1040",
     "part_no": "ESCSMD0065",
     "material_description": "WSD Body Cover Front Cap",
     "cavity": 2,
@@ -8231,6 +8979,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003303",
+    "plant_id": "1040",
     "part_no": "PLDF-Y026-00",
     "material_description": "PLASTIC TOP FRAME BLUE 530",
     "cavity": 1,
@@ -8242,6 +8991,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001361",
+    "plant_id": "1040",
     "part_no": "ESCSMD0063",
     "material_description": "WSD, LED Indicator Guide PipeL",
     "cavity": 8,
@@ -8253,6 +9003,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003794",
+    "plant_id": "1040",
     "part_no": "C58-0613-000",
     "material_description": "Test Button",
     "cavity": 8,
@@ -8264,6 +9015,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003175",
+    "plant_id": "1040",
     "part_no": "1500718",
     "material_description": "LEVER SCROPIO 1500718",
     "cavity": 4,
@@ -8275,6 +9027,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003731",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TWISTER ICE PORTABLE L55 & L60 TAJ GREY",
     "cavity": 4,
@@ -8286,6 +9039,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003792",
+    "plant_id": "1040",
     "part_no": "B07-0600-000",
     "material_description": "WSD, BATTERY HOUSING",
     "cavity": 6,
@@ -8297,6 +9051,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001358",
+    "plant_id": "1040",
     "part_no": "ESCSMD0066",
     "material_description": "WSD Battery Housing LID",
     "cavity": 4,
@@ -8308,6 +9063,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003793",
+    "plant_id": "1040",
     "part_no": "H58-0600-001",
     "material_description": "WSD Body Cover",
     "cavity": 2,
@@ -8319,6 +9075,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003732",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BRACKET ICE PORTABLE L55 & L60 TAJ GREY",
     "cavity": 1,
@@ -8330,6 +9087,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003729",
+    "plant_id": "1040",
     "part_no": "MBL67558210",
     "material_description": "CAP DECO RU NH SNS HIPS MBL67558210",
     "cavity": 2,
@@ -8341,6 +9099,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003727",
+    "plant_id": "1040",
     "part_no": "MBL67500506",
     "material_description": "CAP DECO RL OLD SNS HIPS MBL67500506",
     "cavity": 2,
@@ -8352,6 +9111,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003723",
+    "plant_id": "1040",
     "part_no": "MBL67479905",
     "material_description": "CAP DECO FU OLD SNS HIPS MBL67479905",
     "cavity": 2,
@@ -8363,6 +9123,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001432",
+    "plant_id": "1040",
     "part_no": "ESCSMD0062",
     "material_description": "ASSY, SSD BATTERY HOUSING B07-0600-200",
     "cavity": 1,
@@ -8374,6 +9135,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002389",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SSD Assembly Body Cover H58-0602-000",
     "cavity": 1,
@@ -8385,6 +9147,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004029",
+    "plant_id": "1040",
     "part_no": "A267901",
     "material_description": "IMPALA BLADE LEAF 1.4M WHITE ARIS",
     "cavity": 1,
@@ -8396,6 +9159,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004030",
+    "plant_id": "1040",
     "part_no": "A268001",
     "material_description": "IMPALA BLADE COVER F 1.4M WHITE ARIS",
     "cavity": 2,
@@ -8407,6 +9171,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003720",
+    "plant_id": "1040",
     "part_no": "MBL67238504",
     "material_description": "CAP DECO ALPA RU HIPS NEW WB MBL67238504",
     "cavity": 1,
@@ -8418,6 +9183,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003717",
+    "plant_id": "1040",
     "part_no": "MBL67198806",
     "material_description": "CAP DECO ALPA FL HIPS NEW WB MBL67198806",
     "cavity": 1,
@@ -8429,6 +9195,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001400",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "DRAIN VALVE ASSLY 3 WAY",
     "cavity": 1,
@@ -8440,6 +9207,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001950",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "DRAIN VALVE 2 WAY",
     "cavity": 1,
@@ -8451,6 +9219,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001522",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATE CHANNEL NOZZEL",
     "cavity": 1,
@@ -8462,6 +9231,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001520",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATE Channel cover",
     "cavity": 1,
@@ -8473,6 +9243,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001955",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PV CORE",
     "cavity": 2,
@@ -8484,6 +9255,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001953",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PV CAP",
     "cavity": 2,
@@ -8495,6 +9267,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001920",
+    "plant_id": "1040",
     "part_no": "52141601PA03866",
     "material_description": "BELLOW SUPPORTER",
     "cavity": 2,
@@ -8506,6 +9279,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003725",
+    "plant_id": "1040",
     "part_no": "MBL67480005",
     "material_description": "CAP DECO FL OLD SNS HIPS MBL67480005",
     "cavity": 2,
@@ -8517,6 +9291,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003716",
+    "plant_id": "1040",
     "part_no": "MBL67198709",
     "material_description": "CAP DECO ALPA FU SNS HIPS NE MBL67198709",
     "cavity": 1,
@@ -8528,6 +9303,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003718",
+    "plant_id": "1040",
     "part_no": "MBL67238407",
     "material_description": "CAP DECO ALP HIPS RL NEW SNS MBL67238407",
     "cavity": 1,
@@ -8539,6 +9315,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003715",
+    "plant_id": "1040",
     "part_no": "MBL67198708",
     "material_description": "CAP DECO ALPH FU WB HIPS NEW MBL67198708",
     "cavity": 1,
@@ -8550,6 +9327,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003719",
+    "plant_id": "1040",
     "part_no": "MBL67238408",
     "material_description": "CAP DECO ALPA RL HIPS NEW WB MBL67238408",
     "cavity": 1,
@@ -8561,6 +9339,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001282",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - SPIN TUB M05 - 8.5 KG LIGHT GREY",
     "cavity": 1,
@@ -8572,6 +9351,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003724",
+    "plant_id": "1040",
     "part_no": "MBL67479906",
     "material_description": "CAP DECO FU OLD SW HIPS MBL67479906",
     "cavity": 2,
@@ -8583,6 +9363,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003730",
+    "plant_id": "1040",
     "part_no": "MBL67558211",
     "material_description": "CAP DECO RU NH SW HIPS MBL67558211",
     "cavity": 2,
@@ -8594,6 +9375,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003726",
+    "plant_id": "1040",
     "part_no": "MBL67480006",
     "material_description": "CAP DECO FL OLD SW HIPS MBL67480006",
     "cavity": 2,
@@ -8605,6 +9387,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001447",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BALANCER RING UPPER M05 - 8.5 KG",
     "cavity": 1,
@@ -8616,6 +9399,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001446",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BALANCER RING LOWER M05 - 8.5 KG",
     "cavity": 1,
@@ -8627,6 +9411,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000433",
+    "plant_id": "1040",
     "part_no": "W11640168",
     "material_description": "PEDESTAL GROMETASY PURPLE ZION GENY(145)",
     "cavity": 1,
@@ -8638,6 +9423,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000434",
+    "plant_id": "1040",
     "part_no": "W11640376",
     "material_description": "PEDESTAL GROMET ASY PURP ZION MASS(148)",
     "cavity": 1,
@@ -8649,6 +9435,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000435",
+    "plant_id": "1040",
     "part_no": "W11640170",
     "material_description": "PEDESTAL GROMMET ASSY WINE ZION GEN-Y142",
     "cavity": 1,
@@ -8660,6 +9447,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000428",
+    "plant_id": "1040",
     "part_no": "W11640171",
     "material_description": "PEDESTAL GROMMET ASSYBLACK ZION GEN-Y147",
     "cavity": 1,
@@ -8671,6 +9459,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000429",
+    "plant_id": "1040",
     "part_no": "W11640374",
     "material_description": "PEDESTAL GROMET ASSY BLK ZION MASS(150)",
     "cavity": 1,
@@ -8682,6 +9471,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000430",
+    "plant_id": "1040",
     "part_no": "W11640169",
     "material_description": "PEDESTAL GROMMET ASSY BLUE ZION GEN-Y146",
     "cavity": 1,
@@ -8693,6 +9483,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000431",
+    "plant_id": "1040",
     "part_no": "W11640375",
     "material_description": "PEDESTAL GROMET ASY BLUE ZION MASS(149)",
     "cavity": 1,
@@ -8704,6 +9495,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000432",
+    "plant_id": "1040",
     "part_no": "W11640167",
     "material_description": "PEDESTAL GROMMET ASSY GREY ZION GEN-Y143",
     "cavity": 1,
@@ -8715,6 +9507,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000436",
+    "plant_id": "1040",
     "part_no": "W11640372",
     "material_description": "PEDESTAL GROMET ASY WINE ZION MASS(151)",
     "cavity": 1,
@@ -8726,6 +9519,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004194",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ENCLOSURE BODY MAPLE GLOSS BLK MOLDING",
     "cavity": 1,
@@ -8737,6 +9531,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004195",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ENCLOSURE BODY MAPLE FAIRY RED MOLDING",
     "cavity": 1,
@@ -8748,6 +9543,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004196",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ENCLOSURE BODY MAPLE PEBBLE GRY MOLDING",
     "cavity": 1,
@@ -8759,6 +9555,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004197",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SABER BTM COVER OPEQUE MOLDING",
     "cavity": 2,
@@ -8770,6 +9567,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004198",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SABER BTM COVER INTERNAL BTM MOLDING",
     "cavity": 2,
@@ -8781,6 +9579,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004128",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FRONT MUDGUARD",
     "cavity": 1,
@@ -8792,6 +9591,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003452",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00117",
     "material_description": "GLASS DF LOW E-UPPER 590 GL-DF0403-00117",
     "cavity": 1,
@@ -8803,6 +9603,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003507",
+    "plant_id": "1040",
     "part_no": "ELR110000807",
     "material_description": "ELECTRONICS HOUSING ELR110000807",
     "cavity": 2,
@@ -8814,6 +9615,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003451",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00127",
     "material_description": "GLASS DF LOW E-UPPER 475 GL-DF0403-00127",
     "cavity": 1,
@@ -8825,6 +9627,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003447",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00132",
     "material_description": "GLASS DF LOW E-LOWER 475 GL-DF0403-00132",
     "cavity": 1,
@@ -8836,6 +9639,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003449",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00147",
     "material_description": "GLASS DF LOW E-UPPER 350 GL-DF0403-00147",
     "cavity": 1,
@@ -8847,6 +9651,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003445",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00152",
     "material_description": "GLASS DF LOW E-LOWER 350 GL-DF0403-00152",
     "cavity": 1,
@@ -8858,6 +9663,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002880",
+    "plant_id": "1040",
     "part_no": "PLDF-Y211-00",
     "material_description": "PLASTIC TOP FRAME HT 515DD HIPS WH",
     "cavity": 1,
@@ -8869,6 +9675,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003721",
+    "plant_id": "1040",
     "part_no": "MBL67479707",
     "material_description": "CAP DECO FL SNS HARNES HIPS MBL67479707",
     "cavity": 2,
@@ -8880,6 +9687,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001904",
+    "plant_id": "1040",
     "part_no": "2011C1034634",
     "material_description": "HORIZONTAL LOUVER 12F 16K(BLACK)",
     "cavity": 2,
@@ -8891,6 +9699,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001900",
+    "plant_id": "1040",
     "part_no": "2011C1035477",
     "material_description": "FRONT PANEL 12F 16K INDUS",
     "cavity": 1,
@@ -8902,6 +9711,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003448",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00122",
     "material_description": "GLASS DF LOW E-LOWER 590 GL-DF0403-00122",
     "cavity": 1,
@@ -8913,6 +9723,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002881",
+    "plant_id": "1040",
     "part_no": "PLDF-Y210-00",
     "material_description": "PLASTIC TOP FRAME HT 410DD HIPS WH",
     "cavity": 1,
@@ -8924,6 +9735,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003545",
+    "plant_id": "1040",
     "part_no": "W11732966",
     "material_description": "TRIVET FC,L55,3D,CLEAR W11732966 WHL 208",
     "cavity": 2,
@@ -8935,6 +9747,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003546",
+    "plant_id": "1040",
     "part_no": "W11732967",
     "material_description": "TRIVET RC,L55,3D,CLEAR W11732967",
     "cavity": 2,
@@ -8946,6 +9759,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002076",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BACK COVER",
     "cavity": 1,
@@ -8957,6 +9771,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001476",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "CONTROL PANEL WHITE WM-3",
     "cavity": 2,
@@ -8968,6 +9783,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001219",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER FALL BORD FILTER",
     "cavity": 1,
@@ -8979,6 +9795,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001220",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER FALL BORD PLAIN",
     "cavity": 1,
@@ -8990,6 +9807,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001549",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER FALL BOARD BACK COVER",
     "cavity": 2,
@@ -9001,6 +9819,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001726",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB INSERT (DECO)",
     "cavity": 5,
@@ -9012,6 +9831,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001755",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB WM-29",
     "cavity": 5,
@@ -9023,6 +9843,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001534",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER INLET COVER WM-24",
     "cavity": 2,
@@ -9034,6 +9855,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001547",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER SELECTOR",
     "cavity": 1,
@@ -9045,6 +9867,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001946",
+    "plant_id": "1040",
     "part_no": "52141601PA03849",
     "material_description": "DRAIN SELECTOR",
     "cavity": 1,
@@ -9056,6 +9879,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001413",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TOP FRAME",
     "cavity": 1,
@@ -9067,6 +9891,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001618",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SCREW CAP",
     "cavity": 1,
@@ -9078,6 +9903,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003728",
+    "plant_id": "1040",
     "part_no": "MBL67500507",
     "material_description": "CAP DECO RL OLD SW HIPS MBL67500507",
     "cavity": 2,
@@ -9089,6 +9915,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001312",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TWIN TUB",
     "cavity": 1,
@@ -9100,6 +9927,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001691",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "MAGIC FILTER DOWN",
     "cavity": 1,
@@ -9111,6 +9939,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001695",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "MAGIC FILTER UP",
     "cavity": 1,
@@ -9122,6 +9951,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003453",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00162",
     "material_description": "GLASS DF LOW E-LOWER 230 GL-DF0403-00162",
     "cavity": 1,
@@ -9133,6 +9963,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003456",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00157",
     "material_description": "GLASS DF LOW E-UPPER 230 GL-DF0403-00157",
     "cavity": 1,
@@ -9144,6 +9975,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004352",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PLASTIC-GLASS LOCK CAP BTM PLDF-Y117-00",
     "cavity": 8,
@@ -9155,6 +9987,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003454",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00172",
     "material_description": "GLASS DF LOW E-LOWER 180 GL-DF0403-00172",
     "cavity": 1,
@@ -9166,6 +9999,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003457",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00167",
     "material_description": "GLASS DF LOW E-UPPER 180 GL-DF0403-00167",
     "cavity": 1,
@@ -9177,6 +10011,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001200",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-WASH COVER M05-OPAQUE BURG",
     "cavity": 1,
@@ -9188,6 +10023,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001358",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SPIN LID M05G-BURG",
     "cavity": 1,
@@ -9199,6 +10035,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002070",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-AIR DRY RING M05-8.5 KG WHITE",
     "cavity": 2,
@@ -9210,6 +10047,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003534",
+    "plant_id": "1040",
     "part_no": "2011C1036825-00",
     "material_description": "50-EZ2 IDU CONNECTING ROD-4 WAY SWING",
     "cavity": 2,
@@ -9221,6 +10059,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001477",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-CONTROL PANEL M05G-BURG",
     "cavity": 2,
@@ -9232,6 +10071,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003446",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00142",
     "material_description": "GLASS DF LOW E-LOWER 410 GL-DF0403-00142",
     "cavity": 1,
@@ -9243,6 +10083,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003450",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00137",
     "material_description": "GLASS DF LOW E-UPPER 410 GL-DF0403-00137",
     "cavity": 1,
@@ -9254,6 +10095,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001601",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SAFETY COVER M05-8.5 KG TRANS",
     "cavity": 2,
@@ -9265,6 +10107,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003520",
+    "plant_id": "1040",
     "part_no": "2011C1036809@-00",
     "material_description": "35-50-EZ2 IDU CONTROL BOX ENCLOSURE",
     "cavity": 2,
@@ -9276,6 +10119,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003517",
+    "plant_id": "1040",
     "part_no": "2011C1036811-00",
     "material_description": "35-50-EZ2 IDU ELECTRICAL COVER PLATE",
     "cavity": 4,
@@ -9287,6 +10131,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003573",
+    "plant_id": "1040",
     "part_no": "W11738304",
     "material_description": "DRAIN TUBE CONNECTOR",
     "cavity": 2,
@@ -9298,6 +10143,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003518",
+    "plant_id": "1040",
     "part_no": "12122000036944",
     "material_description": "35-50-70-EZ2 IDU SCREW COVER",
     "cavity": 8,
@@ -9309,6 +10155,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003528",
+    "plant_id": "1040",
     "part_no": "212100303001682",
     "material_description": "35-50-EZ2 IDU WIRE CLIP",
     "cavity": 16,
@@ -9320,6 +10167,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003530",
+    "plant_id": "1040",
     "part_no": "12122000007523",
     "material_description": "35-EZ2 IDU LATCH-H-LOUVER",
     "cavity": 8,
@@ -9331,6 +10179,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003825",
+    "plant_id": "1040",
     "part_no": "A119404",
     "material_description": "MAPLE/COCOA ENCLOSURE BODY- GLOSS BLACK",
     "cavity": 1,
@@ -9342,6 +10191,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003572",
+    "plant_id": "1040",
     "part_no": "W11769433",
     "material_description": "DISPENSER PADDLE, GREY TINT",
     "cavity": 2,
@@ -9353,6 +10203,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003529",
+    "plant_id": "1040",
     "part_no": "121220000370",
     "material_description": "35-50-70-EZ2 IDU FRAME LATCH",
     "cavity": 8,
@@ -9364,6 +10215,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003532",
+    "plant_id": "1040",
     "part_no": "12122000036290",
     "material_description": "35-EZ2 IDU CONNECTING ROD-4 WAY SWING",
     "cavity": 2,
@@ -9375,6 +10227,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003597",
+    "plant_id": "1040",
     "part_no": "W11771607",
     "material_description": "HOUSING HMI ASSY, BLACK",
     "cavity": 1,
@@ -9386,6 +10239,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003620",
+    "plant_id": "1040",
     "part_no": "12122000032987",
     "material_description": "50-EZ2 IDU VERTICAL LOUVER-4 WAY SWING",
     "cavity": 8,
@@ -9397,6 +10251,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004323",
+    "plant_id": "1040",
     "part_no": "2011C1036802-00",
     "material_description": "35-EZ2 IDU CHASSIS",
     "cavity": 1,
@@ -9408,6 +10263,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003533",
+    "plant_id": "1040",
     "part_no": "12122000036326",
     "material_description": "35-EZ2 IDU PIPE CLAMP BOARD",
     "cavity": 4,
@@ -9419,6 +10275,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003523",
+    "plant_id": "1040",
     "part_no": "2011C1036805-00",
     "material_description": "35-EZ2 IDU LOWER FRAME WITH IONIZER",
     "cavity": 1,
@@ -9430,6 +10287,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003524",
+    "plant_id": "1040",
     "part_no": "2011C1037275-00",
     "material_description": "35-EZ2 IDU LOWER FRAME WITHOUT IONIZER",
     "cavity": 1,
@@ -9441,6 +10299,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004571",
+    "plant_id": "1040",
     "part_no": "2011C1036804@CMI",
     "material_description": "35-EZ2 IDU UPPER FRAME",
     "cavity": 1,
@@ -9452,6 +10311,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003531",
+    "plant_id": "1040",
     "part_no": "12122000036286-00",
     "material_description": "35-EZ2 IDU EVAPORATOR LEFT SUPPORT D5",
     "cavity": 4,
@@ -9463,6 +10323,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003526",
+    "plant_id": "1040",
     "part_no": "2011C1036806-00",
     "material_description": "35-EZ2 IDU HORIZONTAL LOUVER",
     "cavity": 2,
@@ -9474,6 +10335,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004325",
+    "plant_id": "1040",
     "part_no": "2011C1036803-00",
     "material_description": "35-EZ2 IDU FRONT PANEL-MIDEA",
     "cavity": 1,
@@ -9485,6 +10347,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003525",
+    "plant_id": "1040",
     "part_no": "2011C1036810-00",
     "material_description": "35-50-EZ2 IDU CONTROL BOX COVER",
     "cavity": 4,
@@ -9496,6 +10359,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003519",
+    "plant_id": "1040",
     "part_no": "12122000037427",
     "material_description": "35-EZ2 IDU FAN MOTOR COVER",
     "cavity": 2,
@@ -9507,6 +10371,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003536",
+    "plant_id": "1040",
     "part_no": "12122000036322",
     "material_description": "35-EZ2 IDU VERTICAL LOUVER-4 WAY SWING",
     "cavity": 8,
@@ -9518,6 +10383,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000105",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "16K 12F F3 PANEL(CMI)",
     "cavity": 1,
@@ -9529,6 +10395,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003243",
+    "plant_id": "1040",
     "part_no": "ABN73639721",
     "material_description": "LOWER SAPPHIRE SN SILVER HIPS",
     "cavity": 2,
@@ -9540,6 +10407,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003245",
+    "plant_id": "1040",
     "part_no": "ABN73639723",
     "material_description": "LOWER SAPPHIRE ROYAL BLUE HIPS",
     "cavity": 2,
@@ -9551,6 +10419,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003242",
+    "plant_id": "1040",
     "part_no": "ABN73639720",
     "material_description": "LOWER SAPPHIRE BLACK HIPS",
     "cavity": 2,
@@ -9562,6 +10431,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003244",
+    "plant_id": "1040",
     "part_no": "ABN73639722",
     "material_description": "LOWER SAPPHIRE SC RED HIPS",
     "cavity": 2,
@@ -9573,6 +10443,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004731",
+    "plant_id": "1040",
     "part_no": "2011C1037472@CMI",
     "material_description": "FRONT PANEL LOWER  XCEED 35EZ",
     "cavity": 1,
@@ -9584,6 +10455,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004730",
+    "plant_id": "1040",
     "part_no": "2011C1037471@CMI",
     "material_description": "FRONT PANEL UPPER XCEED 35EZ",
     "cavity": 1,
@@ -9595,6 +10467,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000617",
+    "plant_id": "1040",
     "part_no": "W11510357",
     "material_description": "COOL PAD CAP",
     "cavity": 8,
@@ -9606,6 +10479,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003569",
+    "plant_id": "1040",
     "part_no": "W11754704",
     "material_description": "EU-REAR SHROUD-MC,CONDENSER WHL-214",
     "cavity": 1,
@@ -9617,6 +10491,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003568",
+    "plant_id": "1040",
     "part_no": "W11754703",
     "material_description": "NEU-FRONT SHROUD-MC,CONDENSER",
     "cavity": 1,
@@ -9628,6 +10503,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003678",
+    "plant_id": "1040",
     "part_no": "MAN64891710",
     "material_description": "BASKET DOOR VT-4/6/7 MAN64891710",
     "cavity": 2,
@@ -9639,6 +10515,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001646",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FIXING CAM",
     "cavity": 1,
@@ -9650,6 +10527,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001699",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "MID COVER",
     "cavity": 2,
@@ -9661,6 +10539,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003676",
+    "plant_id": "1040",
     "part_no": "MAN64892212",
     "material_description": "BASKET DOOR VT-4/6/7 MAN64892212",
     "cavity": 2,
@@ -9672,6 +10551,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003677",
+    "plant_id": "1040",
     "part_no": "MAN64891211",
     "material_description": "BASKET DOOR VT-4/6/7 MAN64891211",
     "cavity": 2,
@@ -9683,6 +10563,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003679",
+    "plant_id": "1040",
     "part_no": "ACQ89947106",
     "material_description": "COVER ASLY TRAY VEGETABLE 05 ACQ89947106",
     "cavity": 1,
@@ -9694,6 +10575,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003680",
+    "plant_id": "1040",
     "part_no": "MAN64108511",
     "material_description": "BASKET DOOR 05 MAN64108511 C1",
     "cavity": 1,
@@ -9705,6 +10587,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003681",
+    "plant_id": "1040",
     "part_no": "MAN64108512",
     "material_description": "BASKET DOOR 05 MAN64108512 C2",
     "cavity": 1,
@@ -9716,6 +10599,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003682",
+    "plant_id": "1040",
     "part_no": "MAN64208607",
     "material_description": "BASKET DOOR ALPHA7 MAN64208607",
     "cavity": 2,
@@ -9727,6 +10611,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003683",
+    "plant_id": "1040",
     "part_no": "MAN64208608",
     "material_description": "BASKET DOOR ALPHA7 MAN64208608",
     "cavity": 2,
@@ -9738,6 +10623,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003684",
+    "plant_id": "1040",
     "part_no": "AJP75494408",
     "material_description": "ASSEMBLY TRAY VEGETABLES AJP754944",
     "cavity": 1,
@@ -9749,6 +10635,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003685",
+    "plant_id": "1040",
     "part_no": "AAP74031415",
     "material_description": "BASKET ASSEMBLY DOOR BLACK AAP74031415",
     "cavity": 1,
@@ -9760,6 +10647,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003235",
+    "plant_id": "1040",
     "part_no": "ABN75658512",
     "material_description": "CAP ASSLY DECOR RU SW HIPS ABN75658512",
     "cavity": 1,
@@ -9771,6 +10659,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000212",
+    "plant_id": "1040",
     "part_no": "AEB75425104.",
     "material_description": "GRILLE FAN ASSLY OMEGA 5 AEB75425104",
     "cavity": 1,
@@ -9782,6 +10671,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001348",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SPIN COVER",
     "cavity": 1,
@@ -9793,6 +10683,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001658",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PULSATOR COVER CAP GREY",
     "cavity": 2,
@@ -9804,6 +10695,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001541",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER LEVEL BOARD WM 13",
     "cavity": 1,
@@ -9815,6 +10707,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001546",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER LEVEL SELECTOR",
     "cavity": 1,
@@ -9826,6 +10719,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001374",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WM-14 PULSATOR  M02G - LIGHT GREY(8709)",
     "cavity": 1,
@@ -9837,6 +10731,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010002694",
+    "plant_id": "1040",
     "part_no": "A122604",
     "material_description": "MAPLE BASE COVER GLOSS BLACK MOLDED PART",
     "cavity": 1,
@@ -9848,6 +10743,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001667",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WM-27 PULSATOR CENTRE MOVER M02G - NEUTRAL GREY",
     "cavity": 1,
@@ -9859,6 +10755,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001671",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WM-27  PULSATOR ROLLER M02G - NEUTRAL GREY",
     "cavity": 3,
@@ -9870,6 +10767,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002069",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-AIR DRY RING M05-8.5KG OPAQUE BURG",
     "cavity": 2,
@@ -9881,6 +10779,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003822",
+    "plant_id": "1040",
     "part_no": "A122604",
     "material_description": "MAPLE BASE COVER GLOSS BLACK MOLDED PART",
     "cavity": 1,
@@ -9892,6 +10791,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001670",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - PULSATOR ROLLER CAP  M02G - NEUTRAL GREY",
     "cavity": 3,
@@ -9903,6 +10803,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001700",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - MINI PULSATOR - M02G - NEUTRAL GREY",
     "cavity": 3,
@@ -9914,6 +10815,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001313",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - TWIN TUB M05 - MIDDLE BLACK",
     "cavity": 1,
@@ -9925,6 +10827,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001911",
+    "plant_id": "1040",
     "part_no": "2011C1034635",
     "material_description": "PLASTIC LOUVER SIDE FLAP LHS12F16K INDUS",
     "cavity": 1,
@@ -9936,6 +10839,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002071",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - AIR DRY RING M05P - TRANSPARENT BLACK",
     "cavity": 2,
@@ -9947,6 +10851,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003547",
+    "plant_id": "1040",
     "part_no": "W11732968",
     "material_description": "RC BIN,L55 CLEAR W11732968",
     "cavity": 2,
@@ -9958,6 +10863,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001535",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - WATER INLET COVER PLASTIC M06 - ROYAL DARK GREY",
     "cavity": 2,
@@ -9969,6 +10875,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003455",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00182",
     "material_description": "GLASS DF LOW E-LOWER 130 GL-DF0403-00182",
     "cavity": 1,
@@ -9980,6 +10887,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001298",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - TOP COVER M05P - ROYAL DARK GREY",
     "cavity": 1,
@@ -9991,6 +10899,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001620",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - SCREW CAP M06 - ROYAL DARK GREY",
     "cavity": 8,
@@ -10002,6 +10911,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002021",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BASE FEET CAV 1 M04 - 7.5 KG BURGUNDY",
     "cavity": 1,
@@ -10013,6 +10923,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001960",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BASE FEET CAV 2 M04 - 7.5 KG BURGUNDY",
     "cavity": 1,
@@ -10024,6 +10935,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001979",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BASE FEET CAV 3 M04 - 7.5 KG BURGUNDY",
     "cavity": 1,
@@ -10035,6 +10947,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001998",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - BASE FEET CAV 4 M04 - 7.5 KG BURGUNDY",
     "cavity": 1,
@@ -10046,6 +10959,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001347",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - SPIN COVER M05 - OPAQUE BLUE",
     "cavity": 1,
@@ -10057,6 +10971,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001279",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - WASH COVER M05 - OPAQUE BLUE",
     "cavity": 1,
@@ -10068,6 +10983,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001942",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - DETERGENT BOX M06P - ROYAL DARK GREY",
     "cavity": 2,
@@ -10079,6 +10995,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001479",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - CONTROL PANEL M05P - ROYAL DARK GREY",
     "cavity": 1,
@@ -10090,6 +11007,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004650",
+    "plant_id": "1040",
     "part_no": "2011C1037509@CMI",
     "material_description": "COVER DISPLAY 70EZ",
     "cavity": 2,
@@ -10101,6 +11019,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001412",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - FRAME M05 - 8.5 KG BLUE",
     "cavity": 1,
@@ -10112,6 +11031,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001619",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - SCREW CAP M06 - BLUE",
     "cavity": 2,
@@ -10123,6 +11043,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002068",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - AIR DRY RING M05 - 8.5 KG - OPAQUE BLUE",
     "cavity": 2,
@@ -10134,6 +11055,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001939",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - DETERGENT BOX M06 - BLUE",
     "cavity": 2,
@@ -10145,6 +11067,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001725",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - KNOB DECO M04 - 7.5 KG BLUE",
     "cavity": 5,
@@ -10156,6 +11079,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003732",
+    "plant_id": "1040",
     "part_no": "W11784790",
     "material_description": "PEDESTAL GROMMET ASSY WINE GEN-Y W11784790",
     "cavity": 1,
@@ -10167,6 +11091,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003733",
+    "plant_id": "1040",
     "part_no": "W11784787",
     "material_description": "PEDESTAL GROMMET ASSY GREY GEN-Y W11784787",
     "cavity": 1,
@@ -10178,6 +11103,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003734",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PEDESTAL GROMMET ASSY PURPLE GEN-Y W11784788",
     "cavity": 1,
@@ -10189,6 +11115,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003735",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PEDESTAL GROMMET ASSY BLUE MASS 200L W11784686",
     "cavity": 1,
@@ -10200,6 +11127,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003736",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PEDESTAL GROMMET ASSY WINE MASS 200L W11784685",
     "cavity": 1,
@@ -10211,6 +11139,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003738",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PEDESTAL GROMMET ASSY BLACK MASS 200L W11784688",
     "cavity": 1,
@@ -10222,6 +11151,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004882",
+    "plant_id": "1040",
     "part_no": "W11784639",
     "material_description": "PEDESTAL BASE PURPLE 200L W11784639",
     "cavity": 1,
@@ -10233,6 +11163,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004883",
+    "plant_id": "1040",
     "part_no": "W11784641",
     "material_description": "PEDESTAL BASE BLUE 200L W11784641",
     "cavity": 1,
@@ -10244,6 +11175,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004884",
+    "plant_id": "1040",
     "part_no": "W11784643",
     "material_description": "PEDESTAL BASE WINE  200L W11784643",
     "cavity": 1,
@@ -10255,6 +11187,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004885",
+    "plant_id": "1040",
     "part_no": "W11784642",
     "material_description": "PEDESTAL BASE GREY 200L W11784642",
     "cavity": 1,
@@ -10266,6 +11199,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004886",
+    "plant_id": "1040",
     "part_no": "W11784640",
     "material_description": "PEDESTAL BASE BLACK200L W11784640",
     "cavity": 1,
@@ -10277,6 +11211,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004821",
+    "plant_id": "1040",
     "part_no": "MAN61928408",
     "material_description": "BASKET DOOR OP2/3/S1 MAN61928408 (HALF LARGE)",
     "cavity": 2,
@@ -10288,6 +11223,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001572",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - TIMER PLATE WASH M06 - 12 KG WHITE",
     "cavity": 1,
@@ -10299,6 +11235,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001570",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - TIMER PLATE SPIN M06 - 12 KG WHITE",
     "cavity": 1,
@@ -10310,6 +11247,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001573",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - TIMER PLATE WATER SELECTOR M06 - 12 KG WHITE",
     "cavity": 1,
@@ -10321,6 +11259,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001551",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM- WATER SELECTOR PARTS-5 KNOB PLASTIC- M04",
     "cavity": 1,
@@ -10332,6 +11271,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002913",
+    "plant_id": "1040",
     "part_no": "W11394835",
     "material_description": "PEDESTAL FACIA CUM BASKET GRAY",
     "cavity": 1,
@@ -10343,6 +11283,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003576",
+    "plant_id": "1040",
     "part_no": "W11738383",
     "material_description": "REAR TRIM WHITE##W11738383",
     "cavity": 2,
@@ -10354,6 +11295,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003577",
+    "plant_id": "1040",
     "part_no": "W11738384",
     "material_description": "REAR TRIM GREY##W11738384",
     "cavity": 2,
@@ -10365,6 +11307,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003578",
+    "plant_id": "1040",
     "part_no": "W11738227",
     "material_description": "TOP HINGE COVER EE ANTRACITE",
     "cavity": 2,
@@ -10376,6 +11319,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003579",
+    "plant_id": "1040",
     "part_no": "W11738228",
     "material_description": "TOP HINGE COVER WHISTLER GD",
     "cavity": 2,
@@ -10387,6 +11331,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003765",
+    "plant_id": "1040",
     "part_no": "W11802783",
     "material_description": "TARSILA FACIA JAR GREY",
     "cavity": 2,
@@ -10398,6 +11343,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003766",
+    "plant_id": "1040",
     "part_no": "W11802782",
     "material_description": "TARSILA FACIA JAR WHITE",
     "cavity": 2,
@@ -10409,6 +11355,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004678",
+    "plant_id": "1040",
     "part_no": "W11766960",
     "material_description": "CAM-LOWER MULION WHITE",
     "cavity": 2,
@@ -10420,6 +11367,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004707",
+    "plant_id": "1040",
     "part_no": "W11766962",
     "material_description": "CAM-UPPER MULION WHITE",
     "cavity": 4,
@@ -10431,6 +11379,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004708",
+    "plant_id": "1040",
     "part_no": "W11767757",
     "material_description": "COVER MULLION SPRING WHITE",
     "cavity": 2,
@@ -10442,6 +11391,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004709",
+    "plant_id": "1040",
     "part_no": "W11766975",
     "material_description": "COVER MULLION SUMP WHITE",
     "cavity": 2,
@@ -10453,6 +11403,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004710",
+    "plant_id": "1040",
     "part_no": "W11766973",
     "material_description": "RETAINER MULLION COVER WHITE",
     "cavity": 2,
@@ -10464,6 +11415,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004712",
+    "plant_id": "1040",
     "part_no": "W11766961",
     "material_description": "CAM-LOWER MULLION GREY",
     "cavity": 2,
@@ -10475,6 +11427,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004713",
+    "plant_id": "1040",
     "part_no": "W11766963",
     "material_description": "CAM-UPPER MULLION GREY",
     "cavity": 4,
@@ -10486,6 +11439,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004714",
+    "plant_id": "1040",
     "part_no": "W11766968",
     "material_description": "COVER MULLION SPRING GREY",
     "cavity": 2,
@@ -10497,6 +11451,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004715",
+    "plant_id": "1040",
     "part_no": "W11766976",
     "material_description": "COVER-MULLION SUMP GREY",
     "cavity": 2,
@@ -10508,6 +11463,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004716",
+    "plant_id": "1040",
     "part_no": "W11766974",
     "material_description": "RETAINER-MULLION COVER GREY",
     "cavity": 2,
@@ -10519,6 +11475,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010001013",
+    "plant_id": "1040",
     "part_no": "70000-257",
     "material_description": "FRONT BASCULE-RH-70000-257",
     "cavity": 2,
@@ -10530,6 +11487,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003780",
+    "plant_id": "1040",
     "part_no": "3067.3011",
     "material_description": "BACKING PLATE LH 3067.3011 W502",
     "cavity": 1,
@@ -10541,6 +11499,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003781",
+    "plant_id": "1040",
     "part_no": "3067.3012",
     "material_description": "BACKING PLATE RH 3067.3012 W502",
     "cavity": 1,
@@ -10552,6 +11511,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003782",
+    "plant_id": "1040",
     "part_no": "2351.3043",
     "material_description": "POWER FOLD CASE FRAME LH 2351.3043 S220",
     "cavity": 1,
@@ -10563,6 +11523,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003783",
+    "plant_id": "1040",
     "part_no": "2351.3044",
     "material_description": "POWER FOLD CASE FRAME RH 2351.3044 S220",
     "cavity": 1,
@@ -10574,6 +11535,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003784",
+    "plant_id": "1040",
     "part_no": "2351.3041A",
     "material_description": "HOUSING FOR CAMERA LH 2351.3041 S220",
     "cavity": 1,
@@ -10585,6 +11547,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003785",
+    "plant_id": "1040",
     "part_no": "2351.3042A",
     "material_description": "HOUSING FOR CAMERA RH 2351.3042 S220",
     "cavity": 1,
@@ -10596,6 +11559,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003786",
+    "plant_id": "1040",
     "part_no": "3067.3013",
     "material_description": "SCALP LH 3067.3013 W502",
     "cavity": 1,
@@ -10607,6 +11571,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003787",
+    "plant_id": "1040",
     "part_no": "3067.3014",
     "material_description": "SCALP RH 3067.3014 W502",
     "cavity": 1,
@@ -10618,6 +11583,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003788",
+    "plant_id": "1040",
     "part_no": "2410.3029",
     "material_description": "FRICTIONAL WASHER 2410.3029 Z101",
     "cavity": 8,
@@ -10629,6 +11595,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003789",
+    "plant_id": "1040",
     "part_no": "2410.3015",
     "material_description": "BASE COVER UPPER RHD LH 2410.3015 Z101",
     "cavity": 1,
@@ -10640,6 +11607,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003790",
+    "plant_id": "1040",
     "part_no": "2410.3016",
     "material_description": "BASE COVER UPPER RHD RH 2410.3016 Z101",
     "cavity": 1,
@@ -10651,6 +11619,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003791",
+    "plant_id": "1040",
     "part_no": "2351.5013",
     "material_description": "GASKET FOR CAMERA LH 2351.5013 S220",
     "cavity": 1,
@@ -10662,6 +11631,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003792",
+    "plant_id": "1040",
     "part_no": "2351.5014",
     "material_description": "GASKET FOR CAMERA RH 2351.5014 S220",
     "cavity": 1,
@@ -10673,6 +11643,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003806",
+    "plant_id": "1040",
     "part_no": "1501614",
     "material_description": "GASKET BOLERO 1501614",
     "cavity": 2,
@@ -10684,6 +11655,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003804",
+    "plant_id": "1040",
     "part_no": "2351.9021",
     "material_description": "PAD LH SUB ASSY S220 2351.9021",
     "cavity": 1,
@@ -10695,6 +11667,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003805",
+    "plant_id": "1040",
     "part_no": "2351.9022",
     "material_description": "PAD LH SUB ASSY S220 2351.9022",
     "cavity": 1,
@@ -10706,6 +11679,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003771",
+    "plant_id": "1040",
     "part_no": "PLWC-Y020-00",
     "material_description": "PLASTIC SWC GRP 5 LINER 1A PLWC-Y020-00",
     "cavity": 1,
@@ -10717,6 +11691,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004808",
+    "plant_id": "1040",
     "part_no": "2011C1037406-00",
     "material_description": "FRONT PANEL MIDEA DYNAMIC CIRCLE 35EZ",
     "cavity": 1,
@@ -10728,6 +11703,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004809",
+    "plant_id": "1040",
     "part_no": "2011C1037506-00",
     "material_description": "MIDEA FRONT TRANSLUCENT DISPLAY COVER 35",
     "cavity": 1,
@@ -10739,6 +11715,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004240",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "CHASSIS 70 EZ",
     "cavity": 1,
@@ -10750,6 +11727,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004462",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "70-EZ2 IDU UPPER FRAME-CMI",
     "cavity": 1,
@@ -10761,6 +11739,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003852",
+    "plant_id": "1040",
     "part_no": "2410.3039",
     "material_description": "BACKING PLATE RHD LH Z121",
     "cavity": 1,
@@ -10772,6 +11751,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003853",
+    "plant_id": "1040",
     "part_no": "2410.3040",
     "material_description": "BACKING PLATE RHD RH Z121",
     "cavity": 1,
@@ -10783,6 +11763,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001571",
+    "plant_id": "1040",
     "part_no": "PLCI1260PL0025",
     "material_description": "CHASSIS (BOTTOM) 1260MM IDU",
     "cavity": 1,
@@ -10794,6 +11775,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001581",
+    "plant_id": "1040",
     "part_no": "PLCI1260PL0055",
     "material_description": "FRONT GRILLE (FRAME) 1260MM IDU(PLASTIC)",
     "cavity": 1,
@@ -10805,6 +11787,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003387",
+    "plant_id": "1040",
     "part_no": "A072103",
     "material_description": "FRONT COVER EFF EXHAUST 150MM GLOS BROWN",
     "cavity": 1,
@@ -10816,6 +11799,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001922",
+    "plant_id": "1040",
     "part_no": "PAC1I22PL00463",
     "material_description": "CHASSIS 1040 Bottom part",
     "cavity": 1,
@@ -10827,6 +11811,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001923",
+    "plant_id": "1040",
     "part_no": "PAC1I22PL00464",
     "material_description": "VOLUTE TONGUE (BOTTOM PART) 1040MM",
     "cavity": 2,
@@ -10838,6 +11823,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003458",
+    "plant_id": "1040",
     "part_no": "GL-DF0403-00177",
     "material_description": "GLASS DF LOW E-UPPER 130 GL-DF0403-00177",
     "cavity": 1,
@@ -10849,6 +11835,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003861",
+    "plant_id": "1040",
     "part_no": "W11778924",
     "material_description": "TRAY DEFROST WATER NEL W11778924",
     "cavity": 1,
@@ -10860,6 +11847,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020001799",
+    "plant_id": "1040",
     "part_no": "PAC1I22PL00253",
     "material_description": "MIDDLE FRAME (GRILL) 1040MM",
     "cavity": 1,
@@ -10871,6 +11859,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003730",
+    "plant_id": "1040",
     "part_no": "W11784789",
     "material_description": "PEDESTAL GROMMET ASSY BLUE GEN-Y (219)",
     "cavity": 1,
@@ -10882,6 +11871,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000234",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00345",
     "material_description": "LEFT SUPPORT 18K",
     "cavity": 2,
@@ -10893,6 +11883,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004441",
+    "plant_id": "1040",
     "part_no": "W11784189",
     "material_description": "CHILLER TRAY GEN Y 185/190",
     "cavity": 1,
@@ -10904,6 +11895,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000224",
+    "plant_id": "1040",
     "part_no": "PAC1I18PL00334",
     "material_description": "CONTROL BOX COVER R 18K(PLASTIC)",
     "cavity": 2,
@@ -10915,6 +11907,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003737",
+    "plant_id": "1040",
     "part_no": "W11784687",
     "material_description": "PEDESTAL GROMMET ASSY GREY MASS 200L 226",
     "cavity": 1,
@@ -10926,6 +11919,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004480",
+    "plant_id": "1040",
     "part_no": "12122000037048",
     "material_description": "PIPE CLAMP BOARD 50EZ",
     "cavity": 4,
@@ -10937,6 +11931,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004199",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB GLOSS BLACK MOLDING PART",
     "cavity": 4,
@@ -10948,6 +11943,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003821",
+    "plant_id": "1040",
     "part_no": "A122603",
     "material_description": "MAPLE BASE COVER SNOW WHITE MOLDED PART",
     "cavity": 1,
@@ -10959,6 +11955,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003769",
+    "plant_id": "1040",
     "part_no": "PLWC-Y017-00",
     "material_description": "PLASTIC-SWC GROUP 2 PLASTIC TOP FRAME BS-26",
     "cavity": 1,
@@ -10970,6 +11967,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003770",
+    "plant_id": "1040",
     "part_no": "PLWC-Y018-00",
     "material_description": "PLASTIC-SWC GROUP 3/4 PLASTIC LINER BS",
     "cavity": 1,
@@ -10981,6 +11979,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003768",
+    "plant_id": "1040",
     "part_no": "PLWC-Y016-00",
     "material_description": "PLASTIC-SWC GROUP 1 PLASTIC LINER BS",
     "cavity": 1,
@@ -10992,6 +11991,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000138",
+    "plant_id": "1040",
     "part_no": "AJP76437902",
     "material_description": "TRAY DRAWER ASSEMBLY WITH HOT STAMPING",
     "cavity": 1,
@@ -11003,6 +12003,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003755",
+    "plant_id": "1040",
     "part_no": "MAN64891712",
     "material_description": "BASKET, DOOR VT-4/6/7 MAN64891712",
     "cavity": 2,
@@ -11014,6 +12015,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003754",
+    "plant_id": "1040",
     "part_no": "MAN64891212",
     "material_description": "BASKET, DOOR VT-4/6/7 MAN64891212",
     "cavity": 2,
@@ -11025,6 +12027,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003711",
+    "plant_id": "1040",
     "part_no": "AJP76437928",
     "material_description": "TRAY ASSEMBLY DRAWER VS6 AJP76437928",
     "cavity": 2,
@@ -11036,6 +12039,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003585",
+    "plant_id": "1040",
     "part_no": "W11767345",
     "material_description": "AIRTOWER FRONT COVER  RC GREYW11767345",
     "cavity": 1,
@@ -11047,6 +12051,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003599",
+    "plant_id": "1040",
     "part_no": "W11771859",
     "material_description": "END CAP BOT, SUB ASSY, FC LH, DARK GREY",
     "cavity": 1,
@@ -11058,6 +12063,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003594",
+    "plant_id": "1040",
     "part_no": "W11771863",
     "material_description": "END CAP BOT, SUB ASSY, CC RH, DARK GREY",
     "cavity": 1,
@@ -11069,6 +12075,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003582",
+    "plant_id": "1040",
     "part_no": "W11764516",
     "material_description": "END CAP TOP RC RH WHISTLER GDW11764516",
     "cavity": 1,
@@ -11080,6 +12087,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003596",
+    "plant_id": "1040",
     "part_no": "W11764514",
     "material_description": "END CAP TOP RC LH WHISTLER GD W11764514",
     "cavity": 1,
@@ -11091,6 +12099,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003688",
+    "plant_id": "1040",
     "part_no": "MCK69997105",
     "material_description": "COVER LAMP GPPS 147F(MCK69997105)",
     "cavity": 4,
@@ -11102,6 +12111,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001427",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HIGH BASE M05-8.5 KG BLUE",
     "cavity": 1,
@@ -11113,6 +12123,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003050",
+    "plant_id": "1040",
     "part_no": "A161102",
     "material_description": "SABER BOTTOM COVER OPAQUE BLACK",
     "cavity": 2,
@@ -11124,6 +12135,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003567",
+    "plant_id": "1040",
     "part_no": "W11738188",
     "material_description": "HV CONTROL BOX HOUSING",
     "cavity": 1,
@@ -11135,6 +12147,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001428",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HIGH BASE M05-8.5 KG BURG",
     "cavity": 1,
@@ -11146,6 +12159,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003756",
+    "plant_id": "1040",
     "part_no": "ACQ89947107",
     "material_description": "COVER ASSEMBLY TRAY VEGETABLE O5 ACQ8994",
     "cavity": 1,
@@ -11157,6 +12171,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004711",
+    "plant_id": "1040",
     "part_no": "W11766958",
     "material_description": "MULLION FLIPPER WHITE",
     "cavity": 2,
@@ -11168,6 +12183,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003900",
+    "plant_id": "1040",
     "part_no": "AJP76437937",
     "material_description": "TRAY DRAWER ASSEMBLY VS6 AJP76437937",
     "cavity": 1,
@@ -11179,6 +12195,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003902",
+    "plant_id": "1040",
     "part_no": "AJP76437945",
     "material_description": "TRAY DRAWER ASSEMBLY VS6 AJP76437945 HOT F",
     "cavity": 1,
@@ -11190,6 +12207,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003759",
+    "plant_id": "1040",
     "part_no": "MAN64208612",
     "material_description": "BASKET, DOOR ALPHA7 MAN64208611",
     "cavity": 2,
@@ -11201,6 +12219,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001201",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - WASH COVER M05P - TRANSPARENT BLACK",
     "cavity": 1,
@@ -11212,6 +12231,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001349",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - SPIN COVER M05P - TRANSPARENT BLACK",
     "cavity": 1,
@@ -11223,6 +12243,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001429",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM - HIGH BASE M05 - ROYAL DARK GREY",
     "cavity": 1,
@@ -11234,6 +12255,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001938",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-DETERGENT BOX M06-12 KG-BURG",
     "cavity": 2,
@@ -11245,6 +12267,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005124",
+    "plant_id": "1040",
     "part_no": "W11737992",
     "material_description": "END CAP FC LH W11737992",
     "cavity": 1,
@@ -11256,6 +12279,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005125",
+    "plant_id": "1040",
     "part_no": "W11737993",
     "material_description": "END CAP CC RH W11737993",
     "cavity": 1,
@@ -11267,6 +12291,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005122",
+    "plant_id": "1040",
     "part_no": "W11778117",
     "material_description": "END CAP GD FC LH W11778117",
     "cavity": 1,
@@ -11278,6 +12303,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005123",
+    "plant_id": "1040",
     "part_no": "W11778114",
     "material_description": "END CAP GD CC RH W11778114",
     "cavity": 1,
@@ -11289,6 +12315,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003257",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "C2-IMF-LC-MMPS-43X16 [F-0062]",
     "cavity": 4,
@@ -11300,6 +12327,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003583",
+    "plant_id": "1040",
     "part_no": "W11767476",
     "material_description": "FRONT COVER FC/CC AIRTOWER G W11767476",
     "cavity": 1,
@@ -11311,6 +12339,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003062",
+    "plant_id": "1040",
     "part_no": "1502122",
     "material_description": "CONTROL TOWER RH S101 1502122",
     "cavity": 1,
@@ -11322,6 +12351,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003063",
+    "plant_id": "1040",
     "part_no": "1502123",
     "material_description": "CONTROL TOWER LH S101 1502123",
     "cavity": 1,
@@ -11333,6 +12363,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003589",
+    "plant_id": "1040",
     "part_no": "W11767344",
     "material_description": "AIR TOWER FRONT PLASTIC, RC",
     "cavity": 1,
@@ -11344,6 +12375,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003586",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FRONT COVER FC/CC AIRTOWER W##W11767475",
     "cavity": 1,
@@ -11355,6 +12387,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003610",
+    "plant_id": "1040",
     "part_no": "W11787686",
     "material_description": "ENDCAP BOT GD, FCLH, W.G.DARK",
     "cavity": 1,
@@ -11366,6 +12399,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003608",
+    "plant_id": "1040",
     "part_no": "W11787674",
     "material_description": "ENDCAP BOT GD, CCRH, W.G.DARK",
     "cavity": 1,
@@ -11377,6 +12411,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003603",
+    "plant_id": "1040",
     "part_no": "W11787654",
     "material_description": "ENDCAP GD BOT, RCRH, W.G.DARK",
     "cavity": 1,
@@ -11388,6 +12423,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003606",
+    "plant_id": "1040",
     "part_no": "W11787664",
     "material_description": "ENDCAP GD, BOT, RCLH, W.G.DARK",
     "cavity": 1,
@@ -11399,6 +12435,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7020000139",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SCREW COVER 12F 12K INDUS",
     "cavity": 4,
@@ -11410,6 +12447,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010000422",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "LEVELLING LEG ASSY GEN-Y-W10732222-(10)",
     "cavity": 2,
@@ -11421,6 +12459,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003574",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "OUTER GRILL MC WHISTLER GD##W11738292",
     "cavity": 1,
@@ -11432,6 +12471,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005141",
+    "plant_id": "1040",
     "part_no": "W11765850",
     "material_description": "BREVERAGE RACK GREY W11765850",
     "cavity": 1,
@@ -11443,6 +12483,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010002077",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-BACK COVER M04-MIDDLE BLACK",
     "cavity": 1,
@@ -11454,6 +12495,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001372",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-PUL M02B-8KG L GRY WITHOUT ROLLER",
     "cavity": 1,
@@ -11465,6 +12507,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL1",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FALSE WALL FRONT",
     "cavity": 1,
@@ -11476,6 +12519,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL2",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER LEVER BOARD M01N+",
     "cavity": 2,
@@ -11487,6 +12531,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL3",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BASKET BALANCER",
     "cavity": 1,
@@ -11498,6 +12543,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005251",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-TWIN TUB GREY-M01N+",
     "cavity": 1,
@@ -11509,6 +12555,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRAIL5",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BASE BLACK M01N+",
     "cavity": 1,
@@ -11520,6 +12567,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL6",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "FRAME CONTROL TABLE BLACK M01N+",
     "cavity": 1,
@@ -11531,6 +12579,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL7",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "DRAIN VALVE 3 WAY",
     "cavity": 1,
@@ -11542,6 +12591,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL8",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PUMP HOUSING WHL-246",
     "cavity": 1,
@@ -11553,6 +12603,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL9",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PV ROD NATURAL",
     "cavity": 4,
@@ -11564,6 +12615,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL10",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "DRAIN VALVE 2 WAY",
     "cavity": 1,
@@ -11575,6 +12627,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL11",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAFETY COVER LID M01N+",
     "cavity": 1,
@@ -11586,6 +12639,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL12",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PULSATOR CAP M01N+",
     "cavity": 4,
@@ -11597,6 +12651,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL13",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PULSATOR INSERT M01N+",
     "cavity": 4,
@@ -11608,6 +12663,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL14",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAFETY COVER INNER M01N+",
     "cavity": 4,
@@ -11619,6 +12675,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL15",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "LID HINGE M01N+",
     "cavity": 8,
@@ -11630,6 +12687,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL16",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB DECO M01N+",
     "cavity": 4,
@@ -11641,6 +12699,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL17",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PV COVER M01N+",
     "cavity": 2,
@@ -11652,6 +12711,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL18",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "HEEL POST PLAST",
     "cavity": 4,
@@ -11663,6 +12723,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL19",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "CONTROL PANEL GLASS",
     "cavity": 1,
@@ -11674,6 +12735,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL20",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SPIN TUB M01N+",
     "cavity": 1,
@@ -11685,6 +12747,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL21",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PULSATOR M01N+",
     "cavity": 1,
@@ -11696,6 +12759,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005099",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BASKET HALF LARGE NEW CODE",
     "cavity": 2,
@@ -11707,6 +12771,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL22",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "BRACKET FOR CAMERA LH/RH",
     "cavity": 2,
@@ -11718,6 +12783,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL23",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WASH COVER & SPIN LID GLASS M05",
     "cavity": 2,
@@ -11729,6 +12795,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL24",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "EXTRA LEG M01N+",
     "cavity": 4,
@@ -11740,6 +12807,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL25",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB M01N+ WM49",
     "cavity": 5,
@@ -11751,6 +12819,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "TRIAL26",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TOP COVER FRAME M05 WM47",
     "cavity": 1,
@@ -11762,6 +12831,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001359",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SPIN LID M05G-ROYAL DARK GRAY",
     "cavity": 1,
@@ -11773,6 +12843,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001217",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-WASH LID M05G-ROYAL DARK GRAY",
     "cavity": 1,
@@ -11784,6 +12855,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003575",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "OUTER_GRILL,MC-GREY",
     "cavity": 1,
@@ -11795,6 +12867,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005255",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "WATER LEVEL BOARD  (LINT FILTER STAND WHITE)",
     "cavity": 2,
@@ -11806,6 +12879,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001478",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "PANEL GLASS",
     "cavity": 1,
@@ -11817,6 +12891,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005213",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "KNOB DECO M04/05",
     "cavity": 5,
@@ -11828,6 +12903,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005258",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-SPIN & WASH COVER HINGE-M01N+",
     "cavity": 8,
@@ -11839,6 +12915,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005259",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PULSATOR CAP-WHITE-M01N+",
     "cavity": 4,
@@ -11850,6 +12927,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001947",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-DRAIN VALVE 2 WAY M03-7.5 KG",
     "cavity": 1,
@@ -11861,6 +12939,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005260",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-SPIN BASKET-GREY-M01N+",
     "cavity": 1,
@@ -11872,6 +12951,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001360",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-MAIN BASE M01N-BLACK",
     "cavity": 1,
@@ -11883,6 +12963,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003645",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SPIN & WASH LID HING-M01N+",
     "cavity": 8,
@@ -11894,6 +12975,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001297",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TOP COVER FRAME M05 WM47",
     "cavity": 1,
@@ -11905,6 +12987,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005254",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-BACK COVER-GREY-M01N+",
     "cavity": 1,
@@ -11916,6 +12999,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005270",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-BACK COVER WHITE-M01N+",
     "cavity": 1,
@@ -11927,6 +13011,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005253",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-4 LEGS ABCD BLACK-M01N+",
     "cavity": 1,
@@ -11938,6 +13023,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005252",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-MAIN BASE BLACK-M01N+",
     "cavity": 1,
@@ -11949,6 +13035,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003641",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-1-M01N+ BLACK",
     "cavity": 1,
@@ -11960,6 +13047,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003642",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-2-M01N+ BLACK",
     "cavity": 1,
@@ -11971,6 +13059,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003643",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-3-M01N+ BLACK",
     "cavity": 1,
@@ -11982,6 +13071,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003644",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-4-M01N+ BLACK",
     "cavity": 1,
@@ -11993,6 +13083,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005268",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-MAIN BASE-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12004,6 +13095,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005256",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PULSATOR ASSEMBLY WHITE M01N+",
     "cavity": 1,
@@ -12015,6 +13107,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005261",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-BALANCER SPIN BASKET UPPER-M01N+",
     "cavity": 1,
@@ -12026,6 +13119,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005267",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-TWIN TUB WHITE-M01N+",
     "cavity": 1,
@@ -12037,6 +13131,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003640",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-TOP COVER M01N+ BLACK",
     "cavity": 1,
@@ -12048,6 +13143,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001604",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SCREW CAP M02-8 KG BLACK",
     "cavity": 2,
@@ -12059,6 +13155,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005264",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PV CASE 2WAY-M01N+(DRAIN VALVE 2 WAY M01N+)",
     "cavity": 1,
@@ -12070,6 +13167,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003702",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SAFETY COVER LID-M01N+",
     "cavity": 1,
@@ -12081,6 +13179,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003687",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-1-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12092,6 +13191,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003688",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-2-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12103,6 +13203,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003689",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-3-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12114,6 +13215,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003690",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HEEL POST-4-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12125,6 +13227,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005269",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-4 LEGS ABCD -TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12136,6 +13239,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003653",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-TOP COVER-COOL BLUE-M01N+",
     "cavity": 1,
@@ -12147,6 +13251,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001605",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SCREW CAP M02-8 KG BLUE",
     "cavity": 1,
@@ -12158,6 +13263,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001831",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-HOSE SPIN NOZZLE(M01N+)-NAT WHITE",
     "cavity": 4,
@@ -12169,6 +13275,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004717",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "MULLION FLIPPER GREY",
     "cavity": 2,
@@ -12180,6 +13287,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005265",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PV CASE 3WAY-M01N+",
     "cavity": 1,
@@ -12191,6 +13299,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005263",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PV BELLOW ROD-M01N+",
     "cavity": 4,
@@ -12202,6 +13311,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001678",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SAFETY COVER INNER CAP",
     "cavity": 1,
@@ -12213,6 +13323,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003602",
+    "plant_id": "1040",
     "part_no": "W11787650",
     "material_description": "ENDCAP GD TOP, RCRH, W.G.DARK",
     "cavity": 1,
@@ -12224,6 +13335,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003604",
+    "plant_id": "1040",
     "part_no": "W11787660",
     "material_description": "ENDCAP GD, TOP RCLH, W.G.DARK",
     "cavity": 1,
@@ -12235,6 +13347,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005257",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PULSATOR INSERT-M01N+",
     "cavity": 4,
@@ -12246,6 +13359,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003571",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "NEU-RC FAN SHROUD REAR##W11738091",
     "cavity": 1,
@@ -12257,6 +13371,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003570",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "NEU-RC FAN SHROUD FRONT##W11738090",
     "cavity": 1,
@@ -12268,6 +13383,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005304",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "HOUSING GRAVITY WD GREY W11750245UNPAINT",
     "cavity": 1,
@@ -12279,6 +13395,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005356",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG ENDCAP GD BOT, RCRH, W D G W11778146",
     "cavity": 1,
@@ -12290,6 +13407,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005357",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG ENDCAP GD, BOT RC LH W D G W11778147",
     "cavity": 1,
@@ -12301,6 +13419,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005272",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-4 LEGS ABCD GREY-M01N+",
     "cavity": 4,
@@ -12312,6 +13431,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003898",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "TRAY ASSEMBLY,FRESH ROOM OP3 AJP36813014",
     "cavity": 1,
@@ -12323,6 +13443,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005271",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-MAIN BASE GREY-M01N+",
     "cavity": 1,
@@ -12334,6 +13455,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004040",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-TOP COVER M01N+ GREY",
     "cavity": 1,
@@ -12345,6 +13467,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001614",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-SCREW CAP M02-8 KGGREY",
     "cavity": 2,
@@ -12356,6 +13479,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004041",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-HEEL POST-1-M01N+ GREY",
     "cavity": 1,
@@ -12367,6 +13491,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004042",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-HEEL POST-2-M01N+ GREY",
     "cavity": 1,
@@ -12378,6 +13503,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004043",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-HEEL POST-3-M01N+ GREY",
     "cavity": 1,
@@ -12389,6 +13515,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004044",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-HEEL POST-4-M01N+ GREY",
     "cavity": 1,
@@ -12400,6 +13527,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010004718",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "HOUSING HMI BLACK",
     "cavity": 1,
@@ -12411,6 +13539,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005362",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG END CAP BOT, FC LH, D GREY W11737994",
     "cavity": 1,
@@ -12422,6 +13551,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005363",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG END CAP BOT, CC RH, D GREY W11737995",
     "cavity": 1,
@@ -12433,6 +13563,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005360",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG END CAP BOT, FC LH, GREY W11737994",
     "cavity": 1,
@@ -12444,6 +13575,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005361",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG END CAP BOT CC RH, D GREY W11737995",
     "cavity": 1,
@@ -12455,6 +13587,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010003657",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-TOP COVER-TAZO BLUE-M01N+",
     "cavity": 1,
@@ -12466,6 +13599,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005262",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-PV CASE COVER-M01N+",
     "cavity": 2,
@@ -12477,6 +13611,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003761",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "ASSEMBLY, TRAY VEGETABLES AJP75494409",
     "cavity": 1,
@@ -12488,6 +13623,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005358",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG ENDCAP BOT GD, FCLH, W D G W11778148",
     "cavity": 1,
@@ -12499,6 +13635,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005359",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SFG ENDCAP BOT GD, CC RH W D G W11778149",
     "cavity": 1,
@@ -12510,6 +13647,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003961",
+    "plant_id": "1040",
     "part_no": "3111.3023",
     "material_description": "CAMERA BRACKET ALTROZ LH 3111.3023",
     "cavity": 1,
@@ -12521,6 +13659,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003962",
+    "plant_id": "1040",
     "part_no": "3111.3024",
     "material_description": "CAMERA BRACKET ALTROZ RH 3111.3024",
     "cavity": 1,
@@ -12532,6 +13671,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010001756",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SAWM-KNOB M04/M05 G1--RDG",
     "cavity": 5,
@@ -12543,6 +13683,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003964",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "END CAP TOP RC LH COSMIC GRAY W11813546",
     "cavity": 1,
@@ -12554,6 +13695,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003963",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "END CAP TOP RC RH COSMIC GRAY W11813545",
     "cavity": 1,
@@ -12565,6 +13707,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005345",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-BACK COVER BLACK-M01N+",
     "cavity": 1,
@@ -12576,6 +13719,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005344",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-TWIN TUB BLACK-M01N+",
     "cavity": 1,
@@ -12587,6 +13731,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "7010005266",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "SASFG-LINT FILTER-M01N+",
     "cavity": 2,
@@ -12598,6 +13743,7 @@ export const SEED_MASTER = [
   },
   {
     "sap_code": "9010003921",
+    "plant_id": "1040",
     "part_no": "",
     "material_description": "INTELLI CRISPER SENSOR HOUSING WHITE W11",
     "cavity": 2,
@@ -12613,430 +13759,429 @@ export const MACHINES = [
   {
     "machine_id": "MC-BM1",
     "machine_no": "BM-1 (20L · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-BM2",
     "machine_no": "BM-2 (20L · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-1",
     "machine_no": "INJ-01 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-2",
     "machine_no": "INJ-02 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-3",
     "machine_no": "INJ-03 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-4",
     "machine_no": "INJ-04 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-5",
     "machine_no": "INJ-05 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-6",
     "machine_no": "INJ-06 (700 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-7",
     "machine_no": "INJ-07 (1000 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-8",
     "machine_no": "INJ-08 (1000 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-9",
     "machine_no": "INJ-09 (1000 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-11",
     "machine_no": "INJ-11 (120 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-12",
     "machine_no": "INJ-12 (120 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-13",
     "machine_no": "INJ-13 (150 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-14",
     "machine_no": "INJ-14 (150 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-15",
     "machine_no": "INJ-15 (150 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-16",
     "machine_no": "INJ-16 (210 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-17",
     "machine_no": "INJ-17 (350 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-18",
     "machine_no": "INJ-18 (350 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-19",
     "machine_no": "INJ-19 (350 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-20",
     "machine_no": "INJ-20 (450 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-21",
     "machine_no": "INJ-21 (250 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-23",
     "machine_no": "INJ-23 (250 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-24",
     "machine_no": "INJ-24 (280 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-25",
     "machine_no": "INJ-25 (470 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-26",
     "machine_no": "INJ-26 (470 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-27",
     "machine_no": "INJ-27 (90 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-28",
     "machine_no": "INJ-28 (90 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-29",
     "machine_no": "INJ-29 (280 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-30",
     "machine_no": "INJ-30 (250 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-31",
     "machine_no": "INJ-31 (360 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-32",
     "machine_no": "INJ-32 (450 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-33",
     "machine_no": "INJ-33 (250 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-34",
     "machine_no": "INJ-34 (300 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-35",
     "machine_no": "INJ-35 (450 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-36",
     "machine_no": "INJ-36 (450 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-37",
     "machine_no": "INJ-37 (650 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-38",
     "machine_no": "INJ-38 (450 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-39",
     "machine_no": "INJ-39 (86 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-40",
     "machine_no": "INJ-40 (86 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-41",
     "machine_no": "INJ-41 (530 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-42",
     "machine_no": "INJ-42 (650 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-44",
     "machine_no": "INJ-44 (530 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-45",
     "machine_no": "INJ-45 (530 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-46",
     "machine_no": "INJ-46 (450 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-47",
     "machine_no": "INJ-47 (450 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-48",
     "machine_no": "INJ-48 (250 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-49",
     "machine_no": "INJ-49 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-50",
     "machine_no": "INJ-50 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-51",
     "machine_no": "INJ-51 (250 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-52",
     "machine_no": "INJ-52 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-53",
     "machine_no": "INJ-53 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-54",
     "machine_no": "INJ-54 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-55",
     "machine_no": "INJ-55 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-56",
     "machine_no": "INJ-56 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-57",
     "machine_no": "INJ-57 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-59",
     "machine_no": "INJ-59 (1200 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-60",
     "machine_no": "INJ-60 (1200 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-61",
     "machine_no": "INJ-61 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-62",
     "machine_no": "INJ-62 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-63",
     "machine_no": "INJ-63 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-64",
     "machine_no": "INJ-64 (360 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-65",
     "machine_no": "INJ-65 (250 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-66",
     "machine_no": "INJ-66 (250 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-67",
     "machine_no": "INJ-67 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-68",
     "machine_no": "INJ-68 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-69",
     "machine_no": "INJ-69 (160 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-70",
     "machine_no": "INJ-70 (250 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-71",
     "machine_no": "INJ-71 (1850 TON · BAY-1)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-72",
     "machine_no": "INJ-72 (470 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-73",
     "machine_no": "INJ-73 (470 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-74",
     "machine_no": "INJ-74 (470 TON · BAY-3)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-75",
     "machine_no": "INJ-75 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-76",
     "machine_no": "INJ-76 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-77",
     "machine_no": "INJ-77 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-78",
     "machine_no": "INJ-78 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-79",
     "machine_no": "INJ-79 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-80",
     "machine_no": "INJ-80 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-81",
     "machine_no": "INJ-81 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-82",
     "machine_no": "INJ-82 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-83",
     "machine_no": "INJ-83 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-84",
     "machine_no": "INJ-84 (250 TON · BAY-4)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-85",
     "machine_no": "INJ-85 (750 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-86",
     "machine_no": "INJ-86 (1550 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   },
   {
     "machine_id": "MC-87",
     "machine_no": "INJ-87 (1080 TON · BAY-2)",
-    "plant_id": "PLANT-U01"
+    "plant_id": "1040"
   }
 ];
-
 export const SHIFTS = [
   {
     shift_id: "1",
@@ -13061,16 +14206,16 @@ export const SHIFTS = [
 ];
 
 export const LOCATIONS = [
-  { location_id: "LOC-GN", name: "Greater Noida" },
   { location_id: "LOC-PUN", name: "Pune" },
+  { location_id: "LOC-GN", name: "Greater Noida" },
   { location_id: "LOC-BHI", name: "Bhiwadi" },
 ];
 
 export const PLANTS = [
-  { plant_id: "PLANT-U01", name: "Unit-01", location_id: "LOC-GN" },
-  { plant_id: "PLANT-U02", name: "Unit-02", location_id: "LOC-GN" },
-  { plant_id: "PLANT-U03", name: "Unit-03", location_id: "LOC-PUN" },
-  { plant_id: "PLANT-U04", name: "Unit-04", location_id: "LOC-BHI" },
+  { plant_id: "1040", name: "1040 - PGEL Pune", location_id: "LOC-PUN", code: "1040" },
+  { plant_id: "PLANT-U01", name: "Unit-01 - Gr. Noida", location_id: "LOC-GN", code: "U01" },
+  { plant_id: "PLANT-U02", name: "Unit-02 - Gr. Noida", location_id: "LOC-GN", code: "U02" },
+  { plant_id: "PLANT-U04", name: "Unit-04 - Bhiwadi", location_id: "LOC-BHI", code: "U04" },
 ];
 
 export const REASON_CODES = [

@@ -9,7 +9,7 @@ import {
   LOCATIONS,
   PLANTS,
 } from "./data/seedData.js";
-import { todayStr, getProductionShiftDate, isShiftEntryLocked } from "./lib/calculations.js";
+import { todayStr, getProductionShiftDate, isShiftEntryLocked, getActiveShift } from "./lib/calculations.js";
 import { loadState, saveState, loadSession, saveSession } from "./lib/storage.js";
 import {
   getUserAccessiblePlants,
@@ -42,17 +42,35 @@ const TABS_BY_ROLE = {
 export default function App() {
   const saved = loadState();
 
-  const [master, setMaster] = useState(saved?.master ?? SEED_MASTER);
-  const [machines, setMachines] = useState(() => {
-    const loaded = saved?.machines ?? MACHINES;
-    return loaded.map((m) => {
-      if (!m.plant_id) {
-        const seedM = MACHINES.find((sm) => sm.machine_id === m.machine_id);
-        return { ...m, plant_id: seedM?.plant_id || PLANTS[0]?.plant_id || "PLANT-U01" };
+  const [master, setMaster] = useState(() => {
+    const loaded = saved?.master;
+    if (!loaded || !Array.isArray(loaded) || loaded.length < 1000) {
+      return SEED_MASTER;
+    }
+    return loaded.map((p) => {
+      if (!p.plant_id) {
+        return { ...p, plant_id: "1040" };
       }
-      return m;
+      return p;
     });
   });
+
+  const [machines, setMachines] = useState(() => {
+    const loaded = saved?.machines;
+    if (!loaded || !loaded.some((m) => m.plant_id === "1040")) {
+      return MACHINES;
+    }
+    return loaded
+      .filter((m) => !m.machine_id?.startsWith("MC-GN") && !m.machine_id?.startsWith("MC-BHI"))
+      .map((m) => {
+        const seedM = MACHINES.find((sm) => sm.machine_id === m.machine_id);
+        if (seedM) {
+          return { ...m, plant_id: seedM.plant_id };
+        }
+        return m;
+      });
+  });
+
   const [shifts, setShifts] = useState(() => {
     const loaded = saved?.shifts;
     // Migrate if missing or legacy defaults (old 8h Shift A with 06:00, or shift_id === "A" / "C")
@@ -81,6 +99,7 @@ export default function App() {
       return s;
     });
   });
+
   const [reasonCodes, setReasonCodes] = useState(() => {
     const loaded = saved?.reasonCodes ?? REASON_CODES;
     if (!loaded.some((r) => r.reason_id === "udt_others")) {
@@ -91,6 +110,7 @@ export default function App() {
     }
     return loaded;
   });
+
   const [locations, setLocations] = useState(() => {
     const loaded = saved?.locations;
     if (!loaded || loaded.some((l) => l.location_id === "LOC-AHM" || l.name === "Ahmednagar" || l.state)) {
@@ -98,13 +118,15 @@ export default function App() {
     }
     return loaded;
   });
+
   const [plants, setPlants] = useState(() => {
     const loaded = saved?.plants;
-    if (!loaded || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
+    if (!loaded || !loaded.some((p) => p.plant_id === "1040") || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
       return PLANTS;
     }
     return loaded;
   });
+
   const [users, setUsers] = useState(() => {
     const loaded = saved?.users ?? USERS;
     // Purge demo users (priya, ramesh, suresh)
@@ -139,11 +161,28 @@ export default function App() {
     });
   });
 
-  const [selectedPlantId, setSelectedPlantId] = useState(
-    saved?.selectedPlantId ?? PLANTS[0]?.plant_id ?? "PLANT-U01"
+  const [selectedPlantId, setSelectedPlantId] = useState(() => {
+    if (saved?.selectedPlantId && saved.selectedPlantId !== "PLANT-U01" && saved.selectedPlantId !== "PLANT-U03") {
+      return saved.selectedPlantId;
+    }
+    return "1040";
+  });
+
+  const [selectedShiftDate, setSelectedShiftDate] = useState(() => getProductionShiftDate(shifts));
+  const activeShift = useMemo(() => getActiveShift(shifts), [shifts]);
+  const [selectedShiftId, setSelectedShiftId] = useState(
+    () => activeShift?.shift_id || shifts[0]?.shift_id || "1"
   );
 
-  const [entries, setEntries] = useState(saved?.entries ?? SEED_ENTRIES);
+  const [entries, setEntries] = useState(() => {
+    const loaded = saved?.entries ?? SEED_ENTRIES;
+    return loaded.map((e) => {
+      if (e.plant_id === "PLANT-U01" || e.plant_id === "PLANT-U03") {
+        return { ...e, plant_id: "1040" };
+      }
+      return e;
+    });
+  });
   const [auditLog, setAuditLog] = useState(saved?.auditLog ?? []);
   
   // Session State: authenticated user from localStorage session, or null (prompts login)
@@ -359,6 +398,10 @@ export default function App() {
         plants={accessiblePlants}
         selectedPlantId={selectedPlantId}
         onPlantChange={setSelectedPlantId}
+        selectedShiftDate={selectedShiftDate}
+        onShiftDateChange={setSelectedShiftDate}
+        selectedShiftId={selectedShiftId}
+        onShiftChange={setSelectedShiftId}
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
@@ -376,6 +419,10 @@ export default function App() {
               locations={accessibleLocations}
               plants={accessiblePlants}
               selectedPlantId={selectedPlantId}
+              selectedShiftDate={selectedShiftDate}
+              onShiftDateChange={setSelectedShiftDate}
+              selectedShiftId={selectedShiftId}
+              onShiftChange={setSelectedShiftId}
               onSubmit={addEntry}
               currentUser={currentUser}
             />

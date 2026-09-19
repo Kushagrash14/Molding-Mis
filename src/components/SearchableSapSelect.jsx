@@ -365,7 +365,7 @@ export default function SearchableSapSelect({
                 No matching SAP product code found for &quot;<strong>{search}</strong>&quot;.
               </div>
             ) : (
-              filteredMaster.map((item, idx) => {
+              filteredMaster.slice(0, 60).map((item, idx) => {
                 const isSelected = item.sap_code === value;
                 const effectiveIdx = prevShiftSap && !search ? idx + 1 : idx;
                 const isHighlighted = effectiveIdx === highlightIdx;

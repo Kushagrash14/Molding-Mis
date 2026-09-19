@@ -25,9 +25,11 @@ export default function MasterAdmin({
 
   // Search states
   const [searchProduct, setSearchProduct] = useState("");
+  const [productPlantFilter, setProductPlantFilter] = useState("all");
   const [prodPage, setProdPage] = useState(1);
   const [prodPageSize, setProdPageSize] = useState(50);
   const [searchMachine, setSearchMachine] = useState("");
+  const [machinePlantFilter, setMachinePlantFilter] = useState("all");
   const [searchShift, setSearchShift] = useState("");
   const [searchReason, setSearchReason] = useState("");
   const [reasonFilterCat, setReasonFilterCat] = useState("all");
@@ -67,12 +69,13 @@ export default function MasterAdmin({
     part_wt: 0,
     run_wt: 0,
     manpower: 2,
+    plant_id: plants[0]?.plant_id || "1040",
   });
 
   const [newMachine, setNewMachine] = useState({
     machine_id: "",
     machine_no: "",
-    plant_id: plants[0]?.plant_id || "PLANT-U01",
+    plant_id: plants[0]?.plant_id || "1040",
   });
 
   const [newShift, setNewShift] = useState({
@@ -236,6 +239,7 @@ export default function MasterAdmin({
         part_wt: Number(newProduct.part_wt) || 0,
         run_wt: Number(newProduct.run_wt) || 0,
         manpower: Number(newProduct.manpower) || 2,
+        plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
       },
     ]);
 
@@ -249,6 +253,7 @@ export default function MasterAdmin({
       part_wt: 0.15,
       run_wt: 0.0,
       manpower: 2,
+      plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
     });
   }
 
@@ -286,13 +291,13 @@ export default function MasterAdmin({
       {
         machine_id: cleanId,
         machine_no: cleanName,
-        plant_id: newMachine.plant_id || plants[0]?.plant_id || "PLANT-U01",
+        plant_id: newMachine.plant_id || plants[0]?.plant_id || "1040",
       },
     ]);
     setNewMachine({
       machine_id: "",
       machine_no: "",
-      plant_id: plants[0]?.plant_id || "PLANT-U01",
+      plant_id: plants[0]?.plant_id || "1040",
     });
   }
 
@@ -482,12 +487,17 @@ export default function MasterAdmin({
   }
 
   // Filtered lists
-  const filteredProducts = master.filter(
-    (m) =>
-      m.sap_code.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      m.part_no.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      m.material_description.toLowerCase().includes(searchProduct.toLowerCase())
-  );
+  const filteredProducts = master.filter((m) => {
+    if (productPlantFilter !== "all" && (m.plant_id || "1040") !== productPlantFilter) {
+      return false;
+    }
+    const q = searchProduct.toLowerCase();
+    return (
+      m.sap_code.toLowerCase().includes(q) ||
+      m.part_no.toLowerCase().includes(q) ||
+      m.material_description.toLowerCase().includes(q)
+    );
+  });
 
   const effectiveProdPageSize =
     prodPageSize === "all" ? Math.max(filteredProducts.length, 1) : Number(prodPageSize);
@@ -501,11 +511,16 @@ export default function MasterAdmin({
           currentProdPage * effectiveProdPageSize
         );
 
-  const filteredMachines = machines.filter(
-    (m) =>
-      m.machine_id.toLowerCase().includes(searchMachine.toLowerCase()) ||
-      m.machine_no.toLowerCase().includes(searchMachine.toLowerCase())
-  );
+  const filteredMachines = machines.filter((m) => {
+    if (machinePlantFilter !== "all" && (m.plant_id || "1040") !== machinePlantFilter) {
+      return false;
+    }
+    const q = searchMachine.toLowerCase();
+    return (
+      m.machine_id.toLowerCase().includes(q) ||
+      m.machine_no.toLowerCase().includes(q)
+    );
+  });
 
   const filteredShifts = shifts.filter(
     (s) =>
@@ -1152,40 +1167,74 @@ export default function MasterAdmin({
               flexWrap: "wrap",
             }}
           >
-            <div className="search-box-pro" style={{ width: "420px" }}>
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search by SAP Code, Part Number, or Description..."
-                value={searchProduct}
-                onChange={(e) => {
-                  setSearchProduct(e.target.value);
-                  setProdPage(1);
-                }}
-              />
-              {searchProduct && (
-                <button
-                  type="button"
-                  className="clear-btn"
-                  onClick={() => {
-                    setSearchProduct("");
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+              <div className="search-box-pro" style={{ width: "360px" }}>
+                <span className="search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search by SAP Code, Part Number, or Description..."
+                  value={searchProduct}
+                  onChange={(e) => {
+                    setSearchProduct(e.target.value);
                     setProdPage(1);
                   }}
-                  title="Clear search"
+                />
+                {searchProduct && (
+                  <button
+                    type="button"
+                    className="clear-btn"
+                    onClick={() => {
+                      setSearchProduct("");
+                      setProdPage(1);
+                    }}
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--ink-muted)" }}>Plant:</span>
+                <select
+                  value={productPlantFilter}
+                  onChange={(e) => {
+                    setProductPlantFilter(e.target.value);
+                    setProdPage(1);
+                  }}
+                  style={{
+                    padding: "7px 12px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1",
+                    background: "#ffffff",
+                    color: "#0f172a",
+                  }}
                 >
-                  ✕
-                </button>
-              )}
+                  <option value="all">All Plants ({master.length})</option>
+                  {plants.map((p) => {
+                    const count = master.filter((m) => (m.plant_id || "1040") === p.plant_id).length;
+                    return (
+                      <option key={p.plant_id} value={p.plant_id}>
+                        {p.name} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
             </div>
+
             <span style={{ fontSize: "12px", color: "var(--ink-faint)" }}>
               Showing {filteredProducts.length} of {master.length} parts
             </span>
           </div>
 
           <div className="table-wrap" style={{ marginBottom: "18px" }}>
-            <table style={{ minWidth: "1150px" }}>
+            <table style={{ minWidth: "1220px" }}>
               <thead>
                 <tr>
+                  <th style={{ width: "110px", minWidth: "110px", textAlign: "center" }}>Plant</th>
                   <th style={{ width: "130px", minWidth: "130px" }}>SAP Code</th>
                   <th style={{ width: "170px", minWidth: "160px" }}>Part No.</th>
                   <th style={{ minWidth: "260px" }}>Description</th>
@@ -1201,13 +1250,29 @@ export default function MasterAdmin({
               <tbody>
                 {paginatedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={10} style={{ textAlign: "center", padding: "32px", color: "var(--ink-faint)" }}>
+                    <td colSpan={11} style={{ textAlign: "center", padding: "32px", color: "var(--ink-faint)" }}>
                       No matching products found.
                     </td>
                   </tr>
                 ) : (
                   paginatedProducts.map((m) => (
                     <tr key={m.sap_code}>
+                      <td style={{ textAlign: "center" }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            background: (m.plant_id || "1040") === "1040" ? "#e0f2fe" : "#f1f5f9",
+                            color: (m.plant_id || "1040") === "1040" ? "#0369a1" : "#475569",
+                            border: "1px solid",
+                            borderColor: (m.plant_id || "1040") === "1040" ? "#bae6fd" : "#cbd5e1",
+                          }}
+                        >
+                          {m.plant_id || "1040"}
+                        </span>
+                      </td>
                       <td className="mono" style={{ fontWeight: 600 }}>
                         {m.sap_code}
                       </td>
@@ -1355,6 +1420,22 @@ export default function MasterAdmin({
             </h4>
             <div className="grid3">
               <div className="form-row">
+                <label>Assigned Plant / Unit *</label>
+                <select
+                  value={newProduct.plant_id || plants[0]?.plant_id || "1040"}
+                  onChange={(e) => setNewProduct({ ...newProduct, plant_id: e.target.value })}
+                >
+                  {plants.map((p) => {
+                    const l = locations.find((loc) => loc.location_id === p.location_id);
+                    return (
+                      <option key={p.plant_id} value={p.plant_id}>
+                        {p.name} {l ? `(${l.name})` : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div className="form-row">
                 <label>SAP Code *</label>
                 <input
                   value={newProduct.sap_code}
@@ -1468,6 +1549,24 @@ export default function MasterAdmin({
                 </div>
 
                 <div className="grid2" style={{ gap: "12px", marginBottom: "14px" }}>
+                  <div className="form-row">
+                    <label>Assigned Plant / Unit</label>
+                    <select
+                      value={editingProduct.plant_id || "1040"}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, plant_id: e.target.value })
+                      }
+                    >
+                      {plants.map((p) => {
+                        const l = locations.find((loc) => loc.location_id === p.location_id);
+                        return (
+                          <option key={p.plant_id} value={p.plant_id}>
+                            {p.name} {l ? `(${l.name})` : ""}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                   <div className="form-row">
                     <label>Part Number</label>
                     <input
@@ -1592,25 +1691,55 @@ export default function MasterAdmin({
               flexWrap: "wrap",
             }}
           >
-            <div className="search-box-pro">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search machine ID or make/tonnage..."
-                value={searchMachine}
-                onChange={(e) => setSearchMachine(e.target.value)}
-              />
-              {searchMachine && (
-                <button
-                  type="button"
-                  className="clear-btn"
-                  onClick={() => setSearchMachine("")}
-                  title="Clear search"
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+              <div className="search-box-pro" style={{ width: "360px" }}>
+                <span className="search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search machine ID or make/tonnage..."
+                  value={searchMachine}
+                  onChange={(e) => setSearchMachine(e.target.value)}
+                />
+                {searchMachine && (
+                  <button
+                    type="button"
+                    className="clear-btn"
+                    onClick={() => setSearchMachine("")}
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--ink-muted)" }}>Plant:</span>
+                <select
+                  value={machinePlantFilter}
+                  onChange={(e) => setMachinePlantFilter(e.target.value)}
+                  style={{
+                    padding: "7px 12px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1",
+                    background: "#ffffff",
+                    color: "#0f172a",
+                  }}
                 >
-                  ✕
-                </button>
-              )}
+                  <option value="all">All Plants ({machines.length})</option>
+                  {plants.map((p) => {
+                    const count = machines.filter((m) => (m.plant_id || "1040") === p.plant_id).length;
+                    return (
+                      <option key={p.plant_id} value={p.plant_id}>
+                        {p.name} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
             </div>
+
             <span style={{ fontSize: "12px", color: "var(--ink-faint)" }}>
               {filteredMachines.length} machines configured
             </span>
@@ -1627,7 +1756,14 @@ export default function MasterAdmin({
                 </tr>
               </thead>
               <tbody>
-                {filteredMachines.map((m) => {
+                {filteredMachines.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: "center", padding: "32px", color: "var(--ink-faint)" }}>
+                      No machines found for the selected plant.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredMachines.map((m) => {
                   const p = plants.find((x) => x.plant_id === m.plant_id);
                   const l = p ? locations.find((loc) => loc.location_id === p.location_id) : null;
                   return (
@@ -1678,7 +1814,7 @@ export default function MasterAdmin({
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
