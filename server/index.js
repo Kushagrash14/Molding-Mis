@@ -179,7 +179,16 @@ app.delete("/api/users/:id", (req, res) => {
 // Entries API (Cloud-persisted for all PCs)
 app.get("/api/entries", (req, res) => {
   try {
-    res.json({ success: true, entries: cloudStorage.getEntries() });
+    let entries = cloudStorage.getEntries();
+    // Optional incremental sync: only return entries updated after ?since=ISO_TIMESTAMP
+    const { since } = req.query;
+    if (since) {
+      const sinceDate = new Date(since);
+      if (!isNaN(sinceDate)) {
+        entries = entries.filter((e) => e.updated_at && new Date(e.updated_at) > sinceDate);
+      }
+    }
+    res.json({ success: true, entries });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

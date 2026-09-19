@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   SEED_MASTER,
   USERS,
@@ -184,6 +184,15 @@ export default function App() {
     });
   });
   const [auditLog, setAuditLog] = useState(saved?.auditLog ?? []);
+
+  // Ref to track which machine_ids operator is actively typing in (never overwrite these during sync)
+  const dirtyMachinesRef = useRef(new Set());
+
+  // Callback passed to EntryForm so it can report dirty machines in real-time
+  const handleDirtyChange = useCallback((dirtySet) => {
+    dirtyMachinesRef.current = dirtySet;
+  }, []);
+
   
   // Session State: authenticated user from localStorage session, or null (prompts login)
   const [currentUser, setCurrentUser] = useState(() => {
@@ -292,9 +301,55 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shifts]);
 
-  // Central AWS Cloud Sync: fetch initial bootstrap and poll every 15s
+  // Central AWS Cloud Sync: smart merge — never overwrite rows operator is actively editing
   useEffect(() => {
     let isMounted = true;
+
+    // Smart merge: cloud data wins ONLY for machines not currently dirty (being typed in)
+    function smartMergeEntries(incomingEntries) {
+      setEntries((prev) => {
+        const dirty = dirtyMachinesRef.current; // Set<machine_id> currently being edited
+        if (!dirty || dirty.size === 0) {
+          // No active editing — safe to take cloud data as-is
+          return incomingEntries;
+        }
+        // Build a map of current local entries for fast lookup
+        const localMap = new Map(prev.map((e) => [e.entry_id, e]));
+        const result = [];
+        const handled = new Set();
+
+        // Process cloud entries
+        for (const cloudEntry of incomingEntries) {
+          const key = `${cloudEntry.shift_date}__${cloudEntry.shift_id}__${cloudEntry.machine_id}__${cloudEntry.plant_id || "1040"}`;
+          if (dirty.has(cloudEntry.machine_id)) {
+            // Operator is actively editing this machine → keep local version
+            const localVer = localMap.get(cloudEntry.entry_id) ||
+              prev.find(
+                (e) =>
+                  e.machine_id === cloudEntry.machine_id &&
+                  e.shift_date === cloudEntry.shift_date &&
+                  e.shift_id === cloudEntry.shift_id &&
+                  (e.plant_id || "1040") === (cloudEntry.plant_id || "1040")
+              );
+            result.push(localVer || cloudEntry);
+          } else {
+            // Not dirty → cloud is authoritative (another PC may have submitted this)
+            result.push(cloudEntry);
+          }
+          handled.add(key);
+        }
+
+        // Preserve any purely local entries (dirty rows not yet on cloud for today)
+        for (const localEntry of prev) {
+          const key = `${localEntry.shift_date}__${localEntry.shift_id}__${localEntry.machine_id}__${localEntry.plant_id || "1040"}`;
+          if (!handled.has(key) && dirty.has(localEntry.machine_id)) {
+            result.push(localEntry);
+          }
+        }
+
+        return result;
+      });
+    }
 
     async function syncFromCloud() {
       try {
@@ -307,7 +362,7 @@ export default function App() {
           setUsers(data.users);
         }
         if (Array.isArray(data.entries)) {
-          setEntries(data.entries);
+          smartMergeEntries(data.entries);
         }
         if (Array.isArray(data.master) && data.master.length > 0) {
           setMaster(data.master);
@@ -345,7 +400,8 @@ export default function App() {
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   function handleLogin(user) {
     setCurrentUser(user);
@@ -499,6 +555,7 @@ export default function App() {
               selectedShiftId={selectedShiftId}
               onShiftChange={setSelectedShiftId}
               onSubmit={addEntry}
+              onDirtyChange={handleDirtyChange}
               currentUser={currentUser}
             />
           )}

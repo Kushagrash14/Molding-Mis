@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import ShiftKpiCards from "./ShiftKpiCards.jsx";
 import MachineSheetRow from "./MachineSheetRow.jsx";
 import RejectionModal from "./RejectionModal.jsx";
@@ -116,6 +116,7 @@ export default function EntryForm({
   selectedShiftDate,
   selectedShiftId,
   onSubmit,
+  onDirtyChange,
   currentUser,
 }) {
   const plant = selectedPlantId || plants[0]?.plant_id || "1040";
@@ -160,6 +161,18 @@ export default function EntryForm({
   const [dirtyMachines, setDirtyMachines] = useState(new Set());
   const [savedMachines, setSavedMachines] = useState(new Set());
 
+  // Keep a stable ref to latest entries so the initialization effect can read current
+  // entries WITHOUT having entries in its dependency array (prevents sheet reset on sync)
+  const entriesRef = useRef(entries);
+  useEffect(() => {
+    entriesRef.current = entries;
+  }); // runs every render but does NOT trigger other effects
+
+  // Report dirty machines to parent App.jsx so sync can protect them
+  useEffect(() => {
+    onDirtyChange?.(dirtyMachines);
+  }, [dirtyMachines, onDirtyChange]);
+
   // Modals state
   const [activeRejModal, setActiveRejModal] = useState(null); // { machineId, runIdx }
   const [activeDtModal, setActiveDtModal] = useState(null);   // { machineId, runIdx }
@@ -175,13 +188,18 @@ export default function EntryForm({
     return Array.from(bays).sort();
   }, [plantMachines]);
 
-  // Initialize sheet matrix whenever plant, shift, shiftDate, or plantMachines change
+  // Initialize sheet matrix whenever plant, shift, shiftDate, or plantMachines change.
+  // IMPORTANT: `entries` is intentionally NOT in this dependency array.
+  // We read from entriesRef.current instead so that periodic cloud sync updates to `entries`
+  // do NOT reset the sheet while the operator is actively filling in data.
+  // The sheet only resets when the operator changes shift/plant/date (which is intentional).
   useEffect(() => {
+    const currentEntries = entriesRef.current;
     const initialSheet = {};
     const initialSaved = new Set();
 
     plantMachines.forEach((m) => {
-      const existing = entries.find(
+      const existing = currentEntries.find(
         (e) =>
           e.machine_id === m.machine_id &&
           e.shift_date === shiftDate &&
@@ -200,7 +218,8 @@ export default function EntryForm({
     setSheetData(initialSheet);
     setSavedMachines(initialSaved);
     setDirtyMachines(new Set());
-  }, [plantMachines, shiftDate, shift, plant, selectedShift, entries]);
+  }, [plantMachines, shiftDate, shift, plant, selectedShift]); // ← entries intentionally excluded
+
 
   // Update a single run within a machine's runs array
   const handleUpdateRun = useCallback((machineId, runIdx, fieldOrObj, val) => {
