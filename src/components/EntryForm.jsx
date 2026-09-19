@@ -188,13 +188,22 @@ export default function EntryForm({
     return Array.from(bays).sort();
   }, [plantMachines]);
 
-  // Initialize sheet matrix whenever plant, shift, shiftDate, or plantMachines change.
-  // IMPORTANT: `entries` is intentionally NOT in this dependency array.
-  // We read from entriesRef.current instead so that periodic cloud sync updates to `entries`
-  // do NOT reset the sheet while the operator is actively filling in data.
-  // The sheet only resets when the operator changes shift/plant/date (which is intentional).
+  // Stable ref to selectedShift so initialization effect can use latest value
+  // WITHOUT selectedShift being in the dependency array (prevents reset on sync)
+  const selectedShiftRef = useRef(selectedShift);
+  useEffect(() => {
+    selectedShiftRef.current = selectedShift;
+  }); // runs every render, no effect triggered
+
+  // Initialize sheet matrix whenever plant, shift ID, shiftDate, or plantMachines change.
+  // CRITICAL: `entries` and `selectedShift` are intentionally NOT in this dependency array.
+  //   - entries excluded → cloud sync (setEntries) won't reset sheet mid-entry
+  //   - selectedShift excluded → setShifts() during sync won't reset sheet
+  //     (shift ID string `shift` already handles "user switched to different shift")
+  // We use entriesRef.current and selectedShiftRef.current to read latest values safely.
   useEffect(() => {
     const currentEntries = entriesRef.current;
+    const currentShift = selectedShiftRef.current;
     const initialSheet = {};
     const initialSaved = new Set();
 
@@ -208,17 +217,18 @@ export default function EntryForm({
       );
 
       if (existing) {
-        initialSheet[m.machine_id] = convertSavedEntryToRuns(existing, selectedShift);
+        initialSheet[m.machine_id] = convertSavedEntryToRuns(existing, currentShift);
         initialSaved.add(m.machine_id);
       } else {
-        initialSheet[m.machine_id] = [createDefaultRunForShift(selectedShift)];
+        initialSheet[m.machine_id] = [createDefaultRunForShift(currentShift)];
       }
     });
 
     setSheetData(initialSheet);
     setSavedMachines(initialSaved);
     setDirtyMachines(new Set());
-  }, [plantMachines, shiftDate, shift, plant, selectedShift]); // ← entries intentionally excluded
+  }, [plantMachines, shiftDate, shift, plant]); // ← entries & selectedShift intentionally excluded
+
 
 
   // Update a single run within a machine's runs array

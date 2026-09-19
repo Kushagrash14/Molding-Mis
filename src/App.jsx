@@ -358,32 +358,41 @@ export default function App() {
         const data = await res.json();
         if (!isMounted) return;
 
+        // Deep-compare helper: only update state if data actually changed.
+        // This prevents React from re-rendering children (and triggering EntryForm's
+        // initialization useEffect) when sync returns identical data every 15s.
+        const stableSet = (setter, newData) => {
+          setter(prev =>
+            JSON.stringify(prev) === JSON.stringify(newData) ? prev : newData
+          );
+        };
+
         if (Array.isArray(data.users) && data.users.length > 0) {
-          setUsers(data.users);
+          stableSet(setUsers, data.users);
         }
         if (Array.isArray(data.entries)) {
           smartMergeEntries(data.entries);
         }
         if (Array.isArray(data.master) && data.master.length > 0) {
-          setMaster(data.master);
+          stableSet(setMaster, data.master);
         }
         if (Array.isArray(data.machines) && data.machines.length > 0) {
-          setMachines(data.machines);
+          stableSet(setMachines, data.machines);
         }
         if (Array.isArray(data.shifts) && data.shifts.length > 0) {
-          setShifts(data.shifts);
+          stableSet(setShifts, data.shifts);
         }
         if (Array.isArray(data.plants) && data.plants.length > 0) {
-          setPlants(data.plants);
+          stableSet(setPlants, data.plants);
         }
         if (Array.isArray(data.locations) && data.locations.length > 0) {
-          setLocations(data.locations);
+          stableSet(setLocations, data.locations);
         }
         if (Array.isArray(data.reasonCodes) && data.reasonCodes.length > 0) {
-          setReasonCodes(data.reasonCodes);
+          stableSet(setReasonCodes, data.reasonCodes);
         }
         if (Array.isArray(data.auditLog)) {
-          setAuditLog(data.auditLog);
+          stableSet(setAuditLog, data.auditLog);
         }
       } catch (err) {
         console.log("Cloud sync silent fallback to cache:", err.message);
