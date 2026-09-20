@@ -109,6 +109,18 @@ code, .mono {
   overflow: hidden;
 }
 
+.app {
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
 .shell {
   flex: 1;
   min-height: 0;
@@ -435,6 +447,7 @@ main.content:has(.sheet-workspace-container) {
   gap: 10px;
   margin-bottom: 8px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 @media (max-width: 1200px) {
@@ -557,6 +570,7 @@ main.content:has(.sheet-workspace-container) {
   gap: 12px;
   flex-wrap: nowrap;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  flex-shrink: 0;
 }
 
 .toolbar-left-group {
@@ -698,10 +712,32 @@ main.content:has(.sheet-workspace-container) {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   flex: 1;
   min-height: 0;
-  max-height: none;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: auto;
   position: relative;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.sheet-table-outer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.sheet-table-outer::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.sheet-table-outer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.sheet-table-outer::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .sheet-matrix-table {
@@ -723,9 +759,14 @@ main.content:has(.sheet-workspace-container) {
   padding: 8px 6px;
   border-bottom: 2px solid #cbd5e1;
   border-right: 1px solid #e2e8f0;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.sheet-matrix-table thead th:first-child {
+  text-align: left;
+  padding-left: 10px;
 }
 
 .sheet-matrix-table tbody tr td {
@@ -808,120 +849,380 @@ main.content:has(.sheet-workspace-container) {
   border-radius: 4px;
 }
 
-.mold-badge {
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 2px 7px;
+/* Start & End Time Cells */
+.cell-start-time {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.start-time-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0 auto;
+}
+
+.sub-start-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.time-badge {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 8px;
   border-radius: 5px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
 }
 
-.mold-badge.primary {
+.time-badge.start-badge {
   background: #f1f5f9;
-  color: #334155;
+  color: #1e293b;
   border: 1px solid #cbd5e1;
 }
 
-.mold-badge.secondary {
-  background: #f5f3ff;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
+.time-badge.end-badge {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  font-weight: 700;
 }
 
-.sub-timing-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sub-timing-picker {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.sub-timing-label {
-  font-size: 10px;
+.mold-order-chip {
+  font-size: 9.5px;
   font-weight: 800;
-  color: #6366f1;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #4338ca;
+  background: #e0e7ff;
+  border: 1px solid #c7d2fe;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
-.sub-mold-time-select {
-  height: 26px !important;
-  font-size: 11px !important;
+.sub-start-select {
+  height: 27px !important;
+  font-size: 11.5px !important;
   font-weight: 700 !important;
-  color: #1e293b !important;
-  background: #f8fafc !important;
-  border: 1px solid #c7d2fe !important;
+  font-family: var(--font-mono) !important;
+  color: #4338ca !important;
+  background: #eef2ff !important;
+  border: 1.5px solid #a5b4fc !important;
   border-radius: 5px !important;
   padding: 0 4px !important;
   cursor: pointer;
   outline: none !important;
-  box-shadow: none !important;
-  width: auto !important;
-  max-width: 155px;
+  width: 68px !important;
+  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.1) !important;
+  text-align: center;
 }
 
-.sub-mold-time-select:focus {
+.sub-start-select:hover:not(:disabled) {
+  border-color: #6366f1 !important;
+  background: #ffffff !important;
+}
+
+.sub-start-select:focus {
   border-color: #4f46e5 !important;
   background: #ffffff !important;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
 }
 
-.sub-timing-hrs {
-  font-size: 10px;
-  color: #64748b;
-  font-weight: 600;
+/* Sub-run start time column wrapper (select + changeover badge stacked) */
+.sub-start-col-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Compact read-only CO badge below the start time selector */
+.changeover-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 3px;
+  padding: 1px 4px;
+  cursor: pointer;
   white-space: nowrap;
 }
 
+.changeover-badge-wrap:hover {
+  background: #fde68a;
+}
+
+/* Unset state — dashed outline, dimmed, prompts user to click SAP */
+.co-badge-unset {
+  background: #fff7ed;
+  border: 1px dashed #fb923c;
+  opacity: 0.85;
+}
+
+.co-badge-unset .changeover-value {
+  color: #f97316;
+  font-size: 9px;
+}
+
+.changeover-label {
+  font-size: 8px;
+  font-weight: 800;
+  color: #92400e;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.changeover-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: #78350f;
+  font-family: var(--font-mono);
+  min-width: 16px;
+  text-align: center;
+}
+
+.changeover-unit {
+  font-size: 8px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* ============================================================
+   Change Over Time popup (inline inside the table)
+   ============================================================ */
+.co-popup-row td {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.co-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}
+
+.co-popup-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  width: 320px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  animation: coPopupIn 0.15s ease-out;
+}
+
+@keyframes coPopupIn {
+  from { opacity: 0; transform: scale(0.92) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.co-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+  border-bottom: 1px solid #fde68a;
+}
+
+.co-popup-icon { font-size: 18px; }
+
+.co-popup-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #78350f;
+}
+
+.co-popup-body {
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.co-popup-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.co-popup-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.co-step-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s;
+}
+
+.co-step-btn:hover { background: #e2e8f0; }
+
+.co-popup-input {
+  width: 72px;
+  height: 36px;
+  border: 2px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #78350f;
+  text-align: center;
+  background: #fffbeb;
+  outline: none;
+  font-family: var(--font-mono);
+  -moz-appearance: textfield;
+}
+
+.co-popup-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(251,191,36,0.25); }
+
+.co-popup-input::-webkit-inner-spin-button,
+.co-popup-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+.co-popup-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.co-popup-footer {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  justify-content: flex-end;
+}
+
+.co-btn-cancel {
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.co-btn-cancel:hover { background: #f1f5f9; }
+
+.co-btn-confirm {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+
+.co-btn-confirm:hover { opacity: 0.9; }
+
+
+/* End Time Cell */
+.cell-end-time {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Standard Cavity Cell */
+.cell-std-cav {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.std-cav-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 5px;
+  padding: 3px 6px;
+  min-width: 26px;
+  text-align: center;
+}
+
 /* SAP Select Cell */
+.cell-sap {
+  text-align: center;
+}
+
 .sheet-sap-wrapper {
-  min-width: 160px;
-  max-width: 220px;
+  width: 100%;
+  max-width: 120px;
+  margin: 0 auto;
 }
 
 .sheet-sap-wrapper .topbar-chip-select {
   width: 100%;
 }
 
+/* Compact Material Description Cell */
+.cell-part-desc {
+  width: 165px;
+  max-width: 180px;
+  padding: 5px 6px !important;
+}
+
 .part-info-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  max-width: 240px;
+  gap: 1px;
+  max-width: 175px;
 }
 
 .part-name-text {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.part-cavity-text {
-  font-size: 10.5px;
-  color: #64748b;
-  font-weight: 500;
-  white-space: nowrap;
+  max-width: 175px;
 }
 
 /* Numeric Table Inputs */
 input.sheet-input-number {
   width: 100%;
-  height: 32px !important;
+  height: 28px !important;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 0 6px !important;
-  font-size: 12px !important;
+  border-radius: 5px;
+  padding: 0 4px !important;
+  font-size: 11.5px !important;
   font-weight: 700;
   color: #0f172a;
-  text-align: right;
+  text-align: center;
   background: #ffffff;
   outline: none;
   font-family: var(--font-mono);
@@ -942,7 +1243,46 @@ input.sheet-input-number {
   cursor: not-allowed;
 }
 
+.cell-center {
+  text-align: center !important;
+}
+
+.cell-run-h {
+  text-align: center;
+}
+
+.cell-run-h .run-h-input {
+  max-width: 44px;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 2px !important;
+}
+
+.cell-oee {
+  text-align: center;
+  padding: 4px 2px !important;
+}
+
+.cell-manpower {
+  text-align: center;
+}
+
+.cell-manpower .manpower-input {
+  max-width: 44px;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 2px !important;
+}
+
+.cell-ok-prod {
+  text-align: center;
+}
+
 .cell-ok-prod .ok-input {
+  max-width: 64px;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 4px !important;
   background: #f0fdf4;
   border-color: #86efac;
   color: #15803d;
@@ -1045,6 +1385,7 @@ input.sheet-input-number {
 .actions-cluster {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
 }
 

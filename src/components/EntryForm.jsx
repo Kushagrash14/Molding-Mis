@@ -38,6 +38,8 @@ function createDefaultRunForShift(shiftObj, id = "run-1") {
     reasons: {},
     other_dt_remark: "",
     is_continued: false,
+    change_over_time: null,
+    change_over_confirmed: false,
   };
 }
 
@@ -72,6 +74,10 @@ function convertSavedEntryToRuns(entry, shiftObj) {
             : "") ||
           "",
         is_continued: Boolean(r.is_continued),
+        change_over_time: (r.change_over_time !== undefined && r.change_over_time !== null && r.change_over_time !== "")
+          ? Number(r.change_over_time)
+          : null,
+        change_over_confirmed: Boolean(r.change_over_confirmed || (r.change_over_time !== undefined && r.change_over_time !== null && r.sap_code)),
       };
     });
   }
@@ -252,7 +258,7 @@ export default function EntryForm({
   const handleAddMold = useCallback((machineId) => {
     setSheetData((prev) => {
       const curRuns = prev[machineId] || [createDefaultRunForShift(selectedShift)];
-      if (curRuns.length >= 4) return prev;
+      if (curRuns.length >= 5) return prev;
 
       const shiftStart = selectedShift?.start_time || "07:00";
       const lastRun = curRuns[curRuns.length - 1];
@@ -300,6 +306,8 @@ export default function EntryForm({
         reasons: {},
         other_dt_remark: "",
         is_continued: false,
+        change_over_time: null,
+        change_over_confirmed: false,
       };
 
       const nextRuns = [...curRuns.slice(0, -1), updatedLastRun, newRun];
@@ -353,6 +361,22 @@ export default function EntryForm({
 
     setDirtyMachines((prev) => new Set(prev).add(machineId));
   }, [selectedShift]);
+
+  // Update change_over_time for a sub-run
+  const handleUpdateChangeOver = useCallback((machineId, runIdx, minutes) => {
+    setSheetData((prev) => {
+      const curRuns = prev[machineId] || [];
+      if (runIdx <= 0 || runIdx >= curRuns.length) return prev;
+      const updated = [...curRuns];
+      updated[runIdx] = {
+        ...updated[runIdx],
+        change_over_time: Number(minutes) || 0,
+        change_over_confirmed: true,
+      };
+      return { ...prev, [machineId]: updated };
+    });
+    setDirtyMachines((prev) => new Set(prev).add(machineId));
+  }, []);
 
   // Remove a sub-mold run and re-merge hours
   const handleRemoveMold = useCallback((machineId, runIdx) => {
@@ -574,6 +598,7 @@ export default function EntryForm({
             value: Number(value),
           })),
         other_dt_remark: (r.other_dt_remark || "").trim() || null,
+        change_over_time: idx > 0 ? (Number(r.change_over_time) || 0) : 0,
       };
     });
 
@@ -834,24 +859,26 @@ export default function EntryForm({
         <table className="sheet-matrix-table">
           <thead>
             <tr>
-              <th style={{ width: "115px" }}>MACHINE</th>
-              <th style={{ width: "135px" }}>MOLD / TIMING</th>
-              <th style={{ width: "165px" }}>SAP CODE</th>
-              <th style={{ minWidth: "150px" }}>PART DESCRIPTION</th>
-              <th style={{ width: "60px" }} title="Run Hours">RUN (H)</th>
-              <th style={{ width: "60px" }} title="Running Cavity">RUN CAV</th>
-              <th style={{ width: "60px" }} title="Declared Manpower">MANPOWER</th>
-              <th style={{ width: "85px" }} title="Net Accepted Pieces">OK PROD (QTY)</th>
-              <th style={{ width: "80px" }} title="Defective Pieces / Rejections">REJECTIONS</th>
-              <th style={{ width: "80px" }} title="Total Downtime (PDT + UDT)">DOWNTIME</th>
-              <th style={{ width: "75px" }} title="Live Overall Equipment Effectiveness">OEE %</th>
-              <th style={{ width: "125px" }}>ACTIONS</th>
+              <th style={{ width: "105px", textAlign: "left", paddingLeft: "10px" }}>MACHINE</th>
+              <th style={{ width: "74px" }} title="Mold Start Time">START TIME</th>
+              <th style={{ width: "120px" }}>SAP CODE</th>
+              <th style={{ width: "165px", maxWidth: "180px", textAlign: "center" }}>MATERIAL DESCRIPTION</th>
+              <th style={{ width: "74px" }} title="Mold End Time">END TIME</th>
+              <th style={{ width: "62px" }} title="Standard Mold Cavity (from Product Master)">STD CAV</th>
+              <th style={{ width: "50px" }} title="Actual Run Hours">RUN (H)</th>
+              <th style={{ width: "58px" }} title="Running Cavity">RUN CAV</th>
+              <th style={{ width: "54px" }} title="Declared Manpower">MANPOWER</th>
+              <th style={{ width: "68px" }} title="Net Accepted Pieces (Qty)">OK PROD</th>
+              <th style={{ width: "76px" }} title="Defective Pieces / Rejections">REJECTIONS</th>
+              <th style={{ width: "76px" }} title="Total Downtime (PDT + UDT)">DOWNTIME</th>
+              <th style={{ width: "52px" }} title="Live Overall Equipment Effectiveness">OEE %</th>
+              <th style={{ width: "118px" }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             {filteredMachines.length === 0 ? (
               <tr>
-                <td colSpan="12" className="sheet-empty-cell">
+                <td colSpan="14" className="sheet-empty-cell">
                   <div style={{ padding: "40px 20px", textAlign: "center", color: "#64748b" }}>
                     <div style={{ fontSize: "28px", marginBottom: "8px" }}>🏭</div>
                     <div style={{ fontWeight: 700, fontSize: "14px", color: "#334155" }}>
@@ -883,6 +910,9 @@ export default function EntryForm({
                     }
                     onUpdateStartTime={(runIdx, newStartTime) =>
                       handleUpdateStartTime(m.machine_id, runIdx, newStartTime)
+                    }
+                    onUpdateChangeOver={(runIdx, minutes) =>
+                      handleUpdateChangeOver(m.machine_id, runIdx, minutes)
                     }
                     onAddMold={() => handleAddMold(m.machine_id)}
                     onRemoveMold={(runIdx) => handleRemoveMold(m.machine_id, runIdx)}

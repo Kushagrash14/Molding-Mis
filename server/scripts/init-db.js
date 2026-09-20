@@ -92,7 +92,7 @@ async function main() {
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS products (
-      sap_code VARCHAR(50) PRIMARY KEY,
+      sap_code VARCHAR(50) NOT NULL,
       part_no VARCHAR(100),
       material_description VARCHAR(255) NOT NULL,
       cavity INT DEFAULT 1,
@@ -101,7 +101,8 @@ async function main() {
       part_wt DECIMAL(8,4) DEFAULT 0.0000,
       run_wt DECIMAL(8,4) DEFAULT 0.0000,
       manpower INT DEFAULT 1,
-      plant_id VARCHAR(50) DEFAULT '1040'
+      plant_id VARCHAR(50) NOT NULL DEFAULT '1040',
+      PRIMARY KEY (sap_code, plant_id)
     ) ENGINE=InnoDB;
   `);
 

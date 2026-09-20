@@ -44,7 +44,7 @@ export default function App() {
 
   const [master, setMaster] = useState(() => {
     const loaded = saved?.master;
-    if (!loaded || !Array.isArray(loaded) || loaded.length < 1000) {
+    if (!loaded || !Array.isArray(loaded) || loaded.length < 1500 || !loaded.some((p) => p.plant_id === "2020")) {
       return SEED_MASTER;
     }
     return loaded.map((p) => {
@@ -57,7 +57,7 @@ export default function App() {
 
   const [machines, setMachines] = useState(() => {
     const loaded = saved?.machines;
-    if (!loaded || !loaded.some((m) => m.plant_id === "1040")) {
+    if (!loaded || !loaded.some((m) => m.plant_id === "1040") || !loaded.some((m) => m.plant_id === "2020")) {
       return MACHINES;
     }
     return loaded
@@ -121,7 +121,7 @@ export default function App() {
 
   const [plants, setPlants] = useState(() => {
     const loaded = saved?.plants;
-    if (!loaded || !loaded.some((p) => p.plant_id === "1040") || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
+    if (!loaded || !loaded.some((p) => p.plant_id === "1040") || !loaded.some((p) => p.plant_id === "2020") || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
       return PLANTS;
     }
     return loaded;
@@ -527,7 +527,7 @@ export default function App() {
   const tabs = TABS_BY_ROLE[role] || TABS_BY_ROLE.operator;
 
   return (
-    <div>
+    <div className="app">
       <TopBar
         currentUser={currentUser}
         onLogout={handleLogout}

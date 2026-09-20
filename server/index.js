@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import dns from "dns";
 import { pool, testConnection } from "./db.js";
 import { cloudStorage } from "./storage.js";
 
@@ -11,6 +12,35 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
 dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config();
+
+async function createMailTransporter() {
+  const host = process.env.SMTP_HOST || "smtp.office365.com";
+  let targetHost = host;
+  try {
+    targetHost = await new Promise((resolve, reject) => {
+      dns.lookup(host, { family: 4 }, (err, address) => {
+        if (err) reject(err);
+        else resolve(address);
+      });
+    });
+  } catch (err) {
+    console.warn("[OTP] DNS lookup fallback, using host:", host);
+  }
+
+  return nodemailer.createTransport({
+    host: targetHost,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    tls: {
+      servername: host,
+      rejectUnauthorized: false,
+    },
+  });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,19 +73,7 @@ app.post("/api/send-otp", async (req, res) => {
       });
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.office365.com",
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        ciphers: "SSLv3",
-        rejectUnauthorized: false,
-      },
-    });
+    const transporter = await createMailTransporter();
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000;

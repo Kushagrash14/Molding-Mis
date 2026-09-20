@@ -13,6 +13,7 @@ export default function SearchableSapSelect({
   onCloseForceOpen = null,
   onTriggerClick = null,
   onOpenChange = null,
+  showCodeOnly = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -29,8 +30,9 @@ export default function SearchableSapSelect({
   useEffect(() => {
     if (forceOpen) {
       setIsOpen(true);
+      if (onCloseForceOpen) onCloseForceOpen();
     }
-  }, [forceOpen]);
+  }, [forceOpen, onCloseForceOpen]);
 
   // Focus search input when dropdown opens
   useEffect(() => {
@@ -140,7 +142,6 @@ export default function SearchableSapSelect({
         onClick={() => {
           if (disabled) return;
           if (isLockedToContinuedMold) {
-            // Locked to continued mold: only cross button works
             return;
           }
           if (onTriggerClick && onTriggerClick()) {
@@ -150,22 +151,24 @@ export default function SearchableSapSelect({
         }}
         tabIndex={disabled || isLockedToContinuedMold ? -1 : 0}
         style={{
-          minHeight: "42px",
+          minHeight: showCodeOnly ? "28px" : "42px",
+          height: showCodeOnly ? "28px" : "auto",
+          boxSizing: "border-box",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "5px 8px",
-          background: disabled ? "#f8fafc" : isLockedToContinuedMold ? "#f8fafc" : "#ffffff",
+          padding: showCodeOnly ? "0 6px" : "5px 8px",
+          background: disabled ? "#f8fafc" : isLockedToContinuedMold ? "#f0fdf4" : "#ffffff",
           border: isOpen
             ? "1.5px solid #2563eb"
             : disabled
-            ? "1.5px solid #e2e8f0"
+            ? "1px solid #e2e8f0"
             : isLockedToContinuedMold
-            ? "1.5px solid #bbf7d0"
-            : "1.5px solid #cbd5e1",
-          borderRadius: "8px",
+            ? "1.5px solid #86efac"
+            : "1px solid #cbd5e1",
+          borderRadius: showCodeOnly ? "5px" : "8px",
           cursor: disabled ? "not-allowed" : isLockedToContinuedMold ? "default" : "pointer",
-          boxShadow: isOpen ? "0 0 0 3px rgba(37, 99, 235, 0.12)" : "none",
+          boxShadow: isOpen ? "0 0 0 2px rgba(37, 99, 235, 0.12)" : "none",
           transition: "all 0.15s ease",
         }}
       >
@@ -174,19 +177,28 @@ export default function SearchableSapSelect({
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span
                 className="mono"
-                style={{
-                  fontWeight: 800,
-                  color: "#0f172a",
-                  fontSize: "12.5px",
-                  background: isLockedToContinuedMold ? "#dcfce7" : "#f1f5f9",
-                  padding: "1px 5px",
-                  borderRadius: "4px",
-                  border: isLockedToContinuedMold ? "1px solid #bbf7d0" : "none",
-                }}
+                style={
+                  showCodeOnly
+                    ? {
+                        fontWeight: 700,
+                        color: isLockedToContinuedMold ? "#166534" : "#0f172a",
+                        fontSize: "12px",
+                        letterSpacing: "0.2px",
+                      }
+                    : {
+                        fontWeight: 800,
+                        color: "#0f172a",
+                        fontSize: "12.5px",
+                        background: isLockedToContinuedMold ? "#dcfce7" : "#f1f5f9",
+                        padding: "1px 5px",
+                        borderRadius: "4px",
+                        border: isLockedToContinuedMold ? "1px solid #bbf7d0" : "none",
+                      }
+                }
               >
                 {selectedItem.sap_code}
               </span>
-              {selectedItem.part_no && (
+              {!showCodeOnly && selectedItem.part_no && (
                 <span
                   style={{
                     fontWeight: 700,
@@ -203,37 +215,57 @@ export default function SearchableSapSelect({
               )}
             </div>
           ) : (
-            <span style={{ color: "#94a3b8", fontSize: "13px" }}>{placeholder}</span>
+            <span style={{ color: "#94a3b8", fontSize: showCodeOnly ? "11px" : "13px", fontWeight: 500 }}>
+              {placeholder}
+            </span>
           )}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginLeft: "4px" }}>
           {selectedItem && !disabled && (
             <button
               type="button"
               onClick={handleClear}
               title={isLockedToContinuedMold ? "Remove continued mold (click to reset & re-decide)" : "Clear selection"}
               style={{
-                background: isLockedToContinuedMold ? "#fee2e2" : "#f1f5f9",
-                border: isLockedToContinuedMold ? "1px solid #fca5a5" : "none",
-                borderRadius: "50%",
-                width: "22px",
-                height: "22px",
+                background: "transparent",
+                border: "none",
+                borderRadius: "4px",
+                width: showCodeOnly ? "16px" : "22px",
+                height: showCodeOnly ? "16px" : "22px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "12px",
+                fontSize: showCodeOnly ? "11px" : "12px",
                 fontWeight: "bold",
-                color: isLockedToContinuedMold ? "#dc2626" : "#64748b",
+                color: isLockedToContinuedMold ? "#dc2626" : "#94a3b8",
                 cursor: "pointer",
+                padding: 0,
+                lineHeight: 1,
                 transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#ef4444";
+                e.currentTarget.style.background = "#fee2e2";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = isLockedToContinuedMold ? "#dc2626" : "#94a3b8";
+                e.currentTarget.style.background = "transparent";
               }}
             >
               ✕
             </button>
           )}
           {!isLockedToContinuedMold && (
-            <span style={{ fontSize: "11px", color: "#94a3b8", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s ease" }}>
+            <span
+              style={{
+                fontSize: showCodeOnly ? "9px" : "11px",
+                color: "#94a3b8",
+                transform: isOpen ? "rotate(180deg)" : "none",
+                transition: "transform 0.15s ease",
+                lineHeight: 1,
+              }}
+            >
               ▼
             </span>
           )}

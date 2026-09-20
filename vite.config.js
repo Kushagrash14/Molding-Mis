@@ -2,14 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import dns from "dns";
 
 dotenv.config();
 
-function otpApiPlugin() {
-  const activeOtps = new Map();
+async function createMailTransporter() {
+  const host = process.env.SMTP_HOST || "smtp.office365.com";
+  let targetHost = host;
+  try {
+    targetHost = await new Promise((resolve, reject) => {
+      dns.lookup(host, { family: 4 }, (err, address) => {
+        if (err) reject(err);
+        else resolve(address);
+      });
+    });
+  } catch (err) {
+    console.warn("[OTP] DNS lookup fallback, using host:", host);
+  }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.office365.com",
+  return nodemailer.createTransport({
+    host: targetHost,
     port: Number(process.env.SMTP_PORT) || 587,
     secure: false,
     auth: {
@@ -17,10 +29,14 @@ function otpApiPlugin() {
       pass: process.env.SMTP_PASS,
     },
     tls: {
-      ciphers: "SSLv3",
+      servername: host,
       rejectUnauthorized: false,
     },
   });
+}
+
+function otpApiPlugin() {
+  const activeOtps = new Map();
 
   return {
     name: "otp-api-plugin",
@@ -71,9 +87,12 @@ function otpApiPlugin() {
                 `,
               };
 
+              console.log(`\n========================================\n🔐 [PGEL OTP] Generated code for ${email}: ${otp}\n========================================\n`);
+
               let sent = false;
               let sendError = null;
               try {
+                const transporter = await createMailTransporter();
                 await transporter.sendMail(mailOptions);
                 sent = true;
                 console.log(`[OTP] Real security email delivered to ${email}`);
@@ -173,6 +192,12 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:5005",
+        changeOrigin: true,
+      },
+    },
   },
 });
 
