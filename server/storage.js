@@ -69,6 +69,39 @@ function loadStore() {
           store.users.push(su);
         }
       }
+
+      // Ensure seed plants exist (e.g. NGM 4010)
+      for (const sp of PLANTS) {
+        if (!store.plants.some((p) => p.plant_id === sp.plant_id)) {
+          store.plants.push(sp);
+        }
+      }
+
+      // Ensure seed machines exist
+      for (const sm of MACHINES) {
+        if (!store.machines.some((m) => m.machine_id === sm.machine_id)) {
+          store.machines.push(sm);
+        }
+      }
+
+      // Ensure seed master products exist
+      const existingSapPlantKeys = new Set(
+        store.master.map((m) => `${m.plant_id || "1040"}_${m.sap_code}`)
+      );
+      let newMasterAdded = 0;
+      for (const sm of SEED_MASTER) {
+        const key = `${sm.plant_id || "1040"}_${sm.sap_code}`;
+        if (!existingSapPlantKeys.has(key)) {
+          store.master.push(sm);
+          existingSapPlantKeys.add(key);
+          newMasterAdded++;
+        }
+      }
+      if (newMasterAdded > 0) {
+        console.log(`[CLOUD STORE] Synced ${newMasterAdded} new master products from seed data into cloud store.`);
+        saveStore();
+      }
+
       // Unlock any entries in the 1 Sep - 22 Sep 2026 window
       if (sanitizeUnlockedWindowEntries(store.entries)) {
         saveStore();
