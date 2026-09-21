@@ -80,7 +80,14 @@ export default function MachineSheetRow({
       {runs.map((r, runIdx) => {
         const isSubRun = runIdx > 0;
         const m = runMetrics[runIdx] || {};
-        const rejPcs = Object.values(r.reasons || {}).reduce((sum, v) => sum + Number(v || 0), 0);
+        const rejPcs =
+          Number(m.total_rej || 0) > 0
+            ? Number(m.total_rej)
+            : Object.entries(r.reasons || {}).reduce((sum, [k, v]) => {
+                const rc = reasonCodes.find((x) => x.reason_id === k);
+                const isRej = rc ? rc.category === "rejection" : k.startsWith("rej_");
+                return isRej ? sum + Number(v || 0) : sum;
+              }, 0);
         const dtMins = Math.round((m.planned_dt || 0) * 60 + (m.unplanned_dt || 0) * 60);
         const rMaster = master.find((item) => item.sap_code === r.sap_code);
 
