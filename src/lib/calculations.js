@@ -388,7 +388,7 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
     badge: "Current Shift",
   };
 
-  // Slot 2: Previous Shift with 12h Grace Window
+  // Slot 2: Previous Shift with 24h/48h Grace Window
   const prevIdx = (safeActiveIdx - 1 + shifts.length) % shifts.length;
   const prevShift = shifts[prevIdx];
 
@@ -398,6 +398,12 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
   const prevProdDate =
     safeActiveIdx === 0 ? addDaysToDateStr(currentProdDate, -1) : currentProdDate;
 
+  const prevDateParts = prevProdDate.split("-").map(Number);
+  const isPrevSaturday =
+    prevDateParts.length === 3 &&
+    new Date(prevDateParts[0], prevDateParts[1] - 1, prevDateParts[2]).getDay() === 6;
+  const graceBadge = isPrevSaturday ? "48h Weekend Window" : "24h Grace Window";
+
   const prevSlot = {
     key: `${prevProdDate}_${prevShift.shift_id}`,
     shift_id: prevShift.shift_id,
@@ -405,16 +411,26 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
     shift: prevShift,
     is_current: false,
     planned_hours: prevShift.planned_hours || 12,
-    label: `${prevShift.name || `Shift ${prevShift.shift_id}`} (${prevShift.start_time}–${prevShift.end_time}) — Previous Shift (12h Grace)`,
-    badge: "12h Grace Window",
+    label: `${prevShift.name || `Shift ${prevShift.shift_id}`} (${prevShift.start_time}–${prevShift.end_time}) — Previous Shift (${graceBadge})`,
+    badge: graceBadge,
   };
 
   return [currentSlot, prevSlot];
 }
 
 /**
- * Returns the exact cutoff Date when a shift's 12-hour grace period ends.
- * (12 hours after the shift's scheduled end time).
+ * Special exception window: 1 Sep 2026 to 22 Sep 2026 (inclusive).
+ * Entries within this date window are never locked.
+ */
+export function isDateInUnlockedWindow(shiftDateStr) {
+  if (!shiftDateStr) return false;
+  return shiftDateStr >= "2026-09-01" && shiftDateStr <= "2026-09-22";
+}
+
+/**
+ * Returns the exact cutoff Date when a shift's grace period ends.
+ * - Standard shifts: 24 hours after the shift's scheduled end time.
+ * - Saturday shifts: 48 hours after the shift's scheduled end time (since Sunday is factory holiday).
  */
 export function getShiftLockDeadline(shiftDateStr, shiftObj) {
   if (!shiftDateStr || !shiftObj || !shiftObj.start_time || !shiftObj.end_time) {
@@ -434,18 +450,28 @@ export function getShiftLockDeadline(shiftDateStr, shiftObj) {
     // Same-day shift (e.g. 07:00 to 19:00)
     endDate = new Date(sY, sM - 1, sD, eh || 0, em || 0, 0, 0);
   } else {
-    // Overnight shift crossing midnight (e.g. 19:00 to 07:00)
+    // Overnight shift crossing midnight (e.g. 19:00 to 07:00 next day)
     endDate = new Date(sY, sM - 1, sD + 1, eh || 0, em || 0, 0, 0);
   }
 
-  return new Date(endDate.getTime() + 12 * 60 * 60 * 1000);
+  // Check if shift date was Saturday (Day 6 in JS Date: 0=Sun, 1=Mon, ..., 6=Sat)
+  const shiftDateObj = new Date(sY, sM - 1, sD);
+  const isSaturday = shiftDateObj.getDay() === 6;
+  const graceHours = isSaturday ? 48 : 24;
+
+  return new Date(endDate.getTime() + graceHours * 60 * 60 * 1000);
 }
 
 /**
- * Checks whether an entry is past its 12-hour grace period after shift ended.
+ * Checks whether an entry is past its grace period after shift ended.
+ * - If the entry falls in the unlocked window (1-22 Sep 2026), it is NEVER locked.
+ * - Otherwise checks against the 24h standard or 48h Saturday grace deadline.
  */
-export function isEntryPastTwelveHours(entry, shifts = [], now = new Date()) {
+export function isEntryPastGracePeriod(entry, shifts = [], now = new Date()) {
   if (!entry) return true;
+  if (isDateInUnlockedWindow(entry.shift_date)) {
+    return false;
+  }
   if (entry.status === "locked") return true;
   const shiftObj = shifts.find((s) => s.shift_id === entry.shift_id) || shifts[0];
   if (!shiftObj) return false;
@@ -455,6 +481,11 @@ export function isEntryPastTwelveHours(entry, shifts = [], now = new Date()) {
 
   return now.getTime() > deadline.getTime();
 }
+
+/**
+ * Backward-compatibility alias
+ */
+export const isEntryPastTwelveHours = isEntryPastGracePeriod;
 
 /**
  * Checks whether a shift on a specific date has already started.
@@ -470,10 +501,10 @@ export function isShiftStartedYet(shiftDateStr, shiftObj, now = new Date()) {
 }
 
 /**
- * Checks whether a shift entry is locked based on the 12-hour grace period window.
+ * Checks whether a shift entry is locked based on the grace period window.
  */
 export function isShiftEntryLocked(entry, shifts = [], now = new Date()) {
-  return isEntryPastTwelveHours(entry, shifts, now);
+  return isEntryPastGracePeriod(entry, shifts, now);
 }
 
 /**

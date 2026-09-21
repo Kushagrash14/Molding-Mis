@@ -294,14 +294,38 @@ app.delete("/api/master/machines/:id", (req, res) => {
 app.post("/api/lock-cutoff", (req, res) => {
   try {
     const entries = cloudStorage.getEntries();
-    const cutoff = Date.now() - 12 * 60 * 60 * 1000;
+    const now = Date.now();
     let lockedCount = 0;
     for (const e of entries) {
-      if (e.status === "submitted" && new Date(e.created_at || 0).getTime() < cutoff) {
-        e.status = "locked";
-        e.locked_at = new Date().toISOString();
-        cloudStorage.saveEntry(e);
-        lockedCount++;
+      // Exemption: 1 Sep to 22 Sep 2026 entries are never locked
+      if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-22") {
+        if (e.status === "locked") {
+          e.status = "submitted";
+          e.locked_at = null;
+          cloudStorage.saveEntry(e);
+        }
+        continue;
+      }
+
+      if (e.status === "submitted") {
+        let graceHours = 24;
+        if (e.shift_date) {
+          const parts = e.shift_date.split("-").map(Number);
+          if (parts.length === 3) {
+            const shiftDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (shiftDateObj.getDay() === 6) {
+              graceHours = 48; // Saturday shift gets 48 hours
+            }
+          }
+        }
+        const cutoff = now - graceHours * 60 * 60 * 1000;
+        const entryTime = new Date(e.created_at || e.shift_date || 0).getTime();
+        if (entryTime < cutoff) {
+          e.status = "locked";
+          e.locked_at = new Date().toISOString();
+          cloudStorage.saveEntry(e);
+          lockedCount++;
+        }
       }
     }
     res.json({ success: true, lockedCount });

@@ -37,6 +37,21 @@ function getInitialStore() {
   };
 }
 
+function sanitizeUnlockedWindowEntries(entriesList) {
+  if (!Array.isArray(entriesList)) return false;
+  let modified = false;
+  for (const e of entriesList) {
+    if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-22") {
+      if (e.status === "locked") {
+        e.status = "submitted";
+        e.locked_at = null;
+        modified = true;
+      }
+    }
+  }
+  return modified;
+}
+
 function loadStore() {
   if (store) return store;
 
@@ -53,6 +68,10 @@ function loadStore() {
         if (!store.users.some((u) => u.id === su.id || u.email?.toLowerCase() === su.email?.toLowerCase())) {
           store.users.push(su);
         }
+      }
+      // Unlock any entries in the 1 Sep - 22 Sep 2026 window
+      if (sanitizeUnlockedWindowEntries(store.entries)) {
+        saveStore();
       }
       return store;
     } catch (err) {
@@ -160,6 +179,13 @@ export const cloudStorage = {
     if (!entry.entry_id) {
       entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     }
+
+    // Special window rule: 1 Sep to 22 Sep 2026 entries are never locked
+    if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-22") {
+      entry.status = "submitted";
+      entry.locked_at = null;
+    }
+
     const idx = s.entries.findIndex((e) => e.entry_id === entry.entry_id);
     const updatedEntry = {
       ...entry,
@@ -184,6 +210,10 @@ export const cloudStorage = {
     for (const entry of entriesList) {
       if (!entry.entry_id) {
         entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      }
+      if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-22") {
+        entry.status = "submitted";
+        entry.locked_at = null;
       }
       const idx = s.entries.findIndex((e) => e.entry_id === entry.entry_id);
       const updatedEntry = {

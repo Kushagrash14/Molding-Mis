@@ -129,7 +129,7 @@ export default function EditModal({
             }}
           >
             <span>🔒</span>
-            <span>This entry is locked (&gt;12 hours past shift cutoff). Viewed in read-only mode.</span>
+            <span>This entry is locked (past shift cutoff). Viewed in read-only mode.</span>
           </div>
         )}
 

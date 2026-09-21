@@ -761,12 +761,12 @@ export default function EntryForm({
         reasonCodes={reasonCodes}
       />
 
-      {/* 12-Hour Shift Cutoff & Upcoming Shift Status Banners */}
+      {/* Shift Cutoff & Upcoming Shift Status Banners */}
       {isPastTwelveHours && (
         <div className="shift-lock-alert-banner expired">
           <span className="lock-icon">🔒</span>
           <div className="lock-alert-text">
-            <strong>Shift Cutoff Expired (Read-Only Mode):</strong> This shift ({shiftDate} · {selectedShift.name || `Shift ${shift}`}) is past the 12-hour grace period cutoff. Historical shift records are strictly locked against modification or tampering.
+            <strong>Shift Cutoff Expired (Read-Only Mode):</strong> This shift ({shiftDate} · {selectedShift.name || `Shift ${shift}`}) is past the cutoff grace period (24 hours standard / 48 hours for Saturday shifts). Historical shift records are strictly locked against modification or tampering.
           </div>
         </div>
       )}
@@ -833,7 +833,7 @@ export default function EntryForm({
         <div className="toolbar-right-group">
           {isPastTwelveHours && (
             <div className="toolbar-lock-badge expired">
-              <span>🔒 12h Grace Window Ended</span>
+              <span>🔒 Grace Window Ended</span>
             </div>
           )}
           {isNotStartedYet && !isPastTwelveHours && (

@@ -9,7 +9,13 @@ import {
   LOCATIONS,
   PLANTS,
 } from "./data/seedData.js";
-import { todayStr, getProductionShiftDate, isShiftEntryLocked, getActiveShift } from "./lib/calculations.js";
+import {
+  todayStr,
+  getProductionShiftDate,
+  isShiftEntryLocked,
+  getActiveShift,
+  isDateInUnlockedWindow,
+} from "./lib/calculations.js";
 import { loadState, saveState, loadSession, saveSession } from "./lib/storage.js";
 import {
   getUserAccessiblePlants,
@@ -289,14 +295,21 @@ export default function App() {
     users,
   ]);
 
-  // Lock system: any submitted entry outside the eligible shift window (older than 12h grace window) gets locked automatically.
+  // Lock system: any submitted entry outside the eligible shift window (older than 24h standard / 48h weekend grace window) gets locked automatically.
+  // Exception: Entries in 1 Sep to 22 Sep 2026 are always kept unlocked.
   useEffect(() => {
     setEntries((prev) =>
-      prev.map((e) =>
-        e.status === "submitted" && isShiftEntryLocked(e, shifts)
+      prev.map((e) => {
+        if (isDateInUnlockedWindow(e.shift_date)) {
+          if (e.status === "locked") {
+            return { ...e, status: "submitted", locked_at: null };
+          }
+          return e;
+        }
+        return e.status === "submitted" && isShiftEntryLocked(e, shifts)
           ? { ...e, status: "locked", locked_at: new Date().toISOString() }
-          : e
-      )
+          : e;
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shifts]);
@@ -463,6 +476,12 @@ export default function App() {
     let count = 0;
     setEntries((prev) =>
       prev.map((e) => {
+        if (isDateInUnlockedWindow(e.shift_date)) {
+          if (e.status === "locked") {
+            return { ...e, status: "submitted", locked_at: null };
+          }
+          return e;
+        }
         if (e.status === "submitted" && isShiftEntryLocked(e, shifts)) {
           count++;
           return { ...e, status: "locked", locked_at: new Date().toISOString() };
@@ -472,8 +491,8 @@ export default function App() {
     );
     alert(
       count > 0
-        ? `${count} historical entry(ies) past 12h grace window locked.`
-        : "All submitted entries are within active shift or 12h grace window."
+        ? `${count} historical entry(ies) past shift cutoff grace window (24h standard / 48h Saturday) locked.`
+        : "All submitted entries are within active shift, grace window (24h standard / 48h Saturday), or 1–22 Sep unlocked window."
     );
   }
 
@@ -505,7 +524,7 @@ export default function App() {
   function tryEdit(entry) {
     const isLocked = entry.status === "locked" || isShiftEntryLocked(entry, shifts);
     if (currentUser?.role !== "admin" && isLocked) {
-      alert("This entry is older than 12 hours and is locked. Operators cannot edit locked records.");
+      alert("This entry is past the shift cutoff (24h standard / 48h weekend) and is locked. Operators cannot edit locked records.");
       return;
     }
     setEditing(entry);
