@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
+import { normalizeReasonsMap } from "../lib/calculations.js";
 
 export default function DowntimeModal({
   isOpen,
@@ -38,11 +39,13 @@ export default function DowntimeModal({
 
   if (!isOpen) return null;
 
+  const normReasons = useMemo(() => normalizeReasonsMap(reasons), [reasons]);
+
   // Calculate totals from currently logged reasons
   const loggedDowntimes = downtimeReasons
     .map((r) => ({
       ...r,
-      minutes: Number(reasons[r.reason_id] || 0),
+      minutes: Number(normReasons[r.reason_id] || 0),
     }))
     .filter((r) => r.minutes > 0);
 
@@ -76,7 +79,7 @@ export default function DowntimeModal({
       return;
     }
 
-    const currentVal = Number(reasons[currentReasonId] || 0);
+    const currentVal = Number(normReasons[currentReasonId] || 0);
     const reasonObj = downtimeReasons.find((r) => r.reason_id === currentReasonId);
     const reasonName = reasonObj?.name || "Downtime";
     const addedFormatted = formatDuration(entryTotalMins);

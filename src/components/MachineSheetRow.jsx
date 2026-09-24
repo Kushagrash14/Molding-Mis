@@ -1,7 +1,13 @@
 import React, { useMemo, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import SearchableSapSelect from "./SearchableSapSelect.jsx";
-import { computeMetrics, calculateHoursBetween, getStartTimeOptions } from "../lib/calculations.js";
+import {
+  computeMetrics,
+  calculateHoursBetween,
+  getStartTimeOptions,
+  calculateTotalDowntimeMinutes,
+  normalizeReasonsMap,
+} from "../lib/calculations.js";
 
 function getMachineParts(machineNo = "") {
   // Parses "INJ-01 (180 TON · BAY-1)" or "BM-1 (20L · BAY-3)"
@@ -51,10 +57,7 @@ export default function MachineSheetRow({
         {
           ...r,
           planned_hours: Number(r.planned_hours) || shiftPlannedHours,
-          reasons: Object.entries(r.reasons || {}).map(([reason_id, value]) => ({
-            reason_id,
-            value,
-          })),
+          reasons: r.reasons,
         },
         rMaster,
         reasonCodes
@@ -80,15 +83,16 @@ export default function MachineSheetRow({
       {runs.map((r, runIdx) => {
         const isSubRun = runIdx > 0;
         const m = runMetrics[runIdx] || {};
+        const reasonsMap = normalizeReasonsMap(r.reasons);
         const rejPcs =
           Number(m.total_rej || 0) > 0
             ? Number(m.total_rej)
-            : Object.entries(r.reasons || {}).reduce((sum, [k, v]) => {
+            : Object.entries(reasonsMap).reduce((sum, [k, v]) => {
                 const rc = reasonCodes.find((x) => x.reason_id === k);
                 const isRej = rc ? rc.category === "rejection" : k.startsWith("rej_");
                 return isRej ? sum + Number(v || 0) : sum;
               }, 0);
-        const dtMins = Math.round((m.planned_dt || 0) * 60 + (m.unplanned_dt || 0) * 60);
+        const dtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
         const rMaster = master.find((item) => item.sap_code === r.sap_code);
 
         // Start time options for sub-runs
@@ -332,7 +336,7 @@ export default function MachineSheetRow({
                 min="0"
                 value={r.ok_prod !== undefined ? r.ok_prod : ""}
                 onChange={(e) => onUpdateRun(runIdx, "ok_prod", e.target.value)}
-                disabled={isReadOnly || !r.sap_code}
+                disabled={isReadOnly || (!r.sap_code && dtMins < 720)}
                 placeholder="0"
                 className="sheet-input-number ok-input"
               />
@@ -358,7 +362,7 @@ export default function MachineSheetRow({
                 type="button"
                 className={`sheet-badge-btn dt-btn ${dtMins > 0 ? "has-val" : ""}`}
                 onClick={() => onOpenDowntimeModal(runIdx)}
-                disabled={isReadOnly || !r.sap_code}
+                disabled={isReadOnly}
                 title="Log Planned & Unplanned Downtime"
               >
                 <span className="dot dt" />
@@ -368,7 +372,7 @@ export default function MachineSheetRow({
 
             {/* 11. OEE % / Metrics */}
             <td className="cell-oee">
-              {r.sap_code && (Number(r.ok_prod) > 0 || dtMins >= Math.round((Number(r.planned_hours) || shiftPlannedHours) * 60)) ? (
+              {(r.sap_code || dtMins >= 720) && (Number(r.ok_prod) > 0 || dtMins >= Math.round((Number(r.planned_hours) || shiftPlannedHours) * 60)) ? (
                 <div
                   className="sheet-oee-badge"
                   style={
@@ -417,7 +421,7 @@ export default function MachineSheetRow({
                       type="button"
                       className={`btn-sheet-save ${isModified ? "is-dirty" : isSaved ? "is-saved" : ""}`}
                       onClick={onSaveRow}
-                      disabled={!r.sap_code || isReadOnly}
+                      disabled={(!r.sap_code && dtMins < Math.round((Number(r.planned_hours) || shiftPlannedHours) * 60)) || isReadOnly}
                       title="Save entry for this machine"
                     >
                       {isSaved && !isModified ? "✓ Saved" : "💾 Save"}

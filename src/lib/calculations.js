@@ -1,14 +1,57 @@
 import { REASON_CODES } from "../data/seedData.js";
 
 /**
+ * Normalizes reasons from any format (Array of objects, Object map, or nested objects) into a clean key-value map: { [reason_id]: Number(minutes/qty) }
+ */
+export function normalizeReasonsMap(reasons) {
+  if (!reasons) return {};
+  if (Array.isArray(reasons)) {
+    const map = {};
+    for (const item of reasons) {
+      if (item && item.reason_id) {
+        map[item.reason_id] = Number(item.value || item.minutes || 0);
+      }
+    }
+    return map;
+  }
+  if (typeof reasons === "object") {
+    const map = {};
+    for (const [k, v] of Object.entries(reasons)) {
+      if (typeof v === "object" && v !== null) {
+        const rId = v.reason_id || k;
+        map[rId] = Number(v.value || v.minutes || 0);
+      } else {
+        map[k] = Number(v || 0);
+      }
+    }
+    return map;
+  }
+  return {};
+}
+
+/**
+ * Calculates total downtime in minutes for any reason object/array
+ */
+export function calculateTotalDowntimeMinutes(reasons, reasonCodes = REASON_CODES) {
+  const map = normalizeReasonsMap(reasons);
+  let totalMins = 0;
+  const currentReasons = reasonCodes || REASON_CODES;
+  for (const [reason_id, val] of Object.entries(map)) {
+    const num = Number(val || 0);
+    if (num <= 0) continue;
+    const rc = currentReasons.find((x) => x.reason_id === reason_id);
+    const isDt = rc
+      ? rc.category === "planned_dt" || rc.category === "unplanned_dt"
+      : reason_id.startsWith("pdt_") || reason_id.startsWith("udt_");
+    if (isDt) {
+      totalMins += num;
+    }
+  }
+  return totalMins;
+}
+
+/**
  * Calculation engine strictly aligned with M2 DEMO.xlsx and plant MIS.
- * Formulas extracted directly from Excel row 2:
- * - Target: Col M = G2 * (I2 - P2 - Q2) * F2
- * - Quality Rate: Col AZ = N2 / (N2 + O2)
- * - Availability: Col BA = (I2 - (P2 + Q2)) / (I2 - P2)
- * - Productivity: Col BB = (N2 + O2) / M2
- * - OEE: Col BC = AZ2 * BA2 * BB2
- * - Prices & Weights: Cols BE, BF, BG, BH, BI, BJ, BK, BL, BM, BN, CW
  */
 export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   if (!entry) return {};
@@ -109,20 +152,20 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   let planned_dt = 0;
   let unplanned_dt = 0;
 
-  const reasonsList = Array.isArray(entry.reasons)
-    ? entry.reasons
-    : entry.reasons && typeof entry.reasons === "object"
-    ? Object.entries(entry.reasons).map(([reason_id, value]) => ({ reason_id, value }))
-    : [];
-
-  reasonsList.forEach((r) => {
-    const rc = currentReasons.find((x) => x.reason_id === r.reason_id);
-    if (!rc) return;
-    const val = Number(r.value) || 0;
-    if (rc.category === "rejection") total_rej += val;
-    // Downtime values in form are minutes, Excel divides by 60 for hours
-    if (rc.category === "planned_dt") planned_dt += val / 60;
-    if (rc.category === "unplanned_dt") unplanned_dt += val / 60;
+  const reasonsMap = normalizeReasonsMap(entry.reasons);
+  Object.entries(reasonsMap).forEach(([reason_id, val]) => {
+    const rc = currentReasons.find((x) => x.reason_id === reason_id);
+    const num = Number(val) || 0;
+    if (num <= 0) return;
+    if (rc) {
+      if (rc.category === "rejection") total_rej += num;
+      if (rc.category === "planned_dt") planned_dt += num / 60;
+      if (rc.category === "unplanned_dt") unplanned_dt += num / 60;
+    } else {
+      if (reason_id.startsWith("rej_")) total_rej += num;
+      if (reason_id.startsWith("pdt_")) planned_dt += num / 60;
+      if (reason_id.startsWith("udt_")) unplanned_dt += num / 60;
+    }
   });
 
   const planned_base = Number(entry.planned_hours) || 12;
@@ -168,11 +211,7 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const total_consumption = net_wt * total_produced;
 
   // Col BM: Tool Change Count
-  const tool_change_count = reasonsList.some(
-    (r) => r.reason_id === "pdt_mould_change" && Number(r.value) > 0
-  )
-    ? 1
-    : 0;
+  const tool_change_count = Number(reasonsMap["pdt_mould_change"] || 0) > 0 ? 1 : 0;
 
   // Manpower Variance
   const stdManpower = Number(itemMaster?.manpower || 2);

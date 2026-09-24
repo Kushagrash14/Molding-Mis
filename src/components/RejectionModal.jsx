@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { normalizeReasonsMap } from "../lib/calculations.js";
 
 export default function RejectionModal({
   isOpen,
@@ -19,13 +20,15 @@ export default function RejectionModal({
   const [justAddedMsg, setJustAddedMsg] = useState(null);
   const qtyInputRef = useRef(null);
 
+  const normReasons = useMemo(() => normalizeReasonsMap(reasons), [reasons]);
+
   if (!isOpen) return null;
 
   // Get list of currently logged rejections
   const loggedRejections = rejectionReasons
     .map((r) => ({
       ...r,
-      value: Number(reasons[r.reason_id] || 0),
+      value: Number(normReasons[r.reason_id] || 0),
     }))
     .filter((r) => r.value > 0);
 
@@ -38,7 +41,7 @@ export default function RejectionModal({
       alert("Please enter a valid rejection quantity (greater than 0).");
       return;
     }
-    const currentVal = Number(reasons[selectedReasonId] || 0);
+    const currentVal = Number(normReasons[selectedReasonId] || 0);
     const targetReason = rejectionReasons.find((r) => r.reason_id === selectedReasonId);
     const reasonName = targetReason?.name || "Defect";
 

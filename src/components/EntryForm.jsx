@@ -16,6 +16,8 @@ import {
   formatShiftDateDisplay,
   computeMetrics,
   getPreviousShiftInfo,
+  calculateTotalDowntimeMinutes,
+  normalizeReasonsMap,
 } from "../lib/calculations.js";
 
 function createDefaultRunForShift(shiftObj, id = "run-1") {
@@ -64,9 +66,7 @@ function convertSavedEntryToRuns(entry, shiftObj) {
         running_cavity: r.running_cavity !== undefined ? r.running_cavity : "",
         manpower: r.manpower !== undefined ? r.manpower : r.hr_mp_declare || "",
         ok_prod: r.ok_prod !== undefined ? String(r.ok_prod) : "",
-        reasons: Array.isArray(r.reasons)
-          ? r.reasons.reduce((acc, item) => ({ ...acc, [item.reason_id]: item.value }), {})
-          : r.reasons || {},
+        reasons: normalizeReasonsMap(r.reasons),
         other_dt_remark:
           r.other_dt_remark ||
           (Array.isArray(r.reasons)
@@ -103,7 +103,7 @@ function convertSavedEntryToRuns(entry, shiftObj) {
       running_cavity: entry.running_cavity !== undefined ? entry.running_cavity : "",
       manpower: entry.hr_mp_declare !== undefined ? entry.hr_mp_declare : "",
       ok_prod: entry.ok_prod !== undefined ? String(entry.ok_prod) : "",
-      reasons: reasonMap,
+      reasons: normalizeReasonsMap(entry.reasons),
       other_dt_remark: otherR?.remark || entry.other_dt_remark || "",
       is_continued: false,
     },
@@ -551,26 +551,35 @@ export default function EntryForm({
     for (let i = 0; i < runs.length; i++) {
       const r = runs[i];
       const moldLabel = `Machine ${machineId} (Mold #${i + 1})`;
-      if (!r.sap_code) {
-        alert(`${moldLabel}: Please select a SAP Product Code.`);
-        return;
-      }
 
-      // Calculate total downtime logged for this run
-      const runDtMins = Object.entries(r.reasons || {}).reduce((sum, [reason_id, val]) => {
-        const rc = reasonCodes.find((x) => x.reason_id === reason_id);
-        const isDt = rc
-          ? rc.category === "planned_dt" || rc.category === "unplanned_dt"
-          : reason_id.startsWith("pdt_") || reason_id.startsWith("udt_");
-        return isDt ? sum + Number(val || 0) : sum;
-      }, 0);
-
+      // 1. Calculate total downtime logged for this run
+      const runDtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
       const runPlannedHours = Number(r.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
       const runPlannedMins = Math.round(runPlannedHours * 60);
-      const isFullShiftDown = runDtMins >= runPlannedMins;
+      const isFullShiftDown = runDtMins >= runPlannedMins || runDtMins >= 720;
 
+      // 2. Validate SAP code
+      if (!r.sap_code) {
+        if (isFullShiftDown) {
+          const prevInfo = prevShiftMap[machineId];
+          if (prevInfo?.sap_code) {
+            r.sap_code = prevInfo.sap_code;
+            r.material_description = prevInfo.master?.material_description || "Previous Shift Mold (12h Breakdown)";
+            r.part_no = prevInfo.master?.part_no || "";
+          } else {
+            r.sap_code = "DOWN_12H";
+            r.material_description = "Machine Breakdown / Full Shift Downtime (12h)";
+            r.part_no = "N/A";
+          }
+        } else {
+          alert(`${moldLabel}: Please select a SAP Product Code.`);
+          return;
+        }
+      }
+
+      // 3. Validate OK Production
       if (isFullShiftDown) {
-        // Machine down for full shift (>= 12 hrs): 0 OK production is permitted
+        // Machine down for full shift (>= 12 hrs): 0 OK production is permitted and expected!
         if (r.ok_prod === "" || r.ok_prod === undefined || r.ok_prod === null) {
           r.ok_prod = "0";
         }
@@ -578,7 +587,7 @@ export default function EntryForm({
         // Machine operated for part of shift: OK production CANNOT be 0 or empty
         if (r.ok_prod === "" || r.ok_prod === undefined || Number(r.ok_prod) <= 0) {
           alert(
-            `${moldLabel}: OK production quantity must be greater than 0 because the machine operated during this shift (downtime is ${runDtMins}m, less than the full shift of ${runPlannedMins}m / ${runPlannedHours}h).\n\nIf the machine did not run at all, please log full shift downtime (${runPlannedMins} mins / ${runPlannedHours} hrs).`
+            `${moldLabel}: OK production quantity must be greater than 0 because the machine operated during this shift (downtime logged is ${runDtMins}m, less than shift duration of ${runPlannedMins}m / ${runPlannedHours}h).\n\nIf the machine was not operated at all for the entire shift, please log full shift downtime (${runPlannedMins} mins / ${runPlannedHours} hrs).`
           );
           return;
         }
@@ -610,6 +619,9 @@ export default function EntryForm({
     // Format entry object
     const formattedRuns = runs.map((r, idx) => {
       const rMaster = master.find((m) => m.sap_code === r.sap_code);
+      const runDtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
+      const isFullShiftDown = runDtMins >= 720 || runDtMins >= Math.round((Number(r.planned_hours) || 12) * 60);
+      const runReasonsMap = normalizeReasonsMap(r.reasons);
       return {
         run_id: r.run_id || `run-${idx + 1}-${Date.now()}`,
         order: idx + 1,
@@ -620,16 +632,16 @@ export default function EntryForm({
         sap_code: r.sap_code,
         material_description: rMaster?.material_description || r.material_description || "",
         part_no: rMaster?.part_no || r.part_no || "",
-        shots_per_hour: rMaster?.shots_per_hour || 60,
-        price: rMaster?.price || 1,
+        shots_per_hour: rMaster?.shots_per_hour || (isFullShiftDown ? 0 : 60),
+        price: rMaster?.price || (isFullShiftDown ? 0 : 1),
         part_wt: rMaster?.part_wt || 0,
         run_wt: rMaster?.run_wt || 0,
-        std_cavity: rMaster?.cavity || 1,
-        running_cavity: Number(r.running_cavity),
-        hr_mp_declare: Number(r.manpower),
-        prod_mp_declare: Number(r.manpower),
-        ok_prod: Number(r.ok_prod),
-        reasons: Object.entries(r.reasons || {})
+        std_cavity: rMaster?.cavity || Number(r.running_cavity) || 1,
+        running_cavity: Number(r.running_cavity) || 1,
+        hr_mp_declare: Number(r.manpower) || 0,
+        prod_mp_declare: Number(r.manpower) || 0,
+        ok_prod: Number(r.ok_prod) || 0,
+        reasons: Object.entries(runReasonsMap)
           .filter(([, v]) => Number(v) > 0)
           .map(([reason_id, value]) => ({
             reason_id,
@@ -719,13 +731,15 @@ export default function EntryForm({
       return next;
     });
     setSavedMachines((prev) => new Set(prev).add(machineId));
-  }, [sheetData, master, selectedShift, entries, shiftDate, shift, plant, isPastTwelveHours, currentUser, onSubmit]);
+  }, [sheetData, master, selectedShift, entries, shiftDate, shift, plant, isPastTwelveHours, currentUser, onSubmit, prevShiftMap, reasonCodes]);
 
   // Save all modified machines in batch
   const handleSaveAllModified = useCallback(() => {
     const toSave = Array.from(dirtyMachines).filter((mId) => {
       const runs = sheetData[mId] || [];
-      return runs.some((r) => Boolean(r.sap_code));
+      return runs.some(
+        (r) => Boolean(r.sap_code) || calculateTotalDowntimeMinutes(r.reasons, reasonCodes) >= 720
+      );
     });
 
     if (toSave.length === 0) {
@@ -740,7 +754,7 @@ export default function EntryForm({
     });
 
     alert(`Successfully saved ${savedCount} machine entries for ${selectedShift.name || `Shift ${shift}`}!`);
-  }, [dirtyMachines, sheetData, handleSaveMachineEntry, selectedShift, shift]);
+  }, [dirtyMachines, sheetData, handleSaveMachineEntry, selectedShift, shift, reasonCodes]);
 
   // Filter machines for table rendering based on search and status
   const filteredMachines = useMemo(() => {
@@ -986,9 +1000,10 @@ export default function EntryForm({
           sapCode={activeRejRun.sap_code}
           materialDescription={activeRejRun.material_description}
           rejectionReasons={rejectionReasons}
-          reasons={activeRejRun.reasons || {}}
+          reasons={normalizeReasonsMap(activeRejRun.reasons)}
           onUpdateReason={(reasonId, val) => {
-            const nextReasons = { ...(activeRejRun.reasons || {}), [reasonId]: val };
+            const currentMap = normalizeReasonsMap(activeRejRun.reasons);
+            const nextReasons = { ...currentMap, [reasonId]: val };
             handleUpdateRun(activeRejModal.machineId, activeRejModal.runIdx, "reasons", nextReasons);
           }}
           isReadOnly={isFormLocked}
@@ -1004,10 +1019,11 @@ export default function EntryForm({
           sapCode={activeDtRun.sap_code}
           materialDescription={activeDtRun.material_description}
           downtimeReasons={downtimeReasons}
-          reasons={activeDtRun.reasons || {}}
+          reasons={normalizeReasonsMap(activeDtRun.reasons)}
           otherDtRemark={activeDtRun.other_dt_remark || ""}
           onUpdateReason={(reasonId, val) => {
-            const nextReasons = { ...(activeDtRun.reasons || {}), [reasonId]: val };
+            const currentMap = normalizeReasonsMap(activeDtRun.reasons);
+            const nextReasons = { ...currentMap, [reasonId]: val };
             handleUpdateRun(activeDtModal.machineId, activeDtModal.runIdx, "reasons", nextReasons);
           }}
           onUpdateOtherRemark={(remark) => {
