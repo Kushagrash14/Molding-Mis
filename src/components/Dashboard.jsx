@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { computeMetrics, pct, inr } from "../lib/calculations.js";
 import { exportProductionToExcel } from "../lib/excelExport.js";
+import ExcelExportModal from "./ExcelExportModal.jsx";
 
 export default function Dashboard({
   entries,
@@ -17,6 +18,7 @@ export default function Dashboard({
   const [filterShift, setFilterShift] = useState("all");
   const [filterMachine, setFilterMachine] = useState("all");
   const [filterDate, setFilterDate] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Cascaded plants based on selected location
   const availablePlants = useMemo(() => {
@@ -234,28 +236,9 @@ export default function Dashboard({
           <button
             type="button"
             className="btn-excel-export"
-            onClick={() => {
-              const plantObj = plants.find((p) => p.plant_id === filterPlant);
-              const locObj = locations.find((l) => l.location_id === filterLocation);
-              const scopeLabel =
-                filterPlant !== "all"
-                  ? `${plantObj?.name || filterPlant}_Dashboard`
-                  : filterLocation !== "all"
-                  ? `${locObj?.name || filterLocation}_Dashboard`
-                  : "Plant_Dashboard";
-
-              exportProductionToExcel({
-                entries: filteredEntries,
-                master,
-                machines,
-                plants,
-                locations,
-                reasonCodes,
-                filterInfo: scopeLabel,
-              });
-            }}
-            disabled={filteredEntries.length === 0}
-            title="Download full executive report and filtered records to Microsoft Excel (.xlsx)"
+            onClick={() => setShowExportModal(true)}
+            disabled={entries.length === 0}
+            title="Download tailored executive report and filtered records to Microsoft Excel (.xlsx)"
           >
             <span style={{ fontSize: "14px" }}>📊</span>
             <span>Export Dashboard (.xlsx)</span>
@@ -425,6 +408,21 @@ export default function Dashboard({
             );
           })}
       </div>
+
+      {showExportModal && (
+        <ExcelExportModal
+          isOpen={true}
+          onClose={() => setShowExportModal(false)}
+          entries={entries}
+          master={master}
+          machines={machines}
+          plants={plants}
+          locations={locations}
+          reasonCodes={reasonCodes}
+          viewerRole="admin"
+          defaultPlantId={filterPlant !== "all" ? filterPlant : plants.length === 1 ? plants[0].plant_id : "all"}
+        />
+      )}
     </div>
   );
 }

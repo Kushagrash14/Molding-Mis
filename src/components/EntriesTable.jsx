@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { computeMetrics, pct, inr, isEntryPastTwelveHours } from "../lib/calculations.js";
 import { exportProductionToExcel, exportProductionToCSV } from "../lib/excelExport.js";
 import Pill from "./Pill.jsx";
+import ExcelExportModal from "./ExcelExportModal.jsx";
 
 export default function EntriesTable({
   entries,
@@ -19,6 +20,7 @@ export default function EntriesTable({
   const [filterPlant, setFilterPlant] = useState("all");
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const list = scopeToUser ? entries.filter((e) => e.entered_by === scopeToUser) : entries;
 
@@ -206,20 +208,20 @@ export default function EntriesTable({
           <button
             type="button"
             className="btn-excel-export"
-            onClick={handleExportExcel}
-            disabled={exporting || sorted.length === 0}
-            title="Export full multi-sheet Microsoft Excel (.xlsx) workbook"
+            onClick={() => setShowExportModal(true)}
+            disabled={list.length === 0}
+            title="Export tailored Microsoft Excel (.xlsx) workbook with plant and date filters"
           >
             <span style={{ fontSize: "14px" }}>📊</span>
-            <span>{exporting ? "Generating Excel..." : "Export to Excel (.xlsx)"}</span>
+            <span>Export to Excel (.xlsx)</span>
           </button>
 
           <button
             type="button"
             className="btn-csv-export"
-            onClick={handleExportCSV}
-            disabled={sorted.length === 0}
-            title="Download plain Comma-Separated Values (.csv)"
+            onClick={() => setShowExportModal(true)}
+            disabled={list.length === 0}
+            title="Export Comma-Separated Values (.csv) with plant and date filters"
           >
             📄 CSV
           </button>
@@ -418,6 +420,21 @@ export default function EntriesTable({
           </tbody>
         </table>
       </div>
+
+      {showExportModal && (
+        <ExcelExportModal
+          isOpen={true}
+          onClose={() => setShowExportModal(false)}
+          entries={list}
+          master={master}
+          machines={machines}
+          plants={plants}
+          locations={locations}
+          reasonCodes={reasonCodes}
+          viewerRole={viewerRole}
+          defaultPlantId={filterPlant !== "all" ? filterPlant : plants.length === 1 ? plants[0].plant_id : "all"}
+        />
+      )}
     </div>
   );
 }

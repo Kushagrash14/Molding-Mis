@@ -368,10 +368,29 @@ export default function MachineSheetRow({
 
             {/* 11. OEE % / Metrics */}
             <td className="cell-oee">
-              {r.sap_code && Number(r.ok_prod) > 0 ? (
-                <div className="sheet-oee-badge">
-                  <span className="oee-val">{(m.oee * 100 || 0).toFixed(0)}%</span>
-                  <span className="oee-sub">A:{(m.a * 100 || 0).toFixed(0)}% · P:{(m.p * 100 || 0).toFixed(0)}%</span>
+              {r.sap_code && (Number(r.ok_prod) > 0 || dtMins >= Math.round((Number(r.planned_hours) || shiftPlannedHours) * 60)) ? (
+                <div
+                  className="sheet-oee-badge"
+                  style={
+                    Number(r.ok_prod) === 0
+                      ? { background: "#fee2e2", borderColor: "#fca5a5" }
+                      : {}
+                  }
+                >
+                  <span
+                    className="oee-val"
+                    style={Number(r.ok_prod) === 0 ? { color: "#dc2626" } : {}}
+                  >
+                    {(m.oee * 100 || 0).toFixed(0)}%
+                  </span>
+                  <span
+                    className="oee-sub"
+                    style={Number(r.ok_prod) === 0 ? { color: "#b91c1c" } : {}}
+                  >
+                    {Number(r.ok_prod) === 0
+                      ? "Full Shift DT"
+                      : `A:${(m.a * 100 || 0).toFixed(0)}% · P:${(m.p * 100 || 0).toFixed(0)}%`}
+                  </span>
                 </div>
               ) : (
                 <span className="empty-dash">—</span>

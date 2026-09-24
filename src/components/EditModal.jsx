@@ -59,10 +59,32 @@ export default function EditModal({
       alert("Run hour must be greater than 0.");
       return;
     }
-    if (form.ok_prod === "" || Number(form.ok_prod) < 0) {
-      alert("OK production quantity cannot be negative.");
-      return;
+
+    const editDtMins = Object.entries(reasonVals).reduce((sum, [reason_id, val]) => {
+      const rc = reasonCodes.find((x) => x.reason_id === reason_id);
+      const isDt = rc
+        ? rc.category === "planned_dt" || rc.category === "unplanned_dt"
+        : reason_id.startsWith("pdt_") || reason_id.startsWith("udt_");
+      return isDt ? sum + Number(val || 0) : sum;
+    }, 0);
+
+    const plannedHrs = Number(form.planned_hours || form.run_hour || 12);
+    const plannedMins = Math.round(plannedHrs * 60);
+    const isFullShiftDown = editDtMins >= plannedMins;
+
+    if (isFullShiftDown) {
+      if (form.ok_prod === "" || form.ok_prod === undefined || Number(form.ok_prod) < 0) {
+        form.ok_prod = 0;
+      }
+    } else {
+      if (form.ok_prod === "" || form.ok_prod === undefined || Number(form.ok_prod) <= 0) {
+        alert(
+          `OK production quantity must be greater than 0 because the machine operated during this shift (downtime is ${editDtMins}m, less than the full shift of ${plannedMins}m / ${plannedHrs}h).\n\nIf the machine did not run at all, please log full shift downtime (${plannedMins} mins / ${plannedHrs} hrs).`
+        );
+        return;
+      }
     }
+
     if (Number(reasonVals["udt_others"]) > 0 && (!otherDtRemark || !otherDtRemark.trim())) {
       alert("Please specify the mandatory reason description for 'OTHERS' downtime.");
       return;

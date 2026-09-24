@@ -555,16 +555,54 @@ export default function EntryForm({
         alert(`${moldLabel}: Please select a SAP Product Code.`);
         return;
       }
-      if (r.ok_prod === "" || Number(r.ok_prod) < 0) {
-        alert(`${moldLabel}: Enter a valid OK production quantity (0 or greater).`);
-        return;
+
+      // Calculate total downtime logged for this run
+      const runDtMins = Object.entries(r.reasons || {}).reduce((sum, [reason_id, val]) => {
+        const rc = reasonCodes.find((x) => x.reason_id === reason_id);
+        const isDt = rc
+          ? rc.category === "planned_dt" || rc.category === "unplanned_dt"
+          : reason_id.startsWith("pdt_") || reason_id.startsWith("udt_");
+        return isDt ? sum + Number(val || 0) : sum;
+      }, 0);
+
+      const runPlannedHours = Number(r.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
+      const runPlannedMins = Math.round(runPlannedHours * 60);
+      const isFullShiftDown = runDtMins >= runPlannedMins;
+
+      if (isFullShiftDown) {
+        // Machine down for full shift (>= 12 hrs): 0 OK production is permitted
+        if (r.ok_prod === "" || r.ok_prod === undefined || r.ok_prod === null) {
+          r.ok_prod = "0";
+        }
+      } else {
+        // Machine operated for part of shift: OK production CANNOT be 0 or empty
+        if (r.ok_prod === "" || r.ok_prod === undefined || Number(r.ok_prod) <= 0) {
+          alert(
+            `${moldLabel}: OK production quantity must be greater than 0 because the machine operated during this shift (downtime is ${runDtMins}m, less than the full shift of ${runPlannedMins}m / ${runPlannedHours}h).\n\nIf the machine did not run at all, please log full shift downtime (${runPlannedMins} mins / ${runPlannedHours} hrs).`
+          );
+          return;
+        }
       }
+
       if (!r.running_cavity || Number(r.running_cavity) <= 0) {
-        alert(`${moldLabel}: Enter running cavity.`);
-        return;
+        if (isFullShiftDown) {
+          const rMaster = master.find((m) => m.sap_code === r.sap_code);
+          r.running_cavity = rMaster?.cavity || 1;
+        } else {
+          alert(`${moldLabel}: Enter running cavity.`);
+          return;
+        }
       }
-      if (!r.manpower || Number(r.manpower) <= 0) {
-        alert(`${moldLabel}: Enter manpower.`);
+
+      if (r.manpower === undefined || r.manpower === "" || Number(r.manpower) < 0) {
+        if (isFullShiftDown) {
+          r.manpower = 0;
+        } else {
+          alert(`${moldLabel}: Enter manpower.`);
+          return;
+        }
+      } else if (!isFullShiftDown && Number(r.manpower) <= 0) {
+        alert(`${moldLabel}: Enter manpower (must be greater than 0).`);
         return;
       }
     }
