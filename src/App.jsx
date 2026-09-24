@@ -35,8 +35,12 @@ const TABS_BY_ROLE = {
   operator: [
     ["entry", "New entry"],
     ["mine", "My entries"],
+    ["dashboard", "Dashboard"],
   ],
-  supervisor: [["browse", "Plant entries"]],
+  supervisor: [
+    ["browse", "Plant entries"],
+    ["dashboard", "Dashboard"],
+  ],
   admin: [
     ["all", "All entries"],
     ["master", "Master data"],
@@ -685,27 +689,16 @@ export default function App() {
           )}
 
           {tab === "dashboard" && (
-            <div>
-              <div className="page-head">
-                <div>
-                  <h2>Plant Performance &amp; OEE Dashboard</h2>
-                  <p>
-                    Aggregated metrics, Pareto analysis, and financial indicators rolled up from logged
-                    entries.
-                  </p>
-                </div>
-              </div>
-              <Dashboard
-                entries={authorizedEntries}
-                master={master}
-                machines={machines}
-                shifts={shifts}
-                reasonCodes={reasonCodes}
-                locations={accessibleLocations}
-                plants={accessiblePlants}
-                initialPlantId={selectedPlantId}
-              />
-            </div>
+            <Dashboard
+              entries={authorizedEntries}
+              master={master}
+              machines={machines}
+              shifts={shifts}
+              reasonCodes={reasonCodes}
+              locations={accessibleLocations}
+              plants={accessiblePlants}
+              initialPlantId={selectedPlantId}
+            />
           )}
 
           {tab === "audit" && (
