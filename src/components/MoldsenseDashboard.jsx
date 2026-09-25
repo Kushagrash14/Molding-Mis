@@ -422,44 +422,9 @@ function DailyOeeMatrixView({ matrixData = [], selectedMonth = "2026-09" }) {
     return { bg: "#fee2e2", color: "#991b1b" };                 // <75% red
   };
 
-  // SVG Chart for Machine Avg OEE
-  const width = 1000;
-  const height = 220;
-  const padLeft = 45;
-  const padRight = 35;
-  const padTop = 25;
-  const padBottom = 35;
-  const chartW = width - padLeft - padRight;
-  const chartH = height - padTop - padBottom;
-
-  const yTicks = [0, 20, 40, 60, 80, 100];
-
-  const chartPoints = useMemo(() => {
-    if (!matrixData || matrixData.length === 0) return [];
-    return matrixData.map((m, i) => {
-      const x = padLeft + (i / Math.max(1, matrixData.length - 1)) * chartW;
-      const val = Number(m.avg) || 0;
-      const normY = Math.min(1, Math.max(0, val / 100));
-      const y = padTop + chartH - normY * chartH;
-      return { x, y, val, mc: m.mc };
-    });
-  }, [matrixData, chartW, chartH, padLeft, padTop]);
-
-  const linePath = useMemo(() => createSmoothPath(chartPoints), [chartPoints]);
-
-  const areaPath = useMemo(() => {
-    if (chartPoints.length === 0) return "";
-    const first = chartPoints[0];
-    const last = chartPoints[chartPoints.length - 1];
-    const bottomY = padTop + chartH;
-    return `${linePath} L ${last.x.toFixed(1)} ${bottomY} L ${first.x.toFixed(1)} ${bottomY} Z`;
-  }, [linePath, chartPoints, padTop, chartH]);
-
-  const target85Y = padTop + chartH - 0.85 * chartH;
-
   return (
     <div className="ms-matrix-container">
-      {/* 1. Matrix Table Card */}
+      {/* Matrix Table Card */}
       <div className="card ms-matrix-card">
         <div className="ms-matrix-header-row">
           <h3 className="ms-matrix-title">Daily MC OEE — Machine × Day Matrix</h3>
@@ -508,104 +473,6 @@ function DailyOeeMatrixView({ matrixData = [], selectedMonth = "2026-09" }) {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* 2. Machine Avg OEE Line Chart Card */}
-      <div className="card ms-matrix-chart-card">
-        <div className="ms-graph-header">
-          <span className="ms-graph-dot" style={{ backgroundColor: "#10b981" }} />
-          <span className="ms-graph-title">MACHINE AVG OEE (%)</span>
-        </div>
-
-        <div className="ms-graph-svg-wrap">
-          <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="grad_mc_avg_oee" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.12" />
-                <stop offset="100%" stopColor="#0f172a" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
-
-            {/* Y Axis Grid lines & Ticks */}
-            {yTicks.map((tickVal) => {
-              const y = padTop + chartH - (tickVal / 100) * chartH;
-              return (
-                <g key={tickVal}>
-                  <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                  <text x={padLeft - 8} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
-                    {tickVal}%
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Red Dotted Target Line at 85% */}
-            <line
-              x1={padLeft}
-              y1={target85Y}
-              x2={width - padRight}
-              y2={target85Y}
-              stroke="#ef4444"
-              strokeDasharray="4 4"
-              strokeWidth="1.5"
-            />
-            <text x={padLeft - 8} y={target85Y - 4} textAnchor="end" fill="#ef4444" fontSize="10" fontWeight="700">
-              85%
-            </text>
-
-            {/* Area Fill */}
-            <path d={areaPath} fill="url(#grad_mc_avg_oee)" />
-
-            {/* Line Curve */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke="#0f172a"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {/* Points on Line */}
-            {chartPoints.map((p, idx) => {
-              const isTargetMet = p.val >= 85;
-              const dotColor = isTargetMet ? "#16a34a" : "#dc2626";
-              return (
-                <g key={idx}>
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r="4.2"
-                    fill={dotColor}
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                  />
-                  <text
-                    x={p.x}
-                    y={p.y - 8}
-                    textAnchor="middle"
-                    fill="#0f172a"
-                    fontSize="10"
-                    fontWeight="700"
-                  >
-                    {p.val.toFixed(1)}
-                  </text>
-                  <text
-                    x={p.x}
-                    y={height - 10}
-                    textAnchor="middle"
-                    className="ms-axis-tick"
-                    fontSize="9.5"
-                    fontWeight="600"
-                    fill="#475569"
-                  >
-                    {p.mc}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
         </div>
       </div>
     </div>
