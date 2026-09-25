@@ -42,6 +42,8 @@ export default function TopBar({
   tabs = [],
   activeTab = "entry",
   onTabChange = () => {},
+  selectedMonth = "2026-09",
+  onMonthChange,
 }) {
   const activeUser = currentUser || USERS.find((u) => u.id === userId) || USERS[0];
   const userRole = role || activeUser.role;
@@ -149,32 +151,47 @@ export default function TopBar({
           </div>
         ) : null}
 
-        {/* Shift Selector Pill (Compact) */}
-        <div className="topbar-chip topbar-shift-chip" title="Active Manufacturing Shift">
-          <span className="live-dot" />
-          <select
-            className="topbar-chip-select shift-select"
-            value={selectedShiftId || activeShift?.shift_id || "1"}
-            onChange={(e) => onShiftChange && onShiftChange(e.target.value)}
-          >
-            {shifts.map((s) => (
-              <option key={s.shift_id} value={s.shift_id}>
-                {`Shift ${s.shift_id}`}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Shift Selector Pill (Hidden on Dashboard because dashboard is monthly plant view) */}
+        {activeTab !== "dashboard" && (
+          <div className="topbar-chip topbar-shift-chip" title="Active Manufacturing Shift">
+            <span className="live-dot" />
+            <select
+              className="topbar-chip-select shift-select"
+              value={selectedShiftId || activeShift?.shift_id || "1"}
+              onChange={(e) => onShiftChange && onShiftChange(e.target.value)}
+            >
+              {shifts.map((s) => (
+                <option key={s.shift_id} value={s.shift_id}>
+                  {`Shift ${s.shift_id}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        {/* Shift Date Picker Chip (Compact & Clean) */}
-        <div className="topbar-chip topbar-date-chip" title="Shift Production Date">
-          <input
-            type="date"
-            className="topbar-date-native-input"
-            value={selectedShiftDate || prodDate}
-            max={todayStr()}
-            onChange={(e) => onShiftDateChange && onShiftDateChange(e.target.value)}
-          />
-        </div>
+        {/* Date / Month Picker Chip (Switches dynamically to Month on Dashboard!) */}
+        {activeTab === "dashboard" ? (
+          <div className="topbar-chip topbar-date-chip" title="Select MIS Month" style={{ minWidth: "160px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 800, color: "#64748b", marginRight: "4px" }}>📅 MONTH:</span>
+            <input
+              type="month"
+              className="topbar-date-native-input"
+              value={selectedMonth || (selectedShiftDate || prodDate).slice(0, 7)}
+              onChange={(e) => onMonthChange && onMonthChange(e.target.value)}
+              style={{ fontWeight: 700, cursor: "pointer" }}
+            />
+          </div>
+        ) : (
+          <div className="topbar-chip topbar-date-chip" title="Shift Production Date">
+            <input
+              type="date"
+              className="topbar-date-native-input"
+              value={selectedShiftDate || prodDate}
+              max={todayStr()}
+              onChange={(e) => onShiftDateChange && onShiftDateChange(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Real-time Clock Telemetry */}
         <div className="topbar-telemetry-bar">

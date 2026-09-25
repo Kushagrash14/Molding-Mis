@@ -4906,16 +4906,24 @@ tbody tr:last-child td {
 .ms-tab-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 12px;
   background: #ffffff;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ms-tab-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.ms-tab-bar::-webkit-scrollbar {
+.ms-tab-group::-webkit-scrollbar {
   display: none;
 }
 

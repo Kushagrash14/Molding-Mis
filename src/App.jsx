@@ -178,6 +178,14 @@ export default function App() {
   });
 
   const [selectedShiftDate, setSelectedShiftDate] = useState(() => getProductionShiftDate(shifts));
+  const [selectedMonth, setSelectedMonth] = useState(() => (getProductionShiftDate(shifts) || "2026-09-25").slice(0, 7));
+
+  const handleShiftDateChange = (date) => {
+    setSelectedShiftDate(date);
+    if (date && date.length >= 7) {
+      setSelectedMonth(date.slice(0, 7));
+    }
+  };
   const activeShift = useMemo(() => getActiveShift(shifts), [shifts]);
   const [selectedShiftId, setSelectedShiftId] = useState(
     () => activeShift?.shift_id || shifts[0]?.shift_id || "1"
@@ -561,12 +569,14 @@ export default function App() {
         selectedPlantId={selectedPlantId}
         onPlantChange={setSelectedPlantId}
         selectedShiftDate={selectedShiftDate}
-        onShiftDateChange={setSelectedShiftDate}
+        onShiftDateChange={handleShiftDateChange}
         selectedShiftId={selectedShiftId}
         onShiftChange={setSelectedShiftId}
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
       />
 
       <div className="shell">
@@ -696,7 +706,8 @@ export default function App() {
               reasonCodes={reasonCodes}
               locations={accessibleLocations}
               plants={accessiblePlants}
-              initialPlantId={selectedPlantId}
+              selectedPlantId={selectedPlantId}
+              selectedMonth={selectedMonth}
             />
           )}
 
