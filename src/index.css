@@ -4810,244 +4810,103 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   MOLDSENSE Executive Dashboard Styles (Pixel-perfect to Plant Screenshot)
+   Plant MIS & Executive Dashboard Styles (Clean Native Integration)
    ========================================================================== */
 
-.ms-dashboard-wrap {
+.mis-dashboard-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #f8fafc;
-  min-height: 100vh;
-  margin: -24px;
-  padding: 20px 24px;
-  color: #0f172a;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
 }
 
-.ms-meeting-mode {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 99999;
-  margin: 0;
-  padding: 24px 32px;
-  background: #090d16;
-  color: #f8fafc;
-  overflow-y: auto;
-}
-
-.ms-meeting-mode .ms-header {
-  background: #0f172a;
-  border-color: #1e293b;
-}
-
-.ms-meeting-mode .ms-company-title {
-  color: #f8fafc;
-}
-
-.ms-meeting-mode .ms-kpi-card,
-.ms-meeting-mode .ms-graph-card,
-.ms-meeting-mode .ms-tab-bar {
-  background: #0f172a;
-  border-color: #1e293b;
-  color: #f8fafc;
-}
-
-.ms-meeting-mode .ms-kpi-val {
-  color: #f8fafc;
-}
-
-.ms-meeting-mode .ms-graph-title {
-  color: #e2e8f0;
-}
-
-/* 1. Header Bar */
-.ms-header {
+.mis-filter-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 14px 20px;
   background: #ffffff;
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.ms-brand-cluster {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ms-logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ms-company-title {
-  font-size: 19px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.5px;
-}
-
-.ms-pill-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
-  border-radius: 20px;
-  color: #2563eb;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-}
-
-.ms-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.ms-header-picker {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  padding: 4px 10px;
-  border-radius: 8px;
-}
-
-.ms-picker-label {
-  font-size: 11px;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.ms-month-input {
-  border: none !important;
-  background: transparent !important;
-  padding: 2px 4px !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  color: #0f172a !important;
-  height: auto !important;
-  box-shadow: none !important;
-  cursor: pointer;
-}
-
-.ms-clock-badge {
-  font-family: var(--font-mono, monospace);
-  font-size: 13px;
-  font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.ms-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  font-size: 12.5px;
-  font-weight: 700;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-}
-
-.ms-btn-teal {
-  background: #0f766e;
-  color: #ffffff;
-}
-
-.ms-btn-teal:hover {
-  background: #115e59;
-}
-
-.ms-btn-outline {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  color: #334155;
-}
-
-.ms-btn-outline:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-}
-
-.ms-btn-blue {
-  background: #2563eb;
-  color: #ffffff;
-}
-
-.ms-btn-blue:hover {
-  background: #1d4ed8;
-}
-
-.ms-btn-meeting {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.25);
-}
-
-.ms-btn-meeting:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-}
-
-/* Time Filter Strip */
-.ms-time-filter-strip {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #ffffff;
-  padding: 12px 18px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   flex-wrap: wrap;
+  gap: 16px;
 }
 
-.ms-tf-item {
+.mis-filter-left {
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
-.ms-tf-item label {
+.mis-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mis-heading {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.mis-subheading {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.mis-filter-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mis-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mis-filter-item label {
   font-size: 12px;
   font-weight: 700;
   color: #475569;
 }
 
-.ms-tf-item select {
-  height: 34px !important;
+.mis-input-month {
+  height: 36px !important;
   font-size: 13px !important;
-  padding: 4px 8px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  cursor: pointer;
+}
+
+.mis-input-month:hover {
+  border-color: #94a3b8 !important;
+}
+
+.mis-filter-item select {
+  height: 36px !important;
+  font-size: 13px !important;
+  padding: 4px 10px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  background: #f8fafc !important;
 }
 
 /* 2. Navigation Tabs Bar */
 .ms-tab-bar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   background: #ffffff;
   padding: 6px 10px;
   border-radius: 10px;
@@ -5101,6 +4960,7 @@ tbody tr:last-child td {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 12px;
+  margin-top: 14px;
   margin-bottom: 16px;
 }
 
@@ -5206,10 +5066,35 @@ tbody tr:last-child td {
   text-transform: uppercase;
 }
 
+.ms-view-toggle {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.ms-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.ms-toggle-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .ms-graph-svg-wrap {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 210px;
 }
 
 .ms-graph-svg {
@@ -5295,4 +5180,5 @@ tbody tr:last-child td {
   color: #0f172a;
   white-space: nowrap;
 }
+
 

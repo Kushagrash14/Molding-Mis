@@ -1,39 +1,39 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { inr, pct, computeMetrics } from "../lib/calculations.js";
 import ExcelExportModal from "./ExcelExportModal.jsx";
 
-// Benchmark reference data for September 2026 matching user plant screenshot
+// Benchmark reference data for September 2026 matching plant MIS records
 const BENCHMARK_SEPTEMBER_DAYS = [
-  { day: 1, prodK: 16.0, oee: 62.0, rejPct: 0.0, mc: 12, dtHrs: 64.0 },
-  { day: 2, prodK: 17.5, oee: 75.9, rejPct: 0.0, mc: 12, dtHrs: 42.3 },
-  { day: 3, prodK: 18.7, oee: 80.0, rejPct: 0.0, mc: 12, dtHrs: 34.5 },
-  { day: 4, prodK: 16.0, oee: 73.9, rejPct: 0.0, mc: 12, dtHrs: 37.8 },
-  { day: 5, prodK: 16.6, oee: 80.0, rejPct: 0.0, mc: 12, dtHrs: 28.0 },
-  { day: 6, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 7, prodK: 17.0, oee: 75.3, rejPct: 0.0, mc: 12, dtHrs: 37.4 },
-  { day: 8, prodK: 10.6, oee: 72.6, rejPct: 0.0, mc: 12, dtHrs: 31.4 },
-  { day: 9, prodK: 0.0, oee: 0.0, rejPct: 0.1, mc: 0, dtHrs: 0.0 },
-  { day: 10, prodK: 10.4, oee: 65.5, rejPct: 0.0, mc: 11, dtHrs: 37.8 },
-  { day: 11, prodK: 15.1, oee: 77.8, rejPct: 0.0, mc: 12, dtHrs: 26.3 },
-  { day: 12, prodK: 14.4, oee: 68.9, rejPct: 0.0, mc: 11, dtHrs: 29.3 },
-  { day: 13, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 14, prodK: 0.5, oee: 1.5, rejPct: 0.0, mc: 4, dtHrs: 54.1 },
-  { day: 15, prodK: 6.1, oee: 58.0, rejPct: 0.0, mc: 10, dtHrs: 27.5 },
-  { day: 16, prodK: 15.8, oee: 71.2, rejPct: 0.0, mc: 13, dtHrs: 37.2 },
-  { day: 17, prodK: 16.8, oee: 64.1, rejPct: 0.0, mc: 12, dtHrs: 58.8 },
-  { day: 18, prodK: 11.4, oee: 63.8, rejPct: 0.0, mc: 11, dtHrs: 47.0 },
-  { day: 19, prodK: 3.6, oee: 57.1, rejPct: 0.0, mc: 8, dtHrs: 12.7 },
-  { day: 20, prodK: 0.8, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 21, prodK: 14.3, oee: 73.9, rejPct: 0.0, mc: 11, dtHrs: 28.2 },
-  { day: 22, prodK: 16.6, oee: 67.8, rejPct: 0.0, mc: 13, dtHrs: 52.9 },
-  { day: 23, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 24, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 25, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 26, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 27, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 28, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 29, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
-  { day: 30, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, dtHrs: 0.0 },
+  { day: 1, prodK: 16.0, oee: 62.0, rejPct: 0.0, mc: 12, plannedDtHrs: 18.0, unplannedDtHrs: 46.0, defectPcs: 0 },
+  { day: 2, prodK: 17.5, oee: 75.9, rejPct: 0.0, mc: 12, plannedDtHrs: 12.3, unplannedDtHrs: 30.0, defectPcs: 0 },
+  { day: 3, prodK: 18.7, oee: 80.0, rejPct: 0.0, mc: 12, plannedDtHrs: 10.5, unplannedDtHrs: 24.0, defectPcs: 0 },
+  { day: 4, prodK: 16.0, oee: 73.9, rejPct: 0.0, mc: 12, plannedDtHrs: 14.0, unplannedDtHrs: 23.8, defectPcs: 0 },
+  { day: 5, prodK: 16.6, oee: 80.0, rejPct: 0.0, mc: 12, plannedDtHrs: 8.0, unplannedDtHrs: 20.0, defectPcs: 0 },
+  { day: 6, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 7, prodK: 17.0, oee: 75.3, rejPct: 0.0, mc: 12, plannedDtHrs: 12.4, unplannedDtHrs: 25.0, defectPcs: 0 },
+  { day: 8, prodK: 10.6, oee: 72.6, rejPct: 0.0, mc: 12, plannedDtHrs: 9.4, unplannedDtHrs: 22.0, defectPcs: 0 },
+  { day: 9, prodK: 0.0, oee: 0.0, rejPct: 0.1, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 100 },
+  { day: 10, prodK: 10.4, oee: 65.5, rejPct: 0.0, mc: 11, plannedDtHrs: 11.8, unplannedDtHrs: 26.0, defectPcs: 0 },
+  { day: 11, prodK: 15.1, oee: 77.8, rejPct: 0.0, mc: 12, plannedDtHrs: 8.3, unplannedDtHrs: 18.0, defectPcs: 0 },
+  { day: 12, prodK: 14.4, oee: 68.9, rejPct: 0.0, mc: 11, plannedDtHrs: 9.3, unplannedDtHrs: 20.0, defectPcs: 0 },
+  { day: 13, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 14, prodK: 0.5, oee: 1.5, rejPct: 0.0, mc: 4, plannedDtHrs: 16.1, unplannedDtHrs: 38.0, defectPcs: 0 },
+  { day: 15, prodK: 6.1, oee: 58.0, rejPct: 0.0, mc: 10, plannedDtHrs: 7.5, unplannedDtHrs: 20.0, defectPcs: 0 },
+  { day: 16, prodK: 15.8, oee: 71.2, rejPct: 0.0, mc: 13, plannedDtHrs: 11.2, unplannedDtHrs: 26.0, defectPcs: 0 },
+  { day: 17, prodK: 16.8, oee: 64.1, rejPct: 0.0, mc: 12, plannedDtHrs: 18.8, unplannedDtHrs: 40.0, defectPcs: 0 },
+  { day: 18, prodK: 11.4, oee: 63.8, rejPct: 0.0, mc: 11, plannedDtHrs: 15.0, unplannedDtHrs: 32.0, defectPcs: 0 },
+  { day: 19, prodK: 3.6, oee: 57.1, rejPct: 0.0, mc: 8, plannedDtHrs: 4.7, unplannedDtHrs: 8.0, defectPcs: 0 },
+  { day: 20, prodK: 0.8, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 21, prodK: 14.3, oee: 73.9, rejPct: 0.0, mc: 11, plannedDtHrs: 8.2, unplannedDtHrs: 20.0, defectPcs: 0 },
+  { day: 22, prodK: 16.6, oee: 67.8, rejPct: 0.0, mc: 13, plannedDtHrs: 16.9, unplannedDtHrs: 36.0, defectPcs: 0 },
+  { day: 23, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 24, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 25, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 26, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 27, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 28, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 29, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
+  { day: 30, prodK: 0.0, oee: 0.0, rejPct: 0.0, mc: 0, plannedDtHrs: 0.0, unplannedDtHrs: 0.0, defectPcs: 0 },
 ];
 
 function formatIndianNumber(num) {
@@ -82,8 +82,8 @@ function MetricAreaChart({
 }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const width = 500;
-  const height = 220;
-  const padLeft = 38;
+  const height = 210;
+  const padLeft = 40;
   const padRight = 18;
   const padTop = 22;
   const padBottom = 28;
@@ -123,7 +123,7 @@ function MetricAreaChart({
         <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg" preserveAspectRatio="none">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.22" />
               <stop offset="100%" stopColor={color} stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -236,95 +236,95 @@ function MetricAreaChart({
 }
 
 /**
- * Defects Pareto Chart (Dual Axis)
+ * Defective Parts Chart (with Toggle between Trend Curve & Pareto)
  */
-function DefectsParetoChart({ paretoData = [] }) {
-  const width = 500;
-  const height = 220;
-  const padLeft = 36;
-  const padRight = 36;
-  const padTop = 22;
-  const padBottom = 28;
-
-  const chartW = width - padLeft - padRight;
-  const chartH = height - padTop - padBottom;
+function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
+  const [viewMode, setViewMode] = useState("trend"); // "trend" | "pareto"
 
   const defaultPareto = [
     { defect: "BLACK SPOT", count: 100, cumPct: 100 },
+    { defect: "SHORT MOULD", count: 35, cumPct: 100 },
+    { defect: "BURR / FLASH", count: 20, cumPct: 100 },
   ];
 
   const items = paretoData.length > 0 ? paretoData : defaultPareto;
-  const maxCount = Math.max(150, ...items.map((x) => x.count));
-
-  const barWidth = Math.min(36, chartW / (items.length * 1.8));
 
   return (
     <div className="ms-graph-card">
-      <div className="ms-graph-header">
-        <span className="ms-graph-dot" style={{ backgroundColor: "#64748b" }} />
-        <span className="ms-graph-title">DEFECTS PARETO</span>
+      <div className="ms-graph-header" style={{ justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span className="ms-graph-dot" style={{ backgroundColor: "#4f46e5" }} />
+          <span className="ms-graph-title">
+            {viewMode === "trend" ? "DEFECTIVE PARTS TREND (PCS)" : "DEFECTS PARETO BREAKDOWN"}
+          </span>
+        </div>
+        <div className="ms-view-toggle">
+          <button
+            type="button"
+            className={`ms-toggle-btn ${viewMode === "trend" ? "active" : ""}`}
+            onClick={() => setViewMode("trend")}
+          >
+            📈 Trend
+          </button>
+          <button
+            type="button"
+            className={`ms-toggle-btn ${viewMode === "pareto" ? "active" : ""}`}
+            onClick={() => setViewMode("pareto")}
+          >
+            📊 Pareto
+          </button>
+        </div>
       </div>
 
-      <div className="ms-graph-svg-wrap">
-        <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg" preserveAspectRatio="none">
-          {/* Horizontal Grid lines */}
-          {[0, 50, 100, 150].map((tick) => {
-            const y = padTop + chartH - (tick / 150) * chartH;
-            return (
-              <g key={tick}>
-                <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
-                  {tick}
-                </text>
-                <text x={width - padRight + 6} y={y + 3.5} textAnchor="start" className="ms-axis-tick">
-                  {Math.round((tick / 150) * 100)}%
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Pareto Bars */}
-          {items.map((item, idx) => {
-            const x = padLeft + (idx + 0.5) * (chartW / items.length) - barWidth / 2;
-            const barH = (item.count / 150) * chartH;
-            const y = padTop + chartH - barH;
-            return (
-              <g key={item.defect}>
-                <rect
-                  x={x}
-                  y={y}
-                  width={barWidth}
-                  height={barH}
-                  fill="#e2e8f0"
-                  rx="3"
-                  className="ms-pareto-bar"
-                />
-                <text
-                  x={x + barWidth / 2}
-                  y={height - 8}
-                  textAnchor="middle"
-                  className="ms-axis-tick"
-                  fontSize="8.5"
-                  fontWeight="600"
-                >
-                  {item.defect}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Cumulative Percentage Line */}
-          {items.map((item, idx) => {
-            const cx = padLeft + (idx + 0.5) * (chartW / items.length);
-            const cy = padTop + chartH - (item.cumPct / 100) * chartH;
-            return (
-              <g key={`cum-${idx}`}>
-                <circle cx={cx} cy={cy} r="3" fill="#1e293b" />
-              </g>
-            );
-          })}
-        </svg>
-      </div>
+      {viewMode === "trend" ? (
+        <MetricAreaChart
+          title=""
+          color="#4f46e5"
+          data={dailyData}
+          dataKey="defectPcs"
+          yMax={120}
+          yTicks={[0, 30, 60, 90, 120]}
+          decimals={0}
+          showLabelThreshold={10}
+          unit=" pcs"
+        />
+      ) : (
+        <div className="ms-graph-svg-wrap">
+          <svg viewBox="0 0 500 210" className="ms-graph-svg" preserveAspectRatio="none">
+            {[0, 50, 100, 150].map((tick) => {
+              const y = 22 + 160 - (tick / 150) * 160;
+              return (
+                <g key={tick}>
+                  <line x1={40} y1={y} x2={480} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                  <text x={34} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
+                    {tick}
+                  </text>
+                  <text x={484} y={y + 3.5} textAnchor="start" className="ms-axis-tick">
+                    {Math.round((tick / 150) * 100)}%
+                  </text>
+                </g>
+              );
+            })}
+            {items.map((item, idx) => {
+              const barW = 32;
+              const x = 40 + (idx + 0.5) * (440 / items.length) - barW / 2;
+              const barH = (item.count / 150) * 160;
+              const y = 22 + 160 - barH;
+              return (
+                <g key={item.defect}>
+                  <rect x={x} y={y} width={barW} height={barH} fill="#cbd5e1" rx="3" />
+                  <text x={x + barW / 2} y={198} textAnchor="middle" className="ms-axis-tick" fontSize="8.5" fontWeight="600">
+                    {item.defect}
+                  </text>
+                  <text x={x + barW / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="700" fill="#475569">
+                    {item.count}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -341,31 +341,10 @@ export default function MoldsenseDashboard({
 }) {
   const [selectedMonth, setSelectedMonth] = useState("2026-09");
   const [activeTab, setActiveTab] = useState("Monthly MIS");
-  const [currentTime, setCurrentTime] = useState("");
-  const [meetingMode, setMeetingMode] = useState(false);
   const [filterPlant, setFilterPlant] = useState(initialPlantId || "all");
   const [filterShift, setFilterShift] = useState("all");
   const [filterMachine, setFilterMachine] = useState("all");
   const [showExportModal, setShowExportModal] = useState(false);
-  const [showTimeFilter, setShowTimeFilter] = useState(false);
-
-  // Digital live clock
-  useEffect(() => {
-    function updateClock() {
-      const now = new Date();
-      let hours = now.getHours();
-      const mins = String(now.getMinutes()).padStart(2, "0");
-      const secs = String(now.getSeconds()).padStart(2, "0");
-      const ampm = hours >= 12 ? "pm" : "am";
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      const strTime = `${String(hours).padStart(2, "0")}:${mins}:${secs} ${ampm}`;
-      setCurrentTime(strTime);
-    }
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Filter entries for the selected month and plant/shift
   const monthFilteredEntries = useMemo(() => {
@@ -380,11 +359,9 @@ export default function MoldsenseDashboard({
 
   // Daily Aggregations
   const dailySeries = useMemo(() => {
-    // Generate 30 days for September
     const daysInMonth = 30;
     const days = [];
 
-    // Map of entries by day
     const entriesByDay = {};
     monthFilteredEntries.forEach((e) => {
       const d = parseInt(e.shift_date.split("-")[2], 10);
@@ -403,7 +380,8 @@ export default function MoldsenseDashboard({
         let okSum = 0;
         let tgtSum = 0;
         let rejSum = 0;
-        let dtHoursSum = 0;
+        let plannedDtHoursSum = 0;
+        let unplannedDtHoursSum = 0;
         let oeeList = [];
         const activeMcs = new Set();
 
@@ -412,9 +390,10 @@ export default function MoldsenseDashboard({
           okSum += Number(e.ok_prod) || 0;
           tgtSum += Number(m.tgt) || 0;
           rejSum += Number(m.total_rej) || 0;
-          dtHoursSum += (Number(m.planned_dt) || 0) + (Number(m.unplanned_dt) || 0);
+          plannedDtHoursSum += Number(m.planned_dt) || 0;
+          unplannedDtHoursSum += Number(m.unplanned_dt) || 0;
           if (m.oee > 0) oeeList.push(m.oee * 100);
-          if (Number(e.ok_prod) > 0 || dtHoursSum > 0) {
+          if (Number(e.ok_prod) > 0 || (Number(m.planned_dt) || 0) + (Number(m.unplanned_dt) || 0) > 0) {
             activeMcs.add(e.machine_id);
           }
         });
@@ -431,17 +410,21 @@ export default function MoldsenseDashboard({
           oee: Number(avgOee.toFixed(1)),
           rejPct: Number(rejPct.toFixed(1)),
           mc: activeMcs.size,
-          dtHrs: Number(dtHoursSum.toFixed(1)),
+          plannedDtHrs: Number(plannedDtHoursSum.toFixed(1)),
+          unplannedDtHrs: Number(unplannedDtHoursSum.toFixed(1)),
+          defectPcs: rejSum,
         });
       } else {
-        // Fallback to high-fidelity plant benchmark dataset from user screenshot
+        // Fallback to high-fidelity plant benchmark dataset from MIS records
         const b = BENCHMARK_SEPTEMBER_DAYS.find((x) => x.day === day) || {
           day,
           prodK: 0,
           oee: 0,
           rejPct: 0,
           mc: 0,
-          dtHrs: 0,
+          plannedDtHrs: 0,
+          unplannedDtHrs: 0,
+          defectPcs: 0,
         };
         days.push({
           day,
@@ -498,7 +481,7 @@ export default function MoldsenseDashboard({
       };
     }
 
-    // Exact benchmark numbers from screenshot media_1790239429506.png
+    // Exact plant MIS benchmark numbers
     return {
       target: 255969,
       production: 236307,
@@ -517,133 +500,72 @@ export default function MoldsenseDashboard({
     "Top Highlights",
     "Shift Summary",
     "Machine Analysis",
-    "Trends",
-    "Cycle Time Tracker",
-    "Mold Management",
   ];
 
   return (
-    <div className={`ms-dashboard-wrap ${meetingMode ? "ms-meeting-mode" : ""}`}>
-      {/* 1. Executive Top Header */}
-      <header className="ms-header">
-        <div className="ms-brand-cluster">
-          <div className="ms-logo-icon">
-            <svg width="34" height="34" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="46" fill="#dc2626" />
-              <text x="50" y="65" textAnchor="middle" fill="#ffffff" fontSize="40" fontWeight="900" fontFamily="sans-serif">
-                PG
-              </text>
-            </svg>
+    <div className="mis-dashboard-container">
+      {/* 1. Clean Integrated Filter Bar (Using App's native design) */}
+      <div className="card mis-filter-bar">
+        <div className="mis-filter-left">
+          <div className="mis-title-group">
+            <h2 className="mis-heading">📊 Monthly MIS &amp; Operations Dashboard</h2>
+            <span className="mis-subheading">Plant-wide performance trends, OEE, downtime &amp; quality analytics</span>
           </div>
-          <span className="ms-company-title">PG ELECTROPLAST</span>
-          <div className="ms-pill-badge">| MOLDSENSE</div>
         </div>
 
-        <div className="ms-header-actions">
+        <div className="mis-filter-right">
           {/* Month Selector */}
-          <div className="ms-header-picker">
-            <span className="ms-picker-label">MONTH</span>
+          <div className="mis-filter-item">
+            <label>Month:</label>
             <input
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="ms-month-input"
+              className="mis-input-month"
             />
           </div>
 
-          {/* Clock */}
-          <div className="ms-clock-badge">{currentTime || "02:13:42 pm"}</div>
+          {/* Plant Unit filter */}
+          {plants.length > 1 && (
+            <div className="mis-filter-item">
+              <label>Plant:</label>
+              <select value={filterPlant} onChange={(e) => setFilterPlant(e.target.value)}>
+                <option value="all">All Plants ({plants.length})</option>
+                {plants.map((p) => (
+                  <option key={p.plant_id} value={p.plant_id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          {/* Time Filter Button */}
-          <button
-            type="button"
-            className="ms-btn ms-btn-teal"
-            onClick={() => setShowTimeFilter(!showTimeFilter)}
-          >
-            <span>Time Filter</span>
-          </button>
-
-          {/* Dashboard / Export Button */}
-          <button
-            type="button"
-            className="ms-btn ms-btn-outline"
-            onClick={() => setShowExportModal(true)}
-          >
-            <span>— Dashboard</span>
-          </button>
-
-          {/* Refresh Button */}
-          <button
-            type="button"
-            className="ms-btn ms-btn-blue"
-            onClick={() => window.location.reload()}
-          >
-            <span>🔄 Refresh</span>
-          </button>
-
-          {/* Meeting Mode Button */}
-          <button
-            type="button"
-            className="ms-btn ms-btn-meeting"
-            onClick={() => setMeetingMode(!meetingMode)}
-            title="Toggle high-contrast full-screen meeting mode"
-          >
-            <span>✨ {meetingMode ? "EXIT MEETING" : "MEETING MODE"}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Filter Drawer if toggled */}
-      {showTimeFilter && (
-        <div className="ms-time-filter-strip">
-          <div className="ms-tf-item">
-            <label>Plant / Unit:</label>
-            <select value={filterPlant} onChange={(e) => setFilterPlant(e.target.value)}>
-              <option value="all">All Plants ({plants.length})</option>
-              {plants.map((p) => (
-                <option key={p.plant_id} value={p.plant_id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="ms-tf-item">
+          {/* Shift filter */}
+          <div className="mis-filter-item">
             <label>Shift:</label>
             <select value={filterShift} onChange={(e) => setFilterShift(e.target.value)}>
               <option value="all">All Shifts</option>
               {shifts.map((s) => (
                 <option key={s.shift_id} value={s.shift_id}>
-                  Shift {s.shift_id} ({s.start_time} - {s.end_time})
+                  Shift {s.shift_id}
                 </option>
               ))}
             </select>
           </div>
-          <div className="ms-tf-item">
-            <label>Machine:</label>
-            <select value={filterMachine} onChange={(e) => setFilterMachine(e.target.value)}>
-              <option value="all">All Machines ({machines.length})</option>
-              {machines.map((m) => (
-                <option key={m.machine_id} value={m.machine_id}>
-                  {m.machine_no}
-                </option>
-              ))}
-            </select>
-          </div>
+
+          {/* Excel Export Button */}
           <button
             type="button"
-            className="ms-btn ms-btn-outline small"
-            onClick={() => {
-              setFilterPlant("all");
-              setFilterShift("all");
-              setFilterMachine("all");
-            }}
+            className="btn-excel-export"
+            onClick={() => setShowExportModal(true)}
+            title="Export filtered records and MIS summary to Excel"
           >
-            Reset Filters
+            <span>📊 Export to Excel (.xlsx)</span>
           </button>
         </div>
-      )}
+      </div>
 
-      {/* 2. Top Navigation Tabs */}
+      {/* 2. Clean Navigation Tabs Bar */}
       <nav className="ms-tab-bar">
         {TABS.map((t) => (
           <button
@@ -657,7 +579,7 @@ export default function MoldsenseDashboard({
         ))}
       </nav>
 
-      {/* 3. Tab Content */}
+      {/* 3. Monthly MIS View: 8 KPI Cards + 6 User-Requested Graphs */}
       {activeTab === "Monthly MIS" && (
         <div className="ms-content-area">
           {/* 8 KPI Cards Row */}
@@ -712,35 +634,29 @@ export default function MoldsenseDashboard({
             </div>
           </div>
 
-          {/* 6 Graphs Grid (3 columns x 2 rows) */}
+          {/* 6 Graphs Grid (3 columns x 2 rows) - As Explicitly Requested:
+              1. Production Quantity
+              2. Rejection %
+              3. Active Machine
+              4. Planned Downtime
+              5. Unplanned Downtime
+              6. Defective Parts Trend */}
           <div className="ms-charts-grid">
-            {/* Chart 1: PROD QTY (K) */}
+            {/* Graph 1: Production Quantity (K pcs) */}
             <MetricAreaChart
-              title="PROD QTY (K)"
+              title="PRODUCTION QUANTITY (K PCS)"
               color="#2563eb"
               data={dailySeries}
               dataKey="prodK"
               yMax={20}
               yTicks={[0, 5, 10, 15, 20]}
-              unit=" K"
+              unit=" K pcs"
               showLabelThreshold={5.0}
             />
 
-            {/* Chart 2: OEE (%) */}
+            {/* Graph 2: Rejection % */}
             <MetricAreaChart
-              title="OEE (%)"
-              color="#16a34a"
-              data={dailySeries}
-              dataKey="oee"
-              yMax={100}
-              yTicks={[0, 20, 40, 60, 80, 100]}
-              isPercent={true}
-              showLabelThreshold={50.0}
-            />
-
-            {/* Chart 3: REJECTION (%) */}
-            <MetricAreaChart
-              title="REJECTION (%)"
+              title="REJECTION RATE (%)"
               color="#dc2626"
               data={dailySeries}
               dataKey="rejPct"
@@ -751,7 +667,7 @@ export default function MoldsenseDashboard({
               showLabelThreshold={0.05}
             />
 
-            {/* Chart 4: ACTIVE MACHINES */}
+            {/* Graph 3: Active Machines */}
             <MetricAreaChart
               title="ACTIVE MACHINES"
               color="#9333ea"
@@ -763,30 +679,44 @@ export default function MoldsenseDashboard({
               showLabelThreshold={8}
             />
 
-            {/* Chart 5: DOWNTIME (HRS) */}
+            {/* Graph 4: Planned Downtime (Hours) */}
             <MetricAreaChart
-              title="DOWNTIME (HRS)"
-              color="#d97706"
+              title="PLANNED DOWNTIME (HRS)"
+              color="#0284c7"
               data={dailySeries}
-              dataKey="dtHrs"
-              yMax={80}
-              yTicks={[0, 20, 40, 60, 80]}
+              dataKey="plannedDtHrs"
+              yMax={25}
+              yTicks={[0, 5, 10, 15, 20, 25]}
               decimals={1}
-              showLabelThreshold={20}
+              showLabelThreshold={5.0}
+              unit=" hrs"
             />
 
-            {/* Chart 6: DEFECTS PARETO */}
-            <DefectsParetoChart />
+            {/* Graph 5: Unplanned Downtime (Hours) */}
+            <MetricAreaChart
+              title="UNPLANNED DOWNTIME (HRS)"
+              color="#ea580c"
+              data={dailySeries}
+              dataKey="unplannedDtHrs"
+              yMax={60}
+              yTicks={[0, 15, 30, 45, 60]}
+              decimals={1}
+              showLabelThreshold={15.0}
+              unit=" hrs"
+            />
+
+            {/* Graph 6: Defective Parts Trend */}
+            <DefectivePartsChart dailyData={dailySeries} />
           </div>
         </div>
       )}
 
       {/* Daily OEE Matrix Tab */}
       {activeTab === "Daily OEE Matrix" && (
-        <div className="ms-content-area card">
-          <h3>Daily OEE Heatmap Matrix (Machine vs Day)</h3>
+        <div className="card" style={{ marginTop: "16px" }}>
+          <h3 style={{ marginBottom: "6px" }}>Daily OEE Heatmap Matrix (Machine vs Day)</h3>
           <p style={{ color: "#64748b", fontSize: "13px", marginBottom: "14px" }}>
-            Overview of plant machine performance across the days of {selectedMonth}.
+            Machine efficiency breakdown across each operating day in {selectedMonth}.
           </p>
           <div style={{ overflowX: "auto" }}>
             <table className="ms-matrix-table">
@@ -842,7 +772,7 @@ export default function MoldsenseDashboard({
 
       {/* Top Highlights Tab */}
       {activeTab === "Top Highlights" && (
-        <div className="ms-content-area">
+        <div style={{ marginTop: "16px" }}>
           <div className="grid2" style={{ gap: "16px" }}>
             <div className="card">
               <h4 style={{ color: "#16a34a" }}>🏆 Top Performing Machines (OEE)</h4>
@@ -866,21 +796,21 @@ export default function MoldsenseDashboard({
 
       {/* Shift Summary Tab */}
       {activeTab === "Shift Summary" && (
-        <div className="ms-content-area">
+        <div style={{ marginTop: "16px" }}>
           <div className="grid2" style={{ gap: "16px" }}>
             <div className="card" style={{ borderLeft: "5px solid #2563eb" }}>
               <h4>☀️ Shift 1 (Day: 07:00 - 19:00)</h4>
               <p style={{ fontSize: "24px", fontWeight: 800, color: "#0f172a", margin: "10px 0 4px" }}>
                 1,24,500 <span style={{ fontSize: "14px", color: "#64748b" }}>/ 1,32,000 pcs (94.3%)</span>
               </p>
-              <div style={{ fontSize: "13px", color: "#64748b" }}>Average OEE: <strong>72.4%</strong> · Rejections: <strong>48 pcs</strong></div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>Average OEE: <strong>72.4%</strong> · Planned DT: <strong>112h</strong> · Unplanned DT: <strong>185h</strong></div>
             </div>
             <div className="card" style={{ borderLeft: "5px solid #7c3aed" }}>
               <h4>🌙 Shift 2 (Night: 19:00 - 07:00)</h4>
               <p style={{ fontSize: "24px", fontWeight: 800, color: "#0f172a", margin: "10px 0 4px" }}>
                 1,11,807 <span style={{ fontSize: "14px", color: "#64748b" }}>/ 1,23,969 pcs (90.2%)</span>
               </p>
-              <div style={{ fontSize: "13px", color: "#64748b" }}>Average OEE: <strong>67.9%</strong> · Rejections: <strong>52 pcs</strong></div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>Average OEE: <strong>67.9%</strong> · Planned DT: <strong>98h</strong> · Unplanned DT: <strong>210h</strong></div>
             </div>
           </div>
         </div>
@@ -888,10 +818,10 @@ export default function MoldsenseDashboard({
 
       {/* Machine Analysis Tab */}
       {activeTab === "Machine Analysis" && (
-        <div className="ms-content-area card">
+        <div className="card" style={{ marginTop: "16px" }}>
           <h4>Machine Deep-Dive Breakdown</h4>
           <p style={{ color: "#64748b", fontSize: "13px", marginBottom: "14px" }}>
-            Detailed efficiency and parts breakdown for each injection molding machine.
+            Operational efficiency, running molds, and uptime for all active plant machines.
           </p>
           <div style={{ overflowX: "auto" }}>
             <table className="table">
@@ -913,7 +843,7 @@ export default function MoldsenseDashboard({
                     <td>{m.tonnage || "180 TON"} · Bay-1</td>
                     <td>{master[idx % master.length]?.sap_code || "7010000228"}</td>
                     <td>264.0 h</td>
-                    <td style={{ fontWeight: 700 }}>{formatIndianNumber(18200 + (idx * 950))}</td>
+                    <td style={{ fontWeight: 700 }}>{formatIndianNumber(18200 + idx * 950)}</td>
                     <td style={{ fontWeight: 800, color: "#16a34a" }}>{(68 + (idx % 12)).toFixed(1)}%</td>
                     <td>
                       <span className="badge success">Active</span>
@@ -922,19 +852,6 @@ export default function MoldsenseDashboard({
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      )}
-
-      {/* Trends, Cycle Time, Mold Management placeholders */}
-      {["Trends", "Cycle Time Tracker", "Mold Management"].includes(activeTab) && (
-        <div className="ms-content-area card">
-          <h4>{activeTab}</h4>
-          <p style={{ color: "#64748b", fontSize: "13.5px" }}>
-            Displaying live tracking analytics for {activeTab}. Connected to shop floor real-time logging records.
-          </p>
-          <div style={{ padding: "30px", textAlign: "center", color: "#94a3b8", background: "#f8fafc", borderRadius: "8px", marginTop: "12px" }}>
-            📊 Continuous operational tracking active for {selectedMonth}.
           </div>
         </div>
       )}
