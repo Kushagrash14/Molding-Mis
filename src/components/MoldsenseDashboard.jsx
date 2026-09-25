@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { computeMetrics } from "../lib/calculations.js";
+import { computeMetrics, normalizeReasonsMap } from "../lib/calculations.js";
 
 // Benchmark reference data for September 2026 Daily OEE Matrix matching user screenshot exactly
 const BENCHMARK_MC_OEE_MATRIX = [
@@ -248,13 +248,22 @@ function MetricAreaChart({
 function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
   const [viewMode, setViewMode] = useState("trend"); // "trend" | "pareto"
 
-  const defaultPareto = [
-    { defect: "BLACK SPOT", count: 100, cumPct: 100 },
-    { defect: "SHORT MOULD", count: 35, cumPct: 100 },
-    { defect: "BURR / FLASH", count: 20, cumPct: 100 },
-  ];
+  const items = paretoData || [];
 
-  const items = paretoData.length > 0 ? paretoData : defaultPareto;
+  // Compute dynamic maxCount for Y axis scaling in Pareto
+  const maxCount = useMemo(() => {
+    if (!items || items.length === 0) return 50;
+    const maxVal = Math.max(...items.map((i) => i.count), 0);
+    if (maxVal <= 25) return 25;
+    if (maxVal <= 50) return 50;
+    if (maxVal <= 100) return 100;
+    if (maxVal <= 250) return 250;
+    if (maxVal <= 500) return 500;
+    if (maxVal <= 1000) return 1000;
+    return Math.ceil(maxVal * 1.15);
+  }, [items]);
+
+  const yTicks = [0, Math.round(maxCount * 0.33), Math.round(maxCount * 0.67), maxCount];
 
   return (
     <div className="ms-graph-card">
@@ -295,11 +304,30 @@ function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
           showLabelThreshold={10}
           unit=" pcs"
         />
+      ) : items.length === 0 ? (
+        <div
+          style={{
+            height: "170px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#94a3b8",
+            fontSize: "13px",
+            gap: "8px",
+          }}
+        >
+          <span style={{ fontSize: "28px" }}>📋</span>
+          <span style={{ fontWeight: 600 }}>No defect rejection records logged for this month</span>
+          <span style={{ fontSize: "11.5px", color: "#cbd5e1" }}>
+            Rejection entries logged in the entry form will automatically populate here.
+          </span>
+        </div>
       ) : (
         <div className="ms-graph-svg-wrap">
           <svg viewBox="0 0 500 210" className="ms-graph-svg" preserveAspectRatio="none">
-            {[0, 50, 100, 150].map((tick) => {
-              const y = 22 + 160 - (tick / 150) * 160;
+            {yTicks.map((tick) => {
+              const y = 22 + 160 - (tick / maxCount) * 160;
               return (
                 <g key={tick}>
                   <line x1={40} y1={y} x2={465} y2={y} stroke="#f1f5f9" strokeWidth="1" />
@@ -307,28 +335,65 @@ function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
                     {tick}
                   </text>
                   <text x={470} y={y + 3.5} textAnchor="start" className="ms-axis-tick">
-                    {Math.round((tick / 150) * 100)}%
+                    {Math.round((tick / maxCount) * 100)}%
                   </text>
                 </g>
               );
             })}
             {items.map((item, idx) => {
-              const barW = Math.min(36, 420 / (items.length * 2));
+              const barW = Math.min(36, 420 / (items.length * 1.8));
               const x = 40 + (idx + 0.5) * (420 / items.length) - barW / 2;
-              const barH = Math.min(160, (item.count / 150) * 160);
+              const barH = Math.min(160, (item.count / maxCount) * 160);
               const y = 22 + 160 - barH;
+
+              const dotY = 22 + 160 - (item.cumPct / 100) * 160;
+              const dotX = x + barW / 2;
+
               return (
                 <g key={item.defect || idx}>
                   <rect x={x} y={y} width={barW} height={barH} fill="#cbd5e1" rx="3" />
-                  <text x={x + barW / 2} y={198} textAnchor="middle" className="ms-axis-tick" fontSize="8.5" fontWeight="600">
+                  <text
+                    x={dotX}
+                    y={198}
+                    textAnchor="middle"
+                    className="ms-axis-tick"
+                    fontSize="8.5"
+                    fontWeight="600"
+                  >
                     {item.defect}
                   </text>
-                  <text x={x + barW / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="700" fill="#475569">
+                  <text
+                    x={dotX}
+                    y={y - 5}
+                    textAnchor="middle"
+                    fontSize="9"
+                    fontWeight="700"
+                    fill="#475569"
+                  >
                     {item.count}
                   </text>
+                  <circle cx={dotX} cy={dotY} r="3.5" fill="#1e3a8a" stroke="#ffffff" strokeWidth="1.5" />
                 </g>
               );
             })}
+
+            {/* Connecting line between cumulative percentage dots */}
+            {items.length > 1 && (
+              <polyline
+                fill="none"
+                stroke="#1e3a8a"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={items
+                  .map((item, idx) => {
+                    const dotX = 40 + (idx + 0.5) * (420 / items.length);
+                    const dotY = 22 + 160 - (item.cumPct / 100) * 160;
+                    return `${dotX.toFixed(1)},${dotY.toFixed(1)}`;
+                  })
+                  .join(" ")}
+              />
+            )}
           </svg>
         </div>
       )}
@@ -634,20 +699,37 @@ export default function MoldsenseDashboard({
     return days;
   }, [monthFilteredEntries, selectedMonth, master, reasonCodes]);
 
-  // Dynamic Defect Breakdown
+  // Dynamic Defect Breakdown (reads real rejections from entry.reasons, runs.reasons, and entry.rejections)
   const paretoData = useMemo(() => {
     const defectCounts = {};
     let totalDefects = 0;
+
+    const processReasons = (reasonsObj) => {
+      if (!reasonsObj) return;
+      const normalized = normalizeReasonsMap(reasonsObj);
+      Object.entries(normalized).forEach(([reason_id, val]) => {
+        const num = Number(val) || 0;
+        if (num <= 0) return;
+        const rc = reasonCodes.find((r) => r.reason_id === reason_id || r.code === reason_id);
+        const isRejection = rc ? rc.category === "rejection" : reason_id.startsWith("rej_");
+        if (isRejection) {
+          const name = rc?.name || rc?.reason_name || reason_id.replace(/^rej_/, "").replace(/_/g, " ").toUpperCase();
+          defectCounts[name] = (defectCounts[name] || 0) + num;
+          totalDefects += num;
+        }
+      });
+    };
+
     monthFilteredEntries.forEach((e) => {
-      if (e.rejections && typeof e.rejections === "object") {
-        Object.entries(e.rejections).forEach(([code, qty]) => {
-          const num = Number(qty) || 0;
-          if (num > 0) {
-            const rc = reasonCodes.find((r) => r.code === code);
-            const name = rc?.reason_name || code;
-            defectCounts[name] = (defectCounts[name] || 0) + num;
-            totalDefects += num;
-          }
+      // 1. Check entry level reasons
+      if (e.reasons) processReasons(e.reasons);
+      // 2. Check entry level rejections
+      if (e.rejections) processReasons(e.rejections);
+      // 3. Check runs array
+      if (e.runs && Array.isArray(e.runs)) {
+        e.runs.forEach((r) => {
+          if (r.reasons) processReasons(r.reasons);
+          if (r.rejections) processReasons(r.rejections);
         });
       }
     });
@@ -667,7 +749,7 @@ export default function MoldsenseDashboard({
       });
     }
 
-    return [{ defect: "BLACK SPOT", count: 100, cumPct: 100 }];
+    return [];
   }, [monthFilteredEntries, reasonCodes]);
 
   // Machine OEE Matrix Data
