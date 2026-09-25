@@ -489,8 +489,14 @@ export default function MoldsenseDashboard({
   locations = [],
   selectedPlantId = "1040",
   selectedMonth = "2026-09",
+  userRole = "operator",
 }) {
+  const isOperator = userRole === "operator";
   const [activeTab, setActiveTab] = useState("Monthly MIS");
+
+  // Operator strictly gets ONLY Monthly MIS; Supervisors and Admins get both tabs
+  const TABS = isOperator ? ["Monthly MIS"] : ["Monthly MIS", "Daily OEE Matrix"];
+  const currentTab = isOperator ? "Monthly MIS" : activeTab;
 
   // Filter entries for the selected month and plant
   const monthFilteredEntries = useMemo(() => {
@@ -663,20 +669,19 @@ export default function MoldsenseDashboard({
     return BENCHMARK_MC_OEE_MATRIX;
   }, [monthFilteredEntries, machines, selectedPlantId, master, reasonCodes]);
 
-  // Keep ONLY 2 tabs as explicitly requested
-  const TABS = ["Monthly MIS", "Daily OEE Matrix"];
-
   return (
     <div className="mis-dashboard-container">
-      {/* 1. Sleek Tab Navigation Strip (Only 2 Tabs, No Export Button) */}
+      {/* 1. Sleek Tab Navigation Strip (Only Monthly MIS for Operator, 2 Tabs for Supervisor/Admin) */}
       <div className="ms-tab-bar">
         <div className="ms-tab-group">
           {TABS.map((t) => (
             <button
               key={t}
               type="button"
-              className={`ms-tab-item ${activeTab === t ? "active" : ""}`}
-              onClick={() => setActiveTab(t)}
+              className={`ms-tab-item ${currentTab === t ? "active" : ""}`}
+              onClick={() => {
+                if (!isOperator) setActiveTab(t);
+              }}
             >
               {t}
             </button>
@@ -685,7 +690,7 @@ export default function MoldsenseDashboard({
       </div>
 
       {/* 2. Monthly MIS Tab: Pure 6 Graphs Grid (No KPI Cards, Fully Functional) */}
-      {activeTab === "Monthly MIS" && (
+      {currentTab === "Monthly MIS" && (
         <div className="ms-content-area" style={{ marginTop: "14px" }}>
           <div className="ms-charts-grid">
             {/* Graph 1: Production Quantity */}
@@ -759,8 +764,8 @@ export default function MoldsenseDashboard({
         </div>
       )}
 
-      {/* 3. Daily OEE Matrix Tab: Machine × Day Heatmap + Machine Avg OEE Chart */}
-      {activeTab === "Daily OEE Matrix" && (
+      {/* 3. Daily OEE Matrix Tab: Machine × Day Heatmap (Strictly blocked for Operator) */}
+      {!isOperator && currentTab === "Daily OEE Matrix" && (
         <DailyOeeMatrixView matrixData={matrixData} selectedMonth={selectedMonth} />
       )}
     </div>

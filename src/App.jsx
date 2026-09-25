@@ -35,6 +35,7 @@ const TABS_BY_ROLE = {
   operator: [
     ["entry", "New entry"],
     ["mine", "My entries"],
+    ["dashboard", "Dashboard"],
   ],
   supervisor: [
     ["browse", "Plant entries"],
@@ -697,7 +698,7 @@ export default function App() {
             </div>
           )}
 
-          {tab === "dashboard" && currentUser?.role !== "operator" && (
+          {tab === "dashboard" && (
             <Dashboard
               entries={authorizedEntries}
               master={master}
@@ -708,6 +709,7 @@ export default function App() {
               plants={accessiblePlants}
               selectedPlantId={selectedPlantId}
               selectedMonth={selectedMonth}
+              userRole={currentUser?.role || "operator"}
             />
           )}
 
