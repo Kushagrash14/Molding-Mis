@@ -10,19 +10,15 @@ async function main() {
   const transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
     port: 587,
-    family: 4,
     secure: false,
-    requireTLS: true,
     auth: {
       user: "verify.software2040@pgel.in",
       pass: "fmdrdczrxkpjrbsv",
     },
     tls: {
-      servername: "smtp.office365.com",
+      ciphers: "SSLv3",
       rejectUnauthorized: false,
     },
-    connectionTimeout: 15000,
-    greetingTimeout: 10000,
   });
 
   try {
