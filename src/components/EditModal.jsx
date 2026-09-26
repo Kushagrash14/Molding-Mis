@@ -51,15 +51,30 @@ export default function EditModal({
 
   function handleReasonChange(id, val) {
     const clean = val === "" ? "" : Math.max(0, Number(val));
-    setReasonVals((prev) => ({ ...prev, [id]: clean }));
+    const nextReasons = { ...reasonVals, [id]: clean };
+    setReasonVals(nextReasons);
+
+    const rc = reasonCodes.find((x) => x.reason_id === id);
+    const isDt = rc
+      ? rc.category === "planned_dt" || rc.category === "unplanned_dt"
+      : id.startsWith("pdt_") || id.startsWith("udt_");
+
+    if (isDt) {
+      const editDtMins = Object.entries(nextReasons).reduce((sum, [reason_id, v]) => {
+        const itemRc = reasonCodes.find((x) => x.reason_id === reason_id);
+        const itemIsDt = itemRc
+          ? itemRc.category === "planned_dt" || itemRc.category === "unplanned_dt"
+          : reason_id.startsWith("pdt_") || reason_id.startsWith("udt_");
+        return itemIsDt ? sum + Number(v || 0) : sum;
+      }, 0);
+
+      const plannedHrs = Number(form.planned_hours || 12.0);
+      const autoRunHour = Math.max(0, Number((plannedHrs - editDtMins / 60).toFixed(1)));
+      setForm((prev) => ({ ...prev, run_hour: autoRunHour }));
+    }
   }
 
   function save() {
-    if (!form.run_hour || Number(form.run_hour) <= 0) {
-      alert("Run hour must be greater than 0.");
-      return;
-    }
-
     const editDtMins = Object.entries(reasonVals).reduce((sum, [reason_id, val]) => {
       const rc = reasonCodes.find((x) => x.reason_id === reason_id);
       const isDt = rc
@@ -71,6 +86,11 @@ export default function EditModal({
     const plannedHrs = Number(form.planned_hours || form.run_hour || 12);
     const plannedMins = Math.round(plannedHrs * 60);
     const isFullShiftDown = editDtMins >= plannedMins;
+
+    if (!isFullShiftDown && (!form.run_hour || Number(form.run_hour) <= 0)) {
+      alert("Run hour must be greater than 0.");
+      return;
+    }
 
     if (isFullShiftDown) {
       if (form.ok_prod === "" || form.ok_prod === undefined || Number(form.ok_prod) < 0) {

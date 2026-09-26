@@ -11,6 +11,7 @@ export default function DowntimeModal({
   downtimeReasons = [],
   reasons = {},
   otherDtRemark = "",
+  plannedHours = 12,
   onUpdateReason,
   onUpdateOtherRemark,
   isReadOnly = false,
@@ -638,15 +639,34 @@ export default function DowntimeModal({
               )}
             </div>
 
-            <span
-              style={{
-                fontSize: "12.5px",
-                fontWeight: 800,
-                color: totalMins > 0 ? "#0369a1" : "#64748b",
-              }}
-            >
-              Total: {formatDuration(totalMins)}
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontSize: "12.5px",
+                  fontWeight: 800,
+                  color: totalMins > 0 ? "#0369a1" : "#64748b",
+                }}
+              >
+                Total Downtime: {formatDuration(totalMins)}
+              </span>
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  color: "#15803d",
+                  background: "#dcfce7",
+                  border: "1px solid #86efac",
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+                title="Running hours decrease automatically with downtime"
+              >
+                ⏱️ Run Hours: {Math.max(0, Number((Number(plannedHours || 12) - totalMins / 60).toFixed(1)))}h / {plannedHours || 12}h
+              </span>
+            </div>
           </div>
 
           {loggedDowntimes.length === 0 ? (

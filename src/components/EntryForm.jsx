@@ -244,15 +244,38 @@ export default function EntryForm({
       const updatedRuns = curRuns.map((r, idx) => {
         if (idx !== runIdx) return r;
         if (typeof fieldOrObj === "object") {
-          return { ...r, ...fieldOrObj };
+          const updated = { ...r, ...fieldOrObj };
+          if ("reasons" in fieldOrObj && !("run_hour" in fieldOrObj)) {
+            const dtMins = calculateTotalDowntimeMinutes(updated.reasons, reasonCodes);
+            const plannedHrs = Number(updated.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
+            const dtHrs = dtMins / 60;
+            updated.run_hour = Math.max(0, Number((plannedHrs - dtHrs).toFixed(1)));
+          }
+          return updated;
         }
+
+        // When downtime/reasons update, automatically decrement running hours by downtime duration!
+        // E.g. 300 min downtime on a 12h shift => 12h - 5h = 7.0h Run Hours
+        if (fieldOrObj === "reasons") {
+          const nextReasons = val;
+          const dtMins = calculateTotalDowntimeMinutes(nextReasons, reasonCodes);
+          const plannedHrs = Number(r.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
+          const dtHrs = dtMins / 60;
+          const autoRunHour = Math.max(0, Number((plannedHrs - dtHrs).toFixed(1)));
+          return {
+            ...r,
+            reasons: nextReasons,
+            run_hour: autoRunHour,
+          };
+        }
+
         return { ...r, [fieldOrObj]: val };
       });
       return { ...prev, [machineId]: updatedRuns };
     });
 
     setDirtyMachines((prev) => new Set(prev).add(machineId));
-  }, [selectedShift]);
+  }, [selectedShift, reasonCodes]);
 
   // Add Mold #2 or Mold #3 sub-run for a machine
   const handleAddMold = useCallback((machineId) => {
@@ -280,14 +303,12 @@ export default function EntryForm({
       const splitDur1 = calculateHoursBetween(lastRun.start_time, splitTime, shiftStart);
       const splitDur2 = calculateHoursBetween(splitTime, lastRun.end_time, shiftStart);
 
+      const lastRunDtMins = calculateTotalDowntimeMinutes(lastRun.reasons, reasonCodes);
       const updatedLastRun = {
         ...lastRun,
         end_time: splitTime,
         planned_hours: splitDur1,
-        run_hour:
-          lastRun.run_hour !== "" && lastRun.run_hour !== undefined
-            ? Math.min(Number(lastRun.run_hour), splitDur1)
-            : splitDur1,
+        run_hour: Math.max(0, Number((splitDur1 - (lastRunDtMins / 60)).toFixed(1))),
       };
 
       const newRun = {
@@ -318,7 +339,7 @@ export default function EntryForm({
     });
 
     setDirtyMachines((prev) => new Set(prev).add(machineId));
-  }, [selectedShift]);
+  }, [selectedShift, reasonCodes]);
 
   // Update start time of Mold runIdx (where runIdx > 0), linking previous run's end time
   const handleUpdateStartTime = useCallback((machineId, runIdx, newStartTime) => {
@@ -332,25 +353,21 @@ export default function EntryForm({
 
       const prevPlanned = calculateHoursBetween(prevRun.start_time, newStartTime, shiftStart);
       const curPlanned = calculateHoursBetween(newStartTime, curRun.end_time, shiftStart);
+      const prevRunDtMins = calculateTotalDowntimeMinutes(prevRun.reasons, reasonCodes);
+      const curRunDtMins = calculateTotalDowntimeMinutes(curRun.reasons, reasonCodes);
 
       const updated = [...curRuns];
       updated[runIdx - 1] = {
         ...prevRun,
         end_time: newStartTime,
         planned_hours: prevPlanned,
-        run_hour:
-          prevRun.run_hour !== "" && prevRun.run_hour !== undefined
-            ? Math.min(Number(prevRun.run_hour), prevPlanned)
-            : prevPlanned,
+        run_hour: Math.max(0, Number((prevPlanned - (prevRunDtMins / 60)).toFixed(1))),
       };
       updated[runIdx] = {
         ...curRun,
         start_time: newStartTime,
         planned_hours: curPlanned,
-        run_hour:
-          curRun.run_hour !== "" && curRun.run_hour !== undefined
-            ? Math.min(Number(curRun.run_hour), curPlanned)
-            : curPlanned,
+        run_hour: Math.max(0, Number((curPlanned - (curRunDtMins / 60)).toFixed(1))),
       };
 
       return {
@@ -360,7 +377,7 @@ export default function EntryForm({
     });
 
     setDirtyMachines((prev) => new Set(prev).add(machineId));
-  }, [selectedShift]);
+  }, [selectedShift, reasonCodes]);
 
   // Update change_over_time for a sub-run
   const handleUpdateChangeOver = useCallback((machineId, runIdx, minutes) => {
@@ -391,11 +408,9 @@ export default function EntryForm({
         const prevRun = { ...nextRuns[runIdx - 1] };
         prevRun.end_time = nextRuns[runIdx].end_time;
         const newDur = calculateHoursBetween(prevRun.start_time, prevRun.end_time, shiftStart);
+        const prevDtMins = calculateTotalDowntimeMinutes(prevRun.reasons, reasonCodes);
         prevRun.planned_hours = newDur;
-        prevRun.run_hour =
-          prevRun.run_hour !== "" && prevRun.run_hour !== undefined
-            ? Math.min(Number(prevRun.run_hour), newDur)
-            : newDur;
+        prevRun.run_hour = Math.max(0, Number((newDur - (prevDtMins / 60)).toFixed(1)));
         nextRuns[runIdx - 1] = prevRun;
         nextRuns.splice(runIdx, 1);
       } else {
@@ -403,11 +418,9 @@ export default function EntryForm({
         const nextRun = { ...nextRuns[runIdx + 1] };
         nextRun.start_time = nextRuns[runIdx].start_time;
         const newDur = calculateHoursBetween(nextRun.start_time, nextRun.end_time, shiftStart);
+        const nextDtMins = calculateTotalDowntimeMinutes(nextRun.reasons, reasonCodes);
         nextRun.planned_hours = newDur;
-        nextRun.run_hour =
-          nextRun.run_hour !== "" && nextRun.run_hour !== undefined
-            ? Math.min(Number(nextRun.run_hour), newDur)
-            : newDur;
+        nextRun.run_hour = Math.max(0, Number((newDur - (nextDtMins / 60)).toFixed(1)));
         nextRuns[runIdx + 1] = nextRun;
         nextRuns.splice(runIdx, 1);
       }
@@ -419,7 +432,7 @@ export default function EntryForm({
     });
 
     setDirtyMachines((prev) => new Set(prev).add(machineId));
-  }, [selectedShift]);
+  }, [selectedShift, reasonCodes]);
 
   // Memoized previous shift info lookup for all plant machines
   const prevShiftMap = useMemo(() => {
@@ -628,7 +641,10 @@ export default function EntryForm({
         start_time: r.start_time,
         end_time: r.end_time,
         planned_hours: Number(r.planned_hours) || Number(selectedShift.planned_hours || 12.0),
-        run_hour: Number(r.run_hour) || Number(r.planned_hours) || 12.0,
+        run_hour:
+          r.run_hour !== undefined && r.run_hour !== "" && !isNaN(Number(r.run_hour))
+            ? Number(r.run_hour)
+            : Math.max(0, Number(((Number(r.planned_hours) || Number(selectedShift.planned_hours || 12.0)) - (runDtMins / 60)).toFixed(1))),
         sap_code: r.sap_code,
         material_description: rMaster?.material_description || r.material_description || "",
         part_no: rMaster?.part_no || r.part_no || "",
@@ -1021,6 +1037,7 @@ export default function EntryForm({
           downtimeReasons={downtimeReasons}
           reasons={normalizeReasonsMap(activeDtRun.reasons)}
           otherDtRemark={activeDtRun.other_dt_remark || ""}
+          plannedHours={Number(activeDtRun.planned_hours) || Number(selectedShift?.planned_hours || 12.0)}
           onUpdateReason={(reasonId, val) => {
             const currentMap = normalizeReasonsMap(activeDtRun.reasons);
             const nextReasons = { ...currentMap, [reasonId]: val };
