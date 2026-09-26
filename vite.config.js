@@ -17,8 +17,21 @@ function getSmtpConfig(useFallback = false) {
   if (useFallback) return DEFAULT_SMTP;
   const host = (process.env.SMTP_HOST || DEFAULT_SMTP.host).trim();
   const port = Number(process.env.SMTP_PORT) || DEFAULT_SMTP.port;
-  const user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
-  const pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  let user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  let pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+
+  const lowerUser = user.toLowerCase();
+  if (
+    !user ||
+    lowerUser.includes("software.2040") ||
+    lowerUser.includes("met.2060") ||
+    lowerUser === "admin" ||
+    lowerUser === "operator"
+  ) {
+    user = DEFAULT_SMTP.user;
+    pass = DEFAULT_SMTP.pass;
+  }
+
   return { host, port, user, pass };
 }
 
@@ -28,6 +41,7 @@ function createMailTransporter(cfg = getSmtpConfig(false)) {
     port: cfg.port,
     family: 4,
     secure: false,
+    requireTLS: true,
     auth: {
       user: cfg.user,
       pass: cfg.pass,
@@ -36,6 +50,9 @@ function createMailTransporter(cfg = getSmtpConfig(false)) {
       servername: cfg.host,
       rejectUnauthorized: false,
     },
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
   });
 }
 
@@ -61,15 +78,17 @@ function otpApiPlugin() {
                 );
               }
 
+              const cfg = getSmtpConfig(false);
               const otp = Math.floor(100000 + Math.random() * 900000).toString();
               const expiresAt = Date.now() + 10 * 60 * 1000;
               activeOtps.set(email.toLowerCase(), { otp, expiresAt, name, employee_code });
 
               // Send real email via Office 365
               const mailOptions = {
-                from: `"PGEL Production Portal" <${process.env.SMTP_USER}>`,
+                from: `"PGEL Production Portal" <${cfg.user}>`,
                 to: email,
                 subject: `🔐 PGEL Portal Verification Code: ${otp}`,
+                text: `Hello ${name || "Colleague"},\n\nYour PGEL Portal verification code is: ${otp}\n\nThis OTP is valid for 10 minutes.\nDo not share this code with anyone.\n\nAutomated notification from PGEL Industrial Automation System.`,
                 html: `
                   <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                     <div style="text-align: center; margin-bottom: 20px;">
@@ -96,30 +115,24 @@ function otpApiPlugin() {
               let sent = false;
               let sendError = null;
               try {
-                const cfg = getSmtpConfig(false);
                 const transporter = createMailTransporter(cfg);
                 await transporter.sendMail(mailOptions);
                 sent = true;
                 console.log(`[OTP] Real security email delivered to ${email}`);
               } catch (mailErr) {
                 console.warn("[OTP] Initial SMTP send failed:", mailErr.message);
-                const cfg = getSmtpConfig(false);
-                if (cfg.pass !== DEFAULT_SMTP.pass || cfg.user !== DEFAULT_SMTP.user) {
-                  try {
-                    console.log("[OTP] Retrying with verified default PGEL service account...");
-                    const fallbackTransporter = createMailTransporter(getSmtpConfig(true));
-                    await fallbackTransporter.sendMail({
-                      ...mailOptions,
-                      from: `"PGEL Production Portal" <${DEFAULT_SMTP.user}>`,
-                    });
-                    sent = true;
-                    console.log(`[OTP] Fallback security email delivered to ${email}`);
-                  } catch (fallbackErr) {
-                    console.error("[OTP] Fallback SMTP error:", fallbackErr.message);
-                    sendError = fallbackErr.message;
-                  }
-                } else {
-                  sendError = mailErr.message;
+                try {
+                  console.log("[OTP] Retrying with verified default PGEL service account...");
+                  const fallbackTransporter = createMailTransporter(getSmtpConfig(true));
+                  await fallbackTransporter.sendMail({
+                    ...mailOptions,
+                    from: `"PGEL Production Portal" <${DEFAULT_SMTP.user}>`,
+                  });
+                  sent = true;
+                  console.log(`[OTP] Fallback security email delivered to ${email}`);
+                } catch (fallbackErr) {
+                  console.error("[OTP] Fallback SMTP error:", fallbackErr.message);
+                  sendError = fallbackErr.message;
                 }
               }
 

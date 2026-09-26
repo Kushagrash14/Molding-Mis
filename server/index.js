@@ -20,23 +20,39 @@ const DEFAULT_SMTP = {
   pass: "fmdrdczrxkpjrbsv",
 };
 
-function getSmtpConfig(useFallback = false) {
-  if (useFallback) {
+function getSmtpConfig(forceVerified = false) {
+  if (forceVerified) {
     return DEFAULT_SMTP;
   }
   const host = (process.env.SMTP_HOST || DEFAULT_SMTP.host).trim();
   const port = Number(process.env.SMTP_PORT) || DEFAULT_SMTP.port;
-  const user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
-  const pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  let user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  let pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+
+  // If user is set to an employee account (e.g. software.2040@pgel.in or met.2060@pgel.in)
+  // or is empty, automatically use the dedicated verified automated service account
+  const lowerUser = user.toLowerCase();
+  if (
+    !user ||
+    lowerUser.includes("software.2040") ||
+    lowerUser.includes("met.2060") ||
+    lowerUser === "admin" ||
+    lowerUser === "operator"
+  ) {
+    user = DEFAULT_SMTP.user;
+    pass = DEFAULT_SMTP.pass;
+  }
+
   return { host, port, user, pass };
 }
 
-function createMailTransporter(cfg) {
+function createMailTransporter(cfg = getSmtpConfig(false)) {
   return nodemailer.createTransport({
     host: cfg.host,
     port: cfg.port,
-    family: 4,
-    secure: false,
+    family: 4, // Strictly force IPv4
+    secure: false, // port 587 uses STARTTLS
+    requireTLS: true,
     auth: {
       user: cfg.user,
       pass: cfg.pass,
@@ -45,6 +61,9 @@ function createMailTransporter(cfg) {
       servername: cfg.host,
       rejectUnauthorized: false,
     },
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
   });
 }
 
@@ -77,14 +96,15 @@ app.post("/api/send-otp", async (req, res) => {
     activeOtps.set(email.toLowerCase().trim(), { otp, expiresAt, name, employee_code });
 
     console.log(`\n======================================================`);
-    console.log(`🔐 [AUTH] Generated OTP for ${email}: ${otp}`);
-    console.log(`📡 [AUTH] SMTP Target: ${cfg.host}:${cfg.port} | User: ${cfg.user}`);
+    console.log(`🔐 [AUTH] Generating OTP for ${email}...`);
+    console.log(`📡 [AUTH] SMTP Sender Account: ${cfg.user} | Target: ${cfg.host}:${cfg.port}`);
     console.log(`======================================================\n`);
 
     const mailOptions = {
       from: `"PGEL Production Portal" <${cfg.user}>`,
       to: email,
       subject: `🔐 PGEL Portal Verification Code: ${otp}`,
+      text: `Hello ${name || "Colleague"},\n\nYour PGEL Portal verification code is: ${otp}\n\nThis OTP is valid for 10 minutes.\nDo not share this code with anyone.\n\nAutomated notification from PGEL Industrial Automation System.`,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
           <div style="text-align: center; margin-bottom: 20px;">
@@ -106,36 +126,35 @@ app.post("/api/send-otp", async (req, res) => {
       `,
     };
 
-    let transporter = createMailTransporter(cfg);
+    let sent = false;
+    let lastErr = null;
 
     try {
-      await transporter.sendMail(mailOptions);
-      console.log(`[AUTH] OTP email successfully dispatched to ${email}`);
+      const transporter = createMailTransporter(cfg);
+      const info = await transporter.sendMail(mailOptions);
+      sent = true;
+      console.log(`[AUTH] OTP email successfully dispatched to ${email}. MessageId: ${info.messageId}`);
     } catch (primaryErr) {
-      console.warn(`[AUTH] Initial send attempt failed (${primaryErr.message}).`);
+      console.warn(`[AUTH] Primary send failed (${primaryErr.message}). Retrying with verified default account...`);
+      lastErr = primaryErr;
 
-      // If custom credentials were provided and failed with auth error, retry with verified default
-      if (cfg.pass !== DEFAULT_SMTP.pass || cfg.user !== DEFAULT_SMTP.user) {
-        console.log(`[AUTH] Retrying dispatch with verified default PGEL service account...`);
-        try {
-          const fallbackCfg = getSmtpConfig(true);
-          const fallbackTransporter = createMailTransporter(fallbackCfg);
-          await fallbackTransporter.sendMail({
-            ...mailOptions,
-            from: `"PGEL Production Portal" <${fallbackCfg.user}>`,
-          });
-          console.log(`[AUTH] Fallback OTP dispatch succeeded to ${email}`);
-          return res.json({
-            success: true,
-            message: "Verification code sent to your registered email address.",
-          });
-        } catch (fallbackErr) {
-          console.error(`[AUTH] Fallback dispatch failed as well:`, fallbackErr.message);
-          throw fallbackErr;
-        }
-      } else {
-        throw primaryErr;
+      try {
+        const fallbackCfg = getSmtpConfig(true);
+        const fallbackTransporter = createMailTransporter(fallbackCfg);
+        const info = await fallbackTransporter.sendMail({
+          ...mailOptions,
+          from: `"PGEL Production Portal" <${fallbackCfg.user}>`,
+        });
+        sent = true;
+        console.log(`[AUTH] Fallback OTP dispatch succeeded to ${email}. MessageId: ${info.messageId}`);
+      } catch (fallbackErr) {
+        console.error(`[AUTH] Fallback dispatch failed:`, fallbackErr.message);
+        lastErr = fallbackErr;
       }
+    }
+
+    if (!sent) {
+      throw lastErr || new Error("Failed to dispatch verification email.");
     }
 
     return res.json({
@@ -155,7 +174,22 @@ app.post("/api/verify-otp", async (req, res) => {
     const cleanEmail = (email || "").toLowerCase().trim();
     const cleanOtp = (otp || "").toString().trim();
 
-    const record = activeOtps.get(cleanEmail);
+    let record = activeOtps.get(cleanEmail);
+    if (!record) {
+      // Also check if cleanEmail was employee code or username
+      for (const [k, v] of activeOtps.entries()) {
+        if (
+          k === cleanEmail ||
+          v.employee_code?.toLowerCase() === cleanEmail ||
+          (cleanEmail === "admin" && k === "software.2040@pgel.in") ||
+          (cleanEmail === "operator" && k === "met.2060@pgel.in")
+        ) {
+          record = v;
+          break;
+        }
+      }
+    }
+
     if (!record) {
       return res.status(400).json({
         success: false,
@@ -363,6 +397,14 @@ app.post("/api/lock-cutoff", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Molding MIS Backend API running on port ${PORT}`);
+  try {
+    const testCfg = getSmtpConfig(false);
+    const testTransporter = createMailTransporter(testCfg);
+    await testTransporter.verify();
+    console.log(`✅ [SMTP] Office 365 Connected & Ready for OTP delivery via ${testCfg.user}`);
+  } catch (smtpErr) {
+    console.warn(`⚠️ [SMTP] Startup verify notice (${smtpErr.message}) - service will dispatch on demand.`);
+  }
 });

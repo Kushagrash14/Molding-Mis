@@ -70,8 +70,10 @@ export default function LoginScreen({ onLogin, users = [] }) {
           u.employee_code?.toLowerCase() === q ||
           u.username?.toLowerCase() === q ||
           u.id?.toLowerCase() === q ||
+          (u.email && u.email.toLowerCase().split("@")[0] === q) ||
           (q === "software.2040@pgel.in" && u.username === "admin") ||
-          (q === "verify.software2040@pgel.in" && u.username === "admin")
+          (q === "verify.software2040@pgel.in" && u.username === "admin") ||
+          (q === "met.2060@pgel.in" && u.username === "operator")
       ) || null
     );
   }
