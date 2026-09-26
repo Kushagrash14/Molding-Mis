@@ -16,7 +16,10 @@ export default function MultiCavityModal({
 }) {
   if (!isOpen || !run) return null;
 
-  const [totalCavity, setTotalCavity] = useState(2);
+  const rMaster = master.find((m) => m.sap_code === run.sap_code);
+  const stdCavity = Math.max(1, Number(rMaster?.cavity || run.std_cavity || 1));
+
+  const [totalCavity, setTotalCavity] = useState(stdCavity);
   const [parts, setParts] = useState([]);
   const [rejPartIdx, setRejPartIdx] = useState(null);
 
@@ -24,7 +27,13 @@ export default function MultiCavityModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    const initialTotal = Math.max(2, Number(run.running_cavity || 2));
+    if (stdCavity <= 1) {
+      alert("Standard Mold Cavity is 1. Single-cavity molds cannot be split into multiple SAP codes.");
+      onClose();
+      return;
+    }
+
+    const initialTotal = Math.min(stdCavity, Math.max(2, Number(run.running_cavity || stdCavity)));
     setTotalCavity(initialTotal);
 
     if (run.cavity_parts && Array.isArray(run.cavity_parts) && run.cavity_parts.length >= 2) {
@@ -40,7 +49,6 @@ export default function MultiCavityModal({
         }))
       );
     } else {
-      const rMaster = master.find((m) => m.sap_code === run.sap_code);
       const mainPart = {
         cavity_no: 1,
         sap_code: run.sap_code || "",
@@ -64,7 +72,7 @@ export default function MultiCavityModal({
 
       setParts([mainPart, secPart]);
     }
-  }, [isOpen]); // Only re-init when opened, prevents resetting active edits!
+  }, [isOpen, stdCavity]);
 
   const allocatedCavitySum = useMemo(() => {
     return parts.reduce((sum, p) => sum + (Number(p.cavity) || 0), 0);
@@ -128,6 +136,11 @@ export default function MultiCavityModal({
   }
 
   function handleSaveMultiCavity() {
+    if (totalCavity > stdCavity) {
+      alert(`Running cavity (${totalCavity}) cannot exceed Standard Mold Cavity (${stdCavity}).`);
+      return;
+    }
+
     if (!isBalanced) {
       alert(
         `Cavity Mismatch: Total allocated cavities (${allocatedCavitySum}) must equal total running cavity (${totalCavity}).`
@@ -240,12 +253,23 @@ export default function MultiCavityModal({
             <input
               type="number"
               min="2"
-              max="16"
+              max={stdCavity}
               value={totalCavity}
-              onChange={(e) => setTotalCavity(Math.max(2, Number(e.target.value) || 2))}
+              onChange={(e) => {
+                const val = Number(e.target.value) || 2;
+                if (val > stdCavity) {
+                  alert(`Running cavity (${val}) cannot exceed Standard Mold Cavity (${stdCavity}).`);
+                  setTotalCavity(stdCavity);
+                  return;
+                }
+                setTotalCavity(Math.max(2, val));
+              }}
               disabled={isReadOnly}
               className="sheet-input-number cav-number-input"
             />
+            <span style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
+              (Max: {stdCavity} Std Cav)
+            </span>
           </div>
 
           <div className={`cav-balance-indicator ${isBalanced ? "balanced" : "mismatched"}`}>

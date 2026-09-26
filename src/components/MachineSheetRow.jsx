@@ -95,6 +95,7 @@ export default function MachineSheetRow({
               }, 0);
         const dtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
         const rMaster = master.find((item) => item.sap_code === r.sap_code);
+        const stdCavity = Number(rMaster?.cavity || r.std_cavity || 1);
 
         // Start time options for sub-runs
         let startOptions = isSubRun
@@ -322,28 +323,32 @@ export default function MachineSheetRow({
                   type="number"
                   step="1"
                   min="1"
+                  max={stdCavity}
                   value={r.running_cavity !== undefined ? r.running_cavity : ""}
-                  onChange={(e) => onUpdateRun(runIdx, "running_cavity", e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val !== "" && Number(val) > stdCavity) {
+                      alert(`Running cavity (${val}) cannot exceed Standard Mold Cavity (${stdCavity}).`);
+                      onUpdateRun(runIdx, "running_cavity", stdCavity);
+                      return;
+                    }
+                    onUpdateRun(runIdx, "running_cavity", val);
+                  }}
                   disabled={isReadOnly || !r.sap_code}
-                  placeholder={String(rMaster?.cavity || 1)}
+                  placeholder={String(stdCavity)}
                   className="sheet-input-number"
                   style={{ maxWidth: "42px" }}
                 />
-                {!isReadOnly && (
+                {/* STRICT TOOLING RULE: Only show + SAP if standard mold cavity is physically >= 2 */}
+                {r.sap_code && stdCavity >= 2 && !isReadOnly && (
                   <button
                     type="button"
                     className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}
-                    onClick={() => {
-                      if (!r.sap_code) {
-                        alert("Please select the Primary SAP code for this machine first.");
-                        return;
-                      }
-                      onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx);
-                    }}
+                    onClick={() => onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx)}
                     title={
                       r.is_multi_cavity
                         ? `Multi-Cavity Active: ${r.cavity_parts?.length || 2} parts (Click to edit)`
-                        : "Optional: Split cavities across multiple SAP codes"
+                        : `Split ${stdCavity} standard cavities across multiple SAP codes`
                     }
                   >
                     {r.is_multi_cavity ? `🔀 ${r.cavity_parts?.length || 2} SAP` : "+ SAP"}
