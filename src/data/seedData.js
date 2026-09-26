@@ -27417,7 +27417,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27429,7 +27429,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27441,7 +27441,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27453,7 +27453,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27465,7 +27465,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27477,7 +27477,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27489,7 +27489,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27501,7 +27501,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27513,7 +27513,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27525,7 +27525,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27537,7 +27537,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27549,7 +27549,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27561,7 +27561,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27573,7 +27573,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27585,7 +27585,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27597,7 +27597,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27609,7 +27609,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27621,7 +27621,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27633,7 +27633,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27645,7 +27645,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27657,7 +27657,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27669,7 +27669,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27681,7 +27681,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27693,7 +27693,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27705,7 +27705,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27717,7 +27717,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27729,7 +27729,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27741,7 +27741,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27753,7 +27753,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27765,7 +27765,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27777,7 +27777,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27789,7 +27789,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 33,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27801,7 +27801,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 33,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27813,7 +27813,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27825,7 +27825,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27837,7 +27837,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27849,7 +27849,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27861,7 +27861,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27873,7 +27873,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27885,7 +27885,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27897,7 +27897,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27909,7 +27909,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27921,7 +27921,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27933,7 +27933,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27945,7 +27945,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27957,7 +27957,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27969,7 +27969,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27981,7 +27981,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -27993,7 +27993,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28005,7 +28005,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28017,7 +28017,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28029,7 +28029,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28041,7 +28041,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 45,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28053,7 +28053,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28065,7 +28065,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28077,7 +28077,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28089,7 +28089,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28101,7 +28101,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28113,7 +28113,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28125,7 +28125,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28137,7 +28137,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28149,7 +28149,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28161,7 +28161,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28173,7 +28173,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28185,7 +28185,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28197,7 +28197,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28209,7 +28209,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28221,7 +28221,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28233,7 +28233,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28245,7 +28245,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28257,7 +28257,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28269,7 +28269,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28281,7 +28281,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28293,7 +28293,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28305,7 +28305,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28317,7 +28317,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28329,7 +28329,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28341,7 +28341,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28353,7 +28353,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28365,7 +28365,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28377,7 +28377,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 45,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28389,7 +28389,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28401,7 +28401,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28413,7 +28413,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28425,7 +28425,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28437,7 +28437,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28449,7 +28449,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28461,7 +28461,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28473,7 +28473,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28485,7 +28485,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28497,7 +28497,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28509,7 +28509,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28521,7 +28521,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28533,7 +28533,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28545,7 +28545,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28557,7 +28557,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28569,7 +28569,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28581,7 +28581,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28593,7 +28593,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28605,7 +28605,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28617,7 +28617,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28629,7 +28629,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28641,7 +28641,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28653,7 +28653,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28665,7 +28665,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28677,7 +28677,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28689,7 +28689,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28701,7 +28701,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 65,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28713,7 +28713,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28725,7 +28725,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28737,7 +28737,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28749,7 +28749,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28761,7 +28761,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28773,7 +28773,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28785,7 +28785,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28797,7 +28797,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28809,7 +28809,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28821,7 +28821,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28833,7 +28833,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 65,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28845,7 +28845,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28857,7 +28857,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28869,7 +28869,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28881,7 +28881,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28893,7 +28893,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28905,7 +28905,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28917,7 +28917,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28929,7 +28929,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28941,7 +28941,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28953,7 +28953,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28965,7 +28965,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28977,7 +28977,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -28989,7 +28989,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29001,7 +29001,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29013,7 +29013,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29025,7 +29025,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29037,7 +29037,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29049,7 +29049,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29061,7 +29061,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29073,7 +29073,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29085,7 +29085,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29097,7 +29097,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29109,7 +29109,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29121,7 +29121,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29133,7 +29133,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29145,7 +29145,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29157,7 +29157,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29169,7 +29169,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29181,7 +29181,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29193,7 +29193,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29205,7 +29205,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29217,7 +29217,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29229,7 +29229,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29241,7 +29241,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 80,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29253,7 +29253,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 80,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29265,7 +29265,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29277,7 +29277,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29289,7 +29289,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29301,7 +29301,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29313,7 +29313,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 36,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29325,7 +29325,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 24,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29337,7 +29337,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29349,7 +29349,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 51,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29361,7 +29361,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29373,7 +29373,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29385,7 +29385,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 60,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29397,7 +29397,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29409,7 +29409,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29421,7 +29421,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29433,7 +29433,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29445,7 +29445,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29457,7 +29457,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29469,7 +29469,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29481,7 +29481,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 28,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29493,7 +29493,7 @@ export const SEED_MASTER = [
       "cavity": 2,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   },
@@ -29505,7 +29505,7 @@ export const SEED_MASTER = [
       "cavity": 1,
       "shots_per_hour": 40,
       "price": 1,
-      "part_wt": 0,
+      "part_wt": 1,
       "run_wt": 0,
       "manpower": 1
   }
