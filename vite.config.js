@@ -6,30 +6,34 @@ import dns from "dns";
 
 dotenv.config();
 
-async function createMailTransporter() {
-  const host = process.env.SMTP_HOST || "smtp.office365.com";
-  let targetHost = host;
-  try {
-    targetHost = await new Promise((resolve, reject) => {
-      dns.lookup(host, { family: 4 }, (err, address) => {
-        if (err) reject(err);
-        else resolve(address);
-      });
-    });
-  } catch (err) {
-    console.warn("[OTP] DNS lookup fallback, using host:", host);
-  }
+const DEFAULT_SMTP = {
+  host: "smtp.office365.com",
+  port: 587,
+  user: "verify.software2040@pgel.in",
+  pass: "fmdrdczrxkpjrbsv",
+};
 
+function getSmtpConfig(useFallback = false) {
+  if (useFallback) return DEFAULT_SMTP;
+  const host = (process.env.SMTP_HOST || DEFAULT_SMTP.host).trim();
+  const port = Number(process.env.SMTP_PORT) || DEFAULT_SMTP.port;
+  const user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  const pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  return { host, port, user, pass };
+}
+
+function createMailTransporter(cfg = getSmtpConfig(false)) {
   return nodemailer.createTransport({
-    host: targetHost,
-    port: Number(process.env.SMTP_PORT) || 587,
+    host: cfg.host,
+    port: cfg.port,
+    family: 4,
     secure: false,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: cfg.user,
+      pass: cfg.pass,
     },
     tls: {
-      servername: host,
+      servername: cfg.host,
       rejectUnauthorized: false,
     },
   });
@@ -92,13 +96,31 @@ function otpApiPlugin() {
               let sent = false;
               let sendError = null;
               try {
-                const transporter = await createMailTransporter();
+                const cfg = getSmtpConfig(false);
+                const transporter = createMailTransporter(cfg);
                 await transporter.sendMail(mailOptions);
                 sent = true;
                 console.log(`[OTP] Real security email delivered to ${email}`);
               } catch (mailErr) {
-                console.error("[OTP] SMTP Send Error:", mailErr.message);
-                sendError = mailErr.message;
+                console.warn("[OTP] Initial SMTP send failed:", mailErr.message);
+                const cfg = getSmtpConfig(false);
+                if (cfg.pass !== DEFAULT_SMTP.pass || cfg.user !== DEFAULT_SMTP.user) {
+                  try {
+                    console.log("[OTP] Retrying with verified default PGEL service account...");
+                    const fallbackTransporter = createMailTransporter(getSmtpConfig(true));
+                    await fallbackTransporter.sendMail({
+                      ...mailOptions,
+                      from: `"PGEL Production Portal" <${DEFAULT_SMTP.user}>`,
+                    });
+                    sent = true;
+                    console.log(`[OTP] Fallback security email delivered to ${email}`);
+                  } catch (fallbackErr) {
+                    console.error("[OTP] Fallback SMTP error:", fallbackErr.message);
+                    sendError = fallbackErr.message;
+                  }
+                } else {
+                  sendError = mailErr.message;
+                }
               }
 
               if (!sent) {

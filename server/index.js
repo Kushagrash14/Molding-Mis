@@ -13,30 +13,36 @@ dotenv.config({ path: path.join(__dirname, "../.env") });
 dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config();
 
-async function createMailTransporter() {
-  const host = process.env.SMTP_HOST || "smtp.office365.com";
-  let targetHost = host;
-  try {
-    targetHost = await new Promise((resolve, reject) => {
-      dns.lookup(host, { family: 4 }, (err, address) => {
-        if (err) reject(err);
-        else resolve(address);
-      });
-    });
-  } catch (err) {
-    console.warn("[OTP] DNS lookup fallback, using host:", host);
-  }
+const DEFAULT_SMTP = {
+  host: "smtp.office365.com",
+  port: 587,
+  user: "verify.software2040@pgel.in",
+  pass: "fmdrdczrxkpjrbsv",
+};
 
+function getSmtpConfig(useFallback = false) {
+  if (useFallback) {
+    return DEFAULT_SMTP;
+  }
+  const host = (process.env.SMTP_HOST || DEFAULT_SMTP.host).trim();
+  const port = Number(process.env.SMTP_PORT) || DEFAULT_SMTP.port;
+  const user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  const pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
+  return { host, port, user, pass };
+}
+
+function createMailTransporter(cfg) {
   return nodemailer.createTransport({
-    host: targetHost,
-    port: Number(process.env.SMTP_PORT) || 587,
+    host: cfg.host,
+    port: cfg.port,
+    family: 4,
     secure: false,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: cfg.user,
+      pass: cfg.pass,
     },
     tls: {
-      servername: host,
+      servername: cfg.host,
       rejectUnauthorized: false,
     },
   });
@@ -65,24 +71,18 @@ app.post("/api/send-otp", async (req, res) => {
       return res.status(400).json({ success: false, error: "Email address is required." });
     }
 
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("[AUTH ERROR] Missing SMTP_USER or SMTP_PASS environment variables");
-      return res.status(500).json({
-        success: false,
-        error: "SMTP credentials not found on server. Please set SMTP_USER and SMTP_PASS in server/.env or /var/www/production-oee-tracker/.env",
-      });
-    }
-
-    const transporter = await createMailTransporter();
-
+    const cfg = getSmtpConfig(false);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000;
     activeOtps.set(email.toLowerCase().trim(), { otp, expiresAt, name, employee_code });
 
-    console.log(`[AUTH] Generated OTP for ${email}: ${otp}`);
+    console.log(`\n======================================================`);
+    console.log(`🔐 [AUTH] Generated OTP for ${email}: ${otp}`);
+    console.log(`📡 [AUTH] SMTP Target: ${cfg.host}:${cfg.port} | User: ${cfg.user}`);
+    console.log(`======================================================\n`);
 
     const mailOptions = {
-      from: `"PGEL Production Portal" <${process.env.SMTP_USER || "no-reply@pgel.in"}>`,
+      from: `"PGEL Production Portal" <${cfg.user}>`,
       to: email,
       subject: `🔐 PGEL Portal Verification Code: ${otp}`,
       html: `
@@ -106,8 +106,37 @@ app.post("/api/send-otp", async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`[AUTH] OTP email successfully dispatched to ${email}`);
+    let transporter = createMailTransporter(cfg);
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`[AUTH] OTP email successfully dispatched to ${email}`);
+    } catch (primaryErr) {
+      console.warn(`[AUTH] Initial send attempt failed (${primaryErr.message}).`);
+
+      // If custom credentials were provided and failed with auth error, retry with verified default
+      if (cfg.pass !== DEFAULT_SMTP.pass || cfg.user !== DEFAULT_SMTP.user) {
+        console.log(`[AUTH] Retrying dispatch with verified default PGEL service account...`);
+        try {
+          const fallbackCfg = getSmtpConfig(true);
+          const fallbackTransporter = createMailTransporter(fallbackCfg);
+          await fallbackTransporter.sendMail({
+            ...mailOptions,
+            from: `"PGEL Production Portal" <${fallbackCfg.user}>`,
+          });
+          console.log(`[AUTH] Fallback OTP dispatch succeeded to ${email}`);
+          return res.json({
+            success: true,
+            message: "Verification code sent to your registered email address.",
+          });
+        } catch (fallbackErr) {
+          console.error(`[AUTH] Fallback dispatch failed as well:`, fallbackErr.message);
+          throw fallbackErr;
+        }
+      } else {
+        throw primaryErr;
+      }
+    }
 
     return res.json({
       success: true,
