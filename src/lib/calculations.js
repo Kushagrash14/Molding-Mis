@@ -458,12 +458,12 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
 }
 
 /**
- * Special exception window: 1 Sep 2026 to 22 Sep 2026 (inclusive).
+ * Special exception window: 1 Sep 2026 to 24 Sep 2026 (inclusive).
  * Entries within this date window are never locked.
  */
 export function isDateInUnlockedWindow(shiftDateStr) {
   if (!shiftDateStr) return false;
-  return shiftDateStr >= "2026-09-01" && shiftDateStr <= "2026-09-22";
+  return shiftDateStr >= "2026-09-01" && shiftDateStr <= "2026-09-24";
 }
 
 /**

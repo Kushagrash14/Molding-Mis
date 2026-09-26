@@ -41,7 +41,7 @@ function sanitizeUnlockedWindowEntries(entriesList) {
   if (!Array.isArray(entriesList)) return false;
   let modified = false;
   for (const e of entriesList) {
-    if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-22") {
+    if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-24") {
       if (e.status === "locked") {
         e.status = "submitted";
         e.locked_at = null;
@@ -213,8 +213,8 @@ export const cloudStorage = {
       entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     }
 
-    // Special window rule: 1 Sep to 22 Sep 2026 entries are never locked
-    if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-22") {
+    // Special window rule: 1 Sep to 24 Sep 2026 entries are never locked
+    if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-24") {
       entry.status = "submitted";
       entry.locked_at = null;
     }
@@ -244,7 +244,7 @@ export const cloudStorage = {
       if (!entry.entry_id) {
         entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       }
-      if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-22") {
+      if (entry.shift_date >= "2026-09-01" && entry.shift_date <= "2026-09-24") {
         entry.status = "submitted";
         entry.locked_at = null;
       }

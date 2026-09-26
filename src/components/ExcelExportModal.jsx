@@ -77,7 +77,7 @@ export default function ExcelExportModal({
       setEndDate(today);
     } else if (presetKey === "unlocked_sep2026") {
       setStartDate("2026-09-01");
-      setEndDate("2026-09-22");
+      setEndDate("2026-09-24");
     } else if (presetKey === "all") {
       setStartDate("");
       setEndDate("");

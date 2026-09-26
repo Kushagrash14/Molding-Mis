@@ -326,8 +326,8 @@ app.post("/api/lock-cutoff", (req, res) => {
     const now = Date.now();
     let lockedCount = 0;
     for (const e of entries) {
-      // Exemption: 1 Sep to 22 Sep 2026 entries are never locked
-      if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-22") {
+      // Exemption: 1 Sep to 24 Sep 2026 entries are never locked
+      if (e.shift_date >= "2026-09-01" && e.shift_date <= "2026-09-24") {
         if (e.status === "locked") {
           e.status = "submitted";
           e.locked_at = null;
