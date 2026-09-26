@@ -329,11 +329,17 @@ export default function MachineSheetRow({
                   className="sheet-input-number"
                   style={{ maxWidth: "42px" }}
                 />
-                {r.sap_code && Number(r.running_cavity || rMaster?.cavity || 1) >= 2 && !isReadOnly && (
+                {!isReadOnly && (
                   <button
                     type="button"
                     className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}
-                    onClick={() => onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx)}
+                    onClick={() => {
+                      if (!r.sap_code) {
+                        alert("Please select the Primary SAP code for this machine first.");
+                        return;
+                      }
+                      onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx);
+                    }}
                     title={
                       r.is_multi_cavity
                         ? `Multi-Cavity Active: ${r.cavity_parts?.length || 2} parts (Click to edit)`

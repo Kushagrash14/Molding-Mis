@@ -5359,12 +5359,12 @@ tbody tr:last-child td {
 }
 
 .btn-mini-cav-split {
-  height: 15px;
-  line-height: 13px;
-  font-size: 9px;
+  height: 18px;
+  line-height: 16px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 0 4px;
-  border-radius: 3px;
+  padding: 0 6px;
+  border-radius: 4px;
   border: 1px dashed #6366f1;
   background: #f5f3ff;
   color: #4f46e5;
@@ -5374,6 +5374,7 @@ tbody tr:last-child td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-top: 2px;
 }
 
 .btn-mini-cav-split:hover {

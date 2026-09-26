@@ -16,17 +16,16 @@ export default function MultiCavityModal({
 }) {
   if (!isOpen || !run) return null;
 
-  const currentTotalCavity = Math.max(2, Number(run.running_cavity || 2));
-  const [totalCavity, setTotalCavity] = useState(currentTotalCavity);
+  const [totalCavity, setTotalCavity] = useState(2);
   const [parts, setParts] = useState([]);
-
-  // Sub-modal for logging part-specific rejection reasons
   const [rejPartIdx, setRejPartIdx] = useState(null);
 
-  // Initialize or reload parts state whenever modal opens or run changes
+  // Initialize once on modal open
   useEffect(() => {
-    const totCav = Math.max(2, Number(run.running_cavity || 2));
-    setTotalCavity(totCav);
+    if (!isOpen) return;
+
+    const initialTotal = Math.max(2, Number(run.running_cavity || 2));
+    setTotalCavity(initialTotal);
 
     if (run.cavity_parts && Array.isArray(run.cavity_parts) && run.cavity_parts.length >= 2) {
       setParts(
@@ -41,7 +40,6 @@ export default function MultiCavityModal({
         }))
       );
     } else {
-      // Create default 2-cavity split: Main SAP gets 1 cavity, 2nd part gets remaining
       const rMaster = master.find((m) => m.sap_code === run.sap_code);
       const mainPart = {
         cavity_no: 1,
@@ -53,7 +51,7 @@ export default function MultiCavityModal({
         reasons: normalizeReasonsMap(run.reasons || {}),
       };
 
-      const secCav = Math.max(1, totCav - 1);
+      const secCav = Math.max(1, initialTotal - 1);
       const secPart = {
         cavity_no: 2,
         sap_code: "",
@@ -66,16 +64,14 @@ export default function MultiCavityModal({
 
       setParts([mainPart, secPart]);
     }
-  }, [isOpen, run, master]);
+  }, [isOpen]); // Only re-init when opened, prevents resetting active edits!
 
-  // Total allocated cavity count
   const allocatedCavitySum = useMemo(() => {
     return parts.reduce((sum, p) => sum + (Number(p.cavity) || 0), 0);
   }, [parts]);
 
   const isBalanced = allocatedCavitySum === totalCavity;
 
-  // Rejection reasons list
   const rejectionReasons = useMemo(() => {
     return reasonCodes.filter(
       (r) => r.category === "rejection" || (r.reason_id && r.reason_id.startsWith("rej_"))
@@ -105,7 +101,7 @@ export default function MultiCavityModal({
 
   function handleAddPart() {
     if (parts.length >= totalCavity) {
-      alert(`Cannot add more parts than total running cavity (${totalCavity}).`);
+      alert(`Cannot add more parts than total running cavity (${totalCavity}). Increase running cavity first.`);
       return;
     }
     const remainingCav = Math.max(1, totalCavity - allocatedCavitySum);
@@ -157,14 +153,12 @@ export default function MultiCavityModal({
     const machineReasons = normalizeReasonsMap(run.reasons || {});
     const mergedReasons = {};
 
-    // Keep all planned and unplanned downtime from machine level
     Object.entries(machineReasons).forEach(([k, v]) => {
       if (k.startsWith("pdt_") || k.startsWith("udt_")) {
         mergedReasons[k] = v;
       }
     });
 
-    // Sum rejection reasons from individual cavity parts
     parts.forEach((p) => {
       Object.entries(p.reasons || {}).forEach(([k, v]) => {
         if (k.startsWith("rej_") && Number(v) > 0) {
@@ -190,7 +184,6 @@ export default function MultiCavityModal({
         "Are you sure you want to remove the Multi-Cavity split? This will revert this machine run back to single-SAP mode."
       )
     ) {
-      // Revert back to single SAP
       const mainPart = parts[0];
       onSave({
         is_multi_cavity: false,
@@ -201,7 +194,6 @@ export default function MultiCavityModal({
     }
   }
 
-  // Calculate total rejections across a single part
   function getPartRejPcs(part) {
     return Object.entries(part.reasons || {}).reduce((sum, [k, v]) => {
       return k.startsWith("rej_") ? sum + Number(v || 0) : sum;
@@ -209,32 +201,42 @@ export default function MultiCavityModal({
   }
 
   const modalContent = (
-    <div className="modal-backdrop-custom" onClick={onClose} style={{ zIndex: 10000 }}>
+    <div className="modal-back" onClick={onClose} style={{ zIndex: 1050 }}>
       <div
-        className="modal-box-custom multi-cav-modal"
+        className="modal"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: "680px", width: "95%" }}
+        style={{
+          maxWidth: "680px",
+          width: "95%",
+          maxHeight: "92vh",
+          overflowY: "auto",
+          padding: "20px 24px",
+          borderRadius: "14px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        }}
       >
         {/* Header */}
-        <div className="multi-cav-header">
-          <div className="multi-cav-title-group">
-            <div className="multi-cav-badge-icon">🔀</div>
+        <div className="modal-head" style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "22px" }}>🔀</span>
             <div>
-              <h3 className="multi-cav-title">Multi-Cavity SAP Allocation</h3>
-              <p className="multi-cav-sub">
+              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 800, color: "#1e1b4b" }}>
+                Multi-Cavity SAP Allocation
+              </h3>
+              <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#64748b" }}>
                 Machine: <strong>{machine?.machine_no || machine?.machine_id}</strong> · Run #{runIdx + 1}
               </p>
             </div>
           </div>
-          <button type="button" className="btn-close-modal" onClick={onClose}>
+          <button type="button" className="modal-close" onClick={onClose} title="Close">
             ✕
           </button>
         </div>
 
-        {/* Total Cavity Selector & Balance Status Bar */}
-        <div className="multi-cav-top-bar">
+        {/* Total Cavity Selector & Balance Bar */}
+        <div className="multi-cav-top-bar" style={{ marginBottom: "14px" }}>
           <div className="total-cav-input-wrap">
-            <label>Total Running Cavity:</label>
+            <label style={{ margin: 0 }}>Total Running Cavity:</label>
             <input
               type="number"
               min="2"
@@ -256,7 +258,7 @@ export default function MultiCavityModal({
         </div>
 
         {/* Parts List */}
-        <div className="multi-cav-parts-list">
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
           {parts.map((p, idx) => {
             const isMain = idx === 0;
             const partRej = getPartRejPcs(p);
@@ -290,7 +292,7 @@ export default function MultiCavityModal({
 
                 <div className="part-card-body">
                   {/* SAP Code Dropdown */}
-                  <div className="part-field-sap">
+                  <div className="part-field-sap" style={{ position: "relative" }}>
                     <label>SAP Code:</label>
                     <SearchableSapSelect
                       value={p.sap_code}
@@ -339,6 +341,7 @@ export default function MultiCavityModal({
                       onClick={() => setRejPartIdx(idx)}
                       disabled={isReadOnly || !p.sap_code}
                       title="Log defect reasons for this cavity part"
+                      style={{ width: "100%", height: "28px" }}
                     >
                       <span className="dot rej" />
                       <span>{partRej > 0 ? `${partRej} pcs` : "+ Rej"}</span>
@@ -352,7 +355,7 @@ export default function MultiCavityModal({
 
         {/* Add Part Button (if cavities remaining) */}
         {!isReadOnly && parts.length < totalCavity && (
-          <div className="multi-cav-add-wrap">
+          <div className="multi-cav-add-wrap" style={{ marginBottom: "14px" }}>
             <button type="button" className="btn-add-cavity-part" onClick={handleAddPart}>
               ➕ Add Cavity #{parts.length + 1} SAP Code
             </button>
@@ -392,29 +395,29 @@ export default function MultiCavityModal({
       {/* Internal Mini Rejection Modal for specific cavity part */}
       {rejPartIdx !== null && (
         <div
-          className="modal-backdrop-custom"
+          className="modal-back"
           onClick={() => setRejPartIdx(null)}
-          style={{ zIndex: 10050 }}
+          style={{ zIndex: 1100 }}
         >
           <div
-            className="modal-box-custom rej-submodal"
+            className="modal"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "480px" }}
+            style={{ maxWidth: "480px", padding: "18px 22px" }}
           >
-            <div className="multi-cav-header">
-              <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>
+            <div className="modal-head">
+              <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#991b1b" }}>
                 Log Rejections · {parts[rejPartIdx]?.sap_code || `Cavity #${rejPartIdx + 1}`}
               </h4>
               <button
                 type="button"
-                className="btn-close-modal"
+                className="modal-close"
                 onClick={() => setRejPartIdx(null)}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ maxHeight: "300px", overflowY: "auto", padding: "10px 0" }}>
+            <div style={{ maxHeight: "300px", overflowY: "auto", padding: "8px 0" }}>
               {rejectionReasons.map((rc) => {
                 const currentVal = parts[rejPartIdx]?.reasons?.[rc.reason_id] || "";
                 return (
