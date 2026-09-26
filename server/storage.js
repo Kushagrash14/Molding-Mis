@@ -70,10 +70,14 @@ function loadStore() {
         }
       }
 
-      // Ensure seed plants exist (e.g. NGM 4010)
+      let storeModified = false;
+
+      // Ensure seed plants exist (e.g. NGM 4010, NGM 4020)
       for (const sp of PLANTS) {
         if (!store.plants.some((p) => p.plant_id === sp.plant_id)) {
           store.plants.push(sp);
+          storeModified = true;
+          console.log(`[CLOUD STORE] Added new seed plant: ${sp.name} (${sp.plant_id})`);
         }
       }
 
@@ -81,6 +85,7 @@ function loadStore() {
       for (const sm of MACHINES) {
         if (!store.machines.some((m) => m.machine_id === sm.machine_id)) {
           store.machines.push(sm);
+          storeModified = true;
         }
       }
 
@@ -88,6 +93,7 @@ function loadStore() {
       for (const sr of REASON_CODES) {
         if (!store.reasonCodes.some((r) => r.reason_id === sr.reason_id)) {
           store.reasonCodes.push(sr);
+          storeModified = true;
         }
       }
 
@@ -106,6 +112,10 @@ function loadStore() {
       }
       if (newMasterAdded > 0) {
         console.log(`[CLOUD STORE] Synced ${newMasterAdded} new master products from seed data into cloud store.`);
+        storeModified = true;
+      }
+
+      if (storeModified) {
         saveStore();
       }
 

@@ -57,12 +57,21 @@ export default function App() {
     if (!loaded || !Array.isArray(loaded) || loaded.length < 1500 || !loaded.some((p) => p.plant_id === "2020")) {
       return SEED_MASTER;
     }
-    return loaded.map((p) => {
+    const currentList = loaded.map((p) => {
       if (!p.plant_id) {
         return { ...p, plant_id: "1040" };
       }
       return p;
     });
+    const existingKeys = new Set(currentList.map((m) => `${m.plant_id || "1040"}_${m.sap_code}`));
+    SEED_MASTER.forEach((sm) => {
+      const key = `${sm.plant_id || "1040"}_${sm.sap_code}`;
+      if (!existingKeys.has(key)) {
+        currentList.push(sm);
+        existingKeys.add(key);
+      }
+    });
+    return currentList;
   });
 
   const [machines, setMachines] = useState(() => {
@@ -70,7 +79,7 @@ export default function App() {
     if (!loaded || !loaded.some((m) => m.plant_id === "1040") || !loaded.some((m) => m.plant_id === "2020")) {
       return MACHINES;
     }
-    return loaded
+    const currentList = loaded
       .filter((m) => !m.machine_id?.startsWith("MC-GN") && !m.machine_id?.startsWith("MC-BHI"))
       .map((m) => {
         const seedM = MACHINES.find((sm) => sm.machine_id === m.machine_id);
@@ -79,6 +88,12 @@ export default function App() {
         }
         return m;
       });
+    MACHINES.forEach((sm) => {
+      if (!currentList.some((m) => m.machine_id === sm.machine_id)) {
+        currentList.push(sm);
+      }
+    });
+    return currentList;
   });
 
   const [shifts, setShifts] = useState(() => {
@@ -134,7 +149,13 @@ export default function App() {
     if (!loaded || !loaded.some((p) => p.plant_id === "1040") || !loaded.some((p) => p.plant_id === "2020") || loaded.some((p) => p.location_id === "LOC-AHM" || p.description)) {
       return PLANTS;
     }
-    return loaded;
+    const currentList = [...loaded];
+    PLANTS.forEach((sp) => {
+      if (!currentList.some((p) => p.plant_id === sp.plant_id)) {
+        currentList.push(sp);
+      }
+    });
+    return currentList;
   });
 
   const [users, setUsers] = useState(() => {
