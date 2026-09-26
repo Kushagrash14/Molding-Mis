@@ -50,20 +50,15 @@ function createMailTransporter(cfg = getSmtpConfig(false)) {
   return nodemailer.createTransport({
     host: cfg.host,
     port: cfg.port,
-    family: 4, // Strictly force IPv4
-    secure: false, // port 587 uses STARTTLS
-    requireTLS: true,
+    secure: false,
     auth: {
       user: cfg.user,
       pass: cfg.pass,
     },
     tls: {
-      servername: cfg.host,
+      ciphers: "SSLv3",
       rejectUnauthorized: false,
     },
-    connectionTimeout: 15000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
   });
 }
 

@@ -39,20 +39,15 @@ function createMailTransporter(cfg = getSmtpConfig(false)) {
   return nodemailer.createTransport({
     host: cfg.host,
     port: cfg.port,
-    family: 4,
     secure: false,
-    requireTLS: true,
     auth: {
       user: cfg.user,
       pass: cfg.pass,
     },
     tls: {
-      servername: cfg.host,
+      ciphers: "SSLv3",
       rejectUnauthorized: false,
     },
-    connectionTimeout: 15000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
   });
 }
 
