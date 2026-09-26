@@ -39,7 +39,13 @@ export default function EntriesTable({
         (r) =>
           (r.sap_code || "").toLowerCase().includes(term) ||
           (r.part_no || "").toLowerCase().includes(term) ||
-          (r.material_description || "").toLowerCase().includes(term)
+          (r.material_description || "").toLowerCase().includes(term) ||
+          (r.cavity_parts || []).some(
+            (cp) =>
+              (cp.sap_code || "").toLowerCase().includes(term) ||
+              (cp.material_description || "").toLowerCase().includes(term) ||
+              (cp.part_no || "").toLowerCase().includes(term)
+          )
       );
 
       return (
@@ -345,9 +351,18 @@ export default function EntriesTable({
                         </div>
                       </div>
                     ) : (
-                      <span className="mono" style={{ fontWeight: 600 }}>
-                        {e.primary_sap_code || e.sap_code}
-                      </span>
+                      <div>
+                        <span className="mono" style={{ fontWeight: 600 }}>
+                          {e.primary_sap_code || e.sap_code}
+                        </span>
+                        {e.runs && e.runs[0]?.is_multi_cavity && e.runs[0]?.cavity_parts && (
+                          <div style={{ marginTop: "2px" }}>
+                            <span className="part-sap-pill">
+                              🔀 {e.runs[0].cavity_parts.map((cp) => `${cp.sap_code}(${cp.cavity}C)`).join(" + ")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
                   {viewerRole !== "operator" && <td>{Number(metrics.tgt || 0).toLocaleString()}</td>}

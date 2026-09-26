@@ -5,6 +5,7 @@ import RejectionModal from "./RejectionModal.jsx";
 import DowntimeModal from "./DowntimeModal.jsx";
 import PreviousShiftMoldModal from "./PreviousShiftMoldModal.jsx";
 import BulkIdleDowntimeModal from "./BulkIdleDowntimeModal.jsx";
+import MultiCavityModal from "./MultiCavityModal.jsx";
 import {
   getActiveShift,
   getProductionShiftDate,
@@ -79,6 +80,8 @@ function convertSavedEntryToRuns(entry, shiftObj) {
           ? Number(r.change_over_time)
           : null,
         change_over_confirmed: Boolean(r.change_over_confirmed || (r.change_over_time !== undefined && r.change_over_time !== null && r.sap_code)),
+        is_multi_cavity: Boolean(r.is_multi_cavity),
+        cavity_parts: r.cavity_parts || null,
       };
     });
   }
@@ -185,6 +188,7 @@ export default function EntryForm({
   const [activeDtModal, setActiveDtModal] = useState(null);   // { machineId, runIdx }
   const [prevMoldModalMachineId, setPrevMoldModalMachineId] = useState(null); // machine_id
   const [isBulkIdleModalOpen, setIsBulkIdleModalOpen] = useState(false);
+  const [activeMultiCavityModal, setActiveMultiCavityModal] = useState(null); // { machineId, runIdx }
 
   // Extract unique Bays from machine numbers (e.g. "BAY-1", "BAY-2")
   const availableBays = useMemo(() => {
@@ -747,6 +751,8 @@ export default function EntryForm({
           })),
         other_dt_remark: (r.other_dt_remark || "").trim() || null,
         change_over_time: idx > 0 ? (Number(r.change_over_time) || 0) : 0,
+        is_multi_cavity: Boolean(r.is_multi_cavity),
+        cavity_parts: r.is_multi_cavity && r.cavity_parts ? r.cavity_parts : null,
       };
     });
 
@@ -781,8 +787,10 @@ export default function EntryForm({
     const primarySap = formattedRuns[0].sap_code;
     const sapDisplay =
       formattedRuns.length === 1
-        ? primarySap
-        : `MULTI (${formattedRuns.map((r) => r.sap_code).join(", ")})`;
+        ? (formattedRuns[0].is_multi_cavity && formattedRuns[0].cavity_parts
+            ? formattedRuns[0].cavity_parts.map((p) => p.sap_code).join(" + ")
+            : primarySap)
+        : `MULTI (${formattedRuns.map((r) => r.is_multi_cavity && r.cavity_parts ? r.cavity_parts.map((p) => p.sap_code).join("+") : r.sap_code).join(", ")})`;
 
     const existing = entries.find(
       (e) =>
@@ -890,6 +898,12 @@ export default function EntryForm({
     const runs = sheetData[activeDtModal.machineId] || [];
     return runs[activeDtModal.runIdx] || null;
   }, [activeDtModal, sheetData]);
+
+  const activeMultiCavityRun = useMemo(() => {
+    if (!activeMultiCavityModal) return null;
+    const runs = sheetData[activeMultiCavityModal.machineId] || [];
+    return runs[activeMultiCavityModal.runIdx] || null;
+  }, [activeMultiCavityModal, sheetData]);
 
   const rejectionReasons = useMemo(() => {
     return reasonCodes.filter((r) => r.category === "rejection");
@@ -1100,6 +1114,9 @@ export default function EntryForm({
                     onOpenDowntimeModal={(runIdx) =>
                       setActiveDtModal({ machineId: m.machine_id, runIdx })
                     }
+                    onOpenMultiCavityModal={(runIdx) =>
+                      setActiveMultiCavityModal({ machineId: m.machine_id, runIdx })
+                    }
                     prevShiftInfo={prevShiftMap[m.machine_id]}
                     onOpenPrevMoldModal={(machineId) => setPrevMoldModalMachineId(machineId)}
                     master={plantMaster}
@@ -1186,6 +1203,27 @@ export default function EntryForm({
         reasonCodes={reasonCodes}
         onApply={handleApplyBulkIdleDowntime}
       />
+
+      {/* 8. Multi-Cavity SAP Split Modal */}
+      {activeMultiCavityModal && activeMultiCavityRun && (
+        <MultiCavityModal
+          isOpen={true}
+          onClose={() => setActiveMultiCavityModal(null)}
+          machine={plantMachines.find((m) => m.machine_id === activeMultiCavityModal.machineId)}
+          run={activeMultiCavityRun}
+          runIdx={activeMultiCavityModal.runIdx}
+          master={plantMaster}
+          reasonCodes={reasonCodes}
+          onSave={(updatedFields) => {
+            handleUpdateRun(
+              activeMultiCavityModal.machineId,
+              activeMultiCavityModal.runIdx,
+              updatedFields
+            );
+          }}
+          isReadOnly={isFormLocked}
+        />
+      )}
     </div>
   );
 }

@@ -102,6 +102,13 @@ export function exportProductionToExcel({
     sumMatKg += metrics.total_consumption;
     sumOee += metrics.oee;
 
+    let materialDesc = m ? m.material_description : "—";
+    if (e.runs && e.runs[0]?.is_multi_cavity && e.runs[0]?.cavity_parts) {
+      materialDesc = e.runs[0].cavity_parts
+        .map((cp) => `${cp.sap_code}: ${cp.material_description || "Part"} (${cp.cavity}C · ${cp.ok_prod || 0}pcs)`)
+        .join(" | ");
+    }
+
     sheet1Data.push([
       e.entry_id,
       plantObj.name || e.plant_id || "Unit-02",
@@ -111,7 +118,7 @@ export function exportProductionToExcel({
       e.machine_id,
       mcObj.machine_no || e.machine_id,
       e.sap_code,
-      m ? m.material_description : "—",
+      materialDesc,
       Number(e.running_cavity) || 0,
       Number(e.run_hour) || 0,
       viewerRole === "operator" ? "—" : metrics.tgt,

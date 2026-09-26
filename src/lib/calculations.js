@@ -173,11 +173,75 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const running_cavity = Number(entry.running_cavity) || 0;
   const ok_prod = Number(entry.ok_prod) || 0;
 
-  // Col M: TGT = Shots/hr * (Run Hour - Planned DT - Unplanned DT) * Running Cavity
+  // Target & Metric aggregations
   const net_run_time = Math.max(0, run_hour - planned_dt - unplanned_dt);
   const shotsPerHour = Number(itemMaster?.shots_per_hour || entry.shots_per_hour || 0);
-  const rawTgt = Math.round(shotsPerHour * net_run_time * running_cavity);
-  const tgt = isNaN(rawTgt) ? 0 : rawTgt;
+
+  let tgt = 0;
+  let ok_prod_price = 0;
+  let rej_price = 0;
+  let prod_plan_amt = 0;
+  let shortfall_loss = 0;
+  let ok_prod_wt = 0;
+  let rej_wt = 0;
+  let total_consumption = 0;
+  let net_wt = 0;
+
+  if (entry.cavity_parts && Array.isArray(entry.cavity_parts) && entry.cavity_parts.length > 0) {
+    let sumTgt = 0;
+    entry.cavity_parts.forEach((p) => {
+      let pMaster = null;
+      if (Array.isArray(master)) {
+        pMaster = master.find((x) => x.sap_code === p.sap_code);
+      }
+      const pPrice = Number(pMaster?.price || p.price || itemMaster?.price || 0);
+      const pPartWt = Number(pMaster?.part_wt || p.part_wt || itemMaster?.part_wt || 0);
+      const pRunWt = Number(pMaster?.run_wt || p.run_wt || itemMaster?.run_wt || 0);
+      const pShots = Number(pMaster?.shots_per_hour || itemMaster?.shots_per_hour || entry.shots_per_hour || 0);
+      const pCavity = Number(p.cavity || 1);
+      const pOk = Number(p.ok_prod || 0);
+
+      // Part rejections
+      let pRej = 0;
+      if (p.reasons) {
+        Object.entries(normalizeReasonsMap(p.reasons)).forEach(([k, v]) => {
+          if (k.startsWith("rej_")) pRej += Number(v || 0);
+        });
+      }
+
+      const pTgt = Math.round(pShots * net_run_time * pCavity);
+      sumTgt += isNaN(pTgt) ? 0 : pTgt;
+
+      const pProduced = pOk + pRej;
+      const pNetWt = pPartWt + (pCavity > 0 ? pRunWt / pCavity : 0);
+
+      ok_prod_price += pPrice * pOk;
+      rej_price += pPrice * pRej;
+      prod_plan_amt += pPrice * pTgt;
+      shortfall_loss += Math.max(0, pTgt - pOk) * pPrice;
+      ok_prod_wt += pPartWt * pOk;
+      rej_wt += pPartWt * pRej;
+      total_consumption += pNetWt * pProduced;
+    });
+    tgt = sumTgt;
+  } else {
+    const rawTgt = Math.round(shotsPerHour * net_run_time * running_cavity);
+    tgt = isNaN(rawTgt) ? 0 : rawTgt;
+
+    const price = Number(itemMaster?.price || entry.price || 0);
+    ok_prod_price = price * ok_prod;
+    rej_price = price * total_rej;
+    prod_plan_amt = price * tgt;
+    shortfall_loss = Math.max(0, tgt - ok_prod) * price;
+
+    const part_wt = Number(itemMaster?.part_wt || entry.part_wt || 0);
+    const run_wt = Number(itemMaster?.run_wt || entry.run_wt || 0);
+    net_wt = part_wt + (running_cavity > 0 ? run_wt / running_cavity : 0);
+    const total_produced_single = ok_prod + total_rej;
+    ok_prod_wt = part_wt * ok_prod;
+    rej_wt = part_wt * total_rej;
+    total_consumption = net_wt * total_produced_single;
+  }
 
   // Col AZ: Quality Rate = OK Prod / (OK Prod + Total Rej)
   const total_produced = ok_prod + total_rej;
@@ -193,22 +257,6 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
 
   // Col BC: OEE = Quality Rate * Availability * Productivity
   const oee = quality_rate * availability * productivity;
-
-  // Col BD & BE & BF: Values (INR)
-  const price = Number(itemMaster?.price || entry.price || 0);
-  const ok_prod_price = price * ok_prod;
-  const rej_price = price * total_rej;
-  const prod_plan_amt = price * tgt;
-  // Col CW: Shortfall Loss = MAX(0, TGT - OK Prod) * Price
-  const shortfall_loss = Math.max(0, tgt - ok_prod) * price;
-
-  // Col BG, BH, BI, BJ, BK, BL: Weights (in KG)
-  const part_wt = Number(itemMaster?.part_wt || entry.part_wt || 0);
-  const run_wt = Number(itemMaster?.run_wt || entry.run_wt || 0);
-  const net_wt = part_wt + (running_cavity > 0 ? run_wt / running_cavity : 0);
-  const ok_prod_wt = part_wt * ok_prod;
-  const rej_wt = part_wt * total_rej;
-  const total_consumption = net_wt * total_produced;
 
   // Col BM: Tool Change Count
   const tool_change_count = Number(reasonsMap["pdt_mould_change"] || 0) > 0 ? 1 : 0;

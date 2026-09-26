@@ -28,6 +28,7 @@ export default function MachineSheetRow({
   onRemoveMold,
   onOpenRejectionModal,
   onOpenDowntimeModal,
+  onOpenMultiCavityModal,
   prevShiftInfo = null,
   onOpenPrevMoldModal = null,
   master = [],
@@ -261,11 +262,24 @@ export default function MachineSheetRow({
               {r.sap_code ? (
                 <div
                   className="part-info-block"
-                  title={`${r.material_description || rMaster?.material_description || ""} (Part No: ${r.part_no || rMaster?.part_no || ""})`}
+                  title={
+                    r.is_multi_cavity && r.cavity_parts
+                      ? r.cavity_parts
+                          .map((p) => `Cavity #${p.cavity_no}: ${p.sap_code} - ${p.material_description} (${p.cavity}C) · OK: ${p.ok_prod || 0} pcs`)
+                          .join("\n")
+                      : `${r.material_description || rMaster?.material_description || ""} (Part No: ${r.part_no || rMaster?.part_no || ""})`
+                  }
                 >
                   <div className="part-name-text">
-                    {r.material_description || rMaster?.material_description || "—"}
+                    {r.is_multi_cavity && r.cavity_parts
+                      ? `🔀 ${r.cavity_parts.map((p) => p.material_description || p.sap_code).join(" + ")}`
+                      : r.material_description || rMaster?.material_description || "—"}
                   </div>
+                  {r.is_multi_cavity && r.cavity_parts && (
+                    <span className="part-sap-pill">
+                      {r.cavity_parts.map((p) => `${p.sap_code}(${p.cavity}C)`).join(" + ")}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <span className="empty-dash">—</span>
@@ -303,16 +317,33 @@ export default function MachineSheetRow({
 
             {/* 6. Running Cavity */}
             <td className="cell-num">
-              <input
-                type="number"
-                step="1"
-                min="1"
-                value={r.running_cavity !== undefined ? r.running_cavity : ""}
-                onChange={(e) => onUpdateRun(runIdx, "running_cavity", e.target.value)}
-                disabled={isReadOnly || !r.sap_code}
-                placeholder={String(rMaster?.cavity || 1)}
-                className="sheet-input-number"
-              />
+              <div className="running-cavity-container">
+                <input
+                  type="number"
+                  step="1"
+                  min="1"
+                  value={r.running_cavity !== undefined ? r.running_cavity : ""}
+                  onChange={(e) => onUpdateRun(runIdx, "running_cavity", e.target.value)}
+                  disabled={isReadOnly || !r.sap_code}
+                  placeholder={String(rMaster?.cavity || 1)}
+                  className="sheet-input-number"
+                  style={{ maxWidth: "42px" }}
+                />
+                {r.sap_code && Number(r.running_cavity || rMaster?.cavity || 1) >= 2 && !isReadOnly && (
+                  <button
+                    type="button"
+                    className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}
+                    onClick={() => onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx)}
+                    title={
+                      r.is_multi_cavity
+                        ? `Multi-Cavity Active: ${r.cavity_parts?.length || 2} parts (Click to edit)`
+                        : "Optional: Split cavities across multiple SAP codes"
+                    }
+                  >
+                    {r.is_multi_cavity ? `🔀 ${r.cavity_parts?.length || 2} SAP` : "+ SAP"}
+                  </button>
+                )}
+              </div>
             </td>
 
             {/* 7. Manpower */}
@@ -336,9 +367,16 @@ export default function MachineSheetRow({
                 min="0"
                 value={r.ok_prod !== undefined ? r.ok_prod : ""}
                 onChange={(e) => onUpdateRun(runIdx, "ok_prod", e.target.value)}
+                onClick={() => {
+                  if (r.is_multi_cavity && onOpenMultiCavityModal) {
+                    onOpenMultiCavityModal(runIdx);
+                  }
+                }}
+                readOnly={Boolean(r.is_multi_cavity)}
                 disabled={isReadOnly || (!r.sap_code && dtMins < 720)}
                 placeholder="0"
-                className="sheet-input-number ok-input"
+                className={`sheet-input-number ok-input ${r.is_multi_cavity ? "multi-active" : ""}`}
+                title={r.is_multi_cavity ? "Multi-cavity active. Click to edit part-wise breakdown." : ""}
               />
             </td>
 
