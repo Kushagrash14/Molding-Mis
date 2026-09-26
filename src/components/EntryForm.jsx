@@ -4,6 +4,7 @@ import MachineSheetRow from "./MachineSheetRow.jsx";
 import RejectionModal from "./RejectionModal.jsx";
 import DowntimeModal from "./DowntimeModal.jsx";
 import PreviousShiftMoldModal from "./PreviousShiftMoldModal.jsx";
+import BulkIdleDowntimeModal from "./BulkIdleDowntimeModal.jsx";
 import {
   getActiveShift,
   getProductionShiftDate,
@@ -183,6 +184,7 @@ export default function EntryForm({
   const [activeRejModal, setActiveRejModal] = useState(null); // { machineId, runIdx }
   const [activeDtModal, setActiveDtModal] = useState(null);   // { machineId, runIdx }
   const [prevMoldModalMachineId, setPrevMoldModalMachineId] = useState(null); // machine_id
+  const [isBulkIdleModalOpen, setIsBulkIdleModalOpen] = useState(false);
 
   // Extract unique Bays from machine numbers (e.g. "BAY-1", "BAY-2")
   const availableBays = useMemo(() => {
@@ -262,11 +264,16 @@ export default function EntryForm({
           const plannedHrs = Number(r.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
           const dtHrs = dtMins / 60;
           const autoRunHour = Math.max(0, Number((plannedHrs - dtHrs).toFixed(1)));
-          return {
+          const updatedRun = {
             ...r,
             reasons: nextReasons,
             run_hour: autoRunHour,
           };
+          if (idx > 0 && nextReasons.pdt_mould_change !== undefined) {
+            updatedRun.change_over_time = Number(nextReasons.pdt_mould_change) || 0;
+            updatedRun.change_over_confirmed = true;
+          }
+          return updatedRun;
         }
 
         return { ...r, [fieldOrObj]: val };
@@ -379,21 +386,39 @@ export default function EntryForm({
     setDirtyMachines((prev) => new Set(prev).add(machineId));
   }, [selectedShift, reasonCodes]);
 
-  // Update change_over_time for a sub-run
+  // Update change_over_time for a sub-run and dynamically sync into pdt_mould_change
   const handleUpdateChangeOver = useCallback((machineId, runIdx, minutes) => {
     setSheetData((prev) => {
       const curRuns = prev[machineId] || [];
       if (runIdx <= 0 || runIdx >= curRuns.length) return prev;
       const updated = [...curRuns];
+      const targetRun = { ...updated[runIdx] };
+      const coMins = Number(minutes) || 0;
+
+      // Update reasons map: set pdt_mould_change to the exact entered changeover minutes
+      const existingReasons = { ...(targetRun.reasons || {}) };
+      if (coMins > 0) {
+        existingReasons.pdt_mould_change = coMins;
+      } else {
+        delete existingReasons.pdt_mould_change;
+      }
+
+      // Dynamically calculate total downtime & decrement run_hour
+      const totalDtMins = calculateTotalDowntimeMinutes(existingReasons, reasonCodes);
+      const plannedHrs = Number(targetRun.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
+      const newRunHour = Math.max(0, Number((plannedHrs - (totalDtMins / 60)).toFixed(1)));
+
       updated[runIdx] = {
-        ...updated[runIdx],
-        change_over_time: Number(minutes) || 0,
+        ...targetRun,
+        change_over_time: coMins,
         change_over_confirmed: true,
+        reasons: existingReasons,
+        run_hour: newRunHour,
       };
       return { ...prev, [machineId]: updated };
     });
     setDirtyMachines((prev) => new Set(prev).add(machineId));
-  }, []);
+  }, [selectedShift, reasonCodes]);
 
   // Remove a sub-mold run and re-merge hours
   const handleRemoveMold = useCallback((machineId, runIdx) => {
@@ -554,6 +579,63 @@ export default function EntryForm({
     if (!prevMoldModalMachineId) return null;
     return prevShiftMap[prevMoldModalMachineId] || null;
   }, [prevMoldModalMachineId, prevShiftMap]);
+
+  // Bulk Quick-Fill 12h Downtime (NO PLAN / NO MANPOWER) for idle machines
+  const handleApplyBulkIdleDowntime = useCallback(
+    (selectedMachineIds, reasonId) => {
+      if (!selectedMachineIds || selectedMachineIds.length === 0) return;
+
+      const plannedHrs = Number(selectedShift?.planned_hours || 12.0);
+      const plannedMins = Math.round(plannedHrs * 60);
+      const reasonObj = reasonCodes.find((r) => r.reason_id === reasonId);
+      const reasonName = reasonObj?.name || (reasonId === "pdt_no_plan" ? "NO PLAN" : "NO MANPOWER");
+      const defaultDesc = `${reasonName} (Full Shift ${plannedHrs}h)`;
+
+      setSheetData((prev) => {
+        const nextSheet = { ...prev };
+        selectedMachineIds.forEach((mId) => {
+          const defaultRun = createDefaultRunForShift(selectedShift);
+          const prevInfo = prevShiftMap[mId];
+          const sapCode = prevInfo?.sap_code || "DOWN_12H";
+          const matDesc = prevInfo?.master?.material_description
+            ? `${prevInfo.master.material_description} (${reasonName})`
+            : defaultDesc;
+          const partNo = prevInfo?.master?.part_no || "N/A";
+          const cavity = prevInfo?.master?.cavity || 1;
+
+          nextSheet[mId] = [
+            {
+              ...defaultRun,
+              sap_code: sapCode,
+              material_description: matDesc,
+              part_no: partNo,
+              std_cavity: cavity,
+              running_cavity: cavity,
+              manpower: 0,
+              ok_prod: "0",
+              run_hour: 0,
+              planned_hours: plannedHrs,
+              reasons: {
+                [reasonId]: plannedMins,
+              },
+              other_dt_remark: "",
+              is_continued: false,
+              change_over_time: null,
+              change_over_confirmed: false,
+            },
+          ];
+        });
+        return nextSheet;
+      });
+
+      setDirtyMachines((prev) => {
+        const next = new Set(prev);
+        selectedMachineIds.forEach((mId) => next.add(mId));
+        return next;
+      });
+    },
+    [selectedShift, reasonCodes, prevShiftMap]
+  );
 
   // Save a single machine's entry
   const handleSaveMachineEntry = useCallback((machineId) => {
@@ -911,6 +993,34 @@ export default function EntryForm({
           )}
           <button
             type="button"
+            className="btn-bulk-idle"
+            onClick={() => setIsBulkIdleModalOpen(true)}
+            disabled={isFormLocked}
+            title={
+              isFormLocked
+                ? "Shift is locked in Read-Only mode"
+                : "Quick fill 12h downtime (NO PLAN / NO MANPOWER) for idle machines"
+            }
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "7px 14px",
+              fontSize: "13px",
+              fontWeight: "600",
+              color: "#0369a1",
+              backgroundColor: "#f0f9ff",
+              border: "1.5px solid #bae6fd",
+              borderRadius: "8px",
+              cursor: isFormLocked ? "not-allowed" : "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span>⚡</span>
+            <span>Quick Fill Idle M/C</span>
+          </button>
+          <button
+            type="button"
             className="btn-batch-save"
             onClick={handleSaveAllModified}
             disabled={isFormLocked || dirtyMachines.size === 0}
@@ -1064,6 +1174,18 @@ export default function EntryForm({
           onConfirmNewMold={handleConfirmNewMold}
         />
       )}
+
+      {/* 7. Bulk Idle Machine Downtime Modal */}
+      <BulkIdleDowntimeModal
+        isOpen={isBulkIdleModalOpen}
+        onClose={() => setIsBulkIdleModalOpen(false)}
+        plantMachines={plantMachines}
+        sheetData={sheetData}
+        savedMachines={savedMachines}
+        selectedShift={selectedShift}
+        reasonCodes={reasonCodes}
+        onApply={handleApplyBulkIdleDowntime}
+      />
     </div>
   );
 }

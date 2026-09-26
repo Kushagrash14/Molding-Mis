@@ -84,6 +84,13 @@ function loadStore() {
         }
       }
 
+      // Ensure seed reason codes exist (e.g. pdt_no_plan)
+      for (const sr of REASON_CODES) {
+        if (!store.reasonCodes.some((r) => r.reason_id === sr.reason_id)) {
+          store.reasonCodes.push(sr);
+        }
+      }
+
       // Ensure seed master products exist
       const existingSapPlantKeys = new Set(
         store.master.map((m) => `${m.plant_id || "1040"}_${m.sap_code}`)

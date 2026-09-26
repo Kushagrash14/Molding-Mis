@@ -25870,6 +25870,12 @@ export const REASON_CODES = [
     "unit": "qty"
   },
   {
+    "reason_id": "pdt_no_plan",
+    "name": "NO PLAN",
+    "category": "planned_dt",
+    "unit": "min"
+  },
+  {
     "reason_id": "pdt_no_load",
     "name": "NO LOAD",
     "category": "planned_dt",
