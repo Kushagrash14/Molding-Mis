@@ -31,7 +31,6 @@ export default function EditModal({
   const isEntryLocked = entry.status === "locked" || isEntryPastTwelveHours(entry, shifts);
   const isReadOnly = currentUser?.role !== "admin" && isEntryLocked;
 
-  const m = master.find((x) => x.sap_code === entry.sap_code) || master[0] || {};
   const draft = {
     ...form,
     reasons: Object.entries(reasonVals)
@@ -43,7 +42,7 @@ export default function EditModal({
       })),
     other_dt_remark: Number(reasonVals["udt_others"]) > 0 ? otherDtRemark.trim() : "",
   };
-  const metrics = computeMetrics(draft, m, reasonCodes);
+  const metrics = computeMetrics(draft, master, reasonCodes);
 
   function update(field, val) {
     setForm((prev) => ({ ...prev, [field]: val }));

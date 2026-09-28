@@ -469,7 +469,7 @@ export default function EntryForm({
     plantMachines.forEach((m) => {
       const info = getPreviousShiftInfo(m.machine_id, shiftDate, shift, entries, shifts);
       if (info && info.sap_code) {
-        const masterItem = master.find((p) => p.sap_code === info.sap_code);
+        const masterItem = plantMaster.find((p) => p.sap_code === info.sap_code);
         map[m.machine_id] = {
           ...info,
           master: masterItem || null,
@@ -477,7 +477,7 @@ export default function EntryForm({
       }
     });
     return map;
-  }, [plantMachines, shiftDate, shift, entries, shifts, master]);
+  }, [plantMachines, shiftDate, shift, entries, shifts, plantMaster]);
 
   // Previous Shift Mold Modal Confirmation Handlers
   const handleConfirmContinueSameMold = useCallback((machineId) => {
@@ -694,7 +694,7 @@ export default function EntryForm({
 
       if (!r.running_cavity || Number(r.running_cavity) <= 0) {
         if (isFullShiftDown) {
-          const rMaster = master.find((m) => m.sap_code === r.sap_code);
+          const rMaster = plantMaster.find((m) => m.sap_code === r.sap_code);
           r.running_cavity = rMaster?.cavity || 1;
         } else {
           alert(`${moldLabel}: Enter running cavity.`);
@@ -717,7 +717,7 @@ export default function EntryForm({
 
     // Format entry object
     const formattedRuns = runs.map((r, idx) => {
-      const rMaster = master.find((m) => m.sap_code === r.sap_code);
+      const rMaster = plantMaster.find((m) => m.sap_code === r.sap_code);
       const runDtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
       const isFullShiftDown = runDtMins >= 720 || runDtMins >= Math.round((Number(r.planned_hours) || 12) * 60);
       const runReasonsMap = normalizeReasonsMap(r.reasons);
@@ -921,7 +921,7 @@ export default function EntryForm({
         selectedPlantId={plant}
         selectedShiftDate={shiftDate}
         selectedShiftId={shift}
-        master={master}
+        master={plantMaster}
         reasonCodes={reasonCodes}
       />
 

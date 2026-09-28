@@ -1,5 +1,9 @@
 import * as XLSX from "xlsx";
-import { computeMetrics, pct } from "./calculations.js";
+import { computeMetrics, findProduct, pct } from "./calculations.js";
+
+function productFor(master, e) {
+  return findProduct(master, e.primary_sap_code || e.sap_code, e.plant_id);
+}
 
 /**
  * Enterprise multi-sheet Excel (.xlsx) generator for PG Electroplast
@@ -77,8 +81,8 @@ export function exportProductionToExcel({
   let sumOee = 0;
 
   entries.forEach((e) => {
-    const m = master.find((x) => x.sap_code === e.sap_code);
-    const metrics = computeMetrics(e, m, reasonCodes);
+    const m = productFor(master, e);
+    const metrics = computeMetrics(e, master, reasonCodes);
     const mcObj = machines.find((x) => x.machine_id === e.machine_id) || {};
     const plantObj = plants.find((p) => p.plant_id === e.plant_id) || {};
     const locObj = locations.find((l) => l.location_id === plantObj.location_id) || {};
@@ -244,7 +248,7 @@ export function exportProductionToExcel({
 
   let hasReasons = false;
   entries.forEach((e) => {
-    const m = master.find((x) => x.sap_code === e.sap_code);
+    const m = productFor(master, e);
     const mcObj = machines.find((x) => x.machine_id === e.machine_id) || {};
     const plantObj = plants.find((p) => p.plant_id === e.plant_id) || {};
     const price = m ? m.price : 0;
@@ -384,8 +388,8 @@ export function exportProductionToCSV({
   ];
 
   const rows = entries.map((e) => {
-    const m = master.find((x) => x.sap_code === e.sap_code);
-    const res = computeMetrics(e, m, reasonCodes);
+    const m = productFor(master, e);
+    const res = computeMetrics(e, master, reasonCodes);
     const mc =
       (machines.find((x) => x.machine_id === e.machine_id) || {}).machine_no || e.machine_id;
     const pObj = plants.find((p) => p.plant_id === e.plant_id);

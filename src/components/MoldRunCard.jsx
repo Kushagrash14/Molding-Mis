@@ -106,8 +106,8 @@ export default function MoldRunCard({
   );
 
   const runMetrics = useMemo(
-    () => computeMetrics(runDraft, runMaster, reasonCodes),
-    [runDraft, runMaster, reasonCodes]
+    () => computeMetrics(runDraft, master, reasonCodes),
+    [runDraft, master, reasonCodes]
   );
 
   const totalDowntimeHrs = (runMetrics?.planned_dt || 0) + (runMetrics?.unplanned_dt || 0);

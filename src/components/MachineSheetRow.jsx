@@ -52,18 +52,17 @@ export default function MachineSheetRow({
 
   // Compute metrics for each mold run
   const runMetrics = useMemo(() => {
-    return runs.map((r) => {
-      const rMaster = master.find((m) => m.sap_code === r.sap_code);
-      return computeMetrics(
+    return runs.map((r) =>
+      computeMetrics(
         {
           ...r,
           planned_hours: Number(r.planned_hours) || shiftPlannedHours,
           reasons: r.reasons,
         },
-        rMaster,
+        master,
         reasonCodes
-      );
-    });
+      )
+    );
   }, [runs, master, reasonCodes, shiftPlannedHours]);
 
   function handleCoConfirm() {
@@ -223,7 +222,9 @@ export default function MachineSheetRow({
                       material_description: found?.material_description || "",
                       part_no: found?.part_no || "",
                       std_cavity: found?.cavity || 1,
-                      running_cavity: r.running_cavity || found?.cavity || 1,
+                      running_cavity: found?.cavity || 1,
+                      is_multi_cavity: false,
+                      cavity_parts: null,
                       manpower: r.manpower || found?.manpower || 1,
                       shots_per_hour: found?.shots_per_hour || 60,
                       price: found?.price || 1,
@@ -442,7 +443,7 @@ export default function MachineSheetRow({
                   >
                     {Number(r.ok_prod) === 0
                       ? "Full Shift DT"
-                      : `A:${(m.a * 100 || 0).toFixed(0)}% · P:${(m.p * 100 || 0).toFixed(0)}%`}
+                      : `A:${((m.availability || 0) * 100).toFixed(0)}% · P:${((m.productivity || 0) * 100).toFixed(0)}%`}
                   </span>
                 </div>
               ) : (

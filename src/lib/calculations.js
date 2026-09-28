@@ -51,6 +51,21 @@ export function calculateTotalDowntimeMinutes(reasons, reasonCodes = REASON_CODE
 }
 
 /**
+ * Finds a product in the master list. The same SAP code can exist in several plants
+ * with different shots/hr and cavity, so the entry's own plant is preferred.
+ */
+export function findProduct(master, sapCode, plantId) {
+  if (!Array.isArray(master) || !sapCode) return null;
+  let fallback = null;
+  for (const p of master) {
+    if (p.sap_code !== sapCode) continue;
+    if (!plantId || (p.plant_id || "1040") === plantId) return p;
+    if (!fallback) fallback = p;
+  }
+  return fallback;
+}
+
+/**
  * Calculation engine strictly aligned with M2 DEMO.xlsx and plant MIS.
  */
 export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
@@ -77,16 +92,14 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     let available_hours = 0;
 
     entry.runs.forEach((r) => {
+      const run = { ...r, plant_id: r.plant_id || entry.plant_id };
       let rMaster = null;
       if (Array.isArray(master)) {
-        rMaster = master.find((x) => x.sap_code === r.sap_code);
+        rMaster = master;
       } else if (master && master.sap_code === r.sap_code) {
         rMaster = master;
       }
-      if (!rMaster && r.shots_per_hour) {
-        rMaster = r;
-      }
-      const rm = computeMetrics(r, rMaster, currentReasons);
+      const rm = computeMetrics(run, rMaster, currentReasons);
       total_rej += rm.total_rej || 0;
       planned_dt += rm.planned_dt || 0;
       unplanned_dt += rm.unplanned_dt || 0;
@@ -135,14 +148,16 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     };
   }
 
-  // Resolve product master if master is an array
-  let itemMaster = master;
-  if (Array.isArray(master)) {
+  // Resolve product master. Multi-cavity entries store a display sap_code like
+  // "A + B", so the real main SAP (primary_sap_code / first run) is looked up first.
+  const masterList = Array.isArray(master) ? master : null;
+  let itemMaster = masterList ? null : master;
+  if (masterList) {
     const sap =
-      entry.sap_code ||
       entry.primary_sap_code ||
-      (entry.runs && entry.runs[0] && entry.runs[0].sap_code);
-    itemMaster = master.find((x) => x.sap_code === sap) || null;
+      (entry.runs && entry.runs[0] && entry.runs[0].sap_code) ||
+      entry.sap_code;
+    itemMaster = findProduct(masterList, sap, entry.plant_id);
   }
 
   // Single run calculation
@@ -168,7 +183,9 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
 
   const planned_base = Number(entry.planned_hours) || 12;
   const run_hour = entry.run_hour !== undefined && entry.run_hour !== "" ? Number(entry.run_hour) : 0;
-  const running_cavity = Number(entry.running_cavity) || 0;
+  const stdCavity = Number(itemMaster?.cavity) || 0;
+  const enteredCavity = Number(entry.running_cavity) || 0;
+  const running_cavity = stdCavity > 0 ? Math.min(enteredCavity, stdCavity) : enteredCavity;
   const ok_prod = Number(entry.ok_prod) || 0;
 
   // Run hours are saved already net of downtime by the entry form; older or manually
@@ -188,16 +205,15 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   let net_wt = 0;
 
   if (entry.cavity_parts && Array.isArray(entry.cavity_parts) && entry.cavity_parts.length > 0) {
+    // One shot fills every cavity of the mold, so all parts share the mold's shots/hr
+    // (the main SAP's). A part's own master shots/hr is only a fallback.
     let sumTgt = 0;
     entry.cavity_parts.forEach((p) => {
-      let pMaster = null;
-      if (Array.isArray(master)) {
-        pMaster = master.find((x) => x.sap_code === p.sap_code);
-      }
+      const pMaster = masterList ? findProduct(masterList, p.sap_code, entry.plant_id) : null;
       const pPrice = Number(pMaster?.price || p.price || itemMaster?.price || 0);
       const pPartWt = Number(pMaster?.part_wt || p.part_wt || itemMaster?.part_wt || 0);
       const pRunWt = Number(pMaster?.run_wt || p.run_wt || itemMaster?.run_wt || 0);
-      const pShots = Number(pMaster?.shots_per_hour || itemMaster?.shots_per_hour || entry.shots_per_hour || 0);
+      const pShots = Number(shotsPerHour || pMaster?.shots_per_hour || 0);
       const pCavity = Number(p.cavity || 1);
       const pOk = Number(p.ok_prod || 0);
 
