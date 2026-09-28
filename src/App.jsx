@@ -689,7 +689,7 @@ export default function App() {
           )}
 
           {tab === "master" && (
-            <div>
+            <div className="master-management-wrapper">
               <div className="page-head">
                 <div>
                   <h2>Plant Master Data Management</h2>

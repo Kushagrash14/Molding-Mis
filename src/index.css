@@ -5794,4 +5794,162 @@ tbody tr:last-child td {
   display: inline-block;
 }
 
+/* ==========================================================================
+   Master Admin Frozen Headers & Sticky Columns
+   ========================================================================== */
+
+.master-management-wrapper .page-head {
+  margin-bottom: 12px;
+}
+
+.master-management-wrapper .page-head h2 {
+  font-size: 20px;
+}
+
+/* Master Table Card (Products with Docked Pagination) */
+.master-table-card {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: max(340px, calc(100vh - 275px)) !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+.master-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.master-table-scroll::-webkit-scrollbar,
+.master-table-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.master-table-scroll::-webkit-scrollbar-track,
+.master-table-wrap::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.master-table-scroll::-webkit-scrollbar-thumb,
+.master-table-wrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.master-table-scroll::-webkit-scrollbar-thumb:hover,
+.master-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Master Table Wrap (Machines, Locations, Shifts, Reasons, Users) */
+.master-table-wrap {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: max(340px, calc(100vh - 275px)) !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  position: relative !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #cbd5e1 #f8fafc !important;
+  margin-bottom: 16px !important;
+}
+
+.master-table-scroll table,
+.master-table-wrap table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  text-align: left;
+}
+
+/* Frozen Header Row */
+.master-table-scroll thead th,
+.master-table-wrap thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  background: #f8fafc !important;
+  color: #334155 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  padding: 10px 12px !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05) !important;
+  white-space: nowrap !important;
+}
+
+/* Sticky First Column (PLANT header & body cells on horizontal scroll) */
+.master-table-scroll thead th:first-child,
+.master-table-wrap thead th:first-child {
+  position: sticky !important;
+  left: 0 !important;
+  top: 0 !important;
+  z-index: 30 !important;
+  background: #f1f5f9 !important;
+  border-right: 1px solid #cbd5e1 !important;
+}
+
+.master-table-scroll tbody td:first-child:not([colspan]),
+.master-table-wrap tbody td:first-child:not([colspan]) {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 10 !important;
+  background: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+.master-table-scroll tbody tr:hover td:first-child:not([colspan]),
+.master-table-wrap tbody tr:hover td:first-child:not([colspan]) {
+  background: #f8fafc !important;
+}
+
+.master-table-scroll tbody td,
+.master-table-wrap tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.master-table-scroll tbody tr:last-child td,
+.master-table-wrap tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.master-table-scroll tbody tr:hover,
+.master-table-wrap tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Docked pagination bar inside Master Table Card */
+.master-table-card .table-pagination {
+  flex-shrink: 0;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 8px 14px;
+}
+
+
 

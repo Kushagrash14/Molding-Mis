@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatUserScopeLabel, getUserAccessiblePlants } from "../lib/permissions.js";
 import { calculateShiftDuration } from "../lib/calculations.js";
 import { SHIFTS } from "../data/seedData.js";
@@ -536,6 +536,13 @@ export default function MasterAdmin({
           currentProdPage * effectiveProdPageSize
         );
 
+  const prodTableScrollRef = useRef(null);
+  useEffect(() => {
+    if (prodTableScrollRef.current) {
+      prodTableScrollRef.current.scrollTop = 0;
+    }
+  }, [currentProdPage, searchProduct, productPlantFilter]);
+
   const filteredMachines = machines.filter((m) => {
     if (machinePlantFilter !== "all" && (m.plant_id || "1040") !== machinePlantFilter) {
       return false;
@@ -840,7 +847,7 @@ export default function MasterAdmin({
               </div>
             </div>
 
-            <div className="table-wrap" style={{ marginBottom: "16px" }}>
+            <div className="table-wrap master-table-wrap" style={{ marginBottom: "16px" }}>
               <table>
                 <thead>
                   <tr>
@@ -967,7 +974,7 @@ export default function MasterAdmin({
               </div>
             </div>
 
-            <div className="table-wrap" style={{ marginBottom: "16px" }}>
+            <div className="table-wrap master-table-wrap" style={{ marginBottom: "16px" }}>
               <table>
                 <thead>
                   <tr>
@@ -1269,8 +1276,9 @@ export default function MasterAdmin({
             </span>
           </div>
 
-          <div className="table-wrap" style={{ marginBottom: "18px" }}>
-            <table style={{ minWidth: "1220px" }}>
+          <div className="table-wrap master-table-card" style={{ marginBottom: "18px" }}>
+            <div className="master-table-scroll" ref={prodTableScrollRef}>
+              <table style={{ minWidth: "1220px" }}>
               <thead>
                 <tr>
                   <th style={{ width: "110px", minWidth: "110px", textAlign: "center" }}>Plant</th>
@@ -1361,6 +1369,7 @@ export default function MasterAdmin({
                 )}
               </tbody>
             </table>
+            </div>
 
             {/* Pagination Controls */}
             <div className="table-pagination">
@@ -1784,7 +1793,7 @@ export default function MasterAdmin({
             </span>
           </div>
 
-          <div className="table-wrap" style={{ marginBottom: "18px" }}>
+          <div className="table-wrap master-table-wrap" style={{ marginBottom: "18px" }}>
             <table>
               <thead>
                 <tr>
@@ -2014,7 +2023,7 @@ export default function MasterAdmin({
             </span>
           </div>
 
-          <div className="table-wrap" style={{ marginBottom: "18px" }}>
+          <div className="table-wrap master-table-wrap" style={{ marginBottom: "18px" }}>
             <table>
               <thead>
                 <tr>
@@ -2439,7 +2448,7 @@ export default function MasterAdmin({
             </div>
           </div>
 
-          <div className="table-wrap" style={{ marginBottom: "18px" }}>
+          <div className="table-wrap master-table-wrap" style={{ marginBottom: "18px" }}>
             <table>
               <thead>
                 <tr>
@@ -2673,7 +2682,7 @@ export default function MasterAdmin({
             </div>
           </div>
 
-          <div className="table-wrap" style={{ marginBottom: "16px" }}>
+          <div className="table-wrap master-table-wrap" style={{ marginBottom: "16px" }}>
             <table>
               <thead>
                 <tr>
