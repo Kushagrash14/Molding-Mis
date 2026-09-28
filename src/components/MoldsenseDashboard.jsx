@@ -1,22 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { computeMetrics, normalizeReasonsMap } from "../lib/calculations.js";
-
-// Benchmark reference data for September 2026 Daily OEE Matrix matching user screenshot exactly
-const BENCHMARK_MC_OEE_MATRIX = [
-  { mc: "M/C: 12", avg: 55.3, days: { 1: 80.5, 2: 66.0, 3: 83.2, 4: 90.3, 5: 87.5, 7: 47.4, 8: 74.9, 10: 86.2, 11: 38.9, 12: 4.0, 14: 0.0, 15: 36.9, 16: 61.4, 17: 20.8, 18: 8.2, 21: 97.7, 22: 72.7 } },
-  { mc: "M/C: 13", avg: 69.0, days: { 1: 59.8, 2: 77.2, 3: 83.8, 4: 84.2, 5: 87.2, 7: 83.8, 8: 88.0, 10: 48.2, 11: 41.6, 12: 36.2, 15: 31.7, 16: 59.3, 17: 50.9, 18: 77.4, 19: 78.0, 21: 91.4, 22: 95.2 } },
-  { mc: "M/C: 14", avg: 77.2, days: { 1: 66.2, 2: 86.5, 3: 87.7, 4: 55.8, 5: 88.0, 7: 85.1, 8: 88.1, 10: 80.2, 11: 83.2, 12: 89.8, 14: 0.0, 15: 78.8, 16: 83.2, 17: 85.9, 18: 88.7, 19: 67.4, 21: 88.3, 22: 87.2 } },
-  { mc: "M/C: 15", avg: 78.6, days: { 1: 76.6, 2: 93.8, 3: 92.7, 4: 97.1, 5: 96.4, 7: 94.1, 8: 86.4, 10: 95.0, 11: 87.8, 12: 87.5, 15: 86.1, 16: 45.1, 17: 84.1, 18: 56.2, 19: 19.3, 21: 74.6, 22: 64.2 } },
-  { mc: "M/C: 16", avg: 64.4, days: { 1: 84.2, 2: 84.2, 8: 0.2, 16: 83.5, 21: 61.6, 22: 72.6 } },
-  { mc: "M/C: 17", avg: 52.2, days: { 1: 30.1, 2: 45.6, 3: 1.2, 4: 81.4, 5: 50.5, 7: 80.4, 8: 50.3, 10: 89.2, 16: 76.4, 17: 59.8, 18: 36.2, 19: 21.3, 22: 56.8 } },
-  { mc: "M/C: 18", avg: 41.4, days: { 1: 13.2, 2: 7.2, 3: 47.4, 4: 74.6, 10: 13.9, 11: 43.8, 12: 51.1, 16: 55.0, 17: 3.1, 18: 98.5, 21: 59.1, 22: 30.4 } },
-  { mc: "M/C: 19", avg: 41.2, days: { 3: 69.5, 4: 52.8, 5: 44.8, 7: 46.3, 8: 9.3, 10: 54.5, 11: 12.6, 12: 56.8, 14: 13.9, 15: 63.4, 16: 16.8, 21: 68.9, 22: 33.8 } },
-  { mc: "M/C: 27", avg: 87.4, days: { 1: 84.6, 2: 97.6, 3: 100.0, 4: 99.0, 5: 96.1, 7: 88.1, 8: 84.3, 10: 90.0, 11: 98.4, 12: 88.3, 14: 0.7, 15: 100.0, 16: 94.6, 17: 100.0, 18: 66.4, 19: 100.0, 21: 90.6, 22: 94.5 } },
-  { mc: "M/C: 39", avg: 65.0, days: { 1: 57.6, 2: 76.3, 3: 82.9, 4: 42.3, 5: 96.9, 7: 88.6, 8: 79.5, 10: 43.0, 11: 99.5, 12: 92.4, 14: 0.0, 15: 97.2, 16: 45.3, 17: 34.3, 18: 4.1, 22: 99.4 } },
-  { mc: "M/C: 40", avg: 61.2, days: { 1: 86.9, 2: 96.8, 3: 81.2, 4: 45.3, 5: 22.8, 7: 48.0, 8: 18.1, 10: 68.6, 11: 77.5, 12: 75.9, 14: 0.0, 15: 41.3, 16: 100.0, 17: 99.7, 18: 73.6, 19: 60.0, 21: 58.0, 22: 47.1 } },
-  { mc: "M/C: 47", avg: 76.2, days: { 1: 51.4, 2: 78.4, 3: 84.2, 4: 76.5, 5: 89.1, 7: 90.1, 8: 94.5, 10: 73.7, 11: 84.4, 12: 78.4, 15: 58.7, 16: 95.5, 17: 90.9, 18: 67.8, 19: 50.7, 21: 91.6, 22: 39.2 } },
-  { mc: "M/C: 51", avg: 76.7, days: { 1: 78.0, 2: 82.5, 3: 79.0, 4: 85.0, 5: 74.0, 7: 88.0, 8: 81.0, 10: 79.5, 11: 83.0, 12: 80.0, 15: 75.0, 16: 82.0, 17: 79.0, 18: 72.0, 19: 68.0, 21: 84.0, 22: 71.0 } },
-];
 
 /**
  * Creates smooth cubic bezier curve SVG path from array of points [{x, y}]
@@ -43,7 +26,109 @@ function createSmoothPath(points) {
 }
 
 /**
- * Reusable Responsive SVG Area Chart with Adaptive Dynamic Scaling
+ * Month calendar info for "YYYY-MM": number of days, short month name, and the last
+ * day that can have production (today for the running month, none for future months).
+ */
+function getMonthInfo(selectedMonth) {
+  const [y, m] = (selectedMonth || "").split("-").map(Number);
+  const now = new Date();
+  const year = y || now.getFullYear();
+  const month = m || now.getMonth() + 1;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", { month: "short" });
+
+  const monthIdx = year * 12 + month;
+  const nowIdx = now.getFullYear() * 12 + now.getMonth() + 1;
+  let lastProductionDay = daysInMonth;
+  if (monthIdx === nowIdx) lastProductionDay = now.getDate();
+  else if (monthIdx > nowIdx) lastProductionDay = 0;
+
+  const todayDay = monthIdx === nowIdx ? now.getDate() : null;
+
+  return { year, month, daysInMonth, monthName, lastProductionDay, todayDay };
+}
+
+function emptyAgg() {
+  return { ok: 0, rej: 0, tgt: 0, netRun: 0, available: 0, plannedDt: 0, unplannedDt: 0 };
+}
+
+function addToAgg(agg, m) {
+  agg.ok += Number(m.ok_prod) || 0;
+  agg.rej += Number(m.total_rej) || 0;
+  agg.tgt += Number(m.tgt) || 0;
+  agg.netRun += Number(m.net_run_time) || 0;
+  agg.available += Number(m.available_hours) || 0;
+  agg.plannedDt += Number(m.planned_dt) || 0;
+  agg.unplannedDt += Number(m.unplanned_dt) || 0;
+}
+
+/**
+ * OEE for a group of shift entries, computed from summed quantities and hours
+ * (not an average of per-entry percentages) so longer / bigger runs weigh correctly.
+ * Returns null when the group had no available hours (e.g. full-shift "No Plan").
+ */
+function oeeFromAgg(agg) {
+  if (agg.available <= 0) return null;
+  const produced = agg.ok + agg.rej;
+  const quality = produced > 0 ? agg.ok / produced : 0;
+  const availability = Math.min(1, agg.netRun / agg.available);
+  const performance = agg.tgt > 0 ? produced / agg.tgt : 0;
+  return {
+    quality: quality * 100,
+    availability: availability * 100,
+    performance: performance * 100,
+    oee: quality * availability * performance * 100,
+  };
+}
+
+const round1 = (v) => (v === null || v === undefined ? null : Number(Number(v).toFixed(1)));
+
+const formatCount = (v) => Math.round(Number(v) || 0).toLocaleString("en-IN");
+const formatPct = (v) => (v === null || v === undefined ? "—" : `${Number(v).toFixed(1)}%`);
+
+function KpiCard({ color, label, value }) {
+  return (
+    <div className="ms-kpi-card" style={{ borderTopColor: color }}>
+      <span className="ms-kpi-deco" style={{ backgroundColor: color }} />
+      <div className="ms-kpi-val">{value}</div>
+      <div className="ms-kpi-lbl">{label}</div>
+    </div>
+  );
+}
+
+/**
+ * Tracks the rendered pixel size of an element so SVG charts can draw at 1:1 scale
+ * (a stretched viewBox would distort text and point markers).
+ */
+function useElementSize(fallback = { width: 500, height: 210 }) {
+  const ref = useRef(null);
+  const [size, setSize] = useState(fallback);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const update = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width > 0 && height > 0) {
+        setSize((prev) =>
+          prev.width === Math.round(width) && prev.height === Math.round(height)
+            ? prev
+            : { width: Math.round(width), height: Math.round(height) }
+        );
+      }
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, size];
+}
+
+/**
+ * Reusable Responsive SVG Area Chart with Adaptive Dynamic Scaling.
+ * Days whose value is null (no entries logged) are skipped instead of plotted as zero.
  */
 function MetricAreaChart({
   title,
@@ -58,12 +143,11 @@ function MetricAreaChart({
   showLabelThreshold = 0,
 }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
-  const width = 500;
-  const height = 210;
+  const [wrapRef, { width, height }] = useElementSize();
   const padLeft = 40;
-  const padRight = 18;
-  const padTop = 22;
-  const padBottom = 28;
+  const padRight = 14;
+  const padTop = 20;
+  const padBottom = 34;
 
   const chartW = width - padLeft - padRight;
   const chartH = height - padTop - padBottom;
@@ -94,74 +178,83 @@ function MetricAreaChart({
     if (!data || data.length === 0) return [];
     return data.map((d, i) => {
       const x = padLeft + (i / Math.max(1, data.length - 1)) * chartW;
-      const rawVal = Number(d[dataKey] || 0);
-      const normY = Math.min(1, Math.max(0, rawVal / (yMax || 1)));
+      const raw = d[dataKey];
+      const hasValue = raw !== null && raw !== undefined;
+      const val = hasValue ? Number(raw) : null;
+      const normY = hasValue ? Math.min(1, Math.max(0, val / (yMax || 1))) : 0;
       const y = padTop + chartH - normY * chartH;
       return {
         x,
         y,
-        val: rawVal,
+        val,
         day: d.day,
-        label: d.label || `${String(d.day).padStart(2, "0")}-Sep`,
+        label: d.label || String(d.day).padStart(2, "0"),
       };
     });
   }, [data, dataKey, yMax, chartW, chartH, padLeft, padTop]);
 
-  const linePath = useMemo(() => createSmoothPath(points), [points]);
+  const plotted = useMemo(() => points.filter((p) => p.val !== null), [points]);
+
+  const linePath = useMemo(() => createSmoothPath(plotted), [plotted]);
 
   const areaPath = useMemo(() => {
-    if (points.length === 0) return "";
-    const first = points[0];
-    const last = points[points.length - 1];
+    if (plotted.length === 0) return "";
+    const first = plotted[0];
+    const last = plotted[plotted.length - 1];
     const bottomY = padTop + chartH;
     return `${linePath} L ${last.x.toFixed(1)} ${bottomY} L ${first.x.toFixed(1)} ${bottomY} Z`;
-  }, [linePath, points, padTop, chartH]);
+  }, [linePath, plotted, padTop, chartH]);
 
   const gradId = `grad_${dataKey}_${color.replace("#", "")}`;
+  const labelEvery = Math.max(1, Math.ceil(26 / (chartW / Math.max(1, points.length))));
+  const hovered = hoveredIdx !== null ? points[hoveredIdx] : null;
 
-  return (
-    <div className="ms-graph-card">
-      <div className="ms-graph-header">
-        <span className="ms-graph-dot" style={{ backgroundColor: color }} />
-        <span className="ms-graph-title">{title}</span>
-      </div>
+  const body = (
+    <div className="ms-graph-svg-wrap" ref={wrapRef}>
+      <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
 
-      <div className="ms-graph-svg-wrap">
-        <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
+        {/* Grid lines and Y axis ticks */}
+        {yTicks.map((tickVal) => {
+          const y = padTop + chartH - (tickVal / yMax) * chartH;
+          return (
+            <g key={tickVal} className="ms-grid-group">
+              <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+              <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
+                {isPercent && yMax <= 5 ? tickVal.toFixed(1) : tickVal}
+                {isPercent ? "%" : ""}
+              </text>
+            </g>
+          );
+        })}
 
-          {/* Grid lines and Y axis ticks */}
-          {yTicks.map((tickVal) => {
-            const y = padTop + chartH - (tickVal / yMax) * chartH;
-            return (
-              <g key={tickVal} className="ms-grid-group">
-                <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
-                  {tickVal}
-                  {isPercent ? "%" : ""}
-                </text>
-              </g>
-            );
-          })}
+        {plotted.length === 0 && (
+          <text x={width / 2} y={padTop + chartH / 2} textAnchor="middle" fill="#94a3b8" fontSize="11" fontWeight="600">
+            No entries logged for this month
+          </text>
+        )}
 
-          {/* Filled Area */}
-          <path d={areaPath} fill={`url(#${gradId})`} />
+        {/* Filled Area */}
+        {plotted.length > 1 && <path d={areaPath} fill={`url(#${gradId})`} />}
 
-          {/* Curve Line */}
+        {/* Curve Line */}
+        {plotted.length > 1 && (
           <path d={linePath} fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        )}
 
-          {/* Points & Data Labels */}
-          {points.map((p, idx) => {
-            const isSignificant = p.val > showLabelThreshold;
-            const isHovered = hoveredIdx === idx;
-            return (
-              <g key={idx}>
-                {/* Visual Circle */}
+        {/* Points & Data Labels */}
+        {points.map((p, idx) => {
+          const isHovered = hoveredIdx === idx;
+          const hasValue = p.val !== null;
+          const isSignificant = hasValue && p.val > showLabelThreshold;
+          return (
+            <g key={idx}>
+              {hasValue && (
                 <circle
                   cx={p.x}
                   cy={p.y}
@@ -170,84 +263,97 @@ function MetricAreaChart({
                   stroke={color}
                   strokeWidth={isHovered ? 2.5 : 1.8}
                 />
+              )}
 
-                {/* Point Label above peak */}
-                {isSignificant && (
-                  <text
-                    x={p.x}
-                    y={p.y - 7}
-                    textAnchor="middle"
-                    fill="#334155"
-                    fontSize="9.5"
-                    fontWeight="600"
-                    className="ms-point-label"
-                  >
-                    {decimals === 0 ? p.val.toFixed(0) : p.val.toFixed(decimals)}
-                    {isPercent ? "%" : ""}
-                  </text>
-                )}
+              {isSignificant && (
+                <text
+                  x={p.x}
+                  y={p.y - 7}
+                  textAnchor="middle"
+                  fill="#334155"
+                  fontSize="9.5"
+                  fontWeight="600"
+                  className="ms-point-label"
+                >
+                  {p.val.toFixed(decimals)}
+                  {isPercent ? "%" : ""}
+                </text>
+              )}
 
-                {/* Invisible hover hotspot */}
-                <rect
-                  x={p.x - 7}
-                  y={padTop}
-                  width="14"
-                  height={chartH + 10}
-                  fill="transparent"
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                />
-              </g>
-            );
-          })}
+              {/* Invisible hover hotspot */}
+              <rect
+                x={p.x - 7}
+                y={padTop}
+                width="14"
+                height={chartH + 10}
+                fill="transparent"
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              />
+            </g>
+          );
+        })}
 
-          {/* X Axis bottom labels (Every 2nd day: 01-Sep, 03-Sep, etc.) */}
-          {points.map((p, idx) => {
-            if (idx % 2 !== 0 && idx !== points.length - 1) return null;
-            return (
-              <text
-                key={idx}
-                x={p.x}
-                y={height - 8}
-                textAnchor="middle"
-                className="ms-axis-tick x-tick"
-                transform={`rotate(-25, ${p.x}, ${height - 8})`}
-              >
-                {p.label}
-              </text>
-            );
-          })}
-        </svg>
+        {/* X Axis bottom labels */}
+        {points.map((p, idx) => {
+          if (idx % labelEvery !== 0) return null;
+          return (
+            <text
+              key={idx}
+              x={p.x}
+              y={height - 12}
+              textAnchor="middle"
+              className="ms-axis-tick x-tick"
+              transform={`rotate(-25, ${p.x}, ${height - 12})`}
+            >
+              {p.label}
+            </text>
+          );
+        })}
+      </svg>
 
-        {/* Hover Tooltip */}
-        {hoveredIdx !== null && points[hoveredIdx] && (
-          <div
-            className="ms-tooltip"
-            style={{
-              left: `${(points[hoveredIdx].x / width) * 100}%`,
-              top: `${(points[hoveredIdx].y / height) * 100}%`,
-            }}
-          >
-            <div className="ms-tooltip-date">{points[hoveredIdx].label}</div>
-            <div className="ms-tooltip-val">
-              <span className="dot" style={{ backgroundColor: color }} />
-              <strong>{points[hoveredIdx].val.toFixed(decimals)}</strong>
-              {unit || (isPercent ? "%" : "")}
-            </div>
+      {/* Hover Tooltip */}
+      {hovered && (
+        <div
+          className="ms-tooltip"
+          style={{
+            left: `${(hovered.x / width) * 100}%`,
+            top: `${(hovered.y / height) * 100}%`,
+          }}
+        >
+          <div className="ms-tooltip-date">{hovered.label}</div>
+          <div className="ms-tooltip-val">
+            <span className="dot" style={{ backgroundColor: color }} />
+            {hovered.val === null ? (
+              <span>No entry</span>
+            ) : (
+              <>
+                <strong>{hovered.val.toFixed(decimals)}</strong>
+                {unit || (isPercent ? "%" : "")}
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="ms-graph-card">
+      <div className="ms-graph-header">
+        <span className="ms-graph-dot" style={{ backgroundColor: color }} />
+        <span className="ms-graph-title">{title}</span>
       </div>
+      {body}
     </div>
   );
 }
 
 /**
- * Defective Parts Trend (PCS) with Trend & Pareto Toggle
+ * Defects Pareto: rejection reasons sorted by count with cumulative % line
  */
-function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
-  const [viewMode, setViewMode] = useState("trend"); // "trend" | "pareto"
-
+function DefectsParetoChart({ paretoData = [] }) {
   const items = paretoData || [];
 
   // Compute dynamic maxCount for Y axis scaling in Pareto
@@ -265,96 +371,69 @@ function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
 
   const yTicks = [0, Math.round(maxCount * 0.33), Math.round(maxCount * 0.67), maxCount];
 
+  const [wrapRef, { width, height }] = useElementSize();
+  const padLeft = 40;
+  const padRight = 36;
+  const padTop = 20;
+  const padBottom = 26;
+  const plotW = Math.max(1, width - padLeft - padRight);
+  const plotH = Math.max(1, height - padTop - padBottom);
+  const baseY = padTop + plotH;
+  const slotW = plotW / Math.max(1, items.length);
+
   return (
     <div className="ms-graph-card">
-      <div className="ms-graph-header" style={{ justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="ms-graph-dot" style={{ backgroundColor: "#4f46e5" }} />
-          <span className="ms-graph-title">
-            {viewMode === "trend" ? "DEFECTIVE PARTS TREND (PCS)" : "DEFECTS PARETO BREAKDOWN"}
-          </span>
-        </div>
-        <div className="ms-view-toggle">
-          <button
-            type="button"
-            className={`ms-toggle-btn ${viewMode === "trend" ? "active" : ""}`}
-            onClick={() => setViewMode("trend")}
-          >
-            📈 Trend
-          </button>
-          <button
-            type="button"
-            className={`ms-toggle-btn ${viewMode === "pareto" ? "active" : ""}`}
-            onClick={() => setViewMode("pareto")}
-          >
-            📊 Pareto
-          </button>
-        </div>
+      <div className="ms-graph-header">
+        <span className="ms-graph-dot" style={{ backgroundColor: "#64748b" }} />
+        <span className="ms-graph-title">DEFECTS PARETO</span>
       </div>
 
-      {viewMode === "trend" ? (
-        <MetricAreaChart
-          title=""
-          color="#4f46e5"
-          data={dailyData}
-          dataKey="defectPcs"
-          defaultYMax={120}
-          defaultYTicks={[0, 30, 60, 90, 120]}
-          decimals={0}
-          showLabelThreshold={10}
-          unit=" pcs"
-        />
-      ) : items.length === 0 ? (
-        <div
-          style={{
-            height: "170px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#94a3b8",
-            fontSize: "13px",
-            gap: "8px",
-          }}
-        >
-          <span style={{ fontSize: "28px" }}>📋</span>
-          <span style={{ fontWeight: 600 }}>No defect rejection records logged for this month</span>
-          <span style={{ fontSize: "11.5px", color: "#cbd5e1" }}>
-            Rejection entries logged in the entry form will automatically populate here.
-          </span>
-        </div>
-      ) : (
-        <div className="ms-graph-svg-wrap">
-          <svg viewBox="0 0 500 210" className="ms-graph-svg" preserveAspectRatio="none">
+      <div className="ms-graph-svg-wrap" ref={wrapRef}>
+        {items.length === 0 ? (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#94a3b8",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            No rejections logged for this month
+          </div>
+        ) : (
+          <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
             {yTicks.map((tick) => {
-              const y = 22 + 160 - (tick / maxCount) * 160;
+              const y = baseY - (tick / maxCount) * plotH;
               return (
                 <g key={tick}>
-                  <line x1={40} y1={y} x2={465} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                  <text x={34} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
+                  <line x1={padLeft} y1={y} x2={width - padRight + 4} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                  <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
                     {tick}
                   </text>
-                  <text x={470} y={y + 3.5} textAnchor="start" className="ms-axis-tick">
+                  <text x={width - padRight + 8} y={y + 3.5} textAnchor="start" className="ms-axis-tick">
                     {Math.round((tick / maxCount) * 100)}%
                   </text>
                 </g>
               );
             })}
             {items.map((item, idx) => {
-              const barW = Math.min(36, 420 / (items.length * 1.8));
-              const x = 40 + (idx + 0.5) * (420 / items.length) - barW / 2;
-              const barH = Math.min(160, (item.count / maxCount) * 160);
-              const y = 22 + 160 - barH;
-
-              const dotY = 22 + 160 - (item.cumPct / 100) * 160;
-              const dotX = x + barW / 2;
+              const barW = Math.min(44, slotW * 0.55);
+              const dotX = padLeft + (idx + 0.5) * slotW;
+              const x = dotX - barW / 2;
+              const barH = Math.min(plotH, (item.count / maxCount) * plotH);
+              const y = baseY - barH;
+              const dotY = baseY - (item.cumPct / 100) * plotH;
 
               return (
                 <g key={item.defect || idx}>
                   <rect x={x} y={y} width={barW} height={barH} fill="#cbd5e1" rx="3" />
                   <text
                     x={dotX}
-                    y={198}
+                    y={height - 8}
                     textAnchor="middle"
                     className="ms-axis-tick"
                     fontSize="8.5"
@@ -387,44 +466,59 @@ function DefectivePartsChart({ dailyData = [], paretoData = [] }) {
                 strokeLinejoin="round"
                 points={items
                   .map((item, idx) => {
-                    const dotX = 40 + (idx + 0.5) * (420 / items.length);
-                    const dotY = 22 + 160 - (item.cumPct / 100) * 160;
+                    const dotX = padLeft + (idx + 0.5) * slotW;
+                    const dotY = baseY - (item.cumPct / 100) * plotH;
                     return `${dotX.toFixed(1)},${dotY.toFixed(1)}`;
                   })
                   .join(" ")}
               />
             )}
           </svg>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
-/**
- * Daily MC OEE — Machine x Day Matrix View (Matching Screenshot media_1790304849077.png)
- */
-function DailyOeeMatrixView({ matrixData = [], selectedMonth = "2026-09" }) {
-  const monthName = selectedMonth
-    ? new Date(`${selectedMonth}-01`).toLocaleString("en-US", { month: "short" }).toUpperCase()
-    : "SEPT";
-  const daysInMonth = 30;
-  const daysList = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+// Badge color for an OEE cell, matching the matrix legend
+function getOeeCellStyle(val) {
+  if (val === null || val === undefined || val === "") return null;
+  const num = Number(val);
+  if (num >= 110) return { bg: "#1e293b", color: "#ffffff" }; // >110% dark navy
+  if (num >= 100) return { bg: "#fecdd3", color: "#9f1239" }; // >100% pink
+  if (num >= 85) return { bg: "#bbf7d0", color: "#166534" }; // 85-99% green
+  if (num >= 75) return { bg: "#fef08a", color: "#854d0e" }; // 75-84% yellow
+  return { bg: "#fee2e2", color: "#991b1b" }; // <75% red
+}
 
-  // Helper function to get badge class & styling for OEE cell matching screenshot legend
-  const getOeeCellStyle = (val) => {
-    if (val === null || val === undefined || val === "") return null;
-    const num = Number(val);
-    if (num >= 110) return { bg: "#1e293b", color: "#ffffff" }; // >110% dark navy
-    if (num >= 100) return { bg: "#fecdd3", color: "#9f1239" }; // >100% pink
-    if (num >= 85) return { bg: "#bbf7d0", color: "#166534" };  // 85-99% green
-    if (num >= 75) return { bg: "#fef08a", color: "#854d0e" };  // 75-84% yellow
-    return { bg: "#fee2e2", color: "#991b1b" };                 // <75% red
-  };
+function OeeBadge({ value }) {
+  const style = getOeeCellStyle(value);
+  if (!style) return null;
+  return (
+    <span className="ms-oee-badge" style={{ backgroundColor: style.bg, color: style.color }}>
+      {Number(value).toFixed(1)}%
+    </span>
+  );
+}
+
+/**
+ * Daily MC OEE — Machine x Day Matrix View
+ */
+function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
+  const daysList = Array.from({ length: monthInfo.daysInMonth }, (_, i) => {
+    const day = i + 1;
+    const date = new Date(monthInfo.year, monthInfo.month - 1, day);
+    return {
+      day,
+      weekday: date.toLocaleString("en-US", { weekday: "short" }),
+      isSunday: date.getDay() === 0,
+      isToday: monthInfo.todayDay === day,
+    };
+  });
+  const dayClass = (d) => `${d.isSunday ? "is-sun" : ""} ${d.isToday ? "is-today" : ""}`;
 
   return (
     <div className="ms-matrix-container">
-      {/* Matrix Table Card */}
       <div className="card ms-matrix-card">
         <div className="ms-matrix-header-row">
           <h3 className="ms-matrix-title">Daily MC OEE — Machine × Day Matrix</h3>
@@ -437,56 +531,74 @@ function DailyOeeMatrixView({ matrixData = [], selectedMonth = "2026-09" }) {
           </div>
         </div>
 
-        <div className="ms-matrix-table-wrap">
-          <table className="ms-matrix-table">
-            <thead>
-              <tr>
-                <th className="th-mc-list">M/C LIST</th>
-                <th className="th-avg-oee">AVG OEE</th>
-                {daysList.map((d) => (
-                  <th key={d} className="th-day">{`${d}-${monthName}`}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {matrixData.map((row) => (
-                <tr key={row.mc}>
-                  <td className="td-mc-name">{row.mc}</td>
-                  <td className="td-avg-oee">{row.avg > 0 ? `${row.avg.toFixed(1)}%` : "—"}</td>
-                  {daysList.map((d) => {
-                    const dayVal = row.days ? row.days[d] : null;
-                    const style = getOeeCellStyle(dayVal);
-                    return (
-                      <td key={d} className="td-day-cell">
-                        {style ? (
-                          <span
-                            className="ms-oee-badge"
-                            style={{ backgroundColor: style.bg, color: style.color }}
-                          >
-                            {Number(dayVal).toFixed(1)}%
-                          </span>
-                        ) : null}
-                      </td>
-                    );
-                  })}
+        {matrixData.length === 0 ? (
+          <div className="ms-matrix-empty">
+            No production entries logged for this plant in {monthInfo.monthName}.
+          </div>
+        ) : (
+          <div className="ms-matrix-table-wrap">
+            <table className="ms-matrix-table">
+              <thead>
+                <tr>
+                  <th className="th-mc-list">M/C LIST</th>
+                  <th className="th-avg-oee">MONTH OEE</th>
+                  {daysList.map((d) => (
+                    <th key={d.day} className={`th-day ${dayClass(d)}`}>
+                      <span className="th-day-num">{String(d.day).padStart(2, "0")}</span>
+                      <span className="th-day-wk">{d.weekday}</span>
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {matrixData.map((row) => (
+                  <tr key={row.machineId}>
+                    <td className="td-mc-name">{row.mc}</td>
+                    <td className="td-avg-oee">
+                      {row.avg !== null ? <OeeBadge value={row.avg} /> : <span className="ms-oee-empty">—</span>}
+                    </td>
+                    {daysList.map((d) => (
+                      <td key={d.day} className={`td-day-cell ${dayClass(d)}`}>
+                        <OeeBadge value={row.days[d.day]} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+              {plantRow && (
+                <tfoot>
+                  <tr>
+                    <td className="td-mc-name">PLANT</td>
+                    <td className="td-avg-oee">
+                      {plantRow.avg !== null ? <OeeBadge value={plantRow.avg} /> : <span className="ms-oee-empty">—</span>}
+                    </td>
+                    {daysList.map((d) => (
+                      <td key={d.day} className={`td-day-cell ${dayClass(d)}`}>
+                        <OeeBadge value={plantRow.days[d.day]} />
+                      </td>
+                    ))}
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+function machineLabel(machine, machineId) {
+  const no = machine?.machine_no;
+  if (no) return String(no).startsWith("M/C") ? no : `M/C: ${no}`;
+  return `M/C: ${machineId}`;
 }
 
 export default function MoldsenseDashboard({
   entries = [],
   master = [],
   machines = [],
-  shifts = [],
   reasonCodes = [],
-  plants = [],
-  locations = [],
   selectedPlantId = "1040",
   selectedMonth = "2026-09",
   userRole = "operator",
@@ -498,180 +610,202 @@ export default function MoldsenseDashboard({
   const TABS = isOperator ? ["Monthly MIS"] : ["Monthly MIS", "Daily OEE Matrix"];
   const currentTab = isOperator ? "Monthly MIS" : activeTab;
 
-  // Filter entries for the selected month and plant
-  const monthFilteredEntries = useMemo(() => {
-    return entries.filter((e) => {
-      if (selectedPlantId && selectedPlantId !== "all" && e.plant_id && e.plant_id !== selectedPlantId) return false;
-      if (e.shift_date && !e.shift_date.startsWith(selectedMonth)) return false;
-      return true;
-    });
-  }, [entries, selectedMonth, selectedPlantId]);
+  const monthInfo = useMemo(() => getMonthInfo(selectedMonth), [selectedMonth]);
 
-  // Fully dynamic daily series computed directly from actual entries
+  // Entries for the selected month and plant, with metrics computed once per entry
+  const monthRows = useMemo(() => {
+    return entries
+      .filter((e) => {
+        if (!e.shift_date || !e.shift_date.startsWith(selectedMonth)) return false;
+        if (selectedPlantId && selectedPlantId !== "all" && (e.plant_id || "1040") !== selectedPlantId) return false;
+        return true;
+      })
+      .map((e) => ({
+        entry: e,
+        day: parseInt(e.shift_date.split("-")[2], 10),
+        m: computeMetrics(e, master, reasonCodes),
+      }));
+  }, [entries, selectedMonth, selectedPlantId, master, reasonCodes]);
+
+  // Daily plant series; days without any entry stay null so charts skip them
   const dailySeries = useMemo(() => {
-    const daysInMonth = 30;
-    const days = [];
-    const entriesByDay = {};
-
-    monthFilteredEntries.forEach((e) => {
-      if (!e.shift_date) return;
-      const parts = e.shift_date.split("-");
-      const d = parseInt(parts[2], 10);
-      if (!entriesByDay[d]) entriesByDay[d] = [];
-      entriesByDay[d].push(e);
+    const byDay = {};
+    let maxDataDay = 0;
+    monthRows.forEach((row) => {
+      if (!byDay[row.day]) byDay[row.day] = [];
+      byDay[row.day].push(row);
+      maxDataDay = Math.max(maxDataDay, row.day);
     });
 
-    const monthName = selectedMonth
-      ? new Date(`${selectedMonth}-01`).toLocaleString("en-US", { month: "short" })
-      : "Sep";
+    const lastDay = Math.min(monthInfo.daysInMonth, Math.max(monthInfo.lastProductionDay, maxDataDay));
+    const days = [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${selectedMonth}-${String(day).padStart(2, "0")}`;
-      const label = `${String(day).padStart(2, "0")}-${monthName}`;
+    for (let day = 1; day <= lastDay; day++) {
+      const label = `${String(day).padStart(2, "0")}-${monthInfo.monthName}`;
+      const rows = byDay[day] || [];
 
-      const dayEntries = entriesByDay[day] || [];
-      let okSum = 0;
-      let tgtSum = 0;
-      let rejSum = 0;
-      let plannedDtHoursSum = 0;
-      let unplannedDtHoursSum = 0;
-      let oeeList = [];
-      const activeMcs = new Set();
+      if (rows.length === 0) {
+        days.push({
+          day,
+          label,
+          prodK: null,
+          rejPct: null,
+          mc: null,
+          plannedDtHrs: null,
+          unplannedDtHrs: null,
+          defectPcs: null,
+        });
+        continue;
+      }
 
-      dayEntries.forEach((e) => {
-        const m = computeMetrics(e, master, reasonCodes);
-        okSum += Number(e.ok_prod) || 0;
-        tgtSum += Number(m.tgt) || 0;
-        rejSum += Number(m.total_rej) || 0;
-        plannedDtHoursSum += Number(m.planned_dt) || 0;
-        unplannedDtHoursSum += Number(m.unplanned_dt) || 0;
-        if (m.oee > 0) oeeList.push(m.oee * 100);
-        if (Number(e.ok_prod) > 0 || (Number(m.planned_dt) || 0) + (Number(m.unplanned_dt) || 0) > 0) {
-          activeMcs.add(e.machine_id);
+      const agg = emptyAgg();
+      const runningMcs = new Set();
+      rows.forEach(({ entry, m }) => {
+        addToAgg(agg, m);
+        if ((Number(m.ok_prod) || 0) > 0 || (Number(m.net_run_time) || 0) > 0) {
+          runningMcs.add(entry.machine_id);
         }
       });
 
-      const avgOee = oeeList.length ? oeeList.reduce((a, b) => a + b, 0) / oeeList.length : 0;
-      const totalPcs = okSum + rejSum;
-      const rejPct = totalPcs > 0 ? (rejSum / totalPcs) * 100 : 0;
+      const produced = agg.ok + agg.rej;
 
       days.push({
         day,
-        dateStr,
         label,
-        prodK: Number((okSum / 1000).toFixed(1)),
-        oee: Number(avgOee.toFixed(1)),
-        rejPct: Number(rejPct.toFixed(1)),
-        mc: activeMcs.size,
-        plannedDtHrs: Number(plannedDtHoursSum.toFixed(1)),
-        unplannedDtHrs: Number(unplannedDtHoursSum.toFixed(1)),
-        defectPcs: rejSum,
+        prodK: round1(agg.ok / 1000),
+        rejPct: produced > 0 ? Number(((agg.rej / produced) * 100).toFixed(2)) : 0,
+        mc: runningMcs.size,
+        plannedDtHrs: round1(agg.plannedDt),
+        unplannedDtHrs: round1(agg.unplannedDt),
+        defectPcs: agg.rej,
       });
     }
 
     return days;
-  }, [monthFilteredEntries, selectedMonth, master, reasonCodes]);
+  }, [monthRows, monthInfo]);
 
-  // Dynamic Defect Breakdown (reads real rejections from entry.reasons, runs.reasons, and entry.rejections)
+  // Month summary for the KPI strip
+  const monthKpis = useMemo(() => {
+    const agg = emptyAgg();
+    const runningMcs = new Set();
+    monthRows.forEach(({ entry, m }) => {
+      addToAgg(agg, m);
+      if ((Number(m.ok_prod) || 0) > 0 || (Number(m.net_run_time) || 0) > 0) {
+        runningMcs.add(entry.machine_id);
+      }
+    });
+    const produced = agg.ok + agg.rej;
+    const k = oeeFromAgg(agg);
+    return {
+      target: agg.tgt,
+      production: agg.ok,
+      prodVsPlan: agg.tgt > 0 ? (agg.ok / agg.tgt) * 100 : null,
+      oee: k ? k.oee : null,
+      rejPct: produced > 0 ? (agg.rej / produced) * 100 : null,
+      activeMc: runningMcs.size,
+    };
+  }, [monthRows]);
+
+  // Rejection reasons, read from the same place computeMetrics reads them so totals match
   const paretoData = useMemo(() => {
     const defectCounts = {};
     let totalDefects = 0;
 
     const processReasons = (reasonsObj) => {
       if (!reasonsObj) return;
-      const normalized = normalizeReasonsMap(reasonsObj);
-      Object.entries(normalized).forEach(([reason_id, val]) => {
+      Object.entries(normalizeReasonsMap(reasonsObj)).forEach(([reason_id, val]) => {
         const num = Number(val) || 0;
         if (num <= 0) return;
         const rc = reasonCodes.find((r) => r.reason_id === reason_id || r.code === reason_id);
         const isRejection = rc ? rc.category === "rejection" : reason_id.startsWith("rej_");
-        if (isRejection) {
-          const name = rc?.name || rc?.reason_name || reason_id.replace(/^rej_/, "").replace(/_/g, " ").toUpperCase();
-          defectCounts[name] = (defectCounts[name] || 0) + num;
-          totalDefects += num;
-        }
+        if (!isRejection) return;
+        const name = rc?.name || rc?.reason_name || reason_id.replace(/^rej_/, "").replace(/_/g, " ").toUpperCase();
+        defectCounts[name] = (defectCounts[name] || 0) + num;
+        totalDefects += num;
       });
     };
 
-    monthFilteredEntries.forEach((e) => {
-      // 1. Check entry level reasons
-      if (e.reasons) processReasons(e.reasons);
-      // 2. Check entry level rejections
-      if (e.rejections) processReasons(e.rejections);
-      // 3. Check runs array
-      if (e.runs && Array.isArray(e.runs)) {
-        e.runs.forEach((r) => {
-          if (r.reasons) processReasons(r.reasons);
-          if (r.rejections) processReasons(r.rejections);
-        });
+    monthRows.forEach(({ entry }) => {
+      if (Array.isArray(entry.runs) && entry.runs.length > 1) {
+        entry.runs.forEach((r) => processReasons(r.reasons));
+      } else {
+        processReasons(entry.reasons);
       }
     });
 
-    if (totalDefects > 0) {
-      const sorted = Object.entries(defectCounts)
-        .map(([defect, count]) => ({ defect, count }))
-        .sort((a, b) => b.count - a.count);
+    if (totalDefects === 0) return [];
 
-      let runningSum = 0;
-      return sorted.map((item) => {
+    let runningSum = 0;
+    return Object.entries(defectCounts)
+      .map(([defect, count]) => ({ defect, count }))
+      .sort((a, b) => b.count - a.count)
+      .map((item) => {
         runningSum += item.count;
-        return {
-          ...item,
-          cumPct: Math.round((runningSum / totalDefects) * 100),
-        };
+        return { ...item, cumPct: Math.round((runningSum / totalDefects) * 100) };
       });
-    }
+  }, [monthRows, reasonCodes]);
 
-    return [];
-  }, [monthFilteredEntries, reasonCodes]);
+  // Machine × Day OEE matrix, combining all shifts of a machine on a day
+  const { matrixData, plantRow } = useMemo(() => {
+    const perMachine = new Map();
+    const plantDays = {};
+    const plantMonth = emptyAgg();
 
-  // Machine OEE Matrix Data
-  const matrixData = useMemo(() => {
-    // If entries exist for machines, calculate dynamically
-    if (monthFilteredEntries.length > 5) {
-      const plantMachines = machines.filter(
-        (m) => !selectedPlantId || selectedPlantId === "all" || m.plant_id === selectedPlantId
-      );
-      const rows = [];
-      const mcsToRender = plantMachines.length > 0 ? plantMachines : machines.slice(0, 15);
+    monthRows.forEach(({ entry, day, m }) => {
+      const id = entry.machine_id;
+      if (!perMachine.has(id)) perMachine.set(id, { month: emptyAgg(), days: {} });
+      const rec = perMachine.get(id);
+      if (!rec.days[day]) rec.days[day] = emptyAgg();
+      addToAgg(rec.days[day], m);
+      addToAgg(rec.month, m);
 
-      mcsToRender.forEach((m) => {
-        const mcLabel = m.machine_no ? (m.machine_no.startsWith("M/C") ? m.machine_no : `M/C: ${m.machine_no}`) : `M/C: ${m.machine_id}`;
-        const dayOeeMap = {};
-        let sumOee = 0;
-        let countDays = 0;
+      if (!plantDays[day]) plantDays[day] = emptyAgg();
+      addToAgg(plantDays[day], m);
+      addToAgg(plantMonth, m);
+    });
 
-        monthFilteredEntries.forEach((e) => {
-          if (e.machine_id === m.machine_id) {
-            const d = parseInt(e.shift_date.split("-")[2], 10);
-            const res = computeMetrics(e, master, reasonCodes);
-            const val = Number((res.oee * 100).toFixed(1));
-            if (val > 0) {
-              dayOeeMap[d] = val;
-              sumOee += val;
-              countDays++;
-            }
-          }
-        });
+    const machineOrder = machines.map((mc) => mc.machine_id);
+    const ids = [...perMachine.keys()].sort((a, b) => {
+      const ia = machineOrder.indexOf(a);
+      const ib = machineOrder.indexOf(b);
+      if (ia === -1 && ib === -1) return String(a).localeCompare(String(b));
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
 
-        const avg = countDays > 0 ? Number((sumOee / countDays).toFixed(1)) : 0;
-        rows.push({
-          mc: mcLabel,
-          avg,
-          days: dayOeeMap,
-        });
+    const rows = ids.map((id) => {
+      const rec = perMachine.get(id);
+      const days = {};
+      Object.entries(rec.days).forEach(([d, agg]) => {
+        const k = oeeFromAgg(agg);
+        if (k) days[d] = round1(k.oee);
       });
+      const monthK = oeeFromAgg(rec.month);
+      return {
+        machineId: id,
+        mc: machineLabel(machines.find((mc) => mc.machine_id === id), id),
+        avg: monthK ? round1(monthK.oee) : null,
+        days,
+      };
+    });
 
-      return rows;
-    }
+    const pDays = {};
+    Object.entries(plantDays).forEach(([d, agg]) => {
+      const k = oeeFromAgg(agg);
+      if (k) pDays[d] = round1(k.oee);
+    });
+    const pMonth = oeeFromAgg(plantMonth);
 
-    // Default to benchmark matrix matching screenshot media_1790304849077.png for September 2026
-    return BENCHMARK_MC_OEE_MATRIX;
-  }, [monthFilteredEntries, machines, selectedPlantId, master, reasonCodes]);
+    return {
+      matrixData: rows,
+      plantRow: rows.length > 0 ? { avg: pMonth ? round1(pMonth.oee) : null, days: pDays } : null,
+    };
+  }, [monthRows, machines]);
 
   return (
     <div className="mis-dashboard-container">
-      {/* 1. Sleek Tab Navigation Strip (Only Monthly MIS for Operator, 2 Tabs for Supervisor/Admin) */}
+      {/* Tab Navigation Strip (Only Monthly MIS for Operator, 2 Tabs for Supervisor/Admin) */}
       <div className="ms-tab-bar">
         <div className="ms-tab-group">
           {TABS.map((t) => (
@@ -689,13 +823,21 @@ export default function MoldsenseDashboard({
         </div>
       </div>
 
-      {/* 2. Monthly MIS Tab: Pure 6 Graphs Grid (No KPI Cards, Fully Functional) */}
+      {/* Monthly MIS Tab: KPI strip + 3x2 Graphs Grid */}
       {currentTab === "Monthly MIS" && (
-        <div className="ms-content-area" style={{ marginTop: "14px" }}>
+        <div className="ms-content-area">
+          <div className="ms-kpi-grid">
+            <KpiCard color="#2563eb" label="Target" value={formatCount(monthKpis.target)} />
+            <KpiCard color="#16a34a" label="Production" value={formatCount(monthKpis.production)} />
+            <KpiCard color="#2563eb" label="Prod vs Plan" value={formatPct(monthKpis.prodVsPlan)} />
+            <KpiCard color="#16a34a" label="OEE (Average)" value={formatPct(monthKpis.oee)} />
+            <KpiCard color="#dc2626" label="Rejection %" value={formatPct(monthKpis.rejPct)} />
+            <KpiCard color="#9333ea" label="Active MC" value={monthKpis.activeMc} />
+          </div>
+
           <div className="ms-charts-grid">
-            {/* Graph 1: Production Quantity */}
             <MetricAreaChart
-              title="PRODUCTION QUANTITY (K PCS)"
+              title="PROD QTY (K)"
               color="#2563eb"
               data={dailySeries}
               dataKey="prodK"
@@ -705,34 +847,6 @@ export default function MoldsenseDashboard({
               showLabelThreshold={0.4}
             />
 
-            {/* Graph 2: Rejection % */}
-            <MetricAreaChart
-              title="REJECTION RATE (%)"
-              color="#dc2626"
-              data={dailySeries}
-              dataKey="rejPct"
-              defaultYMax={1.0}
-              defaultYTicks={[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
-              isPercent={true}
-              decimals={1}
-              unit="%"
-              showLabelThreshold={0.05}
-            />
-
-            {/* Graph 3: Active Machines */}
-            <MetricAreaChart
-              title="ACTIVE MACHINES"
-              color="#9333ea"
-              data={dailySeries}
-              dataKey="mc"
-              defaultYMax={15}
-              defaultYTicks={[0, 5, 10, 15]}
-              decimals={0}
-              unit=" mc"
-              showLabelThreshold={1}
-            />
-
-            {/* Graph 4: Planned Downtime */}
             <MetricAreaChart
               title="PLANNED DOWNTIME (HRS)"
               color="#0284c7"
@@ -745,7 +859,31 @@ export default function MoldsenseDashboard({
               showLabelThreshold={1.0}
             />
 
-            {/* Graph 5: Unplanned Downtime */}
+            <MetricAreaChart
+              title="REJECTION (%)"
+              color="#dc2626"
+              data={dailySeries}
+              dataKey="rejPct"
+              defaultYMax={1.0}
+              defaultYTicks={[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
+              isPercent={true}
+              decimals={2}
+              unit="%"
+              showLabelThreshold={0.05}
+            />
+
+            <MetricAreaChart
+              title="ACTIVE MACHINES"
+              color="#9333ea"
+              data={dailySeries}
+              dataKey="mc"
+              defaultYMax={15}
+              defaultYTicks={[0, 5, 10, 15]}
+              decimals={0}
+              unit=" mc"
+              showLabelThreshold={0}
+            />
+
             <MetricAreaChart
               title="UNPLANNED DOWNTIME (HRS)"
               color="#ea580c"
@@ -758,15 +896,14 @@ export default function MoldsenseDashboard({
               showLabelThreshold={1.0}
             />
 
-            {/* Graph 6: Defective Parts Trend */}
-            <DefectivePartsChart dailyData={dailySeries} paretoData={paretoData} />
+            <DefectsParetoChart paretoData={paretoData} />
           </div>
         </div>
       )}
 
-      {/* 3. Daily OEE Matrix Tab: Machine × Day Heatmap (Strictly blocked for Operator) */}
+      {/* Daily OEE Matrix Tab: Machine × Day Heatmap (Strictly blocked for Operator) */}
       {!isOperator && currentTab === "Daily OEE Matrix" && (
-        <DailyOeeMatrixView matrixData={matrixData} selectedMonth={selectedMonth} />
+        <DailyOeeMatrixView matrixData={matrixData} plantRow={plantRow} monthInfo={monthInfo} />
       )}
     </div>
   );

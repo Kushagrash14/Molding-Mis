@@ -73,9 +73,9 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     let total_consumption = 0;
     let tool_change_count = 0;
     let total_ok = 0;
-    let total_run_hour = 0;
+    let net_run_time = 0;
+    let available_hours = 0;
 
-    let total_planned_hours = 0;
     entry.runs.forEach((r) => {
       let rMaster = null;
       if (Array.isArray(master)) {
@@ -100,17 +100,13 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
       total_consumption += rm.total_consumption || 0;
       tool_change_count += rm.tool_change_count || 0;
       total_ok += Number(r.ok_prod) || 0;
-      total_run_hour += Number(r.run_hour) || 0;
-      total_planned_hours += Number(r.planned_hours) || Number(r.run_hour) || 0;
+      net_run_time += rm.net_run_time || 0;
+      available_hours += rm.available_hours || 0;
     });
 
-    const planned_base = total_planned_hours || Number(entry.planned_hours) || 12;
-    const run_hour = entry.run_hour !== undefined && entry.run_hour !== "" ? Number(entry.run_hour) : total_run_hour;
     const total_produced = total_ok + total_rej;
     const quality_rate = total_produced > 0 ? total_ok / total_produced : 0;
-    const denomAvail = Math.max(0, planned_base - planned_dt);
-    const numAvail = Math.max(0, Math.min(run_hour, planned_base) - unplanned_dt);
-    const availability = denomAvail > 0 ? Math.min(1, Math.max(0, numAvail / denomAvail)) : 0;
+    const availability = available_hours > 0 ? Math.min(1, net_run_time / available_hours) : 0;
     const productivity = tgt > 0 ? total_produced / tgt : 0;
     const oee = quality_rate * availability * productivity;
 
@@ -120,6 +116,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
       planned_dt,
       unplanned_dt,
       tgt,
+      net_run_time,
+      available_hours,
       quality_rate,
       availability,
       productivity,
@@ -173,8 +171,10 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const running_cavity = Number(entry.running_cavity) || 0;
   const ok_prod = Number(entry.ok_prod) || 0;
 
-  // Target & Metric aggregations
-  const net_run_time = Math.max(0, run_hour - planned_dt - unplanned_dt);
+  // Run hours are saved already net of downtime by the entry form; older or manually
+  // edited rows may still hold gross hours, so cap at the downtime-adjusted maximum.
+  const available_hours = Math.max(0, planned_base - planned_dt);
+  const net_run_time = Math.max(0, Math.min(run_hour, available_hours - unplanned_dt));
   const shotsPerHour = Number(itemMaster?.shots_per_hour || entry.shots_per_hour || 0);
 
   let tgt = 0;
@@ -247,10 +247,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   const total_produced = ok_prod + total_rej;
   const quality_rate = total_produced > 0 ? ok_prod / total_produced : 0;
 
-  // Col BA: Availability = (Actual Run Hours - Unplanned DT) / (Planned Base Hours - Planned DT)
-  const denomAvail = Math.max(0, planned_base - planned_dt);
-  const numAvail = Math.max(0, Math.min(run_hour, planned_base) - unplanned_dt);
-  const availability = denomAvail > 0 ? Math.min(1, Math.max(0, numAvail / denomAvail)) : 0;
+  // Col BA: Availability = Net Run Hours / (Planned Base Hours - Planned DT)
+  const availability = available_hours > 0 ? Math.min(1, net_run_time / available_hours) : 0;
 
   // Col BB: Productivity (Performance) = (OK Prod + Total Rej) / TGT
   const productivity = tgt > 0 ? total_produced / tgt : 0;
@@ -271,6 +269,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     planned_dt,
     unplanned_dt,
     tgt,
+    net_run_time,
+    available_hours,
     quality_rate,
     availability,
     productivity,

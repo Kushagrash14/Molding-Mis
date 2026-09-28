@@ -4816,8 +4816,17 @@ tbody tr:last-child td {
 .mis-dashboard-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.mis-dashboard-container .ms-content-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .mis-filter-bar {
@@ -4963,18 +4972,18 @@ tbody tr:last-child td {
   border-radius: 2px 2px 0 0;
 }
 
-/* 3. 8 KPI Cards Grid */
+/* 3. 6 KPI Cards Grid */
 .ms-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 12px;
-  margin-top: 14px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1100px) {
   .ms-kpi-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -4985,35 +4994,48 @@ tbody tr:last-child td {
 }
 
 .ms-kpi-card {
+  position: relative;
+  overflow: hidden;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-top-width: 3.5px;
+  border-top-width: 3px;
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 12px 10px 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 80px;
+  min-height: 66px;
+}
+
+.ms-kpi-deco {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  opacity: 0.07;
+  pointer-events: none;
 }
 
 .ms-kpi-val {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 19px;
+  font-weight: 700;
   color: #0f172a;
-  font-family: system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.3px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.2px;
   line-height: 1.2;
 }
 
 .ms-kpi-lbl {
-  font-size: 10.5px;
-  font-weight: 800;
+  font-size: 9px;
+  font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   margin-top: 4px;
 }
 
@@ -5027,7 +5049,10 @@ tbody tr:last-child td {
 .ms-charts-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-auto-rows: minmax(220px, 1fr);
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
 }
 
 @media (max-width: 1200px) {
@@ -5046,10 +5071,11 @@ tbody tr:last-child td {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px 16px 12px;
+  padding: 10px 12px 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .ms-graph-header {
@@ -5067,8 +5093,9 @@ tbody tr:last-child td {
 }
 
 .ms-graph-title {
-  font-size: 11.5px;
-  font-weight: 800;
+  font-size: 10px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-weight: 700;
   color: #1e293b;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -5102,10 +5129,13 @@ tbody tr:last-child td {
 .ms-graph-svg-wrap {
   position: relative;
   width: 100%;
-  height: 210px;
+  flex: 1;
+  min-height: 170px;
 }
 
 .ms-graph-svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -5113,18 +5143,19 @@ tbody tr:last-child td {
 
 .ms-axis-tick {
   font-size: 9px;
-  fill: #94a3b8;
+  fill: #64748b;
   font-weight: 500;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
 }
 
 .ms-axis-tick.x-tick {
   font-size: 8.5px;
-  fill: #64748b;
+  fill: #475569;
   font-weight: 600;
 }
 
 .ms-point-label {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   pointer-events: none;
   text-shadow: 0 1px 2px #ffffff;
 }
@@ -5164,21 +5195,25 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Daily MC OEE — Machine x Day Matrix View (Matching Screenshot media_1790304849077.png)
+   Daily MC OEE — Machine x Day Matrix View
    ========================================================================== */
 
 .ms-matrix-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 14px;
+  flex: 1;
+  min-height: 0;
 }
 
 .ms-matrix-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -5187,16 +5222,29 @@ tbody tr:last-child td {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .ms-matrix-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 12px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ms-matrix-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .ms-matrix-legend {
@@ -5207,12 +5255,13 @@ tbody tr:last-child td {
 }
 
 .ms-legend-pill {
-  font-size: 11px;
+  font-size: 10px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 4px;
   white-space: nowrap;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
 .ms-legend-pill.p-110 {
@@ -5241,7 +5290,9 @@ tbody tr:last-child td {
 }
 
 .ms-matrix-table-wrap {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #ffffff;
@@ -5249,93 +5300,155 @@ tbody tr:last-child td {
 
 .ms-matrix-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 11px;
   text-align: center;
-  min-width: 950px;
+  min-width: 1100px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
 }
 
-.ms-matrix-table th {
-  padding: 8px 4px;
+/* Header: sticks to the top while scrolling machines */
+.ms-matrix-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 6px 2px;
   background: #f8fafc;
   color: #64748b;
   font-weight: 700;
   font-size: 10px;
-  border-bottom: 1.5px solid #e2e8f0;
-  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
+}
+
+.ms-matrix-table th.th-day {
+  min-width: 46px;
+}
+
+.ms-matrix-table th .th-day-num {
+  display: block;
+  font-size: 11px;
+  color: #1e293b;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ms-matrix-table th .th-day-wk {
+  display: block;
+  font-size: 8.5px;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ms-matrix-table th.th-mc-list,
+.ms-matrix-table th.th-avg-oee {
+  z-index: 4;
+  color: #0f172a;
+  font-weight: 800;
+  letter-spacing: 0.4px;
 }
 
 .ms-matrix-table th.th-mc-list {
+  left: 0;
+  width: 96px;
+  min-width: 96px;
   text-align: left;
   padding-left: 12px;
-  width: 90px;
-  min-width: 90px;
-  background: #f8fafc;
-  color: #0f172a;
-  font-weight: 800;
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  box-shadow: 1px 0 0 #e2e8f0;
 }
 
 .ms-matrix-table th.th-avg-oee {
-  background: #fed7aa;
-  color: #9a3412;
-  font-weight: 800;
-  width: 75px;
-  min-width: 75px;
-  position: sticky;
-  left: 90px;
-  z-index: 2;
-  box-shadow: 1px 0 0 #e2e8f0;
+  left: 96px;
+  width: 78px;
+  min-width: 78px;
+  box-shadow: inset -1px 0 0 #e2e8f0;
 }
 
 .ms-matrix-table td {
-  padding: 6px 3px;
+  padding: 4px 3px;
   border-bottom: 1px solid #f1f5f9;
-  border-right: 1px solid #f8fafc;
-  height: 32px;
+  height: 30px;
+  background: #ffffff;
 }
 
+/* Sticky first two columns */
 .ms-matrix-table td.td-mc-name {
-  text-align: left;
-  padding-left: 12px;
-  font-weight: 800;
-  color: #0f172a;
-  background: #ffffff;
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 2;
+  text-align: left;
+  padding-left: 12px;
+  font-weight: 700;
+  color: #0f172a;
   white-space: nowrap;
-  box-shadow: 1px 0 0 #e2e8f0;
 }
 
 .ms-matrix-table td.td-avg-oee {
-  background: #ffedd5;
-  color: #c2410c;
-  font-weight: 800;
   position: sticky;
-  left: 90px;
-  z-index: 1;
-  box-shadow: 1px 0 0 #e2e8f0;
-  font-size: 11.5px;
+  left: 96px;
+  z-index: 2;
+  box-shadow: inset -1px 0 0 #e2e8f0;
 }
 
-.ms-matrix-table td.td-day-cell {
-  background: #ffffff;
+/* Sundays and today */
+.ms-matrix-table th.is-sun,
+.ms-matrix-table td.is-sun {
+  background: #f8fafc;
+}
+
+.ms-matrix-table th.is-sun .th-day-wk {
+  color: #dc2626;
+}
+
+.ms-matrix-table th.is-today {
+  background: #dbeafe;
+}
+
+.ms-matrix-table th.is-today .th-day-num,
+.ms-matrix-table th.is-today .th-day-wk {
+  color: #1d4ed8;
+}
+
+.ms-matrix-table td.is-today {
+  background: #eff6ff;
+}
+
+/* Row hover */
+.ms-matrix-table tbody tr:hover td {
+  background: #f1f5f9;
+}
+
+/* Plant total row: sticks to the bottom */
+.ms-matrix-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: #f8fafc;
+  border-top: 1.5px solid #cbd5e1;
+  border-bottom: none;
+  font-weight: 800;
+}
+
+.ms-matrix-table tfoot td.td-mc-name,
+.ms-matrix-table tfoot td.td-avg-oee {
+  z-index: 3;
 }
 
 .ms-oee-badge {
   display: inline-block;
-  padding: 3px 5px;
-  border-radius: 3px;
+  padding: 3px 4px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 10px;
-  width: 44px;
+  min-width: 42px;
   text-align: center;
   letter-spacing: -0.2px;
+}
+
+.ms-oee-empty {
+  color: #cbd5e1;
 }
 
 .ms-matrix-chart-card {
