@@ -437,14 +437,14 @@ export default function MachineSheetRow({
                   >
                     {(m.oee * 100 || 0).toFixed(0)}%
                   </span>
-                  <span
-                    className="oee-sub"
-                    style={Number(r.ok_prod) === 0 ? { color: "#b91c1c" } : {}}
-                  >
-                    {Number(r.ok_prod) === 0
-                      ? "Full Shift DT"
-                      : `A:${((m.availability || 0) * 100).toFixed(0)}% · P:${((m.productivity || 0) * 100).toFixed(0)}%`}
-                  </span>
+                  {Number(r.ok_prod) === 0 && (
+                    <span
+                      className="oee-sub"
+                      style={{ color: "#b91c1c" }}
+                    >
+                      Full Shift DT
+                    </span>
+                  )}
                 </div>
               ) : (
                 <span className="empty-dash">—</span>

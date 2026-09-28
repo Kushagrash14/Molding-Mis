@@ -66,32 +66,38 @@ export default function MetricsPreview({
             </span>
           </div>
           <div className="oee-hero-value">{pct(m.oee)}</div>
-          <div className="oee-formula-badge">
-            OEE = {pct(m.availability)} (A) × {pct(m.productivity)} (P) × {pct(m.quality_rate)} (Q)
-          </div>
+          {showTargetAndLoss && (
+            <div className="oee-formula-badge">
+              OEE = {pct(m.availability)} (A) × {pct(m.productivity)} (P) × {pct(m.quality_rate)} (Q)
+            </div>
+          )}
         </div>
 
         {/* Pillar 1: Availability */}
-        <div className="oee-pillar-box">
-          <div className="pillar-header">
-            <span className="pillar-dot blue"></span>
-            <span className="pillar-name">AVAILABILITY (BA)</span>
+        {showTargetAndLoss && (
+          <div className="oee-pillar-box">
+            <div className="pillar-header">
+              <span className="pillar-dot blue"></span>
+              <span className="pillar-name">AVAILABILITY (BA)</span>
+            </div>
+            <div className="pillar-val">{pct(m.availability)}</div>
+            <div className="pillar-sub">
+              DT: {((m.planned_dt + m.unplanned_dt) * 60).toFixed(0)}m loss
+            </div>
           </div>
-          <div className="pillar-val">{pct(m.availability)}</div>
-          <div className="pillar-sub">
-            DT: {((m.planned_dt + m.unplanned_dt) * 60).toFixed(0)}m loss
-          </div>
-        </div>
+        )}
 
         {/* Pillar 2: Performance */}
-        <div className="oee-pillar-box">
-          <div className="pillar-header">
-            <span className="pillar-dot purple"></span>
-            <span className="pillar-name">PERFORMANCE (BB)</span>
+        {showTargetAndLoss && (
+          <div className="oee-pillar-box">
+            <div className="pillar-header">
+              <span className="pillar-dot purple"></span>
+              <span className="pillar-name">PERFORMANCE (BB)</span>
+            </div>
+            <div className="pillar-val">{pct(m.productivity)}</div>
+            <div className="pillar-sub">Speed &amp; Cavity rate</div>
           </div>
-          <div className="pillar-val">{pct(m.productivity)}</div>
-          <div className="pillar-sub">Speed &amp; Cavity rate</div>
-        </div>
+        )}
 
         {/* Pillar 3: Quality Rate */}
         <div className="oee-pillar-box">

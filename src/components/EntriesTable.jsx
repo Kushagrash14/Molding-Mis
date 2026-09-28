@@ -253,8 +253,8 @@ export default function EntriesTable({
               {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "right" }}>TGT</th>}
               <th style={{ width: "90px", minWidth: "90px", textAlign: "right" }}>OK Prod</th>
               <th style={{ width: "90px", minWidth: "90px", textAlign: "right" }}>Total Rej</th>
-              <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Avail</th>
-              <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }} title="Performance (BB)">Perf</th>
+              {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Avail</th>}
+              {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }} title="Performance (BB)">Perf</th>}
               <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Quality</th>
               <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>OEE</th>
               {viewerRole !== "operator" && <th style={{ width: "120px", minWidth: "110px", textAlign: "right" }}>Shortfall Loss</th>}
@@ -267,7 +267,7 @@ export default function EntriesTable({
             {sorted.length === 0 && (
               <tr className="empty-row">
                 <td
-                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 13 : 15}
+                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 11 : 15}
                   style={{ textAlign: "center", padding: "28px", color: "var(--ink-faint)" }}
                 >
                   No matching shift entries found.
@@ -384,8 +384,8 @@ export default function EntriesTable({
                   >
                     {metrics.total_rej}
                   </td>
-                  <td>{pct(metrics.availability)}</td>
-                  <td>{pct(metrics.productivity)}</td>
+                  {viewerRole !== "operator" && <td>{pct(metrics.availability)}</td>}
+                  {viewerRole !== "operator" && <td>{pct(metrics.productivity)}</td>}
                   <td>{pct(metrics.quality_rate)}</td>
                   <td>
                     <span
