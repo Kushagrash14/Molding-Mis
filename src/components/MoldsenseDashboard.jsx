@@ -493,7 +493,7 @@ function getOeeCellStyle(val) {
 
 function OeeBadge({ value }) {
   const style = getOeeCellStyle(value);
-  if (!style) return null;
+  if (!style) return <span className="ms-oee-blank" />;
   return (
     <span className="ms-oee-badge" style={{ backgroundColor: style.bg, color: style.color }}>
       {Number(value).toFixed(1)}%
@@ -521,7 +521,17 @@ function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
     <div className="ms-matrix-container">
       <div className="card ms-matrix-card">
         <div className="ms-matrix-header-row">
-          <h3 className="ms-matrix-title">Daily MC OEE — Machine × Day Matrix</h3>
+          <div>
+            <h3 className="ms-matrix-title">Daily MC OEE — Machine × Day Matrix</h3>
+            <div className="ms-matrix-meta">
+              {monthInfo.monthName} {monthInfo.year} · {matrixData.length} machines
+              {plantRow?.avg != null && (
+                <>
+                  {" "}· Plant OEE <strong>{plantRow.avg.toFixed(1)}%</strong>
+                </>
+              )}
+            </div>
+          </div>
           <div className="ms-matrix-legend">
             <span className="ms-legend-pill p-110">■ &gt;110%</span>
             <span className="ms-legend-pill p-100">■ &gt;100%</span>
@@ -540,8 +550,8 @@ function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
             <table className="ms-matrix-table">
               <thead>
                 <tr>
-                  <th className="th-mc-list">M/C LIST</th>
-                  <th className="th-avg-oee">MONTH OEE</th>
+                  <th className="th-mc-list">MACHINE</th>
+                  <th className="th-avg-oee">MONTH</th>
                   {daysList.map((d) => (
                     <th key={d.day} className={`th-day ${dayClass(d)}`}>
                       <span className="th-day-num">{String(d.day).padStart(2, "0")}</span>
@@ -553,7 +563,10 @@ function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
               <tbody>
                 {matrixData.map((row) => (
                   <tr key={row.machineId}>
-                    <td className="td-mc-name">{row.mc}</td>
+                    <td className="td-mc-name" title={row.mc.detail ? `${row.mc.name} (${row.mc.detail})` : row.mc.name}>
+                      <span className="mc-name">{row.mc.name}</span>
+                      {row.mc.detail && <span className="mc-detail">{row.mc.detail}</span>}
+                    </td>
                     <td className="td-avg-oee">
                       {row.avg !== null ? <OeeBadge value={row.avg} /> : <span className="ms-oee-empty">—</span>}
                     </td>
@@ -568,7 +581,10 @@ function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
               {plantRow && (
                 <tfoot>
                   <tr>
-                    <td className="td-mc-name">PLANT</td>
+                    <td className="td-mc-name">
+                      <span className="mc-name">PLANT</span>
+                      <span className="mc-detail">All machines</span>
+                    </td>
                     <td className="td-avg-oee">
                       {plantRow.avg !== null ? <OeeBadge value={plantRow.avg} /> : <span className="ms-oee-empty">—</span>}
                     </td>
@@ -588,10 +604,11 @@ function DailyOeeMatrixView({ matrixData = [], plantRow = null, monthInfo }) {
   );
 }
 
+// "INJ-01 (700 TON · BAY-2)" -> { name: "INJ-01", detail: "700 TON · BAY-2" }
 function machineLabel(machine, machineId) {
-  const no = machine?.machine_no;
-  if (no) return String(no).startsWith("M/C") ? no : `M/C: ${no}`;
-  return `M/C: ${machineId}`;
+  const raw = String(machine?.machine_no || machineId).replace(/^M\/C:?\s*/i, "");
+  const match = raw.match(/^(.*?)\s*\((.*)\)\s*$/);
+  return match ? { name: match[1], detail: match[2] } : { name: raw, detail: "" };
 }
 
 export default function MoldsenseDashboard({
