@@ -639,8 +639,8 @@ export default function App() {
           )}
 
           {tab === "browse" && (
-            <div>
-              <div className="page-head">
+            <div className="entries-workspace-wrapper">
+              <div className="page-head" style={{ marginBottom: "10px" }}>
                 <div>
                   <h2>Plant Entries Register</h2>
                   <p>Supervisor floor view — real-time monitoring across all machines and shifts.</p>
@@ -661,15 +661,15 @@ export default function App() {
           )}
 
           {tab === "all" && (
-            <div>
-              <div className="page-head">
+            <div className="entries-workspace-wrapper">
+              <div className="page-head" style={{ marginBottom: "10px" }}>
                 <div>
                   <h2>Master Shift Entries Register</h2>
                   <p>Plant Admin view — Full override and edit access with silent audit logging.</p>
                 </div>
               </div>
               {authorizedEntries.filter((e) => e.status === "locked").length === 0 && authorizedEntries.length > 0 && (
-                <div className="banner">
+                <div className="banner" style={{ marginBottom: "10px" }}>
                   <strong>Tip —</strong> entries automatically lock once their shift date is past
                   cutoff. Use &quot;Shift Cutoff Lock&quot; in the top bar to force-check now.
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { computeMetrics, pct, inr, isEntryPastTwelveHours } from "../lib/calculations.js";
 import { exportProductionToExcel, exportProductionToCSV } from "../lib/excelExport.js";
 import Pill from "./Pill.jsx";
@@ -21,6 +21,13 @@ export default function EntriesTable({
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+
+  const tableScrollRef = useRef(null);
+  useEffect(() => {
+    if (tableScrollRef.current) {
+      tableScrollRef.current.scrollTop = 0;
+    }
+  }, [filterPlant, searchTerm]);
 
   const list = scopeToUser ? entries.filter((e) => e.entered_by === scopeToUser) : entries;
 
@@ -234,26 +241,26 @@ export default function EntriesTable({
         </div>
       </div>
 
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap master-table-wrap" ref={tableScrollRef}>
+        <table style={{ minWidth: "1360px" }}>
           <thead>
             <tr>
-              <th>Plant</th>
-              <th>Date</th>
-              <th>Shift</th>
-              <th>Machine</th>
-              <th>SAP Code</th>
-              {viewerRole !== "operator" && <th>TGT</th>}
-              <th>OK Prod</th>
-              <th>Total Rej</th>
-              <th>Avail</th>
-              <th title="Performance (BB)">Perf</th>
-              <th>Quality</th>
-              <th>OEE</th>
-              {viewerRole !== "operator" && <th>Shortfall Loss</th>}
-              <th>Status</th>
-              {viewerRole === "admin" && <th>Entered By</th>}
-              <th>Action</th>
+              <th style={{ width: "130px", minWidth: "130px", textAlign: "center" }}>Plant</th>
+              <th style={{ width: "100px", minWidth: "100px" }}>Date</th>
+              <th style={{ width: "85px", minWidth: "85px" }}>Shift</th>
+              <th style={{ minWidth: "140px" }}>Machine</th>
+              <th style={{ width: "130px", minWidth: "120px" }}>SAP Code</th>
+              {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "right" }}>TGT</th>}
+              <th style={{ width: "90px", minWidth: "90px", textAlign: "right" }}>OK Prod</th>
+              <th style={{ width: "90px", minWidth: "90px", textAlign: "right" }}>Total Rej</th>
+              <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Avail</th>
+              <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }} title="Performance (BB)">Perf</th>
+              <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Quality</th>
+              <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>OEE</th>
+              {viewerRole !== "operator" && <th style={{ width: "120px", minWidth: "110px", textAlign: "right" }}>Shortfall Loss</th>}
+              <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>Status</th>
+              {viewerRole === "admin" && <th style={{ width: "110px", minWidth: "100px" }}>Entered By</th>}
+              <th style={{ width: "100px", minWidth: "90px", textAlign: "center" }}>Action</th>
             </tr>
           </thead>
           <tbody>

@@ -5852,15 +5852,26 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Master Admin Frozen Headers & Sticky Columns
+   Master Admin & Entries Register Frozen Headers & Sticky Columns
    ========================================================================== */
 
-.master-management-wrapper .page-head {
-  margin-bottom: 12px;
+.master-management-wrapper .page-head,
+.entries-workspace-wrapper .page-head {
+  margin-bottom: 10px;
 }
 
-.master-management-wrapper .page-head h2 {
+.master-management-wrapper .page-head h2,
+.entries-workspace-wrapper .page-head h2 {
   font-size: 20px;
+}
+
+.entries-workspace-wrapper .banner {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+}
+
+.entries-workspace-wrapper .master-table-wrap {
+  max-height: max(340px, calc(100vh - 250px)) !important;
 }
 
 /* Master Table Card (Products with Docked Pagination) */
