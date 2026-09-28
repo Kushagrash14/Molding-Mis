@@ -5203,6 +5203,7 @@ tbody tr:last-child td {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 
 .ms-matrix-card {
@@ -5210,6 +5211,7 @@ tbody tr:last-child td {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -5234,6 +5236,17 @@ tbody tr:last-child td {
   margin: 0;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.ms-matrix-meta {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.ms-matrix-meta strong {
+  color: #0f172a;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
 }
 
 .ms-matrix-empty {
@@ -5300,11 +5313,12 @@ tbody tr:last-child td {
 
 .ms-matrix-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 11px;
   text-align: center;
-  min-width: 1100px;
+  min-width: 1340px;
   font-family: var(--font-mono, "IBM Plex Mono", monospace);
 }
 
@@ -5313,17 +5327,13 @@ tbody tr:last-child td {
   position: sticky;
   top: 0;
   z-index: 3;
-  padding: 6px 2px;
+  padding: 7px 2px 6px;
   background: #f8fafc;
   color: #64748b;
   font-weight: 700;
   font-size: 10px;
   border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
-}
-
-.ms-matrix-table th.th-day {
-  min-width: 46px;
 }
 
 .ms-matrix-table th .th-day-num {
@@ -5353,24 +5363,23 @@ tbody tr:last-child td {
 
 .ms-matrix-table th.th-mc-list {
   left: 0;
-  width: 96px;
-  min-width: 96px;
+  width: 150px;
   text-align: left;
   padding-left: 12px;
 }
 
 .ms-matrix-table th.th-avg-oee {
-  left: 96px;
-  width: 78px;
-  min-width: 78px;
+  left: 150px;
+  width: 76px;
   box-shadow: inset -1px 0 0 #e2e8f0;
 }
 
+/* Heatmap cells: each value fills its cell as a tile */
 .ms-matrix-table td {
-  padding: 4px 3px;
-  border-bottom: 1px solid #f1f5f9;
-  height: 30px;
+  padding: 2px;
+  height: 34px;
   background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 /* Sticky first two columns */
@@ -5379,17 +5388,44 @@ tbody tr:last-child td {
   left: 0;
   z-index: 2;
   text-align: left;
-  padding-left: 12px;
+  padding: 3px 8px 3px 12px;
+  overflow: hidden;
+}
+
+.ms-matrix-table .mc-name {
+  display: block;
+  font-size: 11.5px;
   font-weight: 700;
   color: #0f172a;
+  line-height: 1.25;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ms-matrix-table .mc-detail {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .ms-matrix-table td.td-avg-oee {
   position: sticky;
-  left: 96px;
+  left: 150px;
   z-index: 2;
+  padding: 2px 6px;
   box-shadow: inset -1px 0 0 #e2e8f0;
+}
+
+.ms-matrix-table td.td-avg-oee .ms-oee-badge {
+  font-size: 11px;
+  font-weight: 800;
 }
 
 /* Sundays and today */
@@ -5400,6 +5436,10 @@ tbody tr:last-child td {
 
 .ms-matrix-table th.is-sun .th-day-wk {
   color: #dc2626;
+}
+
+.ms-matrix-table td.is-sun .ms-oee-blank {
+  background: transparent;
 }
 
 .ms-matrix-table th.is-today {
@@ -5420,15 +5460,19 @@ tbody tr:last-child td {
   background: #f1f5f9;
 }
 
+.ms-matrix-table tbody tr:hover td.td-mc-name {
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+
 /* Plant total row: sticks to the bottom */
 .ms-matrix-table tfoot td {
   position: sticky;
   bottom: 0;
   z-index: 2;
+  height: 38px;
   background: #f8fafc;
-  border-top: 1.5px solid #cbd5e1;
+  border-top: 2px solid #cbd5e1;
   border-bottom: none;
-  font-weight: 800;
 }
 
 .ms-matrix-table tfoot td.td-mc-name,
@@ -5436,15 +5480,28 @@ tbody tr:last-child td {
   z-index: 3;
 }
 
-.ms-oee-badge {
-  display: inline-block;
-  padding: 3px 4px;
+.ms-matrix-table tfoot .ms-oee-badge {
+  font-weight: 800;
+}
+
+.ms-oee-badge,
+.ms-oee-blank {
+  display: block;
+  width: 100%;
+  height: 28px;
+  line-height: 28px;
   border-radius: 4px;
+}
+
+.ms-oee-badge {
   font-weight: 700;
   font-size: 10px;
-  min-width: 42px;
   text-align: center;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
+}
+
+.ms-oee-blank {
+  background: #f8fafc;
 }
 
 .ms-oee-empty {
