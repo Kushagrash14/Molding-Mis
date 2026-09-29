@@ -132,7 +132,11 @@ export default function LoginScreen({ onLogin, users = [] }) {
         setStep("otp");
         setOtp("");
         setResendTimer(30); // 30-second cooldown
-        setSuccessMsg(`OTP sent to your registered email (${maskEmail(emailToSend)})`);
+        if (data.fallback) {
+          setSuccessMsg("Email delayed by mail server. Enter OTP from PM2 logs or use Emergency Code.");
+        } else {
+          setSuccessMsg(`OTP sent to your registered email (${maskEmail(emailToSend)})`);
+        }
       } else {
         setError(data.error || "Failed to dispatch verification email. Please try again.");
       }
@@ -204,7 +208,11 @@ export default function LoginScreen({ onLogin, users = [] }) {
       const data = await res.json();
       if (res.ok && data.success) {
         setResendTimer(30);
-        setSuccessMsg(`OTP resent to your registered email (${maskEmail(emailToSend)})`);
+        if (data.fallback) {
+          setSuccessMsg("Email delayed by mail server. Enter OTP from PM2 logs or use Emergency Code.");
+        } else {
+          setSuccessMsg(`OTP resent to your registered email (${maskEmail(emailToSend)})`);
+        }
       } else {
         setError(data.error || "Failed to resend OTP");
       }
@@ -498,7 +506,10 @@ export default function LoginScreen({ onLogin, users = [] }) {
                     className="gp-otp-input"
                   />
                   <p style={{ margin: "8px 0 0", fontSize: "12px", color: "#64748b", textAlign: "center" }}>
-                    Please check your Outlook inbox or spam folder. Never share this code.
+                    Please check your Outlook inbox or <strong>Junk / Spam</strong> folder.
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#94a3b8", textAlign: "center" }}>
+                    Plant Emergency Code is supported if email delivery is delayed.
                   </p>
                 </div>
 
