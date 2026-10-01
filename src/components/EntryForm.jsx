@@ -47,6 +47,21 @@ function createDefaultRunForShift(shiftObj, id = "run-1") {
   };
 }
 
+// A mold run can only run inside its own time slot, so run hours are capped at
+// the slot's planned hours minus downtime logged on that run.
+function maxRunHourFor(run, reasonCodes, shiftHrs) {
+  const planned = Number(run.planned_hours) || shiftHrs;
+  const dtHrs = calculateTotalDowntimeMinutes(run.reasons, reasonCodes) / 60;
+  return Math.max(0, Number((planned - dtHrs).toFixed(1)));
+}
+
+function clampRunHour(run, value, reasonCodes, shiftHrs) {
+  if (value === "" || value === null || value === undefined) return value;
+  const num = Number(value);
+  if (isNaN(num)) return "";
+  return Math.min(Math.max(0, num), maxRunHourFor(run, reasonCodes, shiftHrs));
+}
+
 function convertSavedEntryToRuns(entry, shiftObj) {
   const shiftStart = shiftObj?.start_time || "07:00";
   const shiftEnd = shiftObj?.end_time || "19:00";
@@ -245,6 +260,7 @@ export default function EntryForm({
 
   // Update a single run within a machine's runs array
   const handleUpdateRun = useCallback((machineId, runIdx, fieldOrObj, val) => {
+    const shiftHrs = Number(selectedShift?.planned_hours || 12.0);
     setSheetData((prev) => {
       const curRuns = prev[machineId] || [createDefaultRunForShift(selectedShift)];
       const updatedRuns = curRuns.map((r, idx) => {
@@ -256,6 +272,9 @@ export default function EntryForm({
             const plannedHrs = Number(updated.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
             const dtHrs = dtMins / 60;
             updated.run_hour = Math.max(0, Number((plannedHrs - dtHrs).toFixed(1)));
+          }
+          if ("run_hour" in fieldOrObj) {
+            updated.run_hour = clampRunHour(updated, updated.run_hour, reasonCodes, shiftHrs);
           }
           return updated;
         }
@@ -278,6 +297,10 @@ export default function EntryForm({
             updatedRun.change_over_confirmed = true;
           }
           return updatedRun;
+        }
+
+        if (fieldOrObj === "run_hour") {
+          return { ...r, run_hour: clampRunHour(r, val, reasonCodes, shiftHrs) };
         }
 
         return { ...r, [fieldOrObj]: val };
@@ -715,6 +738,19 @@ export default function EntryForm({
       }
     }
 
+    const shiftSpanHrs = calculateHoursBetween(
+      selectedShift?.start_time || "07:00",
+      selectedShift?.end_time || "19:00",
+      selectedShift?.start_time || "07:00"
+    );
+    const slotHrs = runs.reduce((sum, r) => sum + (Number(r.planned_hours) || 0), 0);
+    if (runs.length > 1 && slotHrs > shiftSpanHrs + 0.01) {
+      alert(
+        `Machine ${machineId}: mold time slots add up to ${slotHrs.toFixed(1)}h, more than the ${shiftSpanHrs}h shift. Please re-check the start times of each mold.`
+      );
+      return;
+    }
+
     // Format entry object
     const formattedRuns = runs.map((r, idx) => {
       const rMaster = plantMaster.find((m) => m.sap_code === r.sap_code);
@@ -729,8 +765,8 @@ export default function EntryForm({
         planned_hours: Number(r.planned_hours) || Number(selectedShift.planned_hours || 12.0),
         run_hour:
           r.run_hour !== undefined && r.run_hour !== "" && !isNaN(Number(r.run_hour))
-            ? Number(r.run_hour)
-            : Math.max(0, Number(((Number(r.planned_hours) || Number(selectedShift.planned_hours || 12.0)) - (runDtMins / 60)).toFixed(1))),
+            ? clampRunHour(r, r.run_hour, reasonCodes, Number(selectedShift.planned_hours || 12.0))
+            : maxRunHourFor(r, reasonCodes, Number(selectedShift.planned_hours || 12.0)),
         sap_code: r.sap_code,
         material_description: rMaster?.material_description || r.material_description || "",
         part_no: rMaster?.part_no || r.part_no || "",

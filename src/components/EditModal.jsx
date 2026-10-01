@@ -261,10 +261,12 @@ export default function EditModal({
               type="number"
               step="0.1"
               min="0.1"
-              max="24"
+              max={Number(form.planned_hours) || 12}
               disabled={isReadOnly}
               value={form.run_hour}
-              onChange={(e) => update("run_hour", Math.max(0, Number(e.target.value)))}
+              onChange={(e) =>
+                update("run_hour", Math.min(Number(form.planned_hours) || 12, Math.max(0, Number(e.target.value))))
+              }
             />
           </div>
           <div className="form-row">

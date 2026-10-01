@@ -95,6 +95,8 @@ export default function MachineSheetRow({
         const dtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
         const rMaster = master.find((item) => item.sap_code === r.sap_code);
         const stdCavity = Number(rMaster?.cavity || r.std_cavity || 1);
+        const slotHours = Number(r.planned_hours) || shiftPlannedHours;
+        const maxRunHour = Math.max(0, Number((slotHours - dtMins / 60).toFixed(1)));
 
         // Start time options for sub-runs
         let startOptions = isSubRun
@@ -308,9 +310,18 @@ export default function MachineSheetRow({
                 type="number"
                 step="0.1"
                 min="0"
-                max={r.planned_hours || shiftPlannedHours}
+                max={maxRunHour}
                 value={r.run_hour !== undefined ? r.run_hour : ""}
-                onChange={(e) => onUpdateRun(runIdx, "run_hour", e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && Number(val) > maxRunHour) {
+                    alert(
+                      `Mold #${runIdx + 1}: Run hours (${val}) cannot exceed ${maxRunHour}h (slot ${r.start_time || shiftStart}–${r.end_time || shiftEnd} = ${slotHours}h, downtime ${dtMins}m).`
+                    );
+                  }
+                  onUpdateRun(runIdx, "run_hour", val);
+                }}
+                title={`Max ${maxRunHour}h for this mold`}
                 disabled={isReadOnly || !r.sap_code}
                 placeholder={String(r.planned_hours || shiftPlannedHours)}
                 className="sheet-input-number run-h-input"
