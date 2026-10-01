@@ -183,9 +183,13 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
 
   const planned_base = Number(entry.planned_hours) || 12;
   const run_hour = entry.run_hour !== undefined && entry.run_hour !== "" ? Number(entry.run_hour) : 0;
-  const stdCavity = Number(itemMaster?.cavity) || 0;
+  const stdCavity =
+    Number(itemMaster?.cavity || entry.std_cavity || (entry.runs && entry.runs[0]?.std_cavity)) || 0;
   const enteredCavity = Number(entry.running_cavity) || 0;
   const running_cavity = stdCavity > 0 ? Math.min(enteredCavity, stdCavity) : enteredCavity;
+  // Master "shots_per_hour" is the mold's output in pieces/hr with every cavity running,
+  // so blocked cavities reduce the target proportionally.
+  const cavityFactor = stdCavity > 0 ? running_cavity / stdCavity : running_cavity > 0 ? 1 : 0;
   const ok_prod = Number(entry.ok_prod) || 0;
 
   // Run hours are saved already net of downtime by the entry form; older or manually
@@ -205,8 +209,10 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   let net_wt = 0;
 
   if (entry.cavity_parts && Array.isArray(entry.cavity_parts) && entry.cavity_parts.length > 0) {
-    // One shot fills every cavity of the mold, so all parts share the mold's shots/hr
-    // (the main SAP's). A part's own master shots/hr is only a fallback.
+    // All parts come out of the same mold, so the mold's (main SAP's) pieces/hr is split
+    // across parts by cavity share. A part's own master value is only a fallback.
+    const partsCavityBase =
+      stdCavity || entry.cavity_parts.reduce((s, p) => s + (Number(p.cavity) || 1), 0);
     let sumTgt = 0;
     entry.cavity_parts.forEach((p) => {
       const pMaster = masterList ? findProduct(masterList, p.sap_code, entry.plant_id) : null;
@@ -225,7 +231,7 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
         });
       }
 
-      const pTgt = Math.round(pShots * net_run_time * pCavity);
+      const pTgt = Math.round((pShots * net_run_time * pCavity) / partsCavityBase);
       sumTgt += isNaN(pTgt) ? 0 : pTgt;
 
       const pProduced = pOk + pRej;
@@ -241,7 +247,7 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     });
     tgt = sumTgt;
   } else {
-    const rawTgt = Math.round(shotsPerHour * net_run_time * running_cavity);
+    const rawTgt = Math.round(shotsPerHour * net_run_time * cavityFactor);
     tgt = isNaN(rawTgt) ? 0 : rawTgt;
 
     const price = Number(itemMaster?.price || entry.price || 0);

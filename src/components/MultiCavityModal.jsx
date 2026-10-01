@@ -17,6 +17,20 @@ export default function MultiCavityModal({
   if (!isOpen || !run) return null;
 
   const rMaster = master.find((m) => m.sap_code === run.sap_code);
+
+  const categoryOf = (reasonId) => {
+    const rc = reasonCodes.find((x) => x.reason_id === reasonId);
+    if (rc) return rc.category;
+    if (reasonId.startsWith("rej_")) return "rejection";
+    if (reasonId.startsWith("pdt_")) return "planned_dt";
+    if (reasonId.startsWith("udt_")) return "unplanned_dt";
+    return "";
+  };
+  // Downtime belongs to the machine run, never to an individual cavity part.
+  const onlyRejections = (reasons) =>
+    Object.fromEntries(
+      Object.entries(normalizeReasonsMap(reasons || {})).filter(([k]) => categoryOf(k) === "rejection")
+    );
   const stdCavity = Math.max(1, Number(rMaster?.cavity || run.std_cavity || 1));
 
   const [totalCavity, setTotalCavity] = useState(stdCavity);
@@ -45,7 +59,7 @@ export default function MultiCavityModal({
           part_no: p.part_no || "",
           cavity: Number(p.cavity) || 1,
           ok_prod: p.ok_prod !== undefined ? String(p.ok_prod) : "",
-          reasons: normalizeReasonsMap(p.reasons || {}),
+          reasons: onlyRejections(p.reasons),
         }))
       );
     } else {
@@ -56,7 +70,7 @@ export default function MultiCavityModal({
         part_no: rMaster?.part_no || run.part_no || "",
         cavity: 1,
         ok_prod: run.ok_prod !== undefined ? String(run.ok_prod) : "",
-        reasons: normalizeReasonsMap(run.reasons || {}),
+        reasons: onlyRejections(run.reasons),
       };
 
       const secCav = Math.max(1, initialTotal - 1);
@@ -167,14 +181,14 @@ export default function MultiCavityModal({
     const mergedReasons = {};
 
     Object.entries(machineReasons).forEach(([k, v]) => {
-      if (k.startsWith("pdt_") || k.startsWith("udt_")) {
+      if (categoryOf(k) !== "rejection") {
         mergedReasons[k] = v;
       }
     });
 
     parts.forEach((p) => {
       Object.entries(p.reasons || {}).forEach(([k, v]) => {
-        if (k.startsWith("rej_") && Number(v) > 0) {
+        if (categoryOf(k) === "rejection" && Number(v) > 0) {
           mergedReasons[k] = (mergedReasons[k] || 0) + Number(v);
         }
       });

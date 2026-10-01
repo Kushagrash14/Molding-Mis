@@ -408,7 +408,11 @@ export default function MachineSheetRow({
               <button
                 type="button"
                 className={`sheet-badge-btn rej-btn ${rejPcs > 0 ? "has-val" : ""}`}
-                onClick={() => onOpenRejectionModal(runIdx)}
+                onClick={() =>
+                  r.is_multi_cavity && onOpenMultiCavityModal
+                    ? onOpenMultiCavityModal(runIdx)
+                    : onOpenRejectionModal(runIdx)
+                }
                 disabled={isReadOnly || !r.sap_code}
                 title="Log Rejections / Defect Reasons"
               >

@@ -282,7 +282,7 @@ export default function EntryForm({
         // When downtime/reasons update, automatically decrement running hours by downtime duration!
         // E.g. 300 min downtime on a 12h shift => 12h - 5h = 7.0h Run Hours
         if (fieldOrObj === "reasons") {
-          const nextReasons = val;
+          const nextReasons = typeof val === "function" ? val(normalizeReasonsMap(r.reasons)) : val;
           const dtMins = calculateTotalDowntimeMinutes(nextReasons, reasonCodes);
           const plannedHrs = Number(r.planned_hours) || Number(selectedShift?.planned_hours || 12.0);
           const dtHrs = dtMins / 60;
@@ -1181,9 +1181,10 @@ export default function EntryForm({
           rejectionReasons={rejectionReasons}
           reasons={normalizeReasonsMap(activeRejRun.reasons)}
           onUpdateReason={(reasonId, val) => {
-            const currentMap = normalizeReasonsMap(activeRejRun.reasons);
-            const nextReasons = { ...currentMap, [reasonId]: val };
-            handleUpdateRun(activeRejModal.machineId, activeRejModal.runIdx, "reasons", nextReasons);
+            handleUpdateRun(activeRejModal.machineId, activeRejModal.runIdx, "reasons", (cur) => ({
+              ...cur,
+              [reasonId]: val,
+            }));
           }}
           isReadOnly={isFormLocked}
         />
@@ -1202,9 +1203,10 @@ export default function EntryForm({
           otherDtRemark={activeDtRun.other_dt_remark || ""}
           plannedHours={Number(activeDtRun.planned_hours) || Number(selectedShift?.planned_hours || 12.0)}
           onUpdateReason={(reasonId, val) => {
-            const currentMap = normalizeReasonsMap(activeDtRun.reasons);
-            const nextReasons = { ...currentMap, [reasonId]: val };
-            handleUpdateRun(activeDtModal.machineId, activeDtModal.runIdx, "reasons", nextReasons);
+            handleUpdateRun(activeDtModal.machineId, activeDtModal.runIdx, "reasons", (cur) => ({
+              ...cur,
+              [reasonId]: val,
+            }));
           }}
           onUpdateOtherRemark={(remark) => {
             handleUpdateRun(activeDtModal.machineId, activeDtModal.runIdx, "other_dt_remark", remark);
