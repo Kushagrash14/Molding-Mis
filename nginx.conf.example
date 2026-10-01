@@ -6,6 +6,12 @@ server {
     root /var/www/production-oee-tracker/dist;
     index index.html;
 
+    # index.html must never be cached, otherwise browsers keep loading the old build after a deploy
+    location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        expires off;
+    }
+
     # Static assets caching
     location /assets/ {
         expires 1y;
