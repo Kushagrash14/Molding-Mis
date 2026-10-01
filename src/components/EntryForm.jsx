@@ -794,6 +794,12 @@ export default function EntryForm({
 
     const totalOkProd = formattedRuns.reduce((sum, r) => sum + r.ok_prod, 0);
     const totalRunHours = formattedRuns.reduce((sum, r) => sum + r.run_hour, 0);
+    if (totalRunHours > shiftSpanHrs + 0.01) {
+      alert(
+        `Machine ${machineId}: total run hours of all molds (${totalRunHours.toFixed(1)}h) cannot exceed the ${shiftSpanHrs}h shift.`
+      );
+      return;
+    }
     const totalPlannedHours = formattedRuns.reduce((sum, r) => sum + r.planned_hours, 0);
     const avgCavity = Math.round(
       formattedRuns.reduce((sum, r) => sum + r.running_cavity, 0) / formattedRuns.length

@@ -383,7 +383,7 @@ export default function SearchableSapSelect({
                     </span>
                   </div>
                   <div style={{ fontSize: "12px", color: "#334155", marginTop: "2px" }}>
-                    {prevMaster.material_description} · ({prevMaster.cavity || 1} Cav · {prevMaster.shots_per_hour || 60} s/h)
+                    {prevMaster.material_description} · ({prevMaster.cavity || 1} Cav)
                   </div>
                 </div>
                 <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 800 }}>
@@ -434,7 +434,7 @@ export default function SearchableSapSelect({
                         </span>
                       </div>
                       <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
-                        {item.cavity || 1} Cavity · {item.shots_per_hour || 60} Shots/Hr
+                        {item.cavity || 1} Cavity
                       </div>
                     </div>
 
