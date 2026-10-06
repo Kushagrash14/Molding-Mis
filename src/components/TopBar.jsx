@@ -14,8 +14,11 @@ const ICONS = {
   all: "📑",
   master: "⚙️",
   dashboard: "📊",
+  cycle: "⏱️",
   audit: "🛡️",
 };
+
+const MONTHLY_TABS = new Set(["dashboard", "cycle"]);
 
 function getInitials(name = "") {
   if (!name) return "PG";
@@ -152,7 +155,7 @@ export default function TopBar({
         ) : null}
 
         {/* Shift Selector Pill (Hidden on Dashboard because dashboard is monthly plant view) */}
-        {activeTab !== "dashboard" && (
+        {!MONTHLY_TABS.has(activeTab) && (
           <div className="topbar-chip topbar-shift-chip" title="Active Manufacturing Shift">
             <span className="live-dot" />
             <select
@@ -170,7 +173,7 @@ export default function TopBar({
         )}
 
         {/* Date / Month Picker Chip (Switches dynamically to Month on Dashboard!) */}
-        {activeTab === "dashboard" ? (
+        {MONTHLY_TABS.has(activeTab) ? (
           <div className="topbar-chip topbar-date-chip" title="Select MIS Month" style={{ minWidth: "160px" }}>
             <span style={{ fontSize: "11px", fontWeight: 800, color: "#64748b", marginRight: "4px" }}>📅 MONTH:</span>
             <input
@@ -213,7 +216,7 @@ export default function TopBar({
             <div className="user-text-block">
               <span className="user-display-name">{activeUser.name}</span>
               <span className={`role-pill role-${userRole}`}>
-                {userRole?.toUpperCase()}
+                {userRole === "plant_head" ? "PLANT HEAD" : userRole?.toUpperCase()}
               </span>
             </div>
           </div>

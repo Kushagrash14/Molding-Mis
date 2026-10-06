@@ -43,7 +43,7 @@ export default function Sidebar({ tabs, activeTab, onTabChange, currentUser }) {
           <div className="user-info">
             <div className="user-name">{currentUser.name}</div>
             <div className="user-role-badge">
-              {currentUser.role === "admin" ? "Plant Admin" : currentUser.role === "supervisor" ? "Shift Incharge" : "Machine Operator"}
+              {currentUser.role === "admin" ? "Plant Admin" : currentUser.role === "plant_head" ? "Plant Head" : currentUser.role === "supervisor" ? "Shift Incharge" : "Machine Operator"}
             </div>
           </div>
         </div>

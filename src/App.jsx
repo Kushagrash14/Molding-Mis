@@ -29,6 +29,7 @@ import EditModal from "./components/EditModal.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import MasterAdmin from "./components/MasterAdmin.jsx";
 import AuditLogView from "./components/AuditLogView.jsx";
+import CycleTimeTracker from "./components/CycleTimeTracker.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
 
 const TABS_BY_ROLE = {
@@ -41,13 +42,27 @@ const TABS_BY_ROLE = {
     ["browse", "Plant entries"],
     ["dashboard", "Dashboard"],
   ],
+  plant_head: [
+    ["dashboard", "Plant Head Dashboard"],
+    ["cycle", "Cycle Time Tracker"],
+    ["browse", "Plant entries"],
+  ],
   admin: [
     ["all", "All entries"],
     ["master", "Master data"],
     ["dashboard", "Dashboard"],
+    ["cycle", "Cycle Time Tracker"],
     ["audit", "Audit log"],
   ],
 };
+
+function defaultTabFor(role) {
+  if (role === "operator") return "entry";
+  if (role === "supervisor") return "browse";
+  if (role === "plant_head") return "dashboard";
+  if (role === "admin") return "all";
+  return "entry";
+}
 
 export default function App() {
   const saved = loadState();
@@ -292,13 +307,7 @@ export default function App() {
     return entries.filter((e) => accessiblePlants.some((p) => p.plant_id === e.plant_id));
   }, [entries, currentUser, accessiblePlants]);
 
-  const [tab, setTab] = useState(() => {
-    const sess = loadSession();
-    if (sess?.role === "operator") return "entry";
-    if (sess?.role === "supervisor") return "browse";
-    if (sess?.role === "admin") return "all";
-    return "entry";
-  });
+  const [tab, setTab] = useState(() => defaultTabFor(loadSession()?.role));
   const [editing, setEditing] = useState(null);
 
   // Persist master data, config, and entries to localStorage
@@ -461,9 +470,7 @@ export default function App() {
   function handleLogin(user) {
     setCurrentUser(user);
     saveSession(user);
-    setTab(
-      user.role === "operator" ? "entry" : user.role === "supervisor" ? "browse" : "all"
-    );
+    setTab(defaultTabFor(user.role));
   }
 
   function handleLogout() {
@@ -643,7 +650,10 @@ export default function App() {
               <div className="page-head" style={{ marginBottom: "10px" }}>
                 <div>
                   <h2>Plant Entries Register</h2>
-                  <p>Supervisor floor view — real-time monitoring across all machines and shifts.</p>
+                  <p>
+                    {role === "plant_head" ? "Plant Head view" : "Supervisor floor view"} — real-time monitoring
+                    across all machines and shifts.
+                  </p>
                 </div>
               </div>
               <EntriesTable
@@ -731,6 +741,18 @@ export default function App() {
               selectedPlantId={selectedPlantId}
               selectedMonth={selectedMonth}
               userRole={currentUser?.role || "operator"}
+            />
+          )}
+
+          {tab === "cycle" && (role === "admin" || role === "plant_head") && (
+            <CycleTimeTracker
+              entries={authorizedEntries}
+              master={master}
+              machines={machines}
+              reasonCodes={reasonCodes}
+              plants={accessiblePlants}
+              selectedPlantId={selectedPlantId}
+              selectedMonth={selectedMonth}
             />
           )}
 
