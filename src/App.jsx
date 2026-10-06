@@ -329,7 +329,7 @@ export default function App() {
   ]);
 
   // Lock system: any submitted entry outside the eligible shift window (older than 24h standard / 48h weekend grace window) gets locked automatically.
-  // Exception: Entries in 1 Sep to 29 Sep 2026 are always kept unlocked.
+  // Exception: Entries in 1 Sep to 5 Oct 2026 are always kept unlocked.
   useEffect(() => {
     setEntries((prev) =>
       prev.map((e) => {
@@ -525,7 +525,7 @@ export default function App() {
     alert(
       count > 0
         ? `${count} historical entry(ies) past shift cutoff grace window (24h standard / 48h Saturday) locked.`
-        : "All submitted entries are within active shift, grace window (24h standard / 48h Saturday), or 1–29 Sep unlocked window."
+        : "All submitted entries are within active shift, grace window (24h standard / 48h Saturday), or 1 Sep–5 Oct unlocked window."
     );
   }
 
