@@ -2125,56 +2125,85 @@ input.sheet-input-number {
 .ct-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 16px;
   flex-wrap: wrap;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f8ff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+.ct-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.ct-title-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 10px;
+  background: #e0e7ff;
 }
 .ct-head h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 800;
   color: #0f172a;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ct-head p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: #64748b;
 }
 .ct-meta {
   font-size: 11.5px;
   font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
+  color: #1e3a8a;
+  background: #e0e7ff;
   border-radius: 999px;
   padding: 3px 10px;
   white-space: nowrap;
-  cursor: help;
 }
 .ct-filters {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-left: auto;
+  gap: 12px;
+  align-items: flex-end;
   flex-wrap: wrap;
 }
 .ct-filters label {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column;
+  gap: 4px;
   font-size: 10.5px;
   font-weight: 800;
   color: #64748b;
   text-transform: uppercase;
+  letter-spacing: 0.4px;
   white-space: nowrap;
 }
 .ct-filters select,
 .ct-search {
-  height: 28px;
+  height: 34px;
   border: 1px solid #cbd5e1;
-  border-radius: 7px;
-  padding: 0 8px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
   font-weight: 600;
   color: #0f172a;
   background: #fff;
 }
 .ct-search {
-  width: 180px;
+  width: 210px;
 }
 .ct-kpis {
   display: grid;
@@ -2192,10 +2221,13 @@ input.sheet-input-number {
   background: #fff;
   color: #475569;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  padding: 5px 12px;
+  height: 32px;
+  padding: 0 14px;
   cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
 }
 .ct-toggle button + button {
   border-left: 1px solid #cbd5e1;
@@ -2213,11 +2245,12 @@ input.sheet-input-number {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1px;
-  padding: 6px 10px;
+  gap: 3px;
+  padding: 10px 14px;
   border: 1px solid #e2e8f0;
-  border-left: 3px solid #2563eb;
-  border-radius: 8px;
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   background: #fff;
   cursor: pointer;
   text-align: left;
@@ -2242,7 +2275,7 @@ input.sheet-input-number {
   background: #f8fafc;
 }
 .ct-kpi-label {
-  font-size: 9.5px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #64748b;
   text-transform: uppercase;
@@ -2253,7 +2286,7 @@ input.sheet-input-number {
   max-width: 100%;
 }
 .ct-kpi-value {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
   color: #0f172a;
   font-family: var(--font-mono, monospace);
@@ -2268,7 +2301,7 @@ input.sheet-input-number {
 }
 .ct-table-wrap {
   overflow: auto;
-  max-height: calc(100vh - 190px);
+  max-height: calc(100vh - 270px);
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;

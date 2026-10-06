@@ -23,6 +23,12 @@ function fmtDate(iso) {
   return `${d} ${MONTHS[Number(m) - 1] || m} ${y.slice(2)}`;
 }
 
+function fmtMonth(ym) {
+  if (!ym) return "";
+  const [y, m] = ym.split("-");
+  return `${MONTHS[Number(m) - 1] || m} ${y}`;
+}
+
 function dateSpan(dates) {
   const uniq = [...new Set(dates)].sort();
   if (uniq.length === 0) return "—";
@@ -229,45 +235,56 @@ export default function CycleTimeTracker({
   return (
     <div className="ct-page">
       <div className="ct-head">
-        <h2>Cycle Time Tracker</h2>
-        <span className="ct-meta" title="Parts whose actual output runs above the declared shots/hr — the declared cycle time in master is wrong.">
-          {plantName} · {selectedMonth}
-        </span>
-        <div className="ct-toggle">
-          <button type="button" className={mode === "shift" ? "active" : ""} onClick={() => setMode("shift")}>
-            Shift-wise
-          </button>
-          <button type="button" className={mode === "part" ? "active" : ""} onClick={() => setMode("part")}>
-            Part-wise
-          </button>
+        <div className="ct-title">
+          <div className="ct-title-icon">⏱️</div>
+          <div>
+            <h2>
+              Cycle Time Tracker <span className="ct-meta">{plantName} · {fmtMonth(selectedMonth)}</span>
+            </h2>
+            <p>Parts producing far above master shots/hr — their declared cycle time is wrong.</p>
+          </div>
         </div>
         <div className="ct-filters">
           <label>
-            Flag &gt;
+            View
+            <div className="ct-toggle">
+              <button type="button" className={mode === "shift" ? "active" : ""} onClick={() => setMode("shift")}>
+                Shift-wise
+              </button>
+              <button type="button" className={mode === "part" ? "active" : ""} onClick={() => setMode("part")}>
+                Part-wise
+              </button>
+            </div>
+          </label>
+          <label>
+            Flag above
             <select value={threshold} onChange={(e) => setThreshold(Number(e.target.value))}>
               {THRESHOLDS.map((t) => (
                 <option key={t} value={t}>
-                  {t}%
+                  {t}% of target
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Min hrs
+            Min run hours
             <select value={minHours} onChange={(e) => setMinHours(Number(e.target.value))}>
               {MIN_RUN_HOURS.map((h) => (
                 <option key={h} value={h}>
-                  {h === 0 ? "Any" : `${h}+`}
+                  {h === 0 ? "Any" : `${h}+ hrs`}
                 </option>
               ))}
             </select>
           </label>
-          <input
-            className="ct-search"
-            placeholder="Search SAP / part / machine…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <label>
+            Search
+            <input
+              className="ct-search"
+              placeholder="SAP / part / machine…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
         </div>
       </div>
 
