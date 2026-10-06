@@ -43,7 +43,7 @@ const TABS_BY_ROLE = {
     ["dashboard", "Dashboard"],
   ],
   plant_head: [
-    ["dashboard", "Plant Head Dashboard"],
+    ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
     ["browse", "Plant entries"],
   ],
@@ -749,6 +749,7 @@ export default function App() {
               entries={authorizedEntries}
               master={master}
               machines={machines}
+              shifts={shifts}
               reasonCodes={reasonCodes}
               plants={accessiblePlants}
               selectedPlantId={selectedPlantId}

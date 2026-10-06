@@ -2178,8 +2178,36 @@ input.sheet-input-number {
 }
 .ct-kpis {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
+}
+.ct-toggle {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ct-toggle button {
+  border: none;
+  background: #fff;
+  color: #475569;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.ct-toggle button + button {
+  border-left: 1px solid #cbd5e1;
+}
+.ct-toggle button.active {
+  background: #1e3a8a;
+  color: #fff;
+}
+.ct-sub {
+  color: #b91c1c;
+  font-size: 10.5px;
+  font-weight: 700;
 }
 .ct-kpi {
   display: flex;
