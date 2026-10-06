@@ -159,6 +159,8 @@ export default function EntryForm({
     return machines.filter((m) => m.plant_id === plant);
   }, [machines, plant]);
 
+  const showOee = currentUser?.role !== "operator";
+
   // Dynamically filter master products by manufacturing plant
   const plantMaster = useMemo(() => {
     if (!plant) return master;
@@ -1105,14 +1107,16 @@ export default function EntryForm({
               <th style={{ width: "68px" }} title="Net Accepted Pieces (Qty)">OK PROD</th>
               <th style={{ width: "76px" }} title="Defective Pieces / Rejections">REJECTIONS</th>
               <th style={{ width: "76px" }} title="Total Downtime (PDT + UDT)">DOWNTIME</th>
-              <th style={{ width: "52px" }} title="Live Overall Equipment Effectiveness">OEE %</th>
+              {showOee && (
+                <th style={{ width: "52px" }} title="Live Overall Equipment Effectiveness">OEE %</th>
+              )}
               <th style={{ width: "118px" }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             {filteredMachines.length === 0 ? (
               <tr>
-                <td colSpan="14" className="sheet-empty-cell">
+                <td colSpan={showOee ? 14 : 13} className="sheet-empty-cell">
                   <div style={{ padding: "40px 20px", textAlign: "center", color: "#64748b" }}>
                     <div style={{ fontSize: "28px", marginBottom: "8px" }}>🏭</div>
                     <div style={{ fontWeight: 700, fontSize: "14px", color: "#334155" }}>
@@ -1139,6 +1143,7 @@ export default function EntryForm({
                     key={m.machine_id}
                     machine={m}
                     runs={runs}
+                    showOee={showOee}
                     onUpdateRun={(runIdx, fieldOrObj, val) =>
                       handleUpdateRun(m.machine_id, runIdx, fieldOrObj, val)
                     }

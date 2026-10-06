@@ -38,6 +38,7 @@ export default function MachineSheetRow({
   onSaveRow,
   isSaved = false,
   isModified = false,
+  showOee = true,
 }) {
   const machineMeta = useMemo(() => getMachineParts(machine.machine_no), [machine.machine_no]);
   const shiftStart = selectedShift?.start_time || "07:00";
@@ -436,6 +437,7 @@ export default function MachineSheetRow({
             </td>
 
             {/* 11. OEE % / Metrics */}
+            {showOee && (
             <td className="cell-oee">
               {(r.sap_code || dtMins >= 720) && (Number(r.ok_prod) > 0 || dtMins >= Math.round((Number(r.planned_hours) || shiftPlannedHours) * 60)) ? (
                 <div
@@ -465,6 +467,7 @@ export default function MachineSheetRow({
                 <span className="empty-dash">—</span>
               )}
             </td>
+            )}
 
             {/* 12. Actions & Sub-mold */}
             <td className="cell-actions">

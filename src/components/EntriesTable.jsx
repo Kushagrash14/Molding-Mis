@@ -256,7 +256,7 @@ export default function EntriesTable({
               {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Avail</th>}
               {viewerRole !== "operator" && <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }} title="Performance (BB)">Perf</th>}
               <th style={{ width: "80px", minWidth: "80px", textAlign: "center" }}>Quality</th>
-              <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>OEE</th>
+              {viewerRole !== "operator" && <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>OEE</th>}
               {viewerRole !== "operator" && <th style={{ width: "120px", minWidth: "110px", textAlign: "right" }}>Shortfall Loss</th>}
               <th style={{ width: "90px", minWidth: "90px", textAlign: "center" }}>Status</th>
               {viewerRole === "admin" && <th style={{ width: "110px", minWidth: "100px" }}>Entered By</th>}
@@ -267,7 +267,7 @@ export default function EntriesTable({
             {sorted.length === 0 && (
               <tr className="empty-row">
                 <td
-                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 11 : 15}
+                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 10 : 15}
                   style={{ textAlign: "center", padding: "28px", color: "var(--ink-faint)" }}
                 >
                   No matching shift entries found.
@@ -387,6 +387,7 @@ export default function EntriesTable({
                   {viewerRole !== "operator" && <td>{pct(metrics.availability)}</td>}
                   {viewerRole !== "operator" && <td>{pct(metrics.productivity)}</td>}
                   <td>{pct(metrics.quality_rate)}</td>
+                  {viewerRole !== "operator" && (
                   <td>
                     <span
                       style={{
@@ -412,6 +413,7 @@ export default function EntriesTable({
                       {pct(metrics.oee)}
                     </span>
                   </td>
+                  )}
                   {viewerRole !== "operator" && (
                     <td
                       style={{

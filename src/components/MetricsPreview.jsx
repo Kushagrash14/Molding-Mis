@@ -51,6 +51,7 @@ export default function MetricsPreview({
       {/* Top Cockpit Header: The OEE Multiplier Formula */}
       <div className="cockpit-top-grid">
         {/* Main OEE Hero */}
+        {showTargetAndLoss && (
         <div className="oee-hero-card">
           <div className="oee-header-line">
             <span className="oee-title-text">OVERALL EQUIPMENT EFFECTIVENESS</span>
@@ -66,12 +67,11 @@ export default function MetricsPreview({
             </span>
           </div>
           <div className="oee-hero-value">{pct(m.oee)}</div>
-          {showTargetAndLoss && (
-            <div className="oee-formula-badge">
-              OEE = {pct(m.availability)} (A) × {pct(m.productivity)} (P) × {pct(m.quality_rate)} (Q)
-            </div>
-          )}
+          <div className="oee-formula-badge">
+            OEE = {pct(m.availability)} (A) × {pct(m.productivity)} (P) × {pct(m.quality_rate)} (Q)
+          </div>
         </div>
+        )}
 
         {/* Pillar 1: Availability */}
         {showTargetAndLoss && (
