@@ -36,6 +36,13 @@ function statusFor(pct, threshold) {
   return { key: "ok", label: "OK", color: "#15803d", bg: "#dcfce7" };
 }
 
+function oeeStyle(v) {
+  if (v > 100) return { color: "#7c3aed", background: "#ede9fe" };
+  if (v >= 75) return { color: "#15803d", background: "#dcfce7" };
+  if (v >= 60) return { color: "#b45309", background: "#fef3c7" };
+  return { color: "#b91c1c", background: "#fee2e2" };
+}
+
 export default function CycleTimeTracker({
   entries = [],
   master = [],
@@ -64,7 +71,8 @@ export default function CycleTimeTracker({
         if (!sap || sap === "DOWN_12H" || sap.startsWith("MULTI")) return;
         const m = computeMetrics(run, master, reasonCodes);
         const hrs = Number(m.net_run_time) || 0;
-        const produced = (Number(m.ok_prod) || 0) + (Number(m.total_rej) || 0);
+        const ok = Number(m.ok_prod) || 0;
+        const produced = ok + (Number(m.total_rej) || 0);
         if (hrs <= 0 || produced <= 0) return;
 
         const plantId = run.plant_id || entry.plant_id || "1040";
@@ -80,6 +88,8 @@ export default function CycleTimeTracker({
             cavity: Number(product?.cavity) || Number(run.std_cavity) || 1,
             declared: Number(product?.shots_per_hour) || 0,
             hrs: 0,
+            available: 0,
+            ok: 0,
             produced: 0,
             target: 0,
             machines: new Set(),
@@ -88,6 +98,8 @@ export default function CycleTimeTracker({
         }
         const rec = bySap.get(key);
         rec.hrs += hrs;
+        rec.available += Number(m.available_hours) || hrs;
+        rec.ok += ok;
         rec.produced += produced;
         rec.target += Number(m.tgt) || 0;
         rec.machines.add(entry.machine_id);
@@ -98,6 +110,7 @@ export default function CycleTimeTracker({
           hrs,
           produced,
           rate: produced / hrs,
+          oee: (Number(m.oee) || 0) * 100,
           pct: rec.declared > 0 ? (produced / hrs / rec.declared) * 100 : null,
         });
       });
@@ -106,8 +119,15 @@ export default function CycleTimeTracker({
     return [...bySap.values()].map((rec) => {
       const actual = rec.hrs > 0 ? rec.produced / rec.hrs : 0;
       const pct = rec.declared > 0 ? (actual / rec.declared) * 100 : null;
+      const avail = rec.available > 0 ? Math.min(1, rec.hrs / rec.available) : 0;
+      const perf = rec.target > 0 ? rec.produced / rec.target : 0;
+      const qual = rec.produced > 0 ? rec.ok / rec.produced : 0;
       return {
         ...rec,
+        avail: avail * 100,
+        perf: perf * 100,
+        qual: qual * 100,
+        oee: avail * perf * qual * 100,
         machines: [...rec.machines],
         actual,
         pct,
@@ -144,7 +164,25 @@ export default function CycleTimeTracker({
     const over = eligible.filter((p) => statusFor(p.pct, threshold).key === "over");
     const slow = eligible.filter((p) => statusFor(p.pct, threshold).key === "slow");
     const worst = over.reduce((w, p) => (p.pct > (w?.pct ?? 0) ? p : w), null);
-    return { analysed: eligible.length, over: over.length, slow: slow.length, worst };
+    const sum = (k) => eligible.reduce((s, p) => s + p[k], 0);
+    const hrs = sum("hrs");
+    const available = sum("available");
+    const produced = sum("produced");
+    const target = sum("target");
+    const ok = sum("ok");
+    const avail = available > 0 ? Math.min(1, hrs / available) : 0;
+    const perf = target > 0 ? produced / target : 0;
+    const qual = produced > 0 ? ok / produced : 0;
+    return {
+      analysed: eligible.length,
+      over: over.length,
+      slow: slow.length,
+      worst,
+      avail: avail * 100,
+      perf: perf * 100,
+      qual: qual * 100,
+      oee: avail * perf * qual * 100,
+    };
   }, [parts, minHours, threshold]);
 
   const machineName = (id) => machines.find((mc) => mc.machine_id === id)?.machine_no?.split(" (")[0] || id;
@@ -152,37 +190,34 @@ export default function CycleTimeTracker({
   return (
     <div className="ct-page">
       <div className="ct-head">
-        <div>
-          <h2>Cycle Time Tracker</h2>
-          <p>
-            {plantName} · {selectedMonth} — parts whose actual output runs above the declared shots/hr, which means the
-            declared cycle time in master is wrong.
-          </p>
-        </div>
+        <h2>Cycle Time Tracker</h2>
+        <span className="ct-meta" title="Parts whose actual output runs above the declared shots/hr — the declared cycle time in master is wrong.">
+          {plantName} · {selectedMonth}
+        </span>
         <div className="ct-filters">
           <label>
-            Flag above
+            Flag &gt;
             <select value={threshold} onChange={(e) => setThreshold(Number(e.target.value))}>
               {THRESHOLDS.map((t) => (
                 <option key={t} value={t}>
-                  {t}% of target
+                  {t}%
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Min run hours
+            Min hrs
             <select value={minHours} onChange={(e) => setMinHours(Number(e.target.value))}>
               {MIN_RUN_HOURS.map((h) => (
                 <option key={h} value={h}>
-                  {h === 0 ? "Any" : `${h}+ hrs`}
+                  {h === 0 ? "Any" : `${h}+`}
                 </option>
               ))}
             </select>
           </label>
           <input
             className="ct-search"
-            placeholder="Search SAP / part / description"
+            placeholder="Search SAP / part…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -195,13 +230,23 @@ export default function CycleTimeTracker({
           <span className="ct-kpi-value">{kpis.analysed}</span>
         </button>
         <button type="button" className={`ct-kpi danger ${view === "over" ? "active" : ""}`} onClick={() => setView("over")}>
-          <span className="ct-kpi-label">Above {threshold}% (cycle time wrong)</span>
+          <span className="ct-kpi-label">Above {threshold}% · CT wrong</span>
           <span className="ct-kpi-value">{kpis.over}</span>
         </button>
         <button type="button" className={`ct-kpi warn ${view === "slow" ? "active" : ""}`} onClick={() => setView("slow")}>
-          <span className="ct-kpi-label">Below {SLOW_LIMIT}% (running slow)</span>
+          <span className="ct-kpi-label">Below {SLOW_LIMIT}% · slow</span>
           <span className="ct-kpi-value">{kpis.slow}</span>
         </button>
+        <div className="ct-kpi static oee">
+          <span className="ct-kpi-label">OEE</span>
+          <span className="ct-kpi-value">{fmt(kpis.oee, 1)}%</span>
+        </div>
+        <div className="ct-kpi static">
+          <span className="ct-kpi-label">Avail · Perf · Qual</span>
+          <span className="ct-kpi-value small">
+            {fmt(kpis.avail)}% · {fmt(kpis.perf)}% · {fmt(kpis.qual)}%
+          </span>
+        </div>
         <div className="ct-kpi static">
           <span className="ct-kpi-label">Worst part</span>
           <span className="ct-kpi-value small">
@@ -224,9 +269,9 @@ export default function CycleTimeTracker({
               <th>Declared Shots/Hr</th>
               <th>Actual /Hr</th>
               <th>Actual vs Declared</th>
-              <th>Declared CT (s)</th>
-              <th>Actual CT (s)</th>
+              <th title="Declared → actual cycle time in seconds">CT (s)</th>
               <th>Suggested Shots/Hr</th>
+              <th title="Availability × Performance × Quality">OEE</th>
               <th className="left">Status</th>
             </tr>
           </thead>
@@ -268,9 +313,15 @@ export default function CycleTimeTracker({
                         {p.pct === null ? "—" : `${fmt(p.pct)}%`}
                       </span>
                     </td>
-                    <td>{fmt(p.declaredCt, 1)}</td>
-                    <td>{fmt(p.actualCt, 1)}</td>
+                    <td className="mono">
+                      {fmt(p.declaredCt, 1)} → {fmt(p.actualCt, 1)}
+                    </td>
                     <td className="strong">{st.key === "over" || st.key === "slow" ? fmt(p.actual) : "—"}</td>
+                    <td title={`A ${fmt(p.avail)}% · P ${fmt(p.perf)}% · Q ${fmt(p.qual)}%`}>
+                      <span className="ct-pct" style={oeeStyle(p.oee)}>
+                        {fmt(p.oee, 1)}%
+                      </span>
+                    </td>
                     <td className="left">
                       <span className="ct-status" style={{ color: st.color, background: st.bg }}>
                         {st.label}
@@ -291,6 +342,7 @@ export default function CycleTimeTracker({
                               <th>Produced</th>
                               <th>Actual /Hr</th>
                               <th>vs Declared</th>
+                              <th>OEE</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -309,6 +361,11 @@ export default function CycleTimeTracker({
                                       {r.pct === null ? "—" : `${fmt(r.pct)}%`}
                                     </span>
                                   </td>
+                                  <td>
+                                    <span className="ct-pct" style={oeeStyle(r.oee)}>
+                                      {fmt(r.oee, 1)}%
+                                    </span>
+                                  </td>
                                 </tr>
                               );
                             })}
@@ -324,9 +381,8 @@ export default function CycleTimeTracker({
         </table>
       </div>
       <p className="ct-note">
-        Actual /Hr = (OK + rejected pieces) ÷ net run hours. Declared CT = 3600 ÷ declared shots/hr. A part far above 100%
-        means the machine is consistently faster than the master says — update its shots/hr in Master data to the
-        suggested value.
+        Actual /Hr = (OK + rejected) ÷ net run hrs · CT = 3600 ÷ shots/hr · OEE above 100% (purple) means master
+        shots/hr is too low — update it to the suggested value.
       </p>
     </div>
   );
