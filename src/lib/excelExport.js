@@ -5,6 +5,31 @@ function productFor(master, e) {
   return findProduct(master, e.primary_sap_code || e.sap_code, e.plant_id);
 }
 
+// Operators must not see OEE, its A/P factors, target or target-based loss in exports.
+const OPERATOR_HIDDEN_COLUMNS = new Set([
+  "Target Qty (Pcs)",
+  "Availability (%)",
+  "Performance (%)",
+  "Overall OEE (%)",
+  "Shortfall Loss (₹)",
+  "TGT",
+  "Availability",
+  "Performance",
+  "OEE",
+  "Shortfall Loss (INR)",
+]);
+
+function dropHiddenColumns(rows, headerRow, widths) {
+  const hidden = new Set(
+    headerRow.map((h, i) => (OPERATOR_HIDDEN_COLUMNS.has(h) ? i : -1)).filter((i) => i >= 0)
+  );
+  const keep = (_, i) => !hidden.has(i);
+  return {
+    rows: rows.map((r) => (r.length > 1 ? r.filter(keep) : r)),
+    widths: widths ? widths.filter(keep) : widths,
+  };
+}
+
 /**
  * Enterprise multi-sheet Excel (.xlsx) generator for PG Electroplast
  */
@@ -24,13 +49,18 @@ export function exportProductionToExcel({
   }
 
   const wb = XLSX.utils.book_new();
+  const isOperator = viewerRole === "operator";
 
   // =========================================================================
   // SHEET 1: PRODUCTION REGISTER
   // =========================================================================
   const sheet1Data = [
     // Header Banner
-    ["PG ELECTROPLAST LIMITED - SHOP FLOOR PRODUCTION & OEE REGISTER"],
+    [
+      isOperator
+        ? "PG ELECTROPLAST LIMITED - SHOP FLOOR PRODUCTION REGISTER"
+        : "PG ELECTROPLAST LIMITED - SHOP FLOOR PRODUCTION & OEE REGISTER",
+    ],
     [`Generated: ${new Date().toLocaleString("en-IN")} | Scope: ${filterInfo} | Total Records: ${entries.length}`],
     [], // Empty row separator
     // Column Headers
@@ -184,10 +214,8 @@ export function exportProductionToExcel({
     "",
   ]);
 
-  const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
-
   // Column width calculations so Excel never displays ### or clips
-  ws1["!cols"] = [
+  let sheet1Widths = [
     { wch: 18 }, // Entry ID
     { wch: 14 }, // Plant
     { wch: 16 }, // Location
@@ -220,6 +248,13 @@ export function exportProductionToExcel({
     { wch: 20 }, // Entered By
     { wch: 22 }, // Created At
   ];
+
+  let sheet1Rows = sheet1Data;
+  if (isOperator) {
+    ({ rows: sheet1Rows, widths: sheet1Widths } = dropHiddenColumns(sheet1Data, sheet1Data[3], sheet1Widths));
+  }
+  const ws1 = XLSX.utils.aoa_to_sheet(sheet1Rows);
+  ws1["!cols"] = sheet1Widths;
 
   XLSX.utils.book_append_sheet(wb, ws1, "Production Register");
 
@@ -319,20 +354,20 @@ export function exportProductionToExcel({
     [],
     ["METRIC / KPI INDICATOR", "CONSOLIDATED VALUE", "UNIT / BENCHMARK"],
     ["Total Shift Entries Logged", entries.length, "Batches / Shifts"],
-    ["Total Target Quantity (TGT)", sumTgt, "Pieces"],
+    !isOperator && ["Total Target Quantity (TGT)", sumTgt, "Pieces"],
     ["Total OK Production Accepted", sumOk, "Pieces"],
     ["Total Rejection Quantity", sumRej, "Pieces"],
     ["Total Defect / Rejection Rate", `${overallRejectionRate}%`, "< 2.0% World Class"],
     ["Consolidated Quality Rate", `${overallQuality}%`, "> 98.0% World Class"],
-    ["Consolidated Performance Rate", `${overallPerformance}%`, "> 95.0% Benchmark"],
-    ["Average Overall OEE", `${avgOeePct}%`, "> 85.0% World Class"],
+    !isOperator && ["Consolidated Performance Rate", `${overallPerformance}%`, "> 95.0% Benchmark"],
+    !isOperator && ["Average Overall OEE", `${avgOeePct}%`, "> 85.0% World Class"],
     ["Total Planned Downtime (PDT)", `${sumPdtMin} mins (${(sumPdtMin / 60).toFixed(1)} hrs)`, "Preventive / Meal / Setup"],
     ["Total Unplanned Downtime (UDT)", `${sumUdtMin} mins (${(sumUdtMin / 60).toFixed(1)} hrs)`, "Breakdowns / Starvation"],
     ["Net Production Value Realized", `₹${sumOkVal.toLocaleString("en-IN")}`, "Finished Goods Valuation"],
     ["Rejection Scrap Cost Loss", `₹${sumRejVal.toLocaleString("en-IN")}`, "Direct Material Loss"],
-    ["Target Shortfall Financial Loss", `₹${sumShortfall.toLocaleString("en-IN")}`, "Opportunity Loss vs TGT"],
+    !isOperator && ["Target Shortfall Financial Loss", `₹${sumShortfall.toLocaleString("en-IN")}`, "Opportunity Loss vs TGT"],
     ["Total Raw Material Consumed", `${sumMatKg.toFixed(2)} Kg`, "Net Plastic Granules Consumed"],
-  ];
+  ].filter(Boolean);
 
   const ws3 = XLSX.utils.aoa_to_sheet(sheet3Data);
   ws3["!cols"] = [
@@ -345,7 +380,7 @@ export function exportProductionToExcel({
   // Trigger browser download of genuine .xlsx binary file
   const dateTag = new Date().toISOString().slice(0, 10);
   const cleanFilterTag = filterInfo.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 20);
-  const fileName = `PGEL_OEE_Register_${dateTag}_${cleanFilterTag}.xlsx`;
+  const fileName = `PGEL_${isOperator ? "Production" : "OEE"}_Register_${dateTag}_${cleanFilterTag}.xlsx`;
 
   XLSX.writeFile(wb, fileName);
   return true;
@@ -416,14 +451,16 @@ export function exportProductionToCSV({
     ];
   });
 
-  const csvText = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+  const isOperator = viewerRole === "operator";
+  const csvRows = isOperator ? dropHiddenColumns([headers, ...rows], headers).rows : [headers, ...rows];
+  const csvText = csvRows.map((r) => r.join(",")).join("\r\n");
   const blob = new Blob(["\uFEFF" + csvText], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
   link.setAttribute(
     "download",
-    `PGEL_OEE_Export_${new Date().toISOString().slice(0, 10)}.csv`
+    `PGEL_${isOperator ? "Production" : "OEE"}_Export_${new Date().toISOString().slice(0, 10)}.csv`
   );
   document.body.appendChild(link);
   link.click();

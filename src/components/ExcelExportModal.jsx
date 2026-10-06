@@ -178,7 +178,7 @@ export default function ExcelExportModal({
           <div>
             <h3 style={{ margin: 0, fontSize: "20px", display: "flex", alignItems: "center", gap: "8px", color: "#0f172a" }}>
               <span>📊</span>
-              <span>Export Production &amp; OEE Data</span>
+              <span>{viewerRole === "operator" ? "Export Production Data" : "Export Production & OEE Data"}</span>
             </h3>
             <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748b" }}>
               Filter by manufacturing plant and date range to generate a tailored report.
