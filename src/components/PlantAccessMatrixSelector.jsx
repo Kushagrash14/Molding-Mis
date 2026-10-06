@@ -29,7 +29,7 @@ export default function PlantAccessMatrixSelector({
       });
     } else {
       // Default to currently selected plants or fallback to first plant
-      const fallbackPlantId = plants[0]?.plant_id || "PLANT-U02";
+      const fallbackPlantId = plants[0]?.plant_id || "1040";
       const initialPlants =
         selectedPlantIds.filter((id) => id !== "all").length > 0
           ? selectedPlantIds.filter((id) => id !== "all")
@@ -38,7 +38,7 @@ export default function PlantAccessMatrixSelector({
       const initialLocs =
         selectedLocationIds.filter((id) => id !== "all").length > 0
           ? selectedLocationIds.filter((id) => id !== "all")
-          : [plants.find((p) => p.plant_id === initialPlants[0])?.location_id || "LOC-GN"];
+          : [plants.find((p) => p.plant_id === initialPlants[0])?.location_id || locations[0]?.location_id || "LOC-PUN"];
 
       onChange({
         scope_type: "custom",
@@ -321,7 +321,7 @@ export default function PlantAccessMatrixSelector({
           <div>
             <div className="corp-title">ENTERPRISE CORPORATE ACCESS ACTIVATED</div>
             <div className="corp-subtitle">
-              This user has unrestricted permissions across all {plants.length} plant units in {locations.length} locations (Greater Noida, Pune, Bhiwadi, and any new plants added in Master).
+              This user has unrestricted permissions across all {plants.length} plant units in {locations.length} locations (Pune, Bhiwadi, Noida, and any new plants added in Master).
             </div>
           </div>
         </div>

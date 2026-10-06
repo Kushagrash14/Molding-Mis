@@ -30884,10 +30884,6 @@ export const LOCATIONS = [
     "name": "Pune"
   },
   {
-    "location_id": "LOC-GN",
-    "name": "Greater Noida"
-  },
-  {
     "location_id": "LOC-BHI",
     "name": "Bhiwadi"
   },
@@ -30909,18 +30905,6 @@ export const PLANTS = [
     "name": "2020 - PGTL Pune",
     "location_id": "LOC-PUN",
     "code": "2020"
-  },
-  {
-    "plant_id": "PLANT-U01",
-    "name": "Unit-01 - Gr. Noida",
-    "location_id": "LOC-GN",
-    "code": "U01"
-  },
-  {
-    "plant_id": "PLANT-U02",
-    "name": "Unit-02 - Gr. Noida",
-    "location_id": "LOC-GN",
-    "code": "U02"
   },
   {
     "plant_id": "PLANT-U04",

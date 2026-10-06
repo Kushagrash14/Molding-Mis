@@ -55,8 +55,8 @@ export default function MasterAdmin({
     role: "operator",
     department: "",
     scope_type: "custom", // "all" | "custom"
-    assigned_plant_ids: ["PLANT-U02"],
-    assigned_location_ids: ["LOC-GN"],
+    assigned_plant_ids: [plants[0]?.plant_id || "1040"],
+    assigned_location_ids: [locations[0]?.location_id || "LOC-PUN"],
   });
 
   const [newProduct, setNewProduct] = useState({
@@ -109,7 +109,7 @@ export default function MasterAdmin({
   const [newPlant, setNewPlant] = useState({
     plant_id: "",
     name: "",
-    location_id: locations[0]?.location_id || "LOC-GN",
+    location_id: locations[0]?.location_id || "LOC-PUN",
   });
 
   // ==========================
@@ -118,7 +118,7 @@ export default function MasterAdmin({
   function handleAddLocation() {
     const cleanName = newLocation.name.trim();
     if (!cleanName) {
-      alert("Please enter a Location Name (e.g. Pune, Bhiwadi, Greater Noida).");
+      alert("Please enter a Location Name (e.g. Pune, Bhiwadi, Noida).");
       return;
     }
     if (locations.some((l) => l.name.toLowerCase() === cleanName.toLowerCase())) {
@@ -184,13 +184,13 @@ export default function MasterAdmin({
       {
         plant_id: cleanCode,
         name: cleanName,
-        location_id: newPlant.location_id || (locations[0] ? locations[0].location_id : "LOC-GN"),
+        location_id: newPlant.location_id || (locations[0] ? locations[0].location_id : "LOC-PUN"),
       },
     ]);
     setNewPlant({
       plant_id: "",
       name: "",
-      location_id: locations[0]?.location_id || "LOC-GN",
+      location_id: locations[0]?.location_id || "LOC-PUN",
     });
   }
 
@@ -619,7 +619,7 @@ export default function MasterAdmin({
       assignedPlants = validPlants;
       assignedLocs = (newUser.assigned_location_ids || []).filter((id) => id !== "all");
       const firstPlant = plants.find((p) => assignedPlants.includes(p.plant_id));
-      assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-GN";
+      assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-PUN";
     }
 
     const createdUser = {
@@ -822,7 +822,7 @@ export default function MasterAdmin({
                   <span className="badge-count blue">{locations.length} ACTIVE</span>
                 </h3>
                 <p style={{ fontSize: "12px", color: "var(--ink-faint)", margin: "2px 0 0" }}>
-                  Geographical manufacturing locations (Greater Noida, Pune, Bhiwadi).
+                  Geographical manufacturing locations (Pune, Bhiwadi, Noida).
                 </p>
               </div>
 
@@ -918,7 +918,7 @@ export default function MasterAdmin({
                   <label>Location Name *</label>
                   <input
                     value={newLocation.name}
-                    placeholder="e.g. Pune, Bhiwadi, Greater Noida"
+                    placeholder="e.g. Pune, Bhiwadi, Noida"
                     onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
                   />
                 </div>

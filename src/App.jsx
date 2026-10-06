@@ -193,7 +193,7 @@ export default function App() {
   });
 
   const [selectedPlantId, setSelectedPlantId] = useState(() => {
-    if (saved?.selectedPlantId && saved.selectedPlantId !== "PLANT-U01" && saved.selectedPlantId !== "PLANT-U03") {
+    if (saved?.selectedPlantId && saved.selectedPlantId !== "PLANT-U01" && saved.selectedPlantId !== "PLANT-U02" && saved.selectedPlantId !== "PLANT-U03") {
       return saved.selectedPlantId;
     }
     return "1040";
@@ -216,7 +216,7 @@ export default function App() {
   const [entries, setEntries] = useState(() => {
     const loaded = saved?.entries ?? SEED_ENTRIES;
     return loaded.map((e) => {
-      if (e.plant_id === "PLANT-U01" || e.plant_id === "PLANT-U03") {
+      if (e.plant_id === "PLANT-U01" || e.plant_id === "PLANT-U02" || e.plant_id === "PLANT-U03") {
         return { ...e, plant_id: "1040" };
       }
       return e;

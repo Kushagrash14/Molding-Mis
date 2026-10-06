@@ -72,13 +72,43 @@ function loadStore() {
 
       let storeModified = false;
 
-      // Ensure seed plants exist (e.g. NGM 4010, NGM 4020)
+      // Ensure seed locations exist (e.g. LOC-NOI) and prune legacy locations (e.g. LOC-GN)
+      if (!Array.isArray(store.locations)) {
+        store.locations = [...LOCATIONS];
+        storeModified = true;
+      } else {
+        for (const sl of LOCATIONS) {
+          if (!store.locations.some((l) => l.location_id === sl.location_id)) {
+            store.locations.push(sl);
+            storeModified = true;
+            console.log(`[CLOUD STORE] Added new seed location: ${sl.name} (${sl.location_id})`);
+          }
+        }
+        const validLocIds = new Set(LOCATIONS.map((l) => l.location_id));
+        const prevLocLen = store.locations.length;
+        store.locations = store.locations.filter((l) => validLocIds.has(l.location_id));
+        if (store.locations.length !== prevLocLen) {
+          storeModified = true;
+          console.log(`[CLOUD STORE] Pruned ${prevLocLen - store.locations.length} legacy locations.`);
+        }
+      }
+
+      // Ensure seed plants exist (e.g. NGM 4010, NGM 4020, DMIC Noida 2060)
       for (const sp of PLANTS) {
         if (!store.plants.some((p) => p.plant_id === sp.plant_id)) {
           store.plants.push(sp);
           storeModified = true;
           console.log(`[CLOUD STORE] Added new seed plant: ${sp.name} (${sp.plant_id})`);
         }
+      }
+
+      // Prune legacy/removed plants (e.g. PLANT-U01, PLANT-U02)
+      const validPlantIds = new Set(PLANTS.map((p) => p.plant_id));
+      const prevPlantLen = store.plants.length;
+      store.plants = store.plants.filter((p) => validPlantIds.has(p.plant_id));
+      if (store.plants.length !== prevPlantLen) {
+        storeModified = true;
+        console.log(`[CLOUD STORE] Pruned ${prevPlantLen - store.plants.length} legacy plants.`);
       }
 
       // Ensure seed machines exist
