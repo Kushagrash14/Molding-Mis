@@ -215,9 +215,9 @@ export default function TopBar({
             </div>
             <div className="user-text-block">
               <span className="user-display-name">{activeUser.name}</span>
-              <span className={`role-pill role-${userRole}`}>
-                {userRole === "plant_head" ? "PLANT HEAD" : userRole?.toUpperCase()}
-              </span>
+              {userRole !== "plant_head" && (
+                <span className={`role-pill role-${userRole}`}>{userRole?.toUpperCase()}</span>
+              )}
             </div>
           </div>
 
