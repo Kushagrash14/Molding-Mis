@@ -114,7 +114,7 @@ export default function CycleTimeTracker({
             partNo: product?.part_no || run.part_no || "",
             description: product?.material_description || run.material_description || "",
             cavity: Number(product?.cavity) || Number(run.std_cavity) || 1,
-            declared: Number(product?.shots_per_hour) || 0,
+            shots: Number(product?.shots_per_hour) || 0,
             hrs: 0,
             produced: 0,
             machines: new Set(),
@@ -138,19 +138,21 @@ export default function CycleTimeTracker({
           produced,
           target: Number(m.tgt) || 0,
           rate,
-          pct: rec.declared > 0 ? (rate / rec.declared) * 100 : null,
+          pct: rec.shots > 0 ? (rate / (rec.shots * rec.cavity)) * 100 : null,
         });
       });
     });
 
     return [...bySap.values()].map((rec) => {
       const actual = rec.hrs > 0 ? rec.produced / rec.hrs : 0;
+      const declared = rec.shots * (rec.cavity || 1);
       return {
         ...rec,
         machines: [...rec.machines],
+        declared,
         actual,
-        pct: rec.declared > 0 ? (actual / rec.declared) * 100 : null,
-        declaredCt: rec.declared > 0 ? 3600 / rec.declared : null,
+        pct: declared > 0 ? (actual / declared) * 100 : null,
+        declaredCt: declared > 0 ? 3600 / declared : null,
         actualCt: actual > 0 ? 3600 / actual : null,
         overRuns: rec.runs.filter((r) => r.pct !== null && r.pct >= threshold).length,
         runs: rec.runs.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : String(b.shift).localeCompare(String(a.shift)))),
@@ -430,7 +432,9 @@ export default function CycleTimeTracker({
                       <td className="mono">
                         {fmt(p.declaredCt, 1)} → {fmt(p.actualCt, 1)}
                       </td>
-                      <td className="strong">{st.key === "over" || st.key === "slow" ? fmt(p.actual) : "—"}</td>
+                      <td className="strong">
+                        {st.key === "over" || st.key === "slow" ? fmt(p.cavity > 0 ? p.actual / p.cavity : p.actual) : "—"}
+                      </td>
                       <td className="left">
                         <Status pct={p.pct} />
                       </td>
@@ -483,8 +487,8 @@ export default function CycleTimeTracker({
         )}
       </div>
       <p className="ct-note">
-        Actual /Hr = (OK + Rej) ÷ net run hrs · CT = 3600 ÷ shots/hr · A part far above 100% means master shots/hr is
-        too low — update it in Master data to the suggested value.
+        Target = shots/hr × (12h − planned downtime) × cavity. Declared /Hr is pieces (shots/hr × cavity).
+        Suggested /Hr is the shots/hr to put in Master data.
       </p>
     </div>
   );

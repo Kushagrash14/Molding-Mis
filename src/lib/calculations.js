@@ -206,10 +206,8 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
   let net_wt = 0;
 
   if (entry.cavity_parts && Array.isArray(entry.cavity_parts) && entry.cavity_parts.length > 0) {
-    // Target is the mold's shots/hr x run hours (cavity count does not change it); it is
-    // split across parts by cavity share only for part-wise value. A part's own master
-    // value is only a fallback.
-    const partsCavityBase = entry.cavity_parts.reduce((s, p) => s + (Number(p.cavity) || 1), 0);
+    // Shots/hr is mold cycles. Target uses the 12h shift minus planned downtime only.
+    // Unplanned downtime stays in availability and does not reduce the target.
     let sumTgt = 0;
     entry.cavity_parts.forEach((p) => {
       const pMaster = masterList ? findProduct(masterList, p.sap_code, entry.plant_id) : null;
@@ -228,7 +226,7 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
         });
       }
 
-      const pTgt = Math.round((pShots * net_run_time * pCavity) / partsCavityBase);
+      const pTgt = Math.round(pShots * available_hours * pCavity);
       sumTgt += isNaN(pTgt) ? 0 : pTgt;
 
       const pProduced = pOk + pRej;
@@ -244,8 +242,9 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     });
     tgt = sumTgt;
   } else {
-    // Target = shots/hr x net run hours; cavity count does not change it.
-    const rawTgt = Math.round(shotsPerHour * net_run_time);
+    // Target pieces = shots/hr x (planned hours - planned downtime) x cavity.
+    const cavityForTarget = stdCavity > 0 ? stdCavity : running_cavity > 0 ? running_cavity : 1;
+    const rawTgt = Math.round(shotsPerHour * available_hours * cavityForTarget);
     tgt = isNaN(rawTgt) ? 0 : rawTgt;
 
     const price = Number(itemMaster?.price || entry.price || 0);
