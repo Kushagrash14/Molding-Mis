@@ -7,7 +7,9 @@ import {
   getStartTimeOptions,
   calculateTotalDowntimeMinutes,
   normalizeReasonsMap,
+  findProduct,
 } from "../lib/calculations.js";
+import { familyInPlant, withFamilyRun } from "../data/familyMolds.js";
 
 function getMachineParts(machineNo = "") {
   // Parses "INJ-01 (180 TON · BAY-1)" or "BM-1 (20L · BAY-3)"
@@ -57,6 +59,7 @@ export default function MachineSheetRow({
       computeMetrics(
         {
           ...r,
+          plant_id: r.plant_id || machine.plant_id,
           planned_hours: Number(r.planned_hours) || shiftPlannedHours,
           reasons: r.reasons,
         },
@@ -94,8 +97,9 @@ export default function MachineSheetRow({
                 return isRej ? sum + Number(v || 0) : sum;
               }, 0);
         const dtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
-        const rMaster = master.find((item) => item.sap_code === r.sap_code);
-        const stdCavity = Number(rMaster?.cavity || r.std_cavity || 1);
+        const rMaster = findProduct(master, r.sap_code, machine.plant_id);
+        const family = familyInPlant(master, r.sap_code, machine.plant_id);
+        const stdCavity = family ? family.pieceFactor : Number(rMaster?.cavity || r.std_cavity || 1);
         const slotHours = Number(r.planned_hours) || shiftPlannedHours;
         const maxRunHour = Math.max(0, Number((slotHours - dtMins / 60).toFixed(1)));
 
@@ -219,21 +223,29 @@ export default function MachineSheetRow({
                   value={r.sap_code}
                   showCodeOnly={true}
                   onChange={(newSap) => {
-                    const found = master.find((x) => x.sap_code === newSap);
-                    onUpdateRun(runIdx, {
-                      sap_code: newSap,
-                      material_description: found?.material_description || "",
-                      part_no: found?.part_no || "",
-                      std_cavity: found?.cavity || 1,
-                      running_cavity: found?.cavity || 1,
-                      is_multi_cavity: false,
-                      cavity_parts: null,
-                      manpower: r.manpower || found?.manpower || 1,
-                      shots_per_hour: found?.shots_per_hour || 60,
-                      price: found?.price || 1,
-                      part_wt: found?.part_wt || 0,
-                      run_wt: found?.run_wt || 0,
-                    });
+                    const found = findProduct(master, newSap, machine.plant_id);
+                    onUpdateRun(
+                      runIdx,
+                      withFamilyRun(
+                        {
+                          sap_code: newSap,
+                          material_description: found?.material_description || "",
+                          part_no: found?.part_no || "",
+                          std_cavity: found?.cavity || 1,
+                          running_cavity: found?.cavity || 1,
+                          is_multi_cavity: false,
+                          cavity_parts: null,
+                          manpower: r.manpower || found?.manpower || 1,
+                          shots_per_hour: found?.shots_per_hour || 60,
+                          price: found?.price || 1,
+                          part_wt: found?.part_wt || 0,
+                          run_wt: found?.run_wt || 0,
+                          ok_prod: r.ok_prod,
+                        },
+                        master,
+                        machine.plant_id
+                      )
+                    );
                   }}
                   master={master}
                   disabled={isReadOnly}
@@ -301,7 +313,7 @@ export default function MachineSheetRow({
             {/* 6. Standard Cavity (Auto-filled from Product Master) */}
             <td className="cell-num cell-std-cav">
               <span className="std-cav-badge">
-                {r.sap_code ? (rMaster?.cavity || r.std_cavity || 1) : "—"}
+                {r.sap_code ? (family?.combo || rMaster?.cavity || r.std_cavity || 1) : "—"}
               </span>
             </td>
 
@@ -353,7 +365,7 @@ export default function MachineSheetRow({
                   style={{ maxWidth: "42px" }}
                 />
                 {/* STRICT TOOLING RULE: Only show + SAP if standard mold cavity is physically >= 2 */}
-                {r.sap_code && stdCavity >= 2 && !isReadOnly && (
+                {r.sap_code && (family || stdCavity >= 2) && !isReadOnly && (
                   <button
                     type="button"
                     className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}

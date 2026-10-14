@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import SearchableSapSelect from "./SearchableSapSelect.jsx";
 import { normalizeReasonsMap } from "../lib/calculations.js";
+import { familyInPlant } from "../data/familyMolds.js";
 
 export default function MultiCavityModal({
   isOpen,
@@ -16,7 +17,9 @@ export default function MultiCavityModal({
 }) {
   if (!isOpen || !run) return null;
 
+  const plantId = run.plant_id || machine?.plant_id || "1040";
   const rMaster = master.find((m) => m.sap_code === run.sap_code);
+  const family = familyInPlant(master, run.sap_code, plantId);
 
   const categoryOf = (reasonId) => {
     const rc = reasonCodes.find((x) => x.reason_id === reasonId);
@@ -31,7 +34,9 @@ export default function MultiCavityModal({
     Object.fromEntries(
       Object.entries(normalizeReasonsMap(reasons || {})).filter(([k]) => categoryOf(k) === "rejection")
     );
-  const stdCavity = Math.max(1, Number(rMaster?.cavity || run.std_cavity || 1));
+  const stdCavity = family
+    ? family.pieceFactor
+    : Math.max(1, Number(rMaster?.cavity || run.std_cavity || 1));
 
   const [totalCavity, setTotalCavity] = useState(stdCavity);
   const [parts, setParts] = useState([]);
@@ -41,7 +46,7 @@ export default function MultiCavityModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    if (stdCavity <= 1) {
+    if (!family && stdCavity <= 1) {
       alert("Standard Mold Cavity is 1. Single-cavity molds cannot be split into multiple SAP codes.");
       onClose();
       return;
@@ -60,6 +65,18 @@ export default function MultiCavityModal({
           cavity: Number(p.cavity) || 1,
           ok_prod: p.ok_prod !== undefined ? String(p.ok_prod) : "",
           reasons: onlyRejections(p.reasons),
+        }))
+      );
+    } else if (family) {
+      setParts(
+        family.parts.map((p, idx) => ({
+          cavity_no: idx + 1,
+          sap_code: p.sap,
+          material_description: p.product.material_description || "",
+          part_no: p.product.part_no || "",
+          cavity: p.cavity,
+          ok_prod: p.sap === run.sap_code && run.ok_prod !== undefined ? String(run.ok_prod) : "",
+          reasons: p.sap === run.sap_code ? onlyRejections(run.reasons) : {},
         }))
       );
     } else {

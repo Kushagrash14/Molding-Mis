@@ -6,6 +6,7 @@ import DowntimeModal from "./DowntimeModal.jsx";
 import PreviousShiftMoldModal from "./PreviousShiftMoldModal.jsx";
 import BulkIdleDowntimeModal from "./BulkIdleDowntimeModal.jsx";
 import MultiCavityModal from "./MultiCavityModal.jsx";
+import { withFamilyRun } from "../data/familyMolds.js";
 import {
   getActiveShift,
   getProductionShiftDate,
@@ -511,25 +512,33 @@ export default function EntryForm({
     const pMaster = prevInfo.master;
     const defaultHrs = Number(selectedShift?.planned_hours || 12.0);
 
-    handleUpdateRun(machineId, 0, {
-      sap_code: prevInfo.sap_code,
-      material_description: pMaster?.material_description || "",
-      part_no: pMaster?.part_no || "",
-      std_cavity: pMaster?.cavity || 1,
-      running_cavity: pMaster?.cavity || 1,
-      manpower: pMaster?.manpower || 1,
-      shots_per_hour: pMaster?.shots_per_hour || 60,
-      price: pMaster?.price || 1,
-      part_wt: pMaster?.part_wt || 0,
-      run_wt: pMaster?.run_wt || 0,
-      planned_hours: defaultHrs,
-      run_hour: defaultHrs,
-      is_continued: true,
-      declared_fresh: false,
-    });
+    handleUpdateRun(
+      machineId,
+      0,
+      withFamilyRun(
+        {
+          sap_code: prevInfo.sap_code,
+          material_description: pMaster?.material_description || "",
+          part_no: pMaster?.part_no || "",
+          std_cavity: pMaster?.cavity || 1,
+          running_cavity: pMaster?.cavity || 1,
+          manpower: pMaster?.manpower || 1,
+          shots_per_hour: pMaster?.shots_per_hour || 60,
+          price: pMaster?.price || 1,
+          part_wt: pMaster?.part_wt || 0,
+          run_wt: pMaster?.run_wt || 0,
+          planned_hours: defaultHrs,
+          run_hour: defaultHrs,
+          is_continued: true,
+          declared_fresh: false,
+        },
+        plantMaster,
+        plant
+      )
+    );
 
     setPrevMoldModalMachineId(null);
-  }, [prevShiftMap, selectedShift, handleUpdateRun]);
+  }, [prevShiftMap, selectedShift, handleUpdateRun, plantMaster, plant]);
 
   const handleConfirmMidShiftChange = useCallback((machineId, handoverTime) => {
     const prevInfo = prevShiftMap[machineId];
@@ -541,28 +550,32 @@ export default function EntryForm({
     const dur1 = calculateHoursBetween(shiftStart, handoverTime, shiftStart);
     const dur2 = calculateHoursBetween(handoverTime, shiftEnd, shiftStart);
 
-    const run1 = {
-      run_id: `run-1-${Date.now()}`,
-      start_time: shiftStart,
-      end_time: handoverTime,
-      planned_hours: dur1,
-      run_hour: dur1,
-      sap_code: prevInfo.sap_code,
-      material_description: pMaster?.material_description || "",
-      part_no: pMaster?.part_no || "",
-      std_cavity: pMaster?.cavity || 1,
-      running_cavity: pMaster?.cavity || 1,
-      manpower: pMaster?.manpower || 1,
-      shots_per_hour: pMaster?.shots_per_hour || 60,
-      price: pMaster?.price || 1,
-      part_wt: pMaster?.part_wt || 0,
-      run_wt: pMaster?.run_wt || 0,
-      ok_prod: "",
-      reasons: {},
-      other_dt_remark: "",
-      is_continued: true,
-      declared_fresh: false,
-    };
+    const run1 = withFamilyRun(
+      {
+        run_id: `run-1-${Date.now()}`,
+        start_time: shiftStart,
+        end_time: handoverTime,
+        planned_hours: dur1,
+        run_hour: dur1,
+        sap_code: prevInfo.sap_code,
+        material_description: pMaster?.material_description || "",
+        part_no: pMaster?.part_no || "",
+        std_cavity: pMaster?.cavity || 1,
+        running_cavity: pMaster?.cavity || 1,
+        manpower: pMaster?.manpower || 1,
+        shots_per_hour: pMaster?.shots_per_hour || 60,
+        price: pMaster?.price || 1,
+        part_wt: pMaster?.part_wt || 0,
+        run_wt: pMaster?.run_wt || 0,
+        ok_prod: "",
+        reasons: {},
+        other_dt_remark: "",
+        is_continued: true,
+        declared_fresh: false,
+      },
+      plantMaster,
+      plant
+    );
 
     const run2 = {
       run_id: `run-2-${Date.now() + 1}`,
@@ -589,7 +602,7 @@ export default function EntryForm({
     }));
     setDirtyMachines((prev) => new Set(prev).add(machineId));
     setPrevMoldModalMachineId(null);
-  }, [prevShiftMap, selectedShift]);
+  }, [prevShiftMap, selectedShift, plantMaster, plant]);
 
   const handleConfirmNewMold = useCallback((machineId) => {
     handleUpdateRun(machineId, 0, {

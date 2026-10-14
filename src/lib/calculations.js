@@ -1,4 +1,5 @@
 import { REASON_CODES } from "../data/seedData.js";
+import { familyInPlant } from "../data/familyMolds.js";
 
 /**
  * Normalizes reasons from any format (Array of objects, Object map, or nested objects) into a clean key-value map: { [reason_id]: Number(minutes/qty) }
@@ -243,7 +244,15 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
     tgt = sumTgt;
   } else {
     // Target pieces = shots/hr x (planned hours - planned downtime) x cavity.
-    const cavityForTarget = stdCavity > 0 ? stdCavity : running_cavity > 0 ? running_cavity : 1;
+    // A 1+1 or 2+2 family mold produces every part on each shot, so the factor is
+    // the sum of those cavities (1+1 = 2, 2+2 = 4), not the single part's cavity.
+    const sapForFamily =
+      entry.primary_sap_code ||
+      (entry.runs && entry.runs[0] && entry.runs[0].sap_code) ||
+      entry.sap_code;
+    const family = familyInPlant(masterList, sapForFamily, entry.plant_id);
+    const ownCavity = stdCavity > 0 ? stdCavity : running_cavity > 0 ? running_cavity : 1;
+    const cavityForTarget = family ? family.pieceFactor : ownCavity;
     const rawTgt = Math.round(shotsPerHour * available_hours * cavityForTarget);
     tgt = isNaN(rawTgt) ? 0 : rawTgt;
 

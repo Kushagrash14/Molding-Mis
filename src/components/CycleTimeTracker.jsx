@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import { computeMetrics, findProduct } from "../lib/calculations.js";
+import { familyInPlant } from "../data/familyMolds.js";
 
 const THRESHOLDS = [105, 110, 120, 150];
 const MIN_RUN_HOURS = [0, 2, 8, 24];
@@ -107,13 +108,15 @@ export default function CycleTimeTracker({
         const key = `${plantId}_${sap}`;
         if (!bySap.has(key)) {
           const product = findProduct(master, sap, plantId);
+          const family = familyInPlant(master, sap, plantId);
           bySap.set(key, {
             key,
             sap,
             plantId,
             partNo: product?.part_no || run.part_no || "",
             description: product?.material_description || run.material_description || "",
-            cavity: Number(product?.cavity) || Number(run.std_cavity) || 1,
+            cavity: family ? family.pieceFactor : Number(product?.cavity) || Number(run.std_cavity) || 1,
+            combo: family?.combo || "",
             shots: Number(product?.shots_per_hour) || 0,
             hrs: 0,
             produced: 0,
@@ -351,7 +354,7 @@ export default function CycleTimeTracker({
                   <td>{shiftName(r.shift)}</td>
                   <td>{machineName(r.machine)}</td>
                   <PartCell p={r.part} />
-                  <td>{r.part.cavity}</td>
+                  <td>{r.part.combo || r.part.cavity}</td>
                   <td>{fmt(r.hrs, 1)}</td>
                   <td>{fmt(r.ok)}</td>
                   <td>{fmt(r.rej)}</td>
@@ -416,7 +419,7 @@ export default function CycleTimeTracker({
                         </div>
                       </td>
                       <td className="strong">{dateSpan(p.runs.map((r) => r.date))}</td>
-                      <td>{p.cavity}</td>
+                      <td>{p.combo || p.cavity}</td>
                       <td title={p.machines.join(", ")}>{p.machines.map(machineName).join(", ")}</td>
                       <td>
                         {p.runs.length}

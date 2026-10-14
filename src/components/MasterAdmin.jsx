@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { formatUserScopeLabel, getUserAccessiblePlants } from "../lib/permissions.js";
 import { calculateShiftDuration } from "../lib/calculations.js";
 import { SHIFTS } from "../data/seedData.js";
+import { familyInPlant } from "../data/familyMolds.js";
 import PlantAccessMatrixSelector from "./PlantAccessMatrixSelector.jsx";
 
 export default function MasterAdmin({
@@ -1341,7 +1342,9 @@ export default function MasterAdmin({
                           {m.material_description}
                         </div>
                       </td>
-                      <td style={{ textAlign: "center", fontWeight: 600 }}>{m.cavity}</td>
+                      <td style={{ textAlign: "center", fontWeight: 600 }}>
+                        {familyInPlant(master, m.sap_code, m.plant_id)?.combo || m.cavity}
+                      </td>
                       <td style={{ textAlign: "center" }}>{m.shots_per_hour}</td>
                       <td style={{ textAlign: "right", fontWeight: 600 }}>₹{Number(m.price || 0).toFixed(2)}</td>
                       <td style={{ textAlign: "right" }}>{m.part_wt} kg</td>
@@ -1637,7 +1640,12 @@ export default function MasterAdmin({
                     />
                   </div>
                   <div className="form-row">
-                    <label>Mold Cavity</label>
+                    <label>
+                      Mold Cavity
+                      {familyInPlant(master, editingProduct.sap_code, editingProduct.plant_id)?.combo
+                        ? ` · family ${familyInPlant(master, editingProduct.sap_code, editingProduct.plant_id).combo}`
+                        : ""}
+                    </label>
                     <input
                       type="number"
                       min="1"

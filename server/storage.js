@@ -10,6 +10,7 @@ import {
   REASON_CODES,
   USERS,
 } from "../src/data/seedData.js";
+import { applyFamilyMoldsToMaster } from "../src/data/familyMolds.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "data");
@@ -146,6 +147,12 @@ function loadStore() {
       }
 
       if (storeModified) {
+        saveStore();
+      }
+
+      const familyUpdated = applyFamilyMoldsToMaster(store.master);
+      if (familyUpdated > 0) {
+        console.log(`[CLOUD STORE] Updated ${familyUpdated} master rows for 1+1 / 2+2 family molds.`);
         saveStore();
       }
 

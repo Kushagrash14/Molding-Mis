@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import { familyInPlant } from "../data/familyMolds.js";
 
 export default function SearchableSapSelect({
   value,
@@ -434,7 +435,7 @@ export default function SearchableSapSelect({
                         </span>
                       </div>
                       <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
-                        {item.cavity || 1} Cavity
+                        {familyInPlant(master, item.sap_code, item.plant_id)?.combo || `${item.cavity || 1} Cavity`}
                       </div>
                     </div>
 
