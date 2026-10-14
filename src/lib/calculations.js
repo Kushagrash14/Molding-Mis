@@ -534,12 +534,12 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
 }
 
 /**
- * Special exception: 7 Oct 2026 only.
- * Every entry on this date is never locked.
+ * Special exception: 7 Oct 2026 through 13 Oct 2026 (inclusive).
+ * Every entry in this range is never locked.
  */
 export function isDateInUnlockedWindow(shiftDateStr) {
   if (!shiftDateStr) return false;
-  return shiftDateStr === "2026-10-07";
+  return shiftDateStr >= "2026-10-07" && shiftDateStr <= "2026-10-13";
 }
 
 /**
@@ -579,7 +579,7 @@ export function getShiftLockDeadline(shiftDateStr, shiftObj) {
 
 /**
  * Checks whether an entry is past its grace period after shift ended.
- * - If the entry is on 7 Oct 2026, it is NEVER locked.
+ * - If the entry is from 7 Oct through 13 Oct 2026, it is NEVER locked.
  * - Otherwise checks against the 24h standard or 48h Saturday grace deadline.
  */
 export function isEntryPastGracePeriod(entry, shifts = [], now = new Date()) {
