@@ -365,7 +365,7 @@ export default function MachineSheetRow({
                   style={{ maxWidth: "42px" }}
                 />
                 {/* STRICT TOOLING RULE: Only show + SAP if standard mold cavity is physically >= 2 */}
-                {r.sap_code && (family || stdCavity >= 2) && !isReadOnly && (
+                {r.sap_code && (family ? family.parts.length >= 2 : stdCavity >= 2) && !isReadOnly && (
                   <button
                     type="button"
                     className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}
