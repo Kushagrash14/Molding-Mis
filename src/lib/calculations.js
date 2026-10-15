@@ -539,7 +539,14 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
  */
 export function isDateInUnlockedWindow(shiftDateStr) {
   if (!shiftDateStr) return false;
-  return shiftDateStr >= "2026-10-01" && shiftDateStr <= "2026-10-13";
+  const d = String(shiftDateStr).slice(0, 10);
+  return d >= "2026-10-01" && d <= "2026-10-13";
+}
+
+/** Stored status cannot keep a 1–13 Oct 2026 entry locked. */
+export function presentEntry(entry) {
+  if (!entry || entry.status !== "locked" || !isDateInUnlockedWindow(entry.shift_date)) return entry;
+  return { ...entry, status: "submitted", locked_at: null };
 }
 
 /**

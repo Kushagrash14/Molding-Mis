@@ -276,7 +276,7 @@ export default function EntriesTable({
             )}
             {sorted.map((e) => {
               const metrics = computeMetrics(e, master, reasonCodes);
-              const isEntryLocked = e.status === "locked" || isEntryPastTwelveHours(e, shifts);
+              const isEntryLocked = isEntryPastTwelveHours(e, shifts);
               const canEdit =
                 viewerRole === "admin" ||
                 (viewerRole === "operator" &&

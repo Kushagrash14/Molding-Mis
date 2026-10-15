@@ -28,7 +28,7 @@ export default function EditModal({
     return otherR?.remark || entry.other_dt_remark || "";
   });
 
-  const isEntryLocked = entry.status === "locked" || isEntryPastTwelveHours(entry, shifts);
+  const isEntryLocked = isEntryPastTwelveHours(entry, shifts);
   const isReadOnly = currentUser?.role !== "admin" && isEntryLocked;
 
   const draft = {

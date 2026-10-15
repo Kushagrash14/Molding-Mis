@@ -42,7 +42,8 @@ function sanitizeUnlockedWindowEntries(entriesList) {
   if (!Array.isArray(entriesList)) return false;
   let modified = false;
   for (const e of entriesList) {
-    if (e.shift_date >= "2026-10-01" && e.shift_date <= "2026-10-13") {
+    const shiftDay = String(e.shift_date || "").slice(0, 10);
+    if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-13") {
       if (e.status === "locked") {
         e.status = "submitted";
         e.locked_at = null;
@@ -268,7 +269,8 @@ export const cloudStorage = {
     }
 
     // 1 Oct through 13 Oct 2026 entries are never locked
-    if (entry.shift_date >= "2026-10-01" && entry.shift_date <= "2026-10-13") {
+    const shiftDay = String(entry.shift_date || "").slice(0, 10);
+    if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-13") {
       entry.status = "submitted";
       entry.locked_at = null;
     }
@@ -298,7 +300,8 @@ export const cloudStorage = {
       if (!entry.entry_id) {
         entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       }
-      if (entry.shift_date >= "2026-10-01" && entry.shift_date <= "2026-10-13") {
+      const shiftDay = String(entry.shift_date || "").slice(0, 10);
+      if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-13") {
         entry.status = "submitted";
         entry.locked_at = null;
       }

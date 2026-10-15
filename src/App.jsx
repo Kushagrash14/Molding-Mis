@@ -15,6 +15,7 @@ import {
   isShiftEntryLocked,
   getActiveShift,
   isDateInUnlockedWindow,
+  presentEntry,
 } from "./lib/calculations.js";
 import { loadState, saveState, loadSession, saveSession } from "./lib/storage.js";
 import {
@@ -366,7 +367,7 @@ export default function App() {
         const dirty = dirtyMachinesRef.current; // Set<machine_id> currently being edited
         if (!dirty || dirty.size === 0) {
           // No active editing — safe to take cloud data as-is
-          return incomingEntries;
+          return incomingEntries.map(presentEntry);
         }
         // Build a map of current local entries for fast lookup
         const localMap = new Map(prev.map((e) => [e.entry_id, e]));
@@ -386,10 +387,10 @@ export default function App() {
                   e.shift_id === cloudEntry.shift_id &&
                   (e.plant_id || "1040") === (cloudEntry.plant_id || "1040")
               );
-            result.push(localVer || cloudEntry);
+            result.push(presentEntry(localVer || cloudEntry));
           } else {
             // Not dirty → cloud is authoritative (another PC may have submitted this)
-            result.push(cloudEntry);
+            result.push(presentEntry(cloudEntry));
           }
           handled.add(key);
         }
@@ -562,7 +563,7 @@ export default function App() {
   }
 
   function tryEdit(entry) {
-    const isLocked = entry.status === "locked" || isShiftEntryLocked(entry, shifts);
+    const isLocked = isShiftEntryLocked(entry, shifts);
     if (currentUser?.role !== "admin" && isLocked) {
       alert("This entry is past the shift cutoff (24h standard / 48h weekend) and is locked. Operators cannot edit locked records.");
       return;
