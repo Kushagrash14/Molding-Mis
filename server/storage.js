@@ -129,21 +129,29 @@ function loadStore() {
         }
       }
 
-      // Ensure seed master products exist
-      const existingSapPlantKeys = new Set(
-        store.master.map((m) => `${m.plant_id || "1040"}_${m.sap_code}`)
+      // Ensure seed master products exist and sync updated part_wt
+      const existingMasterMap = new Map(
+        store.master.map((m) => [`${m.plant_id || "1040"}_${m.sap_code}`, m])
       );
       let newMasterAdded = 0;
+      let masterUpdated = 0;
       for (const sm of SEED_MASTER) {
         const key = `${sm.plant_id || "1040"}_${sm.sap_code}`;
-        if (!existingSapPlantKeys.has(key)) {
+        const existing = existingMasterMap.get(key);
+        if (!existing) {
           store.master.push(sm);
-          existingSapPlantKeys.add(key);
+          existingMasterMap.set(key, sm);
           newMasterAdded++;
+        } else if (existing.part_wt === 1 && sm.part_wt && sm.part_wt !== 1) {
+          existing.part_wt = sm.part_wt;
+          if (sm.material_description && !existing.material_description) {
+            existing.material_description = sm.material_description;
+          }
+          masterUpdated++;
         }
       }
-      if (newMasterAdded > 0) {
-        console.log(`[CLOUD STORE] Synced ${newMasterAdded} new master products from seed data into cloud store.`);
+      if (newMasterAdded > 0 || masterUpdated > 0) {
+        console.log(`[CLOUD STORE] Synced ${newMasterAdded} new and ${masterUpdated} updated master products from seed data into cloud store.`);
         storeModified = true;
       }
 
