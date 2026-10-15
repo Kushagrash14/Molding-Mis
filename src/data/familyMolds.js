@@ -5,8 +5,13 @@
 export const FAMILY_PLANTS = ["1040", "2020", "4010"];
 
 const PGEL = ["1040"];
-const one = (a, b) => ({ plants: PGEL, parts: [{ sap: a, cavity: 1 }, { sap: b, cavity: 1 }] });
-const lone = (sap) => ({ plants: PGEL, combo: "1+1", parts: [{ sap, cavity: 1 }] });
+const one = (a, b) => ({
+  plants: PGEL,
+  manual: true,
+  combo: "1+1",
+  parts: [{ sap: a, cavity: 1 }, { sap: b, cavity: 1 }],
+});
+const lone = (sap) => ({ plants: PGEL, manual: true, combo: "1+1", parts: [{ sap, cavity: 1 }] });
 
 const PGEL_PUNE_11 = [
   one("9010003780", "9010003781"),
@@ -118,20 +123,60 @@ export function familyInPlant(master, sapCode, plantId) {
     const row = master.find(
       (m) => String(m.sap_code) === part.sap && String(m.plant_id || "1040") === pid
     );
-    if (!row) return null;
+    if (!row) {
+      if (group.manual) continue;
+      return null;
+    }
     present.push({ sap: part.sap, cavity: part.cavity, product: row });
   }
+  if (!present.some((p) => p.sap === sap)) return null;
   const combo = group.combo || present.map((p) => p.cavity).join("+");
   const pieceFactor = group.combo
     ? group.combo.split("+").reduce((s, n) => s + (Number(n) || 0), 0)
     : present.reduce((s, p) => s + p.cavity, 0);
-  return { combo, parts: present, pieceFactor };
+  return {
+    combo,
+    parts: group.manual ? present.filter((p) => p.sap === sap) : present,
+    pieceFactor,
+    manual: Boolean(group.manual),
+  };
 }
 
 export function withFamilyRun(fields, master, plantId) {
   const fam = familyInPlant(master, fields?.sap_code, plantId);
-  if (!fam || fam.parts.length < 2) return fields;
+  if (!fam) return fields;
   const selected = String(fields.sap_code);
+  if (fam.manual) {
+    const known = fam.parts.find((p) => p.sap === selected) || fam.parts[0];
+    const prod = known?.product;
+    return {
+      ...fields,
+      std_cavity: fam.pieceFactor,
+      running_cavity: fam.pieceFactor,
+      is_multi_cavity: true,
+      cavity_parts: [
+        {
+          cavity_no: 1,
+          sap_code: selected,
+          material_description: prod?.material_description || fields.material_description || "",
+          part_no: prod?.part_no || fields.part_no || "",
+          cavity: 1,
+          ok_prod: fields.ok_prod ?? "",
+          reasons: {},
+        },
+        {
+          cavity_no: 2,
+          sap_code: "",
+          material_description: "",
+          part_no: "",
+          cavity: 1,
+          ok_prod: "",
+          reasons: {},
+        },
+      ],
+    };
+  }
+  if (fam.parts.length < 2) return fields;
   const cavity_parts = fam.parts.map((p, idx) => ({
     cavity_no: idx + 1,
     sap_code: p.sap,
@@ -156,6 +201,23 @@ export function applyFamilyMoldsToMaster(master) {
   for (const pid of FAMILY_PLANTS) {
     for (const group of FAMILY_MOLDS) {
       if (group.plants && !group.plants.includes(pid)) continue;
+      if (group.manual) {
+        const combo = group.combo || "1+1";
+        group.parts.forEach((p) => {
+          const row = master.find(
+            (m) => String(m.sap_code) === p.sap && String(m.plant_id || "1040") === pid
+          );
+          if (!row) return;
+          const same = Number(row.cavity) === p.cavity && row.mold_combo === combo && row.manual_family;
+          if (same) return;
+          row.cavity = p.cavity;
+          row.mold_combo = combo;
+          row.family_saps = [p.sap];
+          row.manual_family = true;
+          changed++;
+        });
+        continue;
+      }
       const rows = group.parts.map((p) =>
         master.find((m) => String(m.sap_code) === p.sap && String(m.plant_id || "1040") === pid)
       );

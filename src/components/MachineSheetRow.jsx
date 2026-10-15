@@ -365,18 +365,22 @@ export default function MachineSheetRow({
                   style={{ maxWidth: "42px" }}
                 />
                 {/* STRICT TOOLING RULE: Only show + SAP if standard mold cavity is physically >= 2 */}
-                {r.sap_code && (family ? family.parts.length >= 2 : stdCavity >= 2) && !isReadOnly && (
+                {r.sap_code && (family || r.is_multi_cavity || stdCavity >= 2) && !isReadOnly && (
                   <button
                     type="button"
                     className={`btn-mini-cav-split ${r.is_multi_cavity ? "active" : ""}`}
                     onClick={() => onOpenMultiCavityModal && onOpenMultiCavityModal(runIdx)}
                     title={
-                      r.is_multi_cavity
-                        ? `Multi-Cavity Active: ${r.cavity_parts?.length || 2} parts (Click to edit)`
-                        : `Split ${stdCavity} standard cavities across multiple SAP codes`
+                      family?.manual
+                        ? "1+1 mold. Pick the second SAP yourself."
+                        : r.is_multi_cavity
+                          ? `Multi-Cavity Active: ${r.cavity_parts?.length || 2} parts (Click to edit)`
+                          : `Split ${stdCavity} standard cavities across multiple SAP codes`
                     }
                   >
-                    {r.is_multi_cavity ? `🔀 ${r.cavity_parts?.length || 2} SAP` : "+ SAP"}
+                    {r.is_multi_cavity && r.cavity_parts?.every((p) => p.sap_code)
+                      ? `🔀 ${r.cavity_parts.length} SAP`
+                      : "+ SAP"}
                   </button>
                 )}
               </div>
