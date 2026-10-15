@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { computeMetrics, isEntryPastTwelveHours } from "../lib/calculations.js";
+import { grantCovers } from "../lib/accessGrants.js";
 import MetricsPreview from "./MetricsPreview.jsx";
 import SearchableMachineSelect from "./SearchableMachineSelect.jsx";
 
@@ -14,6 +15,7 @@ export default function EditModal({
   onClose,
   onSave,
   currentUser,
+  accessGrants = [],
 }) {
   const [form, setForm] = useState({ ...entry });
   const [reasonVals, setReasonVals] = useState(() => {
@@ -28,7 +30,9 @@ export default function EditModal({
     return otherR?.remark || entry.other_dt_remark || "";
   });
 
-  const isEntryLocked = isEntryPastTwelveHours(entry, shifts);
+  const isEntryLocked =
+    isEntryPastTwelveHours(entry, shifts) &&
+    !grantCovers(accessGrants, entry.entered_by || currentUser?.id, entry.plant_id, entry.shift_date);
   const isReadOnly = currentUser?.role !== "admin" && isEntryLocked;
 
   const draft = {

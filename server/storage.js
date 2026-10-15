@@ -35,6 +35,7 @@ function getInitialStore() {
     reasonCodes: [...REASON_CODES],
     entries: [],
     auditLog: [],
+    accessRequests: [],
   };
 }
 
@@ -165,6 +166,11 @@ function loadStore() {
         saveStore();
       }
 
+      if (!Array.isArray(store.accessRequests)) {
+        store.accessRequests = [];
+        saveStore();
+      }
+
       // Unlock every entry from 1 Oct through 13 Oct 2026
       if (sanitizeUnlockedWindowEntries(store.entries)) {
         saveStore();
@@ -205,6 +211,7 @@ export const cloudStorage = {
       reasonCodes: s.reasonCodes,
       entries: s.entries,
       auditLog: s.auditLog,
+      accessRequests: s.accessRequests || [],
     };
   },
 
@@ -409,6 +416,55 @@ export const cloudStorage = {
       return true;
     }
     return false;
+  },
+
+  listAccessRequests() {
+    return loadStore().accessRequests || [];
+  },
+
+  createAccessRequest(body) {
+    const s = loadStore();
+    if (!Array.isArray(s.accessRequests)) s.accessRequests = [];
+    const dates = Array.isArray(body.dates) ? [...new Set(body.dates.map((d) => String(d).slice(0, 10)))].filter(Boolean).sort() : [];
+    if (!body.requested_by || dates.length === 0) {
+      throw new Error("Operator and at least one date are required.");
+    }
+    if (dates.length > 31) throw new Error("Request at most 31 days at a time.");
+    const pending = s.accessRequests.find(
+      (r) => r.status === "pending" && r.requested_by === body.requested_by && r.plant_id === (body.plant_id || "1040")
+    );
+    if (pending) throw new Error("You already have a pending request. Wait for the Plant Head.");
+    const request = {
+      id: `req_${Date.now()}`,
+      plant_id: body.plant_id || "1040",
+      requested_by: body.requested_by,
+      requested_by_name: body.requested_by_name || "Operator",
+      dates,
+      note: String(body.note || "").slice(0, 300),
+      status: "pending",
+      created_at: new Date().toISOString(),
+      decided_by: null,
+      decided_by_name: null,
+      decided_at: null,
+      unlock_until: null,
+    };
+    s.accessRequests.unshift(request);
+    saveStore();
+    return request;
+  },
+
+  decideAccessRequest(id, { approve, decided_by, decided_by_name }) {
+    const s = loadStore();
+    const request = (s.accessRequests || []).find((r) => r.id === id);
+    if (!request) throw new Error("Request not found.");
+    if (request.status !== "pending") throw new Error("This request is already decided.");
+    request.status = approve ? "approved" : "rejected";
+    request.decided_by = decided_by || null;
+    request.decided_by_name = decided_by_name || null;
+    request.decided_at = new Date().toISOString();
+    request.unlock_until = approve ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null;
+    saveStore();
+    return request;
   },
 
   addAuditLog(auditEntry) {

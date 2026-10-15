@@ -390,16 +390,60 @@ app.delete("/api/master/machines/:id", (req, res) => {
   }
 });
 
+app.post("/api/access-requests", (req, res) => {
+  try {
+    const request = cloudStorage.createAccessRequest(req.body || {});
+    res.json({ success: true, request });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/access-requests/:id/decide", (req, res) => {
+  try {
+    const request = cloudStorage.decideAccessRequest(req.params.id, {
+      approve: Boolean(req.body?.approve),
+      decided_by: req.body?.decided_by,
+      decided_by_name: req.body?.decided_by_name,
+    });
+    res.json({ success: true, request });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // Run lock-cutoff
 app.post("/api/lock-cutoff", (req, res) => {
   try {
     const entries = cloudStorage.getEntries();
+    const grants = cloudStorage.listAccessRequests();
     const now = Date.now();
+    const coveredByGrant = (e) => {
+      const day = String(e.shift_date || "").slice(0, 10);
+      return grants.some(
+        (g) =>
+          g.status === "approved" &&
+          g.requested_by === e.entered_by &&
+          String(g.plant_id || "1040") === String(e.plant_id || "1040") &&
+          g.unlock_until &&
+          new Date(g.unlock_until).getTime() > now &&
+          (g.dates || []).includes(day)
+      );
+    };
     let lockedCount = 0;
     for (const e of entries) {
       // Exemption: 1 Oct through 13 Oct 2026 entries are never locked
       const shiftDay = String(e.shift_date || "").slice(0, 10);
       if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-13") {
+        if (e.status === "locked") {
+          e.status = "submitted";
+          e.locked_at = null;
+          cloudStorage.saveEntry(e);
+        }
+        continue;
+      }
+
+      if (coveredByGrant(e)) {
         if (e.status === "locked") {
           e.status = "submitted";
           e.locked_at = null;

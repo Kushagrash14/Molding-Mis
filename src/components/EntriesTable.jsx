@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { computeMetrics, pct, inr, isEntryPastTwelveHours } from "../lib/calculations.js";
+import { grantCovers } from "../lib/accessGrants.js";
 import { exportProductionToExcel, exportProductionToCSV } from "../lib/excelExport.js";
 import Pill from "./Pill.jsx";
 import ExcelExportModal from "./ExcelExportModal.jsx";
@@ -15,6 +16,8 @@ export default function EntriesTable({
   viewerRole,
   onEdit,
   scopeToUser,
+  accessGrants = [],
+  viewerId,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPlant, setFilterPlant] = useState("all");
@@ -276,7 +279,9 @@ export default function EntriesTable({
             )}
             {sorted.map((e) => {
               const metrics = computeMetrics(e, master, reasonCodes);
-              const isEntryLocked = isEntryPastTwelveHours(e, shifts);
+              const isEntryLocked =
+                isEntryPastTwelveHours(e, shifts) &&
+                !grantCovers(accessGrants, e.entered_by || viewerId, e.plant_id, e.shift_date);
               const canEdit =
                 viewerRole === "admin" ||
                 (viewerRole === "operator" &&

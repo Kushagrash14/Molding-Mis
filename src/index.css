@@ -6325,5 +6325,77 @@ tbody tr:last-child td {
   padding: 8px 14px;
 }
 
+.shift-lock-alert-banner.granted {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.ar-request-btn,
+.ar-yes {
+  border: 0;
+  background: #0f766e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ar-request-btn:hover,
+.ar-yes:hover { background: #115e59; }
+
+.ar-wait-note { font-weight: 650; white-space: nowrap; }
+
+.ar-no {
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ar-page { display: flex; flex-direction: column; gap: 12px; }
+.ar-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.ar-head h2 { margin: 0 0 4px; font-size: 18px; }
+.ar-head p { margin: 0; color: #64748b; font-size: 13px; }
+.ar-count { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; }
+.ar-pill { border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.ar-pill.wait { background: #fff7ed; color: #9a3412; }
+.ar-pill.ok { background: #ecfdf5; color: #047857; }
+.ar-pill.no { background: #fef2f2; color: #b91c1c; }
+.ar-actions { display: flex; gap: 6px; justify-content: center; }
+.ar-by { color: #64748b; font-size: 12px; }
+
+.ar-modal-back {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+}
+.ar-modal {
+  width: min(440px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ar-modal h3 { margin: 0; }
+.ar-modal p { margin: 0; color: #64748b; font-size: 13px; }
+.ar-modal label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 650; color: #334155; }
+.ar-modal input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 7px 8px; font-size: 13px; }
+.ar-days { font-size: 12px; color: #0f766e; }
+.ar-error { font-size: 12px; color: #b91c1c; }
+.ar-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
 
 

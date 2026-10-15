@@ -7,6 +7,7 @@ import PreviousShiftMoldModal from "./PreviousShiftMoldModal.jsx";
 import BulkIdleDowntimeModal from "./BulkIdleDowntimeModal.jsx";
 import MultiCavityModal from "./MultiCavityModal.jsx";
 import { withFamilyRun } from "../data/familyMolds.js";
+import { datesBetween, grantCovers, pendingForDate } from "../lib/accessGrants.js";
 import {
   getActiveShift,
   getProductionShiftDate,
@@ -144,6 +145,8 @@ export default function EntryForm({
   onSubmit,
   onDirtyChange,
   currentUser,
+  accessGrants = [],
+  onRequestAccess,
 }) {
   const plant = selectedPlantId || plants[0]?.plant_id || "1040";
   const shiftDate = selectedShiftDate || getProductionShiftDate(shifts);
@@ -168,10 +171,20 @@ export default function EntryForm({
     return master.filter((p) => !p.plant_id || p.plant_id === plant);
   }, [master, plant]);
 
-  // Lock check
+  const activeGrant = grantCovers(accessGrants, currentUser?.id, plant, shiftDate);
+  const pendingGrant = pendingForDate(accessGrants, currentUser?.id, plant, shiftDate);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [accessFrom, setAccessFrom] = useState(shiftDate);
+  const [accessTo, setAccessTo] = useState(shiftDate);
+  const [accessNote, setAccessNote] = useState("");
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessError, setAccessError] = useState("");
+
+  // Lock check. An approved Plant Head grant opens this date for 24 hours.
   const isPastTwelveHours = useMemo(() => {
+    if (activeGrant) return false;
     return isEntryPastTwelveHours({ shift_date: shiftDate, shift_id: shift }, shifts);
-  }, [shiftDate, shift, shifts]);
+  }, [shiftDate, shift, shifts, activeGrant]);
 
   const isNotStartedYet = useMemo(() => {
     return !isShiftStartedYet(shiftDate, selectedShift);
@@ -989,6 +1002,40 @@ export default function EntryForm({
           <div className="lock-alert-text">
             <strong>Shift Cutoff Expired (Read-Only Mode):</strong> This shift ({shiftDate} · {selectedShift.name || `Shift ${shift}`}) is past the cutoff grace period (24 hours standard / 48 hours for Saturday shifts). Historical shift records are strictly locked against modification or tampering.
           </div>
+          {currentUser?.role === "operator" && (
+            pendingGrant ? (
+              <span className="ar-wait-note">Request sent. Waiting for Plant Head.</span>
+            ) : (
+              <button
+                type="button"
+                className="ar-request-btn"
+                onClick={() => {
+                  setAccessFrom(shiftDate);
+                  setAccessTo(shiftDate);
+                  setAccessNote("");
+                  setAccessError("");
+                  setAccessOpen(true);
+                }}
+              >
+                Request entry access from Plant Head
+              </button>
+            )
+          )}
+        </div>
+      )}
+      {activeGrant && (
+        <div className="shift-lock-alert-banner granted">
+          <span className="lock-icon">🔓</span>
+          <div className="lock-alert-text">
+            <strong>Plant Head approved this date.</strong> You can edit until{" "}
+            {new Date(activeGrant.unlock_until).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            .
+          </div>
         </div>
       )}
       {isNotStartedYet && !isPastTwelveHours && (
@@ -1267,6 +1314,71 @@ export default function EntryForm({
       />
 
       {/* 8. Multi-Cavity SAP Split Modal */}
+      {accessOpen && (
+        <div className="ar-modal-back" onClick={() => !accessBusy && setAccessOpen(false)}>
+          <div className="ar-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Request entry access</h3>
+            <p>Choose the previous dates you need. Plant Head approval opens them for 24 hours.</p>
+            <label>
+              From
+              <input type="date" value={accessFrom} onChange={(e) => setAccessFrom(e.target.value)} />
+            </label>
+            <label>
+              To
+              <input type="date" value={accessTo} onChange={(e) => setAccessTo(e.target.value)} />
+            </label>
+            <label>
+              Note
+              <input
+                value={accessNote}
+                placeholder="Why do you need these dates?"
+                onChange={(e) => setAccessNote(e.target.value)}
+              />
+            </label>
+            <div className="ar-days">
+              {datesBetween(accessFrom, accessTo).length
+                ? datesBetween(accessFrom, accessTo).join(", ")
+                : "Pick a valid from and to date."}
+            </div>
+            {accessError && <div className="ar-error">{accessError}</div>}
+            <div className="ar-modal-actions">
+              <button type="button" onClick={() => setAccessOpen(false)} disabled={accessBusy}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="ar-yes"
+                disabled={accessBusy}
+                onClick={async () => {
+                  const dates = datesBetween(accessFrom, accessTo);
+                  if (!dates.length) {
+                    setAccessError("Choose a from date that is on or before the to date.");
+                    return;
+                  }
+                  setAccessBusy(true);
+                  setAccessError("");
+                  try {
+                    await onRequestAccess?.({
+                      plant_id: plant,
+                      requested_by: currentUser.id,
+                      requested_by_name: currentUser.name,
+                      dates,
+                      note: accessNote,
+                    });
+                    setAccessOpen(false);
+                  } catch (err) {
+                    setAccessError(err.message || "Could not send the request.");
+                  } finally {
+                    setAccessBusy(false);
+                  }
+                }}
+              >
+                {accessBusy ? "Sending…" : "Send to Plant Head"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {activeMultiCavityModal && activeMultiCavityRun && (
         <MultiCavityModal
           isOpen={true}

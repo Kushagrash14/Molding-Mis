@@ -31,7 +31,9 @@ import Dashboard from "./components/Dashboard.jsx";
 import MasterAdmin from "./components/MasterAdmin.jsx";
 import AuditLogView from "./components/AuditLogView.jsx";
 import CycleTimeTracker from "./components/CycleTimeTracker.jsx";
+import AccessRequests from "./components/AccessRequests.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
+import { grantCovers } from "./lib/accessGrants.js";
 
 const TABS_BY_ROLE = {
   operator: [
@@ -47,6 +49,7 @@ const TABS_BY_ROLE = {
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
     ["browse", "Plant entries"],
+    ["requests", "Requests"],
   ],
   admin: [
     ["all", "All entries"],
@@ -239,6 +242,7 @@ export default function App() {
     });
   });
   const [auditLog, setAuditLog] = useState(saved?.auditLog ?? []);
+  const [accessRequests, setAccessRequests] = useState([]);
 
   // Ref to track which machine_ids operator is actively typing in (never overwrite these during sync)
   const dirtyMachinesRef = useRef(new Set());
@@ -450,6 +454,9 @@ export default function App() {
         if (Array.isArray(data.auditLog)) {
           stableSet(setAuditLog, data.auditLog);
         }
+        if (Array.isArray(data.accessRequests)) {
+          stableSet(setAccessRequests, data.accessRequests);
+        }
       } catch (err) {
         console.log("Cloud sync silent fallback to cache:", err.message);
       }
@@ -562,8 +569,38 @@ export default function App() {
     }).catch((err) => console.error("Cloud update entry error:", err));
   }
 
+  async function submitAccessRequest(payload) {
+    const res = await fetch("/api/access-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.request) throw new Error(data.error || "Could not send the request.");
+    setAccessRequests((prev) => [data.request, ...prev.filter((r) => r.id !== data.request.id)]);
+  }
+
+  async function decideAccessRequest(id, approve) {
+    const res = await fetch(`/api/access-requests/${id}/decide`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        approve,
+        decided_by: currentUser?.id,
+        decided_by_name: currentUser?.name,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.request) {
+      alert(data.error || "Could not update the request.");
+      return;
+    }
+    setAccessRequests((prev) => prev.map((r) => (r.id === data.request.id ? data.request : r)));
+  }
+
   function tryEdit(entry) {
-    const isLocked = isShiftEntryLocked(entry, shifts);
+    const granted = grantCovers(accessRequests, entry.entered_by, entry.plant_id, entry.shift_date);
+    const isLocked = isShiftEntryLocked(entry, shifts) && !granted;
     if (currentUser?.role !== "admin" && isLocked) {
       alert("This entry is past the shift cutoff (24h standard / 48h weekend) and is locked. Operators cannot edit locked records.");
       return;
@@ -628,6 +665,8 @@ export default function App() {
               onSubmit={addEntry}
               onDirtyChange={handleDirtyChange}
               currentUser={currentUser}
+              accessGrants={accessRequests}
+              onRequestAccess={submitAccessRequest}
             />
           )}
 
@@ -643,6 +682,8 @@ export default function App() {
               viewerRole={currentUser.role || "operator"}
               scopeToUser={currentUser.id}
               onEdit={tryEdit}
+              accessGrants={accessRequests}
+              viewerId={currentUser.id}
             />
           )}
 
@@ -745,6 +786,15 @@ export default function App() {
             />
           )}
 
+          {tab === "requests" && role === "plant_head" && (
+            <AccessRequests
+              requests={accessRequests}
+              plants={accessiblePlants}
+              currentUser={currentUser}
+              onDecide={decideAccessRequest}
+            />
+          )}
+
           {tab === "cycle" && (role === "admin" || role === "plant_head") && (
             <CycleTimeTracker
               entries={authorizedEntries}
@@ -785,6 +835,7 @@ export default function App() {
           locations={locations}
           plants={plants}
           currentUser={currentUser}
+          accessGrants={accessRequests}
           onClose={() => setEditing(null)}
           onSave={saveEdit}
         />
