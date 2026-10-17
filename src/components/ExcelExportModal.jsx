@@ -77,7 +77,7 @@ export default function ExcelExportModal({
       setEndDate(today);
     } else if (presetKey === "unlocked_sep2026") {
       setStartDate("2026-10-01");
-      setEndDate("2026-10-13");
+      setEndDate("2026-10-16");
     } else if (presetKey === "all") {
       setStartDate("");
       setEndDate("");
@@ -289,7 +289,7 @@ export default function ExcelExportModal({
                 { id: "yesterday", label: "Yesterday" },
                 { id: "last_7_days", label: "Last 7 Days" },
                 { id: "this_month", label: "This Month" },
-                { id: "unlocked_sep2026", label: "1–13 Oct" },
+                { id: "unlocked_sep2026", label: "1–16 Oct" },
                 { id: "all", label: "All Dates" },
               ].map((p) => {
                 const isActive = datePreset === p.id;
