@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import { USERS } from "../data/seedData.js";
 import {
   getActiveShift,
   getProductionShiftDate,
@@ -49,7 +48,7 @@ export default function TopBar({
   selectedMonth = "2026-09",
   onMonthChange,
 }) {
-  const activeUser = currentUser || USERS.find((u) => u.id === userId) || USERS[0];
+  const activeUser = currentUser || { name: "", role: role || "operator", id: userId };
   const userRole = role || activeUser.role;
   const [timeStr, setTimeStr] = useState("");
 

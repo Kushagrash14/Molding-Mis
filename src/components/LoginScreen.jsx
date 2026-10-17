@@ -13,7 +13,7 @@ function maskEmail(email = "") {
   return `${first}${stars}${last}@${domain}`;
 }
 
-export default function LoginScreen({ onLogin, users = [] }) {
+export default function LoginScreen({ onLogin }) {
   const [step, setStep] = useState("input"); // 'input' | 'otp'
   const [identifier, setIdentifier] = useState("");
   const [targetUser, setTargetUser] = useState(null);
@@ -22,31 +22,6 @@ export default function LoginScreen({ onLogin, users = [] }) {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
-  const [cloudUsers, setCloudUsers] = useState(users);
-
-  // Sync users from AWS Cloud on mount
-  useEffect(() => {
-    fetch("/api/users")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.success && Array.isArray(data.users) && data.users.length > 0) {
-          setCloudUsers(data.users);
-        }
-      })
-      .catch((err) => console.log("Cloud users sync fallback to props:", err));
-  }, []);
-
-  useEffect(() => {
-    if (users && users.length > 0) {
-      setCloudUsers((prev) => {
-        const map = new Map(prev.map((u) => [u.id, u]));
-        for (const u of users) {
-          map.set(u.id, { ...(map.get(u.id) || {}), ...u });
-        }
-        return Array.from(map.values());
-      });
-    }
-  }, [users]);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -59,26 +34,6 @@ export default function LoginScreen({ onLogin, users = [] }) {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Strictly match registered PGEL personnel
-  function findRegisteredUser(cleanStr, userList = cloudUsers) {
-    const q = cleanStr.trim().toLowerCase();
-    if (!q) return null;
-    return (
-      userList.find(
-        (u) =>
-          u.email?.toLowerCase() === q ||
-          u.employee_code?.toLowerCase() === q ||
-          u.username?.toLowerCase() === q ||
-          u.id?.toLowerCase() === q ||
-          (u.email && u.email.toLowerCase().split("@")[0] === q) ||
-          (q === "software.2040@pgel.in" && u.username === "admin") ||
-          (q === "verify.software2040@pgel.in" && u.username === "admin") ||
-          (q === "met.2060@pgel.in" && u.username === "operator")
-      ) || null
-    );
-  }
-
-  // Step 1: Identify & Dispatch OTP
   async function handleIdentify(e) {
     if (e) e.preventDefault();
     setError("");
@@ -90,55 +45,26 @@ export default function LoginScreen({ onLogin, users = [] }) {
       return;
     }
 
-    // Try in-memory first
-    let matched = findRegisteredUser(clean, cloudUsers);
-
-    // If not found, immediately query AWS Cloud in case another PC just added this user
-    if (!matched) {
-      try {
-        const uRes = await fetch("/api/users");
-        const uData = await uRes.json();
-        if (uData?.success && Array.isArray(uData.users) && uData.users.length > 0) {
-          setCloudUsers(uData.users);
-          matched = findRegisteredUser(clean, uData.users);
-        }
-      } catch (checkErr) {
-        console.warn("Live cloud check warning:", checkErr);
-      }
-    }
-
-    if (!matched) {
-      setError(`No registered employee account found for "${clean}". Please contact Plant Administrator.`);
-      return;
-    }
-
-    const emailToSend = matched.email;
-
     setBusy(true);
     try {
-      const res = await fetch("/api/send-otp", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: emailToSend,
-          name: matched.name,
-          employee_code: matched.employee_code || "PGEL",
-        }),
+        body: JSON.stringify({ identifier: clean }),
       });
-
       const data = await res.json();
       if (res.ok && data.success) {
-        setTargetUser(matched);
+        setTargetUser({
+          name: data.name || "PGEL user",
+          email: data.maskedEmail || "registered email",
+          employee_code: data.employee_code || "",
+        });
         setStep("otp");
         setOtp("");
-        setResendTimer(30); // 30-second cooldown
-        if (data.fallback) {
-          setSuccessMsg("Email delayed by mail server. Enter OTP from PM2 logs or use Emergency Code.");
-        } else {
-          setSuccessMsg(`OTP sent to your registered email (${maskEmail(emailToSend)})`);
-        }
+        setResendTimer(30);
+        setSuccessMsg(`OTP sent to ${data.maskedEmail || "your registered email"}.`);
       } else {
-        setError(data.error || "Failed to dispatch verification email. Please try again.");
+        setError(data.error || "Failed to send the verification email.");
       }
     } catch (err) {
       setError(`Unable to reach authentication service (${err.message}).`);
@@ -153,26 +79,25 @@ export default function LoginScreen({ onLogin, users = [] }) {
     setError("");
 
     const cleanOtp = otp.trim();
-    if (!cleanOtp || cleanOtp.length < 4) {
-      setError("Please enter 6-digit OTP");
+    if (!cleanOtp || cleanOtp.length !== 6) {
+      setError("Please enter the 6-digit OTP");
       return;
     }
 
     setBusy(true);
     try {
-      const email = targetUser?.email || identifier.trim();
-      const res = await fetch("/api/verify-otp", {
+      const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email,
+          identifier: identifier.trim(),
           otp: cleanOtp,
         }),
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
-        onLogin(targetUser || users[0]);
+      if (res.ok && data.success && data.user) {
+        onLogin(data.user);
       } else {
         setError(data.error || "Invalid or expired OTP code.");
       }
@@ -195,24 +120,15 @@ export default function LoginScreen({ onLogin, users = [] }) {
     setBusy(true);
     setError("");
     try {
-      const emailToSend = targetUser?.email || identifier.trim();
-      const res = await fetch("/api/send-otp", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: emailToSend,
-          name: targetUser?.name || "Colleague",
-          employee_code: targetUser?.employee_code || "PGEL",
-        }),
+        body: JSON.stringify({ identifier: identifier.trim() }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setResendTimer(30);
-        if (data.fallback) {
-          setSuccessMsg("Email delayed by mail server. Enter OTP from PM2 logs or use Emergency Code.");
-        } else {
-          setSuccessMsg(`OTP resent to your registered email (${maskEmail(emailToSend)})`);
-        }
+        setSuccessMsg(`OTP resent to ${data.maskedEmail || "your registered email"}.`);
       } else {
         setError(data.error || "Failed to resend OTP");
       }
@@ -508,9 +424,6 @@ export default function LoginScreen({ onLogin, users = [] }) {
                   <p style={{ margin: "8px 0 0", fontSize: "12px", color: "#64748b", textAlign: "center" }}>
                     Please check your Outlook inbox or <strong>Junk / Spam</strong> folder.
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#94a3b8", textAlign: "center" }}>
-                    Plant Emergency Code is supported if email delivery is delayed.
-                  </p>
                 </div>
 
                 <div className="gp-auth-links-row">
@@ -533,7 +446,7 @@ export default function LoginScreen({ onLogin, users = [] }) {
 
                 <button
                   type="submit"
-                  disabled={busy || otp.length < 4}
+                  disabled={busy || otp.length !== 6}
                   className="gp-submit-btn"
                 >
                   {busy ? (

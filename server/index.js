@@ -1,419 +1,296 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
-import dns from "dns";
-import { pool, testConnection } from "./db.js";
+import { testConnection } from "./db.js";
 import { cloudStorage } from "./storage.js";
+import { sendLoginOtp } from "./mail.js";
+import {
+  securityHeaders,
+  rejectCrossSite,
+  rateLimit,
+  requireAuth,
+  requireRole,
+  findRegisteredUser,
+  issueOtp,
+  checkOtp,
+  startSession,
+  endSession,
+  maskRegisteredEmail,
+  assertCanWriteEntry,
+  assertPlant,
+  scopeBootstrap,
+  accessiblePlantIds,
+} from "./security.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
 dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config();
 
-const DEFAULT_SMTP = {
-  host: "smtp.office365.com",
-  port: 587,
-  user: "verify.software2040@pgel.in",
-  pass: "fmdrdczrxkpjrbsv",
-};
-
-function getSmtpConfig(forceVerified = false) {
-  if (forceVerified) {
-    return DEFAULT_SMTP;
-  }
-  const host = (process.env.SMTP_HOST || DEFAULT_SMTP.host).trim();
-  const port = Number(process.env.SMTP_PORT) || DEFAULT_SMTP.port;
-  let user = (process.env.SMTP_USER || DEFAULT_SMTP.user).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
-  let pass = (process.env.SMTP_PASS || DEFAULT_SMTP.pass).trim().replace(/^["']|["']$/g, "").replace(/\r/g, "");
-
-  // If user is set to an employee account (e.g. software.2040@pgel.in or met.2060@pgel.in)
-  // or is empty, automatically use the dedicated verified automated service account
-  const lowerUser = user.toLowerCase();
-  if (
-    !user ||
-    lowerUser.includes("software.2040") ||
-    lowerUser.includes("met.2060") ||
-    lowerUser === "admin" ||
-    lowerUser === "operator"
-  ) {
-    user = DEFAULT_SMTP.user;
-    pass = DEFAULT_SMTP.pass;
-  }
-
-  return { host, port, user, pass };
-}
-
-function createMailTransporter(cfg = getSmtpConfig(false)) {
-  return nodemailer.createTransport({
-    host: cfg.host,
-    port: cfg.port,
-    secure: false,
-    auth: {
-      user: cfg.user,
-      pass: cfg.pass,
-    },
-    tls: {
-      minVersion: "TLSv1.2",
-      rejectUnauthorized: false,
-    },
-    connectionTimeout: 12000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
-}
-
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
 
-app.use(cors());
-app.use(express.json({ limit: "15mb" }));
+app.use(securityHeaders);
+app.use(rejectCrossSite);
+app.use(express.json({ limit: "2mb" }));
 
-// In-memory OTP storage
-const activeOtps = new Map();
+function sendError(res, err) {
+  const status = err.status || 400;
+  res.status(status).json({ success: false, error: err.message || "Request failed." });
+}
 
-// Health check
-app.get("/api/health", async (req, res) => {
-  const dbOk = await testConnection();
-  res.json({ status: "ok", timestamp: new Date().toISOString(), database: dbOk ? "connected" : "disconnected" });
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
 });
 
-// Diagnostic SMTP check
-app.get("/api/check-smtp", async (req, res) => {
+app.post("/api/auth/send-otp", rateLimit("send-otp", 5, 15 * 60 * 1000), async (req, res) => {
   try {
-    const cfg = getSmtpConfig(false);
-    const transporter = createMailTransporter(cfg);
-    await transporter.verify();
-    res.json({
-      status: "ok",
-      host: cfg.host,
-      port: cfg.port,
-      user: cfg.user,
-      verified: true,
-      timestamp: new Date().toISOString(),
+    const user = findRegisteredUser(req.body?.identifier);
+    if (!user || !user.email) {
+      return res.status(400).json({ success: false, error: "No registered account was found for that email or employee code." });
+    }
+    const otp = issueOtp(user);
+    await sendLoginOtp({
+      to: user.email,
+      name: user.name,
+      employeeCode: user.employee_code,
+      otp,
     });
-  } catch (err) {
-    res.status(500).json({
-      status: "error",
-      error: err.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Send OTP
-app.post("/api/send-otp", async (req, res) => {
-  try {
-    const { email, name, employee_code } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, error: "Email address is required." });
-    }
-
-    const cfg = getSmtpConfig(false);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000;
-    const emergencyOtp = (process.env.EMERGENCY_OTP || "704020").trim();
-    activeOtps.set(email.toLowerCase().trim(), { otp, expiresAt, name, employee_code });
-
-    console.log(`\n======================================================`);
-    console.log(`🔐 [AUTH] Generating OTP for ${email}...`);
-    console.log(`🔐 [AUTH] ACTIVE OTP: >>> ${otp} <<< (Valid for 10 min)`);
-    console.log(`🔑 [AUTH] Master Emergency Code: ${emergencyOtp}`);
-    console.log(`📡 [AUTH] SMTP Sender Account: ${cfg.user} | Target: ${cfg.host}:${cfg.port}`);
-    console.log(`======================================================\n`);
-
-    const mailOptions = {
-      from: `"PGEL Production Portal" <${cfg.user}>`,
-      to: email,
-      subject: `🔐 PGEL Portal Verification Code: ${otp}`,
-      text: `Hello ${name || "Colleague"},\n\nYour PGEL Portal verification code is: ${otp}\n\nThis OTP is valid for 10 minutes.\nDo not share this code with anyone.\n\nAutomated notification from PGEL Industrial Automation System.`,
-      html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">PG ELECTROPLAST LIMITED</div>
-            <div style="color: #64748b; font-size: 12.5px; margin-top: 3px;">Shop Floor Production &amp; OEE Operations Portal</div>
-          </div>
-          <div style="background: #f8fafc; border-radius: 10px; padding: 22px; text-align: center; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
-            <p style="color: #334155; font-size: 14px; margin: 0 0 10px;">Hello <strong>${name || "Colleague"}</strong> (${employee_code || "PGEL"}),</p>
-            <p style="color: #475569; font-size: 13.5px; margin: 0 0 16px;">Use this One-Time Password (OTP) to securely log in:</p>
-            <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0284c7; background: #ffffff; padding: 14px 24px; border-radius: 8px; border: 2px dashed #0284c7; display: inline-block; font-family: monospace;">
-              ${otp}
-            </div>
-            <p style="color: #dc2626; font-size: 12px; font-weight: 600; margin: 14px 0 0;">⏱️ Valid for 10 minutes. Do not disclose this code.</p>
-          </div>
-          <p style="font-size: 11.5px; color: #94a3b8; text-align: center; margin: 0;">
-            Automated notification from PGEL Industrial Automation System.
-          </p>
-        </div>
-      `,
-    };
-
-    let sent = false;
-    let lastErr = null;
-
-    try {
-      const transporter = createMailTransporter(cfg);
-      const info = await transporter.sendMail(mailOptions);
-      sent = true;
-      console.log(`[AUTH] OTP email successfully dispatched to ${email}. MessageId: ${info.messageId}`);
-    } catch (primaryErr) {
-      console.warn(`[AUTH] Primary send failed (${primaryErr.message}). Retrying with verified default account...`);
-      lastErr = primaryErr;
-
-      try {
-        const fallbackCfg = getSmtpConfig(true);
-        const fallbackTransporter = createMailTransporter(fallbackCfg);
-        const info = await fallbackTransporter.sendMail({
-          ...mailOptions,
-          from: `"PGEL Production Portal" <${fallbackCfg.user}>`,
-        });
-        sent = true;
-        console.log(`[AUTH] Fallback OTP dispatch succeeded to ${email}. MessageId: ${info.messageId}`);
-      } catch (fallbackErr) {
-        console.error(`[AUTH] Fallback dispatch failed:`, fallbackErr.message);
-        lastErr = fallbackErr;
-      }
-    }
-
-    if (!sent) {
-      console.warn(`⚠️ [AUTH] Email delivery failed (${lastErr?.message}). Fallback OTP available in console/PM2 logs: ${otp} or Emergency Code: ${emergencyOtp}`);
-      return res.json({
-        success: true,
-        fallback: true,
-        message: "Email dispatch delayed by mail provider. You can check PM2 logs or use Master Emergency Code.",
-      });
-    }
-
     return res.json({
       success: true,
-      message: "Verification code sent to your registered email address.",
+      name: user.name,
+      employee_code: user.employee_code || "",
+      maskedEmail: maskRegisteredEmail(user),
     });
   } catch (err) {
-    console.error("[AUTH] Send OTP error:", err.message);
-    return res.status(500).json({ success: false, error: `Email delivery failed (${err.message}). Please check SMTP settings.` });
+    console.error("[AUTH] OTP email failed:", err.message);
+    return res.status(err.status || 503).json({
+      success: false,
+      error: "Could not send the verification email. Try again in a minute.",
+    });
   }
 });
 
-// Verify OTP (Genuine 6-digit cryptographic OTP from email or Emergency Master Code)
-app.post("/api/verify-otp", async (req, res) => {
+app.post("/api/auth/verify-otp", rateLimit("verify-otp", 10, 15 * 60 * 1000), (req, res) => {
+  const user = findRegisteredUser(req.body?.identifier);
+  if (!user) {
+    return res.status(400).json({ success: false, error: "Invalid or expired verification code." });
+  }
+  const result = checkOtp(user, req.body?.otp);
+  if (result !== "ok") {
+    const error = result === "expired"
+      ? "The verification code has expired. Request a new code."
+      : "Invalid or expired verification code.";
+    return res.status(400).json({ success: false, error });
+  }
+  const sessionUser = startSession(req, res, user);
+  return res.json({ success: true, user: sessionUser });
+});
+
+app.post("/api/auth/logout", (req, res) => {
+  endSession(req, res);
+  res.json({ success: true });
+});
+
+app.get("/api/auth/me", requireAuth, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
+app.get("/api/bootstrap", requireAuth, (req, res) => {
   try {
-    const { email, otp } = req.body;
-    const cleanEmail = (email || "").toLowerCase().trim();
-    const cleanOtp = (otp || "").toString().trim();
-    const emergencyOtp = (process.env.EMERGENCY_OTP || "704020").trim();
-
-    // 1. Emergency master bypass code - works for any account even if email delivery fails
-    if (cleanOtp === emergencyOtp) {
-      console.log(`🔑 [AUTH] Master Emergency OTP used for ${cleanEmail}`);
-      return res.json({ success: true, emergency: true });
-    }
-
-    // 2. Active OTP verification
-    let record = activeOtps.get(cleanEmail);
-    if (!record) {
-      // Also check if cleanEmail was employee code or username
-      for (const [k, v] of activeOtps.entries()) {
-        if (
-          k === cleanEmail ||
-          v.employee_code?.toLowerCase() === cleanEmail ||
-          (cleanEmail === "admin" && k === "software.2040@pgel.in") ||
-          (cleanEmail === "operator" && k === "met.2060@pgel.in")
-        ) {
-          record = v;
-          break;
-        }
-      }
-    }
-
-    if (!record) {
-      return res.status(400).json({
-        success: false,
-        error: "No active verification code found for this user. Please request a new OTP.",
-      });
-    }
-
-    if (Date.now() >= record.expiresAt) {
-      activeOtps.delete(cleanEmail);
-      return res.status(400).json({
-        success: false,
-        error: "The verification code has expired (10-minute limit). Please request a new code.",
-      });
-    }
-
-    if (record.otp !== cleanOtp) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid security code. Please check the 6-digit code in your email and try again.",
-      });
-    }
-
-    activeOtps.delete(cleanEmail);
-    return res.json({ success: true });
+    res.json(scopeBootstrap(req.user));
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-// Bootstrap initial data for frontend
-app.get("/api/bootstrap", (req, res) => {
-  try {
-    const data = cloudStorage.getBootstrap();
-    res.json(data);
-  } catch (err) {
-    console.error("Bootstrap error:", err);
-    res.status(500).json({ error: "Failed to load bootstrap data", details: err.message });
-  }
+app.get("/api/users", requireAuth, requireRole("admin"), (_req, res) => {
+  res.json({ success: true, users: cloudStorage.getUsers() });
 });
 
-// Users API (Cloud-persisted for all PCs)
-app.get("/api/users", (req, res) => {
+app.post("/api/users", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    res.json({ success: true, users: cloudStorage.getUsers() });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.post("/api/users", (req, res) => {
-  try {
-    const user = cloudStorage.saveUser(req.body);
+    const role = ["operator", "supervisor", "plant_head", "admin"].includes(req.body?.role)
+      ? req.body.role
+      : "operator";
+    const user = cloudStorage.saveUser({ ...req.body, role });
     res.json({ success: true, user });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.delete("/api/users/:id", (req, res) => {
+app.delete("/api/users/:id", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ success: false, error: "You cannot delete the account you are logged in with." });
+    }
     const ok = cloudStorage.deleteUser(req.params.id);
     res.json({ success: ok });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-// Entries API (Cloud-persisted for all PCs)
-app.get("/api/entries", (req, res) => {
-  try {
-    let entries = cloudStorage.getEntries();
-    // Optional incremental sync: only return entries updated after ?since=ISO_TIMESTAMP
-    const { since } = req.query;
-    if (since) {
-      const sinceDate = new Date(since);
-      if (!isNaN(sinceDate)) {
-        entries = entries.filter((e) => e.updated_at && new Date(e.updated_at) > sinceDate);
-      }
+app.get("/api/entries", requireAuth, (req, res) => {
+  const data = cloudStorage.getBootstrap();
+  const allowed = new Set(accessiblePlantIds(req.user, data.plants));
+  let entries = data.entries.filter((e) => allowed.has(String(e.plant_id)));
+  const since = req.query.since;
+  if (since) {
+    const sinceDate = new Date(since);
+    if (!Number.isNaN(sinceDate.getTime())) {
+      entries = entries.filter((e) => e.updated_at && new Date(e.updated_at) > sinceDate);
     }
-    res.json({ success: true, entries });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
   }
+  res.json({ success: true, entries });
 });
 
-app.post("/api/entries", (req, res) => {
+app.post("/api/entries", requireAuth, (req, res) => {
   try {
-    const saved = cloudStorage.saveEntry(req.body);
+    const entry = { ...req.body };
+    const existing = entry.entry_id
+      ? cloudStorage.getEntries().find((e) => e.entry_id === entry.entry_id)
+      : null;
+    if (existing) {
+      assertPlant(req.user, existing.plant_id);
+      entry.plant_id = existing.plant_id;
+      entry.entered_by = existing.entered_by || req.user.id;
+      entry.entered_by_name = existing.entered_by_name || req.user.name;
+    } else if (req.user.role === "operator") {
+      entry.entered_by = req.user.id;
+      entry.entered_by_name = req.user.name;
+    }
+    assertCanWriteEntry(req.user, entry);
+    const saved = cloudStorage.saveEntry(entry);
     res.json({ success: true, entry: saved });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.post("/api/entries/batch", (req, res) => {
+app.post("/api/entries/batch", requireAuth, (req, res) => {
   try {
-    const list = Array.isArray(req.body) ? req.body : (req.body.entries || []);
-    const processed = cloudStorage.saveEntriesBatch(list);
+    const list = Array.isArray(req.body) ? req.body : (req.body?.entries || []);
+    const prepared = list.map((entry) => {
+      assertCanWriteEntry(req.user, entry || {});
+      if (req.user.role !== "operator") return entry;
+      return { ...entry, entered_by: req.user.id, entered_by_name: req.user.name };
+    });
+    const processed = cloudStorage.saveEntriesBatch(prepared);
     res.json({ success: true, entries: processed, count: processed.length });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.put("/api/entries/:id", (req, res) => {
+app.put("/api/entries/:id", requireAuth, (req, res) => {
   try {
-    const updated = cloudStorage.saveEntry({ ...req.body, entry_id: req.params.id });
-    if (req.body.auditEntry) {
-      cloudStorage.addAuditLog(req.body.auditEntry);
+    const existing = cloudStorage.getEntries().find((e) => e.entry_id === req.params.id);
+    if (!existing) return res.status(404).json({ success: false, error: "Entry not found." });
+    assertPlant(req.user, existing.plant_id);
+    const entry = { ...existing, ...req.body, entry_id: req.params.id, plant_id: existing.plant_id };
+    entry.entered_by = existing.entered_by;
+    entry.entered_by_name = existing.entered_by_name;
+    assertCanWriteEntry(req.user, entry);
+    const updated = cloudStorage.saveEntry(entry);
+    if (req.user.role === "admin" && req.body?.auditEntry) {
+      cloudStorage.addAuditLog({
+        ...req.body.auditEntry,
+        changed_by: req.user.id,
+        changed_by_name: req.user.name,
+      });
     }
     res.json({ success: true, entry: updated });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.delete("/api/entries/:id", (req, res) => {
+app.delete("/api/entries/:id", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    const existing = cloudStorage.getEntries().find((e) => e.entry_id === req.params.id);
+    if (existing) assertPlant(req.user, existing.plant_id);
     const ok = cloudStorage.deleteEntry(req.params.id);
     res.json({ success: ok });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-// Master Products API
-app.post("/api/master/products", (req, res) => {
+app.post("/api/master/products", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    assertPlant(req.user, req.body?.plant_id);
     const product = cloudStorage.saveProduct(req.body);
     res.json({ success: true, product });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.delete("/api/master/products/:sap_code", (req, res) => {
+app.delete("/api/master/products/:sap_code", requireAuth, requireRole("admin"), (req, res) => {
   try {
     const ok = cloudStorage.deleteProduct(req.params.sap_code);
     res.json({ success: ok });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-// Master Machines API
-app.post("/api/master/machines", (req, res) => {
+app.post("/api/master/machines", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    assertPlant(req.user, req.body?.plant_id);
     const machine = cloudStorage.saveMachine(req.body);
     res.json({ success: true, machine });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.delete("/api/master/machines/:id", (req, res) => {
+app.delete("/api/master/machines/:id", requireAuth, requireRole("admin"), (req, res) => {
   try {
     const ok = cloudStorage.deleteMachine(req.params.id);
     res.json({ success: ok });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-app.post("/api/access-requests", (req, res) => {
+app.post("/api/access-requests", requireAuth, requireRole("operator"), (req, res) => {
   try {
-    const request = cloudStorage.createAccessRequest(req.body || {});
-    res.json({ success: true, request });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
-
-app.post("/api/access-requests/:id/decide", (req, res) => {
-  try {
-    const request = cloudStorage.decideAccessRequest(req.params.id, {
-      approve: Boolean(req.body?.approve),
-      decided_by: req.body?.decided_by,
-      decided_by_name: req.body?.decided_by_name,
+    assertPlant(req.user, req.body?.plant_id);
+    const request = cloudStorage.createAccessRequest({
+      ...req.body,
+      plant_id: req.body?.plant_id,
+      requested_by: req.user.id,
+      requested_by_name: req.user.name,
     });
     res.json({ success: true, request });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    sendError(res, err);
   }
 });
 
-// Run lock-cutoff
-app.post("/api/lock-cutoff", (req, res) => {
+app.post("/api/access-requests/:id/decide", requireAuth, requireRole("plant_head", "admin"), (req, res) => {
+  try {
+    const existing = cloudStorage.listAccessRequests().find((r) => r.id === req.params.id);
+    if (!existing) return res.status(404).json({ success: false, error: "Request not found." });
+    assertPlant(req.user, existing.plant_id);
+    const request = cloudStorage.decideAccessRequest(req.params.id, {
+      approve: Boolean(req.body?.approve),
+      decided_by: req.user.id,
+      decided_by_name: req.user.name,
+    });
+    res.json({ success: true, request });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
   try {
     const entries = cloudStorage.getEntries();
     const grants = cloudStorage.listAccessRequests();
@@ -432,7 +309,6 @@ app.post("/api/lock-cutoff", (req, res) => {
     };
     let lockedCount = 0;
     for (const e of entries) {
-      // Exemption: 1 Oct through 16 Oct 2026 entries are never locked
       const shiftDay = String(e.shift_date || "").slice(0, 10);
       if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
         if (e.status === "locked") {
@@ -442,7 +318,6 @@ app.post("/api/lock-cutoff", (req, res) => {
         }
         continue;
       }
-
       if (coveredByGrant(e)) {
         if (e.status === "locked") {
           e.status = "submitted";
@@ -451,16 +326,13 @@ app.post("/api/lock-cutoff", (req, res) => {
         }
         continue;
       }
-
       if (e.status === "submitted") {
         let graceHours = 24;
         if (e.shift_date) {
           const parts = e.shift_date.split("-").map(Number);
           if (parts.length === 3) {
             const shiftDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-            if (shiftDateObj.getDay() === 6) {
-              graceHours = 48; // Saturday shift gets 48 hours
-            }
+            if (shiftDateObj.getDay() === 6) graceHours = 48;
           }
         }
         const cutoff = now - graceHours * 60 * 60 * 1000;
@@ -475,18 +347,19 @@ app.post("/api/lock-cutoff", (req, res) => {
     }
     res.json({ success: true, lockedCount });
   } catch (err) {
-    res.status(500).json({ error: "Lock cutoff error", details: err.message });
+    sendError(res, err);
   }
+});
+
+app.use("/api", (_req, res) => {
+  res.status(404).json({ success: false, error: "Not found." });
 });
 
 app.listen(PORT, async () => {
   console.log(`Molding MIS Backend API running on port ${PORT}`);
-  try {
-    const testCfg = getSmtpConfig(false);
-    const testTransporter = createMailTransporter(testCfg);
-    await testTransporter.verify();
-    console.log(`✅ [SMTP] Office 365 Connected & Ready for OTP delivery via ${testCfg.user}`);
-  } catch (smtpErr) {
-    console.warn(`⚠️ [SMTP] Startup verify notice (${smtpErr.message}) - service will dispatch on demand.`);
+  const dbOk = await testConnection().catch(() => false);
+  if (!dbOk) console.warn("[DB] Database check did not connect. JSON store is still in use.");
+  if (!process.env.SMTP_PASS || !process.env.SMTP_USER) {
+    console.warn("[AUTH] SMTP_USER and SMTP_PASS are not set. Login emails will fail until they are added to .env.");
   }
 });

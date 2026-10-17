@@ -1,9 +1,5 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
-  SEED_MASTER,
-  USERS,
-  SEED_ENTRIES,
-  MACHINES,
   SHIFTS,
   REASON_CODES,
   LOCATIONS,
@@ -17,7 +13,7 @@ import {
   isDateInUnlockedWindow,
   presentEntry,
 } from "./lib/calculations.js";
-import { loadState, saveState, loadSession, saveSession } from "./lib/storage.js";
+import { loadState, saveState, saveSession } from "./lib/storage.js";
 import {
   getUserAccessiblePlants,
   getUserAccessibleLocations,
@@ -71,49 +67,8 @@ function defaultTabFor(role) {
 export default function App() {
   const saved = loadState();
 
-  const [master, setMaster] = useState(() => {
-    const loaded = saved?.master;
-    if (!loaded || !Array.isArray(loaded) || loaded.length < 1500 || !loaded.some((p) => p.plant_id === "2020")) {
-      return SEED_MASTER;
-    }
-    const currentList = loaded.map((p) => {
-      if (!p.plant_id) {
-        return { ...p, plant_id: "1040" };
-      }
-      return p;
-    });
-    const existingKeys = new Set(currentList.map((m) => `${m.plant_id || "1040"}_${m.sap_code}`));
-    SEED_MASTER.forEach((sm) => {
-      const key = `${sm.plant_id || "1040"}_${sm.sap_code}`;
-      if (!existingKeys.has(key)) {
-        currentList.push(sm);
-        existingKeys.add(key);
-      }
-    });
-    return currentList;
-  });
-
-  const [machines, setMachines] = useState(() => {
-    const loaded = saved?.machines;
-    if (!loaded || !loaded.some((m) => m.plant_id === "1040") || !loaded.some((m) => m.plant_id === "2020")) {
-      return MACHINES;
-    }
-    const currentList = loaded
-      .filter((m) => !m.machine_id?.startsWith("MC-GN") && !m.machine_id?.startsWith("MC-BHI"))
-      .map((m) => {
-        const seedM = MACHINES.find((sm) => sm.machine_id === m.machine_id);
-        if (seedM) {
-          return { ...m, plant_id: seedM.plant_id };
-        }
-        return m;
-      });
-    MACHINES.forEach((sm) => {
-      if (!currentList.some((m) => m.machine_id === sm.machine_id)) {
-        currentList.push(sm);
-      }
-    });
-    return currentList;
-  });
+  const [master, setMaster] = useState(() => (Array.isArray(saved?.master) ? saved.master : []));
+  const [machines, setMachines] = useState(() => (Array.isArray(saved?.machines) ? saved.machines : []));
 
   const [shifts, setShifts] = useState(() => {
     const loaded = saved?.shifts;
@@ -177,39 +132,7 @@ export default function App() {
     return currentList;
   });
 
-  const [users, setUsers] = useState(() => {
-    const loaded = saved?.users ?? USERS;
-    // Purge demo users (priya, ramesh, suresh)
-    const filtered = loaded.filter(
-      (u) =>
-        !["u_priya", "u_ramesh", "u_suresh"].includes(u.id) &&
-        !["priya", "ramesh", "suresh"].includes(u.username)
-    );
-    const list = [...filtered];
-    // Ensure all seed accounts from USERS are present
-    for (const su of USERS) {
-      if (!list.some((u) => u.id === su.id || u.email?.toLowerCase() === su.email?.toLowerCase())) {
-        list.push(su);
-      }
-    }
-    return list.map((u) => {
-      if (u.username === "admin" || u.id === "u_admin") {
-        return {
-          ...u,
-          id: "u_admin",
-          username: "admin",
-          email: "software.2040@pgel.in",
-          employee_code: u.employee_code || "PG-001",
-          name: "System Administrator",
-          role: "admin",
-          assigned_location_id: "all",
-          assigned_location_ids: ["all"],
-          assigned_plant_ids: ["all"],
-        };
-      }
-      return u;
-    });
-  });
+  const [users, setUsers] = useState(() => (Array.isArray(saved?.users) ? saved.users : []));
 
   const [selectedPlantId, setSelectedPlantId] = useState(() => {
     if (saved?.selectedPlantId && saved.selectedPlantId !== "PLANT-U01" && saved.selectedPlantId !== "PLANT-U02" && saved.selectedPlantId !== "PLANT-U03") {
@@ -233,7 +156,7 @@ export default function App() {
   );
 
   const [entries, setEntries] = useState(() => {
-    const loaded = saved?.entries ?? SEED_ENTRIES;
+    const loaded = saved?.entries ?? [];
     return loaded.map((e) => {
       if (e.plant_id === "PLANT-U01" || e.plant_id === "PLANT-U02" || e.plant_id === "PLANT-U03") {
         return { ...e, plant_id: "1040" };
@@ -253,32 +176,8 @@ export default function App() {
   }, []);
 
   
-  // Session State: authenticated user from localStorage session, or null (prompts login)
-  const [currentUser, setCurrentUser] = useState(() => {
-    const sess = loadSession();
-    if (sess) {
-      const loadedUsers = saved?.users ?? USERS;
-      const match = loadedUsers.find(
-        (u) => u.id === sess.id || u.username?.toLowerCase() === sess.username?.toLowerCase()
-      );
-      if (match) {
-        const seedMatch = USERS.find((su) => su.username === match.username || su.id === match.id);
-        const assignedLocId = match.assigned_location_id ?? seedMatch?.assigned_location_id ?? "all";
-        const assignedLocIds =
-          match.assigned_location_ids ??
-          (match.assigned_location_id ? [match.assigned_location_id] : seedMatch?.assigned_location_ids ?? ["all"]);
-        const assignedPlants = match.assigned_plant_ids ?? seedMatch?.assigned_plant_ids ?? ["all"];
-        return {
-          ...match,
-          assigned_location_id: assignedLocId,
-          assigned_location_ids: assignedLocIds,
-          assigned_plant_ids: assignedPlants,
-        };
-      }
-      return sess;
-    }
-    return null;
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Calculate accessible plants & locations for the logged-in user
   const accessiblePlants = useMemo(() => {
@@ -312,7 +211,7 @@ export default function App() {
     return entries.filter((e) => accessiblePlants.some((p) => p.plant_id === e.plant_id));
   }, [entries, currentUser, accessiblePlants]);
 
-  const [tab, setTab] = useState(() => defaultTabFor(loadSession()?.role));
+  const [tab, setTab] = useState("entry");
   const [editing, setEditing] = useState(null);
 
   // Persist master data, config, and entries to localStorage
@@ -361,8 +260,36 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shifts]);
 
+  useEffect(() => {
+    let live = true;
+    fetch("/api/auth/me")
+      .then(async (r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!live) return;
+        if (data?.user) {
+          setCurrentUser(data.user);
+          saveSession(data.user);
+          setTab(defaultTabFor(data.user.role));
+        } else {
+          setCurrentUser(null);
+          saveSession(null);
+        }
+        setAuthChecked(true);
+      })
+      .catch(() => {
+        if (!live) return;
+        setCurrentUser(null);
+        saveSession(null);
+        setAuthChecked(true);
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+
   // Central AWS Cloud Sync: smart merge — never overwrite rows operator is actively editing
   useEffect(() => {
+    if (!currentUser) return;
     let isMounted = true;
 
     // Smart merge: cloud data wins ONLY for machines not currently dirty (being typed in)
@@ -414,9 +341,18 @@ export default function App() {
     async function syncFromCloud() {
       try {
         const res = await fetch("/api/bootstrap");
+        if (res.status === 401) {
+          setCurrentUser(null);
+          saveSession(null);
+          return;
+        }
         if (!res.ok) return;
         const data = await res.json();
         if (!isMounted) return;
+        if (data.currentUser) {
+          setCurrentUser(data.currentUser);
+          saveSession(data.currentUser);
+        }
 
         // Deep-compare helper: only update state if data actually changed.
         // This prevents React from re-rendering children (and triggering EntryForm's
@@ -472,7 +408,7 @@ export default function App() {
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   function handleLogin(user) {
@@ -482,6 +418,7 @@ export default function App() {
   }
 
   function handleLogout() {
+    fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     setCurrentUser(null);
     saveSession(null);
     setTab("entry");
@@ -606,6 +543,14 @@ export default function App() {
       return;
     }
     setEditing(entry);
+  }
+
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Segoe UI, sans-serif", color: "#334155" }}>
+        Checking session…
+      </div>
+    );
   }
 
   // If user is not authenticated, present the enterprise Login Screen
