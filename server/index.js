@@ -36,6 +36,7 @@ app.disable("x-powered-by");
 app.use(securityHeaders);
 app.use(rejectCrossSite);
 app.use(express.json({ limit: "2mb" }));
+const limitWrites = rateLimit("write", 300, 60 * 1000);
 
 function sendError(res, err) {
   const status = err.status || 400;
@@ -149,7 +150,7 @@ app.get("/api/entries", requireAuth, (req, res) => {
   res.json({ success: true, entries });
 });
 
-app.post("/api/entries", requireAuth, (req, res) => {
+app.post("/api/entries", requireAuth, limitWrites, (req, res) => {
   try {
     const entry = { ...req.body };
     const existing = entry.entry_id
@@ -172,13 +173,28 @@ app.post("/api/entries", requireAuth, (req, res) => {
   }
 });
 
-app.post("/api/entries/batch", requireAuth, (req, res) => {
+app.post("/api/entries/batch", requireAuth, limitWrites, (req, res) => {
   try {
     const list = Array.isArray(req.body) ? req.body : (req.body?.entries || []);
-    const prepared = list.map((entry) => {
-      assertCanWriteEntry(req.user, entry || {});
-      if (req.user.role !== "operator") return entry;
-      return { ...entry, entered_by: req.user.id, entered_by_name: req.user.name };
+    if (list.length > 200) {
+      return res.status(400).json({ success: false, error: "Too many entries in one request." });
+    }
+    const prepared = list.map((raw) => {
+      const entry = { ...raw };
+      const existing = entry.entry_id
+        ? cloudStorage.getEntries().find((e) => e.entry_id === entry.entry_id)
+        : null;
+      if (existing) {
+        assertPlant(req.user, existing.plant_id);
+        entry.plant_id = existing.plant_id;
+        entry.entered_by = existing.entered_by || req.user.id;
+        entry.entered_by_name = existing.entered_by_name || req.user.name;
+      } else if (req.user.role === "operator") {
+        entry.entered_by = req.user.id;
+        entry.entered_by_name = req.user.name;
+      }
+      assertCanWriteEntry(req.user, entry);
+      return entry;
     });
     const processed = cloudStorage.saveEntriesBatch(prepared);
     res.json({ success: true, entries: processed, count: processed.length });
@@ -187,7 +203,7 @@ app.post("/api/entries/batch", requireAuth, (req, res) => {
   }
 });
 
-app.put("/api/entries/:id", requireAuth, (req, res) => {
+app.put("/api/entries/:id", requireAuth, limitWrites, (req, res) => {
   try {
     const existing = cloudStorage.getEntries().find((e) => e.entry_id === req.params.id);
     if (!existing) return res.status(404).json({ success: false, error: "Entry not found." });
@@ -233,7 +249,10 @@ app.post("/api/master/products", requireAuth, requireRole("admin"), (req, res) =
 
 app.delete("/api/master/products/:sap_code", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    const ok = cloudStorage.deleteProduct(req.params.sap_code);
+    const plantId = String(req.query.plant_id || "");
+    if (!plantId) return res.status(400).json({ success: false, error: "Plant is required." });
+    assertPlant(req.user, plantId);
+    const ok = cloudStorage.deleteProduct(req.params.sap_code, plantId);
     res.json({ success: ok });
   } catch (err) {
     sendError(res, err);
@@ -242,6 +261,10 @@ app.delete("/api/master/products/:sap_code", requireAuth, requireRole("admin"), 
 
 app.post("/api/master/machines", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    const existing = cloudStorage.getBootstrap().machines.find(
+      (m) => m.machine_id === String(req.body?.machine_id || "").trim().toUpperCase()
+    );
+    if (existing) assertPlant(req.user, existing.plant_id);
     assertPlant(req.user, req.body?.plant_id);
     const machine = cloudStorage.saveMachine(req.body);
     res.json({ success: true, machine });
@@ -252,6 +275,8 @@ app.post("/api/master/machines", requireAuth, requireRole("admin"), (req, res) =
 
 app.delete("/api/master/machines/:id", requireAuth, requireRole("admin"), (req, res) => {
   try {
+    const existing = cloudStorage.getBootstrap().machines.find((m) => m.machine_id === req.params.id);
+    if (existing) assertPlant(req.user, existing.plant_id);
     const ok = cloudStorage.deleteMachine(req.params.id);
     res.json({ success: ok });
   } catch (err) {
@@ -353,6 +378,11 @@ app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
 
 app.use("/api", (_req, res) => {
   res.status(404).json({ success: false, error: "Not found." });
+});
+
+app.use((err, _req, res, _next) => {
+  console.error("[API]", err.message);
+  res.status(err.status || 400).json({ success: false, error: "Request failed." });
 });
 
 app.listen(PORT, async () => {

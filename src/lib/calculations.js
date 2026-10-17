@@ -1,4 +1,4 @@
-import { REASON_CODES } from "../data/seedData.js";
+import { REASON_CODES } from "../data/referenceData.js";
 import { familyInPlant } from "../data/familyMolds.js";
 
 /**

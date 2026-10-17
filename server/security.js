@@ -260,6 +260,13 @@ export function checkOtp(user, otp) {
 }
 
 export function startSession(req, res, user) {
+  const mine = [...sessions.values()]
+    .filter((s) => s.userId === user.id)
+    .sort((a, b) => a.expiresAt - b.expiresAt);
+  while (mine.length >= 5) {
+    const oldest = mine.shift();
+    sessions.delete(oldest.token);
+  }
   const token = crypto.randomBytes(32).toString("hex");
   sessions.set(token, { token, userId: user.id, expiresAt: Date.now() + SESSION_MS });
   persistSessions();

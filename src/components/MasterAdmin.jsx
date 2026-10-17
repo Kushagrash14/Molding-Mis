@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { formatUserScopeLabel, getUserAccessiblePlants } from "../lib/permissions.js";
 import { calculateShiftDuration } from "../lib/calculations.js";
-import { SHIFTS } from "../data/seedData.js";
+import { SHIFTS } from "../data/referenceData.js";
 import { familyInPlant } from "../data/familyMolds.js";
 import PlantAccessMatrixSelector from "./PlantAccessMatrixSelector.jsx";
 
@@ -275,10 +275,10 @@ export default function MasterAdmin({
     setEditingProduct(null);
   }
 
-  function handleDeleteProduct(sap_code) {
+  function handleDeleteProduct(sap_code, plant_id) {
     if (confirm(`Are you sure you want to remove SAP product "${sap_code}" from Master?`)) {
-      setMaster((prev) => prev.filter((m) => m.sap_code !== sap_code));
-      fetch(`/api/master/products/${encodeURIComponent(sap_code)}`, {
+      setMaster((prev) => prev.filter((m) => !(m.sap_code === sap_code && m.plant_id === plant_id)));
+      fetch(`/api/master/products/${encodeURIComponent(sap_code)}?plant_id=${encodeURIComponent(plant_id || "")}`, {
         method: "DELETE",
       }).catch((err) => console.error("Cloud product delete error:", err));
     }
@@ -1361,7 +1361,7 @@ export default function MasterAdmin({
                           <button
                             className="btn small secondary"
                             style={{ color: "var(--danger, #dc2626)" }}
-                            onClick={() => handleDeleteProduct(m.sap_code)}
+                            onClick={() => handleDeleteProduct(m.sap_code, m.plant_id)}
                           >
                             Delete
                           </button>

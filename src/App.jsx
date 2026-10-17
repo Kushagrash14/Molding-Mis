@@ -4,7 +4,7 @@ import {
   REASON_CODES,
   LOCATIONS,
   PLANTS,
-} from "./data/seedData.js";
+} from "./data/referenceData.js";
 import {
   todayStr,
   getProductionShiftDate,
@@ -13,7 +13,7 @@ import {
   isDateInUnlockedWindow,
   presentEntry,
 } from "./lib/calculations.js";
-import { loadState, saveState, saveSession } from "./lib/storage.js";
+import { loadState, saveState, saveSession, clearState } from "./lib/storage.js";
 import {
   getUserAccessiblePlants,
   getUserAccessibleLocations,
@@ -419,6 +419,7 @@ export default function App() {
 
   function handleLogout() {
     fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    clearState();
     setCurrentUser(null);
     saveSession(null);
     setTab("entry");

@@ -355,7 +355,8 @@ export const cloudStorage = {
     const cleanSap = (product.sap_code || "").trim();
     if (!cleanSap) throw new Error("SAP code is required");
 
-    const idx = s.master.findIndex((p) => p.sap_code === cleanSap);
+    const plantId = String(product.plant_id || "1040");
+    const idx = s.master.findIndex((p) => p.sap_code === cleanSap && String(p.plant_id || "1040") === plantId);
     const prodObj = {
       ...product,
       sap_code: cleanSap,
@@ -373,10 +374,10 @@ export const cloudStorage = {
     return prodObj;
   },
 
-  deleteProduct(sap_code) {
+  deleteProduct(sap_code, plantId) {
     const s = loadStore();
     const initialLen = s.master.length;
-    s.master = s.master.filter((p) => p.sap_code !== sap_code);
+    s.master = s.master.filter((p) => !(p.sap_code === sap_code && String(p.plant_id || "1040") === String(plantId || "")));
     if (s.master.length !== initialLen) {
       saveStore();
       return true;
