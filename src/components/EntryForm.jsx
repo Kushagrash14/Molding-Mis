@@ -693,7 +693,7 @@ export default function EntryForm({
   );
 
   // Save a single machine's entry
-  const handleSaveMachineEntry = useCallback((machineId) => {
+  const handleSaveMachineEntry = useCallback((machineId, options = {}) => {
     const runs = sheetData[machineId];
     if (!runs || runs.length === 0) return;
 
@@ -865,9 +865,9 @@ export default function EntryForm({
     const existing = entries.find(
       (e) =>
         e.machine_id === machineId &&
-        e.shift_date === shiftDate &&
-        e.shift_id === shift &&
-        (!plant || e.plant_id === plant)
+        String(e.shift_date || "").slice(0, 10) === String(shiftDate || "").slice(0, 10) &&
+        String(e.shift_id || "") === String(shift || "") &&
+        (!plant || String(e.plant_id || "1040") === String(plant))
     );
 
     const entry = {
@@ -899,14 +899,21 @@ export default function EntryForm({
       last_edited_at: existing ? new Date().toISOString() : null,
     };
 
-    onSubmit(entry);
-
-    setDirtyMachines((prev) => {
-      const next = new Set(prev);
-      next.delete(machineId);
-      return next;
-    });
-    setSavedMachines((prev) => new Set(prev).add(machineId));
+    return Promise.resolve(onSubmit(entry))
+      .then(() => {
+        setDirtyMachines((prev) => {
+          const next = new Set(prev);
+          next.delete(machineId);
+          return next;
+        });
+        setSavedMachines((prev) => new Set(prev).add(machineId));
+      })
+      .catch((err) => {
+        if (!options.quiet) {
+          alert(`Machine ${machineId} was not saved. ${err.message || "Server rejected the entry."}`);
+        }
+        throw err;
+      });
   }, [sheetData, master, selectedShift, entries, shiftDate, shift, plant, isPastTwelveHours, currentUser, onSubmit, prevShiftMap, reasonCodes]);
 
   // Save all modified machines in batch
@@ -923,13 +930,15 @@ export default function EntryForm({
       return;
     }
 
-    let savedCount = 0;
-    toSave.forEach((mId) => {
-      handleSaveMachineEntry(mId);
-      savedCount++;
+    Promise.allSettled(toSave.map((mId) => handleSaveMachineEntry(mId, { quiet: true }))).then((results) => {
+      const savedCount = results.filter((r) => r.status === "fulfilled").length;
+      const failedCount = results.length - savedCount;
+      if (failedCount === 0) {
+        alert(`Saved ${savedCount} machine entries for ${selectedShift.name || `Shift ${shift}`}.`);
+      } else {
+        alert(`Saved ${savedCount}. ${failedCount} could not be saved. Those rows are still marked unsaved.`);
+      }
     });
-
-    alert(`Successfully saved ${savedCount} machine entries for ${selectedShift.name || `Shift ${shift}`}!`);
   }, [dirtyMachines, sheetData, handleSaveMachineEntry, selectedShift, shift, reasonCodes]);
 
   // Filter machines for table rendering based on search and status

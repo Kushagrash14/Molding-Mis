@@ -463,7 +463,7 @@ export default function App() {
       return [entryToSave, ...prev];
     });
 
-    fetch("/api/entries", {
+    return fetch("/api/entries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(entryToSave),
@@ -475,10 +475,11 @@ export default function App() {
         }
         pendingEntryIdsRef.current.delete(entryToSave.entry_id);
         setEntries((prev) => prev.map((e) => (e.entry_id === entryToSave.entry_id ? data.entry : e)));
+        return data.entry;
       })
       .catch((err) => {
         console.error("Cloud save entry error:", err);
-        alert(`Entry for ${entryToSave.machine_id} on ${entryToSave.shift_date} was not saved. ${err.message}`);
+        throw err;
       });
   }
 
