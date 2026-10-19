@@ -169,6 +169,7 @@ export default function App() {
 
   // Ref to track which machine_ids operator is actively typing in (never overwrite these during sync)
   const dirtyMachinesRef = useRef(new Set());
+  const pendingEntryIdsRef = useRef(new Set());
 
   // Callback passed to EntryForm so it can report dirty machines in real-time
   const handleDirtyChange = useCallback((dirtySet) => {
@@ -296,9 +297,18 @@ export default function App() {
     function smartMergeEntries(incomingEntries) {
       setEntries((prev) => {
         const dirty = dirtyMachinesRef.current; // Set<machine_id> currently being edited
+        const pending = pendingEntryIdsRef.current;
+        const entryKey = (e) =>
+          `${String(e.shift_date || "").slice(0, 10)}__${String(e.shift_id || "")}__${e.machine_id}__${String(e.plant_id || "1040")}`;
         if (!dirty || dirty.size === 0) {
-          // No active editing — safe to take cloud data as-is
-          return incomingEntries.map(presentEntry);
+          const cloud = incomingEntries.map(presentEntry);
+          const seen = new Set(cloud.map(entryKey));
+          for (const localEntry of prev) {
+            if (pending.has(localEntry.entry_id) && !seen.has(entryKey(localEntry))) {
+              cloud.push(localEntry);
+            }
+          }
+          return cloud;
         }
         // Build a map of current local entries for fast lookup
         const localMap = new Map(prev.map((e) => [e.entry_id, e]));
@@ -307,7 +317,7 @@ export default function App() {
 
         // Process cloud entries
         for (const cloudEntry of incomingEntries) {
-          const key = `${cloudEntry.shift_date}__${cloudEntry.shift_id}__${cloudEntry.machine_id}__${cloudEntry.plant_id || "1040"}`;
+          const key = entryKey(cloudEntry);
           if (dirty.has(cloudEntry.machine_id)) {
             // Operator is actively editing this machine → keep local version
             const localVer = localMap.get(cloudEntry.entry_id) ||
@@ -328,8 +338,8 @@ export default function App() {
 
         // Preserve any purely local entries (dirty rows not yet on cloud for today)
         for (const localEntry of prev) {
-          const key = `${localEntry.shift_date}__${localEntry.shift_id}__${localEntry.machine_id}__${localEntry.plant_id || "1040"}`;
-          if (!handled.has(key) && dirty.has(localEntry.machine_id)) {
+          const key = entryKey(localEntry);
+          if (!handled.has(key) && (dirty.has(localEntry.machine_id) || pending.has(localEntry.entry_id))) {
             result.push(localEntry);
           }
         }
@@ -429,9 +439,12 @@ export default function App() {
     const entryToSave = {
       ...entry,
       entry_id: entry.entry_id || `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      plant_id: entry.plant_id || selectedPlantId || "1040",
+      plant_id: String(entry.plant_id || selectedPlantId || "1040"),
+      shift_id: String(entry.shift_id || ""),
+      shift_date: String(entry.shift_date || "").slice(0, 10),
       updated_at: new Date().toISOString(),
     };
+    pendingEntryIdsRef.current.add(entryToSave.entry_id);
 
     setEntries((prev) => {
       const idx = prev.findIndex(
@@ -450,12 +463,23 @@ export default function App() {
       return [entryToSave, ...prev];
     });
 
-    // Save directly to AWS Cloud
     fetch("/api/entries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(entryToSave),
-    }).catch((err) => console.error("Cloud save entry error:", err));
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.entry) {
+          throw new Error(data.error || "Server did not save this entry.");
+        }
+        pendingEntryIdsRef.current.delete(entryToSave.entry_id);
+        setEntries((prev) => prev.map((e) => (e.entry_id === entryToSave.entry_id ? data.entry : e)));
+      })
+      .catch((err) => {
+        console.error("Cloud save entry error:", err);
+        alert(`Entry for ${entryToSave.machine_id} on ${entryToSave.shift_date} was not saved. ${err.message}`);
+      });
   }
 
   function runLockJob() {

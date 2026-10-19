@@ -21,6 +21,35 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 let store = null;
+let storeMtime = 0;
+
+const LEGACY_PLANT_IDS = {
+  "PLANT-U01": "1040",
+  "PLANT-U02": "1040",
+  "PLANT-U03": "1040",
+};
+
+function normalizeEntryIdentity(entry) {
+  if (!entry || typeof entry !== "object") return false;
+  let changed = false;
+  const rawPlant = String(entry.plant_id || "1040");
+  const plantId = LEGACY_PLANT_IDS[rawPlant] || rawPlant;
+  const shiftDate = String(entry.shift_date || "").slice(0, 10);
+  const shiftId = String(entry.shift_id || "");
+  if (entry.plant_id !== plantId) {
+    entry.plant_id = plantId;
+    changed = true;
+  }
+  if (shiftDate && entry.shift_date !== shiftDate) {
+    entry.shift_date = shiftDate;
+    changed = true;
+  }
+  if (shiftId && entry.shift_id !== shiftId) {
+    entry.shift_id = shiftId;
+    changed = true;
+  }
+  return changed;
+}
 
 function getInitialStore() {
   return {
@@ -56,12 +85,17 @@ function sanitizeUnlockedWindowEntries(entriesList) {
 }
 
 function loadStore() {
-  if (store) return store;
+  if (store && fs.existsSync(STORE_FILE)) {
+    const stat = fs.statSync(STORE_FILE);
+    if (stat.mtimeMs === storeMtime) return store;
+    store = null;
+  }
 
   if (fs.existsSync(STORE_FILE)) {
     try {
       const raw = fs.readFileSync(STORE_FILE, "utf-8");
       const parsed = JSON.parse(raw);
+      storeMtime = fs.statSync(STORE_FILE).mtimeMs;
       store = {
         ...getInitialStore(),
         ...parsed,
@@ -171,13 +205,22 @@ function loadStore() {
         saveStore();
       }
 
+      if (Array.isArray(store.entries)) {
+        for (const entry of store.entries) {
+          if (normalizeEntryIdentity(entry)) storeModified = true;
+        }
+      }
+
       // Unlock every entry from 1 Oct through 16 Oct 2026
       if (sanitizeUnlockedWindowEntries(store.entries)) {
-        saveStore();
+        storeModified = true;
       }
+      if (storeModified) saveStore();
       return store;
     } catch (err) {
-      console.error("[CLOUD STORE] Error reading store, initializing fresh:", err.message);
+      console.error("[CLOUD STORE] Existing store could not be read. It was NOT replaced:", err.message);
+      if (store) return store;
+      throw err;
     }
   }
 
@@ -190,11 +233,16 @@ function saveStore() {
   if (!store) return;
   store.last_updated = new Date().toISOString();
   try {
+    if (fs.existsSync(STORE_FILE)) {
+      fs.copyFileSync(STORE_FILE, `${STORE_FILE}.bak`);
+    }
     const tempFile = `${STORE_FILE}.tmp_${Date.now()}`;
     fs.writeFileSync(tempFile, JSON.stringify(store, null, 2), "utf-8");
     fs.renameSync(tempFile, STORE_FILE);
+    storeMtime = fs.statSync(STORE_FILE).mtimeMs;
   } catch (err) {
     console.error("[CLOUD STORE] Failed to write store file:", err.message);
+    throw err;
   }
 }
 
@@ -283,6 +331,7 @@ export const cloudStorage = {
       entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     }
 
+    normalizeEntryIdentity(entry);
     // 1 Oct through 16 Oct 2026 entries are never locked
     const shiftDay = String(entry.shift_date || "").slice(0, 10);
     if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
@@ -315,6 +364,7 @@ export const cloudStorage = {
       if (!entry.entry_id) {
         entry.entry_id = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       }
+      normalizeEntryIdentity(entry);
       const shiftDay = String(entry.shift_date || "").slice(0, 10);
       if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
         entry.status = "submitted";

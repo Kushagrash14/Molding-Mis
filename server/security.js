@@ -40,9 +40,18 @@ function persistSessions() {
 
 loadSessions();
 
+function asIdList(value) {
+  if (Array.isArray(value)) return value.map(String);
+  if (value == null || value === "") return [];
+  return [String(value)];
+}
+
 export function publicUser(user) {
   if (!user) return null;
-  const role = user.role === "it_admin" ? "admin" : user.role || "operator";
+  const rawRole = String(user.role || "operator").trim().toLowerCase();
+  const role = rawRole === "it_admin" ? "admin" : rawRole;
+  const plantIds = asIdList(user.assigned_plant_ids);
+  const locationIds = asIdList(user.assigned_location_ids || user.assigned_location_id);
   return {
     id: user.id,
     username: user.username,
@@ -51,9 +60,9 @@ export function publicUser(user) {
     name: user.name || user.username,
     role,
     department: user.department || "",
-    assigned_location_id: user.assigned_location_id || "all",
-    assigned_location_ids: user.assigned_location_ids || ["all"],
-    assigned_plant_ids: user.assigned_plant_ids || ["1040"],
+    assigned_location_id: locationIds[0] || user.assigned_location_id || "all",
+    assigned_location_ids: locationIds.length ? locationIds : ["all"],
+    assigned_plant_ids: plantIds.length ? plantIds : ["1040"],
   };
 }
 

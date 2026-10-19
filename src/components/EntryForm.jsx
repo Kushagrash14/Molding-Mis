@@ -160,7 +160,7 @@ export default function EntryForm({
   // Dynamically filter machines by manufacturing plant (strictly for selected plant)
   const plantMachines = useMemo(() => {
     if (!plant) return machines;
-    return machines.filter((m) => m.plant_id === plant);
+    return machines.filter((m) => String(m.plant_id || "1040") === String(plant));
   }, [machines, plant]);
 
   const showOee = currentUser?.role !== "operator";
@@ -254,9 +254,9 @@ export default function EntryForm({
       const existing = currentEntries.find(
         (e) =>
           e.machine_id === m.machine_id &&
-          e.shift_date === shiftDate &&
-          e.shift_id === shift &&
-          (!plant || e.plant_id === plant)
+          String(e.shift_date || "").slice(0, 10) === String(shiftDate || "").slice(0, 10) &&
+          String(e.shift_id || "") === String(shift || "") &&
+          (!plant || String(e.plant_id || "1040") === String(plant))
       );
 
       if (existing) {
