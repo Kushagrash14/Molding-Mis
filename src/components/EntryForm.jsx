@@ -272,6 +272,44 @@ export default function EntryForm({
     setDirtyMachines(new Set());
   }, [plantMachines, shiftDate, shift, plant]); // ← entries & selectedShift intentionally excluded
 
+  // Once a row is on the server, keep it visible. Do not clear a row the operator is still typing.
+  useEffect(() => {
+    const currentShift = selectedShiftRef.current;
+    const match = (e, machineId) =>
+      e.machine_id === machineId &&
+      String(e.shift_date || "").slice(0, 10) === String(shiftDate || "").slice(0, 10) &&
+      String(e.shift_id || "") === String(shift || "") &&
+      (!plant || String(e.plant_id || "1040") === String(plant));
+
+    setSheetData((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      plantMachines.forEach((m) => {
+        if (dirtyMachines.has(m.machine_id)) return;
+        const existing = entries.find((e) => match(e, m.machine_id));
+        if (!existing) return;
+        const runs = convertSavedEntryToRuns(existing, currentShift);
+        if (JSON.stringify(next[m.machine_id] || null) !== JSON.stringify(runs)) {
+          next[m.machine_id] = runs;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+
+    setSavedMachines((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      plantMachines.forEach((m) => {
+        if (entries.some((e) => match(e, m.machine_id)) && !next.has(m.machine_id)) {
+          next.add(m.machine_id);
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [entries, plantMachines, shiftDate, shift, plant, dirtyMachines]);
+
 
 
   // Update a single run within a machine's runs array

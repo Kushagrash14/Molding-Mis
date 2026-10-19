@@ -339,7 +339,17 @@ export const cloudStorage = {
       entry.locked_at = null;
     }
 
-    const idx = s.entries.findIndex((e) => e.entry_id === entry.entry_id);
+    let idx = s.entries.findIndex((e) => e.entry_id === entry.entry_id);
+    if (idx < 0) {
+      idx = s.entries.findIndex(
+        (e) =>
+          e.machine_id === entry.machine_id &&
+          String(e.shift_date || "").slice(0, 10) === shiftDay &&
+          String(e.shift_id || "") === String(entry.shift_id || "") &&
+          String(e.plant_id || "1040") === String(entry.plant_id || "1040")
+      );
+      if (idx >= 0) entry.entry_id = s.entries[idx].entry_id;
+    }
     const updatedEntry = {
       ...entry,
       updated_at: new Date().toISOString(),

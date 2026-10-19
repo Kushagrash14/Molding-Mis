@@ -170,6 +170,7 @@ export default function App() {
   // Ref to track which machine_ids operator is actively typing in (never overwrite these during sync)
   const dirtyMachinesRef = useRef(new Set());
   const pendingEntryIdsRef = useRef(new Set());
+  const confirmedEntryIdsRef = useRef(new Set());
 
   // Callback passed to EntryForm so it can report dirty machines in real-time
   const handleDirtyChange = useCallback((dirtySet) => {
@@ -298,15 +299,17 @@ export default function App() {
       setEntries((prev) => {
         const dirty = dirtyMachinesRef.current; // Set<machine_id> currently being edited
         const pending = pendingEntryIdsRef.current;
+        const confirmed = confirmedEntryIdsRef.current;
         const entryKey = (e) =>
           `${String(e.shift_date || "").slice(0, 10)}__${String(e.shift_id || "")}__${e.machine_id}__${String(e.plant_id || "1040")}`;
+        const keepLocal = (localEntry, seen) =>
+          !seen.has(entryKey(localEntry)) &&
+          (pending.has(localEntry.entry_id) || confirmed.has(localEntry.entry_id));
         if (!dirty || dirty.size === 0) {
           const cloud = incomingEntries.map(presentEntry);
           const seen = new Set(cloud.map(entryKey));
           for (const localEntry of prev) {
-            if (pending.has(localEntry.entry_id) && !seen.has(entryKey(localEntry))) {
-              cloud.push(localEntry);
-            }
+            if (keepLocal(localEntry, seen)) cloud.push(localEntry);
           }
           return cloud;
         }
@@ -339,7 +342,7 @@ export default function App() {
         // Preserve any purely local entries (dirty rows not yet on cloud for today)
         for (const localEntry of prev) {
           const key = entryKey(localEntry);
-          if (!handled.has(key) && (dirty.has(localEntry.machine_id) || pending.has(localEntry.entry_id))) {
+          if (!handled.has(key) && (dirty.has(localEntry.machine_id) || pending.has(localEntry.entry_id) || confirmed.has(localEntry.entry_id))) {
             result.push(localEntry);
           }
         }
@@ -474,7 +477,10 @@ export default function App() {
           throw new Error(data.error || "Server did not save this entry.");
         }
         pendingEntryIdsRef.current.delete(entryToSave.entry_id);
-        setEntries((prev) => prev.map((e) => (e.entry_id === entryToSave.entry_id ? data.entry : e)));
+        confirmedEntryIdsRef.current.add(data.entry.entry_id || entryToSave.entry_id);
+        setEntries((prev) =>
+          prev.map((e) => (e.entry_id === entryToSave.entry_id ? data.entry : e))
+        );
         return data.entry;
       })
       .catch((err) => {
