@@ -1,5 +1,55 @@
 import * as XLSX from "xlsx";
-import { computeMetrics, findProduct, pct } from "./calculations.js";
+import { computeMetrics, findProduct, normalizeReasonsMap, pct } from "./calculations.js";
+
+// After Total Rejection, then after the downtime totals. Same columns for every role.
+const REJECTION_COLUMNS = [
+  ["rej_startup", "STARTUP"],
+  ["rej_power_cut", "POWER CUT"],
+  ["rej_short_mould", "SHORT MOULD"],
+  ["rej_pin_mark", "PIN MARK"],
+  ["rej_flow_mark", "FLOW MARK"],
+  ["rej_shrinkage", "SHRINKAGE"],
+  ["rej_silver", "SILVER"],
+  ["rej_black_spot", "BLACK SPOT"],
+  ["rej_crack", "CRACK"],
+  ["rej_barrel_clean", "BARREL CLEAN"],
+  ["rej_weld_line", "WELD LINE"],
+  ["rej_printing", "PRINTING"],
+  ["rej_other", "OTHER"],
+];
+
+const DOWNTIME_COLUMNS = [
+  ["pdt_no_plan", "NO PLAN"],
+  ["pdt_no_load", "NO LOAD"],
+  ["udt_power_cut", "POWER CUT"],
+  ["udt_rm_short", "R/M SHORT"],
+  ["udt_no_manpower", "NO MANPOWER"],
+  ["pdt_mould_change", "MOULD CHANGE"],
+  ["udt_under_maint", "UNDER MAINT"],
+  ["udt_trail", "TRAIL"],
+  ["pdt_barrel_clean", "BARREL CLEAN"],
+  ["udt_cycle_delay", "CYCLE DELAY"],
+  ["udt_packaging_mat", "PACKAGING"],
+  ["udt_nozzel_chock", "NOZZEL CHOCK"],
+  ["udt_5s", "5S"],
+  ["udt_barrel_heating", "BARREL HEATING"],
+  ["udt_rm_heating", "R/M HEATING"],
+  ["udt_under_tool_room", "UNDER TOOL"],
+  ["udt_componet_stick", "COMPONET STICK"],
+  ["udt_mc_issue", "M/C ISSUE"],
+  ["udt_hrtc_issue", "HRTC ISSUE"],
+  ["pdt_preventive", "PREVENTIVE"],
+  ["pdt_lunch", "LUNCH"],
+  ["udt_others", "OTHERS"],
+];
+
+function reasonCells(reasonMap, columns, sums) {
+  return columns.map(([id], i) => {
+    const n = Number(reasonMap[id]) || 0;
+    if (sums) sums[i] += n;
+    return n || "";
+  });
+}
 
 function productFor(master, e) {
   return findProduct(master, e.primary_sap_code || e.sap_code, e.plant_id);
@@ -79,9 +129,11 @@ export function exportProductionToExcel({
       "Target Qty (Pcs)",
       "OK Production (Pcs)",
       "Total Rejection (Pcs)",
+      ...REJECTION_COLUMNS.map(([, name]) => name),
       "Total Produced (Pcs)",
       "Planned DT (Mins)",
       "Unplanned DT (Mins)",
+      ...DOWNTIME_COLUMNS.map(([, name]) => name),
       "Availability (%)",
       "Performance (%)",
       "Quality Rate (%)",
@@ -109,6 +161,8 @@ export function exportProductionToExcel({
   let sumShortfall = 0;
   let sumMatKg = 0;
   let sumOee = 0;
+  const rejSums = REJECTION_COLUMNS.map(() => 0);
+  const dtSums = DOWNTIME_COLUMNS.map(() => 0);
 
   entries.forEach((e) => {
     const m = productFor(master, e);
@@ -124,6 +178,9 @@ export function exportProductionToExcel({
     const prodPct = Number((metrics.productivity * 100).toFixed(1));
     const qualPct = Number((metrics.quality_rate * 100).toFixed(1));
     const oeePct = Number((metrics.oee * 100).toFixed(1));
+    const reasonMap = normalizeReasonsMap(e.reasons);
+    const rejCells = reasonCells(reasonMap, REJECTION_COLUMNS, rejSums);
+    const dtCells = reasonCells(reasonMap, DOWNTIME_COLUMNS, dtSums);
 
     sumTgt += metrics.tgt;
     sumOk += e.ok_prod;
@@ -158,9 +215,11 @@ export function exportProductionToExcel({
       viewerRole === "operator" ? "—" : metrics.tgt,
       Number(e.ok_prod) || 0,
       metrics.total_rej,
+      ...rejCells,
       totalProd,
       pdtMins,
       udtMins,
+      ...dtCells,
       availPct,
       prodPct,
       qualPct,
@@ -195,9 +254,11 @@ export function exportProductionToExcel({
     viewerRole === "operator" ? "—" : sumTgt,
     sumOk,
     sumRej,
+    ...rejSums.map((n) => n || ""),
     sumOk + sumRej,
     sumPdtMin,
     sumUdtMin,
+    ...dtSums.map((n) => n || ""),
     "",
     "",
     "",
@@ -230,9 +291,11 @@ export function exportProductionToExcel({
     { wch: 16 }, // Target Qty
     { wch: 18 }, // OK Prod
     { wch: 18 }, // Total Rej
+    ...REJECTION_COLUMNS.map(() => ({ wch: 14 })),
     { wch: 18 }, // Total Prod
     { wch: 16 }, // Planned DT
     { wch: 18 }, // Unplanned DT
+    ...DOWNTIME_COLUMNS.map(() => ({ wch: 14 })),
     { wch: 16 }, // Availability %
     { wch: 16 }, // Performance %
     { wch: 16 }, // Quality %
@@ -412,6 +475,10 @@ export function exportProductionToCSV({
     "TGT",
     "OK Prod",
     "Total Rej",
+    ...REJECTION_COLUMNS.map(([, name]) => name),
+    "Planned DT (Mins)",
+    "Unplanned DT (Mins)",
+    ...DOWNTIME_COLUMNS.map(([, name]) => name),
     "Availability",
     "Performance",
     "Quality Rate",
@@ -430,6 +497,7 @@ export function exportProductionToCSV({
     const pObj = plants.find((p) => p.plant_id === e.plant_id);
     const plantName = pObj ? pObj.name : e.plant_id || "Unit-02";
 
+    const reasonMap = normalizeReasonsMap(e.reasons);
     return [
       `"${e.entry_id}"`,
       `"${plantName}"`,
@@ -440,6 +508,10 @@ export function exportProductionToCSV({
       viewerRole === "operator" ? '"—"' : res.tgt,
       e.ok_prod,
       res.total_rej,
+      ...reasonCells(reasonMap, REJECTION_COLUMNS),
+      Math.round(res.planned_dt * 60),
+      Math.round(res.unplanned_dt * 60),
+      ...reasonCells(reasonMap, DOWNTIME_COLUMNS),
       `"${pct(res.availability)}"`,
       `"${pct(res.productivity)}"`,
       `"${pct(res.quality_rate)}"`,

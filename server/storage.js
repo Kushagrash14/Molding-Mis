@@ -11,6 +11,51 @@ import {
   USERS,
 } from "../src/data/seedData.js";
 import { applyFamilyMoldsToMaster } from "../src/data/familyMolds.js";
+import { PLANT_MASTER_UPDATES } from "../src/data/plantMasterUpdates.js";
+
+const MASTER_SYNC_FIELDS = [
+  "part_no",
+  "material_description",
+  "cavity",
+  "shots_per_hour",
+  "price",
+  "part_wt",
+  "run_wt",
+  "manpower",
+];
+
+function applyMasterRows(master, rows) {
+  const index = new Map(master.map((m, i) => [`${m.plant_id || "1040"}_${m.sap_code}`, i]));
+  let added = 0;
+  let updated = 0;
+  for (const row of rows) {
+    const sap = String(row.sap_code || "").trim();
+    const plant = String(row.plant_id || "").trim();
+    if (!sap || !plant) continue;
+    const key = `${plant}_${sap}`;
+    const idx = index.get(key);
+    if (idx == null) {
+      const next = { ...row, sap_code: sap, plant_id: plant };
+      master.push(next);
+      index.set(key, master.length - 1);
+      added++;
+      continue;
+    }
+    const cur = master[idx];
+    let changed = false;
+    for (const field of MASTER_SYNC_FIELDS) {
+      if (row[field] === undefined || row[field] === null) continue;
+      if (field === "part_no" && String(row.part_no || "").trim() === "") continue;
+      if (field === "material_description" && String(row.material_description || "").trim() === "") continue;
+      if (cur[field] !== row[field]) {
+        cur[field] = row[field];
+        changed = true;
+      }
+    }
+    if (changed) updated++;
+  }
+  return { added, updated };
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "data");
@@ -73,7 +118,7 @@ function sanitizeUnlockedWindowEntries(entriesList) {
   let modified = false;
   for (const e of entriesList) {
     const shiftDay = String(e.shift_date || "").slice(0, 10);
-    if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
+    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19") {
       if (e.status === "locked") {
         e.status = "submitted";
         e.locked_at = null;
@@ -187,6 +232,12 @@ function loadStore() {
       }
       if (newMasterAdded > 0 || masterUpdated > 0) {
         console.log(`[CLOUD STORE] Synced ${newMasterAdded} new and ${masterUpdated} updated master products from seed data into cloud store.`);
+        storeModified = true;
+      }
+
+      const plantPatch = applyMasterRows(store.master, PLANT_MASTER_UPDATES);
+      if (plantPatch.added > 0 || plantPatch.updated > 0) {
+        console.log(`[CLOUD STORE] Master sheet: added ${plantPatch.added}, updated ${plantPatch.updated} (PGEL 1040, PGTL 2020, NGM 4010).`);
         storeModified = true;
       }
 
@@ -334,7 +385,7 @@ export const cloudStorage = {
     normalizeEntryIdentity(entry);
     // 1 Oct through 16 Oct 2026 entries are never locked
     const shiftDay = String(entry.shift_date || "").slice(0, 10);
-    if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
+    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19") {
       entry.status = "submitted";
       entry.locked_at = null;
     }
@@ -376,7 +427,7 @@ export const cloudStorage = {
       }
       normalizeEntryIdentity(entry);
       const shiftDay = String(entry.shift_date || "").slice(0, 10);
-      if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
+      if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19") {
         entry.status = "submitted";
         entry.locked_at = null;
       }

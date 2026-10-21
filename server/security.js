@@ -7,7 +7,7 @@ import { cloudStorage } from "./storage.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SESSION_FILE = path.join(__dirname, "data", "sessions.json");
 const COOKIE = "mis_session";
-const SESSION_MS = 14 * 60 * 60 * 1000;
+const SESSION_MS = 15 * 24 * 60 * 60 * 1000;
 const OTP_MS = 10 * 60 * 1000;
 
 const sessions = new Map();
@@ -296,7 +296,7 @@ export function maskRegisteredEmail(user) {
 
 function unlockedWindow(shiftDate) {
   const d = String(shiftDate || "").slice(0, 10);
-  return d >= "2026-10-01" && d <= "2026-10-16";
+  return (d >= "2026-10-01" && d <= "2026-10-16") || d === "2026-10-19";
 }
 
 function shiftPastGrace(shiftDate, shiftId, shifts) {

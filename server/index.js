@@ -335,7 +335,7 @@ app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
     let lockedCount = 0;
     for (const e of entries) {
       const shiftDay = String(e.shift_date || "").slice(0, 10);
-      if (shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") {
+      if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19") {
         if (e.status === "locked") {
           e.status = "submitted";
           e.locked_at = null;
