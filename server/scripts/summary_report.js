@@ -7,7 +7,7 @@ function findStore() {
     "/var/www/production-oee-tracker/server/data/cloud_store.json",
     "/home/ubuntu/production-oee-tracker/server/data/cloud_store.json",
     "/var/www/molding-mis/server/data/cloud_store.json",
-    "/home/ubuntu/molding-mis/server/data/cloud_store.json",
+    "/home/ubuntu/Molding-Mis/server/data/cloud_store.json",
     path.join(process.cwd(), "server/data/cloud_store.json"),
     path.join(process.cwd(), "data/cloud_store.json"),
   ];
@@ -88,12 +88,17 @@ for (const p of plants) {
 
   for (const d of dates) {
     const dayLabel = d.slice(8, 10) + "-Oct";
+    const dParts = d.split("-");
+    const alt1 = dParts[2] + "-" + dParts[1] + "-" + dParts[0];
+    const alt2 = dParts[2] + "/" + dParts[1] + "/" + dParts[0];
+
     const plantEntries = entries.filter((e) => {
       const matchPlant =
         String(e.plant_id || "") === p.id ||
         (p.id === "1040" && ["PLANT-U01", "PLANT-U02", "PLANT-U03"].includes(String(e.plant_id)));
-      const entryDate = String(e.shift_date || "").slice(0, 10);
-      return matchPlant && entryDate === d;
+      const rawDate = String(e.shift_date || "");
+      const entryDate = rawDate.slice(0, 10);
+      return matchPlant && (entryDate === d || rawDate.startsWith(d) || entryDate === alt1 || entryDate === alt2);
     });
 
     const mcEntriesMap = new Map();
