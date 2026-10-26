@@ -28,6 +28,7 @@ import MasterAdmin from "./components/MasterAdmin.jsx";
 import AuditLogView from "./components/AuditLogView.jsx";
 import CycleTimeTracker from "./components/CycleTimeTracker.jsx";
 import AccessRequests from "./components/AccessRequests.jsx";
+import DailyUpdateView from "./components/DailyUpdateView.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
 import { grantCovers } from "./lib/accessGrants.js";
 
@@ -43,12 +44,14 @@ const TABS_BY_ROLE = {
   ],
   plant_head: [
     ["dashboard", "Dashboard"],
+    ["daily_update", "Daily Update"],
     ["cycle", "Cycle Time Tracker"],
     ["browse", "Plant entries"],
     ["requests", "Requests"],
   ],
   admin: [
     ["all", "All entries"],
+    ["daily_update", "Daily Update"],
     ["master", "Master data"],
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
@@ -715,6 +718,26 @@ export default function App() {
                 onEdit={tryEdit}
               />
             </div>
+          )}
+
+          {tab === "daily_update" && (role === "admin" || role === "plant_head") && (
+            <DailyUpdateView
+              entries={entries}
+              machines={machines}
+              plants={accessiblePlants.length > 0 ? accessiblePlants : plants}
+              locations={locations}
+              master={master}
+              shifts={shifts}
+              currentUser={currentUser}
+              onRefresh={() => {
+                fetch("/api/entries")
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (d?.entries) setEntries(d.entries);
+                  })
+                  .catch((err) => console.error(err));
+              }}
+            />
           )}
 
           {tab === "master" && (

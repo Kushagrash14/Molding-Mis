@@ -11,6 +11,7 @@ const ICONS = {
   mine: "📋",
   browse: "🏭",
   all: "📑",
+  daily_update: "📅",
   master: "⚙️",
   dashboard: "📊",
   cycle: "⏱️",
