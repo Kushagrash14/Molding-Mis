@@ -44,7 +44,6 @@ const TABS_BY_ROLE = {
   ],
   plant_head: [
     ["dashboard", "Dashboard"],
-    ["daily_update", "Daily Update"],
     ["cycle", "Cycle Time Tracker"],
     ["browse", "Plant entries"],
     ["requests", "Requests"],
@@ -758,7 +757,7 @@ export default function App() {
             </div>
           )}
 
-          {tab === "daily_update" && (role === "admin" || role === "plant_head") && (
+          {tab === "daily_update" && role === "admin" && (
             <DailyUpdateView
               entries={entries}
               machines={machines}
