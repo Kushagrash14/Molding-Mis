@@ -142,7 +142,7 @@ export default function DailyUpdateView({
   const [startDate, setStartDate] = useState("2026-10-18");
   const [endDate, setEndDate] = useState("2026-10-25");
   const [activePlantTab, setActivePlantTab] = useState("ALL"); // "ALL" or plant_id
-  const [layoutMode, setLayoutMode] = useState("grid"); // "grid" | "stacked"
+  const [layoutMode, setLayoutMode] = useState("stacked"); // default to "stacked" for direct full view
   const [drillModalData, setDrillModalData] = useState(null);
   const [drillTab, setDrillTab] = useState("filled"); // "filled" | "no_plan" | "pending"
   const [copyFeedback, setCopyFeedback] = useState(false);
@@ -959,8 +959,11 @@ export default function DailyUpdateView({
                 {/* Table: ALL 6 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
                 <div style={{ width: "100%", overflow: "hidden" }}>
                   <table
+                    className="daily-mis-table"
                     style={{
                       width: "100%",
+                      minWidth: 0,
+                      maxWidth: "100%",
                       tableLayout: "fixed",
                       borderCollapse: "collapse",
                       fontSize: "12px",
