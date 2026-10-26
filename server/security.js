@@ -296,7 +296,7 @@ export function maskRegisteredEmail(user) {
 
 function unlockedWindow(shiftDate) {
   const d = String(shiftDate || "").slice(0, 10);
-  return (d >= "2026-10-01" && d <= "2026-10-16") || d === "2026-10-19" || d === "2026-10-20";
+  return (d >= "2026-10-01" && d <= "2026-10-16") || d === "2026-10-19" || d === "2026-10-20" || d === "2026-10-23";
 }
 
 function shiftPastGrace(shiftDate, shiftId, shifts) {

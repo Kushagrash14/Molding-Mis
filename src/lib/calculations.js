@@ -534,13 +534,13 @@ export function getEligibleShiftSlots(shifts = [], now = new Date()) {
 }
 
 /**
- * Special exception: 1 Oct 2026 through 16 Oct 2026, plus 19 Oct and 20 Oct 2026.
+ * Special exception: 1 Oct 2026 through 16 Oct 2026, plus 19, 20 and 23 Oct 2026.
  * Every entry on these dates is never locked.
  */
 export function isDateInUnlockedWindow(shiftDateStr) {
   if (!shiftDateStr) return false;
   const d = String(shiftDateStr).slice(0, 10);
-  return (d >= "2026-10-01" && d <= "2026-10-16") || d === "2026-10-19" || d === "2026-10-20";
+  return (d >= "2026-10-01" && d <= "2026-10-16") || d === "2026-10-19" || d === "2026-10-20" || d === "2026-10-23";
 }
 
 /** Stored status cannot keep a 1–16 Oct 2026 entry locked. */

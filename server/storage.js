@@ -118,7 +118,7 @@ function sanitizeUnlockedWindowEntries(entriesList) {
   let modified = false;
   for (const e of entriesList) {
     const shiftDay = String(e.shift_date || "").slice(0, 10);
-    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20") {
+    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20" || shiftDay === "2026-10-23") {
       if (e.status === "locked") {
         e.status = "submitted";
         e.locked_at = null;
@@ -385,7 +385,7 @@ export const cloudStorage = {
     normalizeEntryIdentity(entry);
     // 1 Oct through 16 Oct 2026 entries are never locked
     const shiftDay = String(entry.shift_date || "").slice(0, 10);
-    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20") {
+    if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20" || shiftDay === "2026-10-23") {
       entry.status = "submitted";
       entry.locked_at = null;
     }
@@ -427,7 +427,7 @@ export const cloudStorage = {
       }
       normalizeEntryIdentity(entry);
       const shiftDay = String(entry.shift_date || "").slice(0, 10);
-      if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20") {
+      if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20" || shiftDay === "2026-10-23") {
         entry.status = "submitted";
         entry.locked_at = null;
       }
