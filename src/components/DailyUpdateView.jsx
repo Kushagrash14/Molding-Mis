@@ -177,6 +177,31 @@ export default function DailyUpdateView({
     return map;
   }, [targetPlants, machines]);
 
+  // Fast O(N) pre-index for entries by plant and date
+  const entriesLookup = useMemo(() => {
+    const map = new Map();
+    for (const e of entries) {
+      const rawPlant = String(e.plant_id || "");
+      const pId = ["PLANT-U01", "PLANT-U02", "PLANT-U03"].includes(rawPlant) ? "1040" : rawPlant;
+      const rawDate = String(e.shift_date || "");
+      const d = rawDate.slice(0, 10);
+      const key = `${pId}__${d}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(e);
+
+      // Also support alternative date format indexing if present
+      if (rawDate.includes("-")) {
+        const parts = d.split("-");
+        if (parts.length === 3) {
+          const alt1 = `${pId}__${parts[2]}-${parts[1]}-${parts[0]}`;
+          if (!map.has(alt1)) map.set(alt1, []);
+          map.get(alt1).push(e);
+        }
+      }
+    }
+    return map;
+  }, [entries]);
+
   // Main calculation matrix: plant_id -> dateStr -> { totalProd, totalMc, noPlanMc, filledMc, filledPct, pendingMc, machineDetails }
   const tableMatrix = useMemo(() => {
     const matrix = {};
@@ -197,19 +222,8 @@ export default function DailyUpdateView({
       };
 
       for (const d of dateList) {
-        const dParts = d.split("-");
-        const alt1 = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
-        const alt2 = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-
-        // Match entries for this plant and date
-        const plantDateEntries = entries.filter((e) => {
-          const rawPlant = String(e.plant_id || "");
-          const matchPlant =
-            rawPlant === pId ||
-            (pId === "1040" && ["PLANT-U01", "PLANT-U02", "PLANT-U03"].includes(rawPlant));
-          const entryDate = String(e.shift_date || "").slice(0, 10);
-          return matchPlant && (entryDate === d || entryDate === alt1 || entryDate === alt2);
-        });
+        // Fast O(1) lookup
+        const plantDateEntries = entriesLookup.get(`${pId}__${d}`) || [];
 
         // Group entries by machine_id
         const mcEntriesMap = new Map();

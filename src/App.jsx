@@ -308,12 +308,31 @@ export default function App() {
         const keepLocal = (localEntry, seen) =>
           !seen.has(entryKey(localEntry)) &&
           (pending.has(localEntry.entry_id) || confirmed.has(localEntry.entry_id));
+
+        const areEntriesIdentical = (a, b) => {
+          if (a === b) return true;
+          if (!a || !b) return false;
+          if (a.length !== b.length) return false;
+          for (let i = 0; i < a.length; i++) {
+            const ai = a[i];
+            const bi = b[i];
+            if (ai.entry_id !== bi.entry_id) return false;
+            if (ai.updated_at !== bi.updated_at) return false;
+            if (ai.status !== bi.status) return false;
+            if (ai.ok_prod !== bi.ok_prod) return false;
+            if (ai.run_hour !== bi.run_hour) return false;
+            if (ai.total_rej !== bi.total_rej) return false;
+          }
+          return true;
+        };
+
         if (!dirty || dirty.size === 0) {
           const cloud = incomingEntries.map(presentEntry);
           const seen = new Set(cloud.map(entryKey));
           for (const localEntry of prev) {
             if (keepLocal(localEntry, seen)) cloud.push(localEntry);
           }
+          if (areEntriesIdentical(prev, cloud)) return prev;
           return cloud;
         }
         // Build a map of current local entries for fast lookup
@@ -350,11 +369,15 @@ export default function App() {
           }
         }
 
+        if (areEntriesIdentical(prev, result)) return prev;
         return result;
       });
     }
 
-    async function syncFromCloud() {
+    let lastSyncTime = 0;
+    async function syncFromCloud(force = false) {
+      if (!force && Date.now() - lastSyncTime < 10000) return;
+      lastSyncTime = Date.now();
       try {
         const res = await fetch("/api/bootstrap");
         if (res.status === 401) {
@@ -370,13 +393,28 @@ export default function App() {
           saveSession(data.currentUser);
         }
 
-        // Deep-compare helper: only update state if data actually changed.
-        // This prevents React from re-rendering children (and triggering EntryForm's
-        // initialization useEffect) when sync returns identical data every 15s.
+        // Fast O(1) sample-compare helper: avoid heavy JSON.stringify on thousands of master rows
         const stableSet = (setter, newData) => {
-          setter(prev =>
-            JSON.stringify(prev) === JSON.stringify(newData) ? prev : newData
-          );
+          setter((prev) => {
+            if (prev === newData) return prev;
+            if (!prev || !newData) return newData;
+            if (Array.isArray(prev) && Array.isArray(newData)) {
+              if (prev.length !== newData.length) return newData;
+              if (prev.length === 0) return prev;
+              const mid = Math.floor(prev.length / 2);
+              for (const idx of [0, mid, prev.length - 1]) {
+                const p = prev[idx];
+                const n = newData[idx];
+                if (!p || !n) return newData;
+                const pk = p.id || p.sap_code || p.machine_id || p.plant_id || p.shift_id;
+                const nk = n.id || n.sap_code || n.machine_id || n.plant_id || n.shift_id;
+                if (pk !== nk) return newData;
+                if (p.updated_at !== n.updated_at) return newData;
+              }
+              return prev;
+            }
+            return newData;
+          });
         };
 
         if (Array.isArray(data.users) && data.users.length > 0) {
@@ -414,9 +452,9 @@ export default function App() {
       }
     }
 
-    syncFromCloud();
-    const interval = setInterval(syncFromCloud, 15000);
-    const handleFocus = () => syncFromCloud();
+    syncFromCloud(true);
+    const interval = setInterval(() => syncFromCloud(false), 30000);
+    const handleFocus = () => syncFromCloud(false);
     window.addEventListener("focus", handleFocus);
 
     return () => {

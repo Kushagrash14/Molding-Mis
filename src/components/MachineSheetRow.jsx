@@ -20,7 +20,7 @@ function getMachineParts(machineNo = "") {
   return { name: machineNo, details: "" };
 }
 
-export default function MachineSheetRow({
+function MachineSheetRow({
   machine,
   runs = [],
   onUpdateRun,
@@ -674,3 +674,40 @@ export default function MachineSheetRow({
     </>
   );
 }
+
+function areMachineRowPropsEqual(prev, next) {
+  if (prev.machine?.machine_id !== next.machine?.machine_id) return false;
+  if (prev.isSaved !== next.isSaved) return false;
+  if (prev.isModified !== next.isModified) return false;
+  if (prev.isReadOnly !== next.isReadOnly) return false;
+  if (prev.showOee !== next.showOee) return false;
+  if (prev.selectedShift?.shift_id !== next.selectedShift?.shift_id) return false;
+  if (prev.prevShiftInfo !== next.prevShiftInfo) return false;
+
+  const prevRuns = prev.runs || [];
+  const nextRuns = next.runs || [];
+  if (prevRuns.length !== nextRuns.length) return false;
+
+  for (let i = 0; i < prevRuns.length; i++) {
+    const p = prevRuns[i];
+    const n = nextRuns[i];
+    if (p.sap_code !== n.sap_code) return false;
+    if (p.material_description !== n.material_description) return false;
+    if (p.part_no !== n.part_no) return false;
+    if (p.ok_prod !== n.ok_prod) return false;
+    if (p.run_hour !== n.run_hour) return false;
+    if (p.running_cavity !== n.running_cavity) return false;
+    if (p.manpower !== n.manpower) return false;
+    if (p.start_time !== n.start_time || p.end_time !== n.end_time) return false;
+    if (p.change_over_time !== n.change_over_time) return false;
+    if (p.change_over_confirmed !== n.change_over_confirmed) return false;
+    if (p.reasons !== n.reasons) {
+      if (JSON.stringify(p.reasons || {}) !== JSON.stringify(n.reasons || {})) return false;
+    }
+  }
+
+  return true;
+}
+
+const MemoizedMachineSheetRow = React.memo(MachineSheetRow, areMachineRowPropsEqual);
+export default MemoizedMachineSheetRow;
