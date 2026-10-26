@@ -142,6 +142,7 @@ export default function DailyUpdateView({
   const [startDate, setStartDate] = useState("2026-10-18");
   const [endDate, setEndDate] = useState("2026-10-25");
   const [activePlantTab, setActivePlantTab] = useState("ALL"); // "ALL" or plant_id
+  const [layoutMode, setLayoutMode] = useState("grid"); // "grid" | "stacked"
   const [drillModalData, setDrillModalData] = useState(null);
   const [drillTab, setDrillTab] = useState("filled"); // "filled" | "no_plan" | "pending"
   const [copyFeedback, setCopyFeedback] = useState(false);
@@ -783,59 +784,118 @@ export default function DailyUpdateView({
         </div>
       </div>
 
-      {/* 4. Plant View Tabs (All vs Single) */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
-        <button
-          onClick={() => setActivePlantTab("ALL")}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "8px",
-            border: activePlantTab === "ALL" ? "2px solid #0284c7" : "1px solid #cbd5e1",
-            backgroundColor: activePlantTab === "ALL" ? "#e0f2fe" : "#ffffff",
-            color: activePlantTab === "ALL" ? "#0369a1" : "#475569",
-            fontWeight: 800,
-            fontSize: "13px",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          🌐 All Plants (Side-by-Side Grid)
-        </button>
+      {/* 4. Plant View Tabs & Layout Mode */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
+      >
+        <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px" }}>
+          <button
+            onClick={() => setActivePlantTab("ALL")}
+            style={{
+              padding: "7px 14px",
+              borderRadius: "8px",
+              border: activePlantTab === "ALL" ? "2px solid #0284c7" : "1px solid #cbd5e1",
+              backgroundColor: activePlantTab === "ALL" ? "#e0f2fe" : "#ffffff",
+              color: activePlantTab === "ALL" ? "#0369a1" : "#475569",
+              fontWeight: 800,
+              fontSize: "13px",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🌐 All Plants
+          </button>
 
-        {targetPlants.map((p) => {
-          const isSelected = activePlantTab === p.plant_id;
-          const pName = getPlantDisplayName(p);
-          const totalMc = (plantMachinesMap.get(p.plant_id) || []).length;
-          return (
+          {targetPlants.map((p) => {
+            const isSelected = activePlantTab === p.plant_id;
+            const pName = getPlantDisplayName(p);
+            const totalMc = (plantMachinesMap.get(p.plant_id) || []).length;
+            return (
+              <button
+                key={p.plant_id}
+                onClick={() => setActivePlantTab(p.plant_id)}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: "8px",
+                  border: isSelected ? "2px solid #0284c7" : "1px solid #cbd5e1",
+                  backgroundColor: isSelected ? "#e0f2fe" : "#ffffff",
+                  color: isSelected ? "#0369a1" : "#475569",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {pName} ({totalMc} M/C)
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Layout Switcher: Side-by-Side Grid vs Direct Full Width */}
+        {activePlantTab === "ALL" && (
+          <div
+            style={{
+              display: "inline-flex",
+              backgroundColor: "#f1f5f9",
+              padding: "3px",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+            }}
+          >
             <button
-              key={p.plant_id}
-              onClick={() => setActivePlantTab(p.plant_id)}
+              type="button"
+              onClick={() => setLayoutMode("grid")}
               style={{
-                padding: "8px 16px",
-                borderRadius: "8px",
-                border: isSelected ? "2px solid #0284c7" : "1px solid #cbd5e1",
-                backgroundColor: isSelected ? "#e0f2fe" : "#ffffff",
-                color: isSelected ? "#0369a1" : "#475569",
+                padding: "5px 12px",
+                borderRadius: "6px",
+                border: "none",
+                backgroundColor: layoutMode === "grid" ? "#ffffff" : "transparent",
+                color: layoutMode === "grid" ? "#0284c7" : "#64748b",
                 fontWeight: 700,
-                fontSize: "13px",
+                fontSize: "12px",
                 cursor: "pointer",
-                whiteSpace: "nowrap",
+                boxShadow: layoutMode === "grid" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
               }}
             >
-              {pName} ({totalMc} M/C)
+              📑 2-Column Grid
             </button>
-          );
-        })}
+            <button
+              type="button"
+              onClick={() => setLayoutMode("stacked")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "6px",
+                border: "none",
+                backgroundColor: layoutMode === "stacked" ? "#ffffff" : "transparent",
+                color: layoutMode === "stacked" ? "#0284c7" : "#64748b",
+                fontWeight: 700,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: layoutMode === "stacked" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+              }}
+            >
+              📋 Full Width (Direct View)
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* 5. Plant Tables Grid (Matching Excel Layout in Screenshot) */}
+      {/* 5. Plant Tables Grid */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns:
-            activePlantTab === "ALL"
-              ? "repeat(auto-fit, minmax(480px, 1fr))"
-              : "1fr",
+            activePlantTab !== "ALL" || layoutMode === "stacked"
+              ? "1fr"
+              : "repeat(auto-fit, minmax(540px, 1fr))",
           gap: "24px",
           alignItems: "start",
         }}
@@ -865,7 +925,7 @@ export default function DailyUpdateView({
                   style={{
                     backgroundColor: theme.headerBg,
                     borderBottom: "2px solid #0f172a",
-                    padding: "10px 16px",
+                    padding: "9px 14px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
@@ -873,7 +933,7 @@ export default function DailyUpdateView({
                 >
                   <span
                     style={{
-                      fontSize: "16px",
+                      fontSize: "15px",
                       fontWeight: 900,
                       color: "#0f172a",
                       letterSpacing: "0.02em",
@@ -896,16 +956,25 @@ export default function DailyUpdateView({
                   </span>
                 </div>
 
-                {/* Table matching Screenshot: Date | Total Prod | Total M/C | No Plan M/C | Filled M/C | Filled % */}
-                <div style={{ overflowX: "auto" }}>
+                {/* Table: ALL 6 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
+                <div style={{ width: "100%", overflow: "hidden" }}>
                   <table
                     style={{
                       width: "100%",
+                      tableLayout: "fixed",
                       borderCollapse: "collapse",
-                      fontSize: "13px",
+                      fontSize: "12px",
                       textAlign: "center",
                     }}
                   >
+                    <colgroup>
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "23%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "15%" }} />
+                    </colgroup>
                     <thead>
                       <tr
                         style={{
@@ -915,64 +984,71 @@ export default function DailyUpdateView({
                       >
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
-                            width: "70px",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Date
                         </th>
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Total Prod
                         </th>
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
-                            width: "75px",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Total M/C
                         </th>
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
-                            width: "85px",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           No Plan M/C
                         </th>
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
-                            width: "75px",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Filled M/C
                         </th>
                         <th
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
-                            width: "75px",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Filled %
@@ -1036,64 +1112,69 @@ export default function DailyUpdateView({
                           >
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 4px",
                                 fontWeight: 600,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
                                 backgroundColor: "#ffffff",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.shortDate}
                             </td>
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 6px",
                                 fontWeight: 700,
                                 color: row.totalProd > 0 ? "#0284c7" : "#64748b",
                                 borderRight: "1px solid #cbd5e1",
                                 textAlign: "right",
-                                paddingRight: "14px",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.totalProd > 0 ? row.totalProd.toLocaleString("en-IN") : ""}
                             </td>
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 4px",
                                 fontWeight: 600,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.totalMc}
                             </td>
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 4px",
                                 fontWeight: 700,
                                 color: row.noPlanMcCount > 0 ? "#d97706" : "#94a3b8",
                                 borderRight: "1px solid #cbd5e1",
                                 backgroundColor: row.noPlanMcCount > 0 ? "#fffbeb" : "transparent",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.noPlanMcCount > 0 ? row.noPlanMcCount : ""}
                             </td>
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 4px",
                                 fontWeight: 700,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.filledMcCount > 0 ? row.filledMcCount : ""}
                             </td>
                             <td
                               style={{
-                                padding: "8px 10px",
+                                padding: "7px 4px",
                                 fontWeight: 800,
                                 backgroundColor: pctBg,
                                 color: pctColor,
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {row.filledMcCount > 0 ? `${row.filledPct}%` : ""}
@@ -1112,52 +1193,56 @@ export default function DailyUpdateView({
                       >
                         <td
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           Total
                         </td>
                         <td
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 6px",
                             color: "#0284c7",
                             borderRight: "1px solid #0f172a",
                             textAlign: "right",
-                            paddingRight: "14px",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {data.totals.totalProd > 0 ? data.totals.totalProd.toLocaleString("en-IN") : "0"}
                         </td>
                         <td
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {data.totalMc}
                         </td>
                         <td
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             color: "#d97706",
                             borderRight: "1px solid #0f172a",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {data.totals.noPlanOccurrences}
                         </td>
                         <td
                           style={{
-                            padding: "8px 10px",
+                            padding: "7px 4px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {data.totals.filledShifts}
                         </td>
-                        <td style={{ padding: "8px 10px", color: "#64748b" }}>-</td>
+                        <td style={{ padding: "7px 4px", color: "#64748b", whiteSpace: "nowrap" }}>-</td>
                       </tr>
                     </tbody>
                   </table>
