@@ -126,6 +126,7 @@ export default function CycleTimeTracker({
         }
         const rec = bySap.get(key);
         const rate = produced / hrs;
+        const shotRate = rate / (rec.cavity || 1);
         rec.hrs += hrs;
         rec.produced += produced;
         rec.machines.add(entry.machine_id);
@@ -141,22 +142,23 @@ export default function CycleTimeTracker({
           produced,
           target: Number(m.tgt) || 0,
           rate,
-          pct: rec.shots > 0 ? (rate / (rec.shots * rec.cavity)) * 100 : null,
+          shotRate,
+          pct: rec.shots > 0 ? (shotRate / rec.shots) * 100 : null,
         });
       });
     });
 
     return [...bySap.values()].map((rec) => {
       const actual = rec.hrs > 0 ? rec.produced / rec.hrs : 0;
-      const declared = rec.shots * (rec.cavity || 1);
+      const actualShots = actual / (rec.cavity || 1);
       return {
         ...rec,
         machines: [...rec.machines],
-        declared,
         actual,
-        pct: declared > 0 ? (actual / declared) * 100 : null,
-        declaredCt: declared > 0 ? 3600 / declared : null,
-        actualCt: actual > 0 ? 3600 / actual : null,
+        actualShots,
+        pct: rec.shots > 0 ? (actualShots / rec.shots) * 100 : null,
+        declaredCt: rec.shots > 0 ? 3600 / rec.shots : null,
+        actualCt: actualShots > 0 ? 3600 / actualShots : null,
         overRuns: rec.runs.filter((r) => r.pct !== null && r.pct >= threshold).length,
         runs: rec.runs.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : String(b.shift).localeCompare(String(a.shift)))),
       };
@@ -333,10 +335,10 @@ export default function CycleTimeTracker({
                 <th>Rej</th>
                 <th>Produced</th>
                 <th>Target</th>
-                <th>Declared /Hr</th>
-                <th>Actual /Hr</th>
-                <th>vs Declared</th>
-                <th title="Declared → actual cycle time in seconds">CT (s)</th>
+                <th title="Shots per hour from Master data">Master Shots/Hr</th>
+                <th title="Produced pieces per hour ÷ pieces per shot">Actual Shots/Hr</th>
+                <th>vs Master</th>
+                <th title="Master → actual mold cycle time in seconds">CT (s)</th>
                 <th className="left">Status</th>
               </tr>
             </thead>
@@ -360,13 +362,13 @@ export default function CycleTimeTracker({
                   <td>{fmt(r.rej)}</td>
                   <td className="strong">{fmt(r.produced)}</td>
                   <td>{fmt(r.target)}</td>
-                  <td>{r.part.declared ? fmt(r.part.declared) : "—"}</td>
-                  <td className="strong">{fmt(r.rate)}</td>
+                  <td>{r.part.shots ? fmt(r.part.shots) : "—"}</td>
+                  <td className="strong">{fmt(r.shotRate)}</td>
                   <td>
                     <Pct pct={r.pct} />
                   </td>
                   <td className="mono">
-                    {fmt(r.part.declaredCt, 1)} → {fmt(r.rate > 0 ? 3600 / r.rate : null, 1)}
+                    {fmt(r.part.declaredCt, 1)} → {fmt(r.shotRate > 0 ? 3600 / r.shotRate : null, 1)}
                   </td>
                   <td className="left">
                     <Status pct={r.pct} />
@@ -386,11 +388,11 @@ export default function CycleTimeTracker({
                 <th>Shifts</th>
                 <th>Run Hrs</th>
                 <th>Produced</th>
-                <th>Declared /Hr</th>
-                <th>Actual /Hr</th>
-                <th>vs Declared</th>
-                <th title="Declared → actual cycle time in seconds">CT (s)</th>
-                <th>Suggested /Hr</th>
+                <th title="Shots per hour from Master data">Master Shots/Hr</th>
+                <th title="Produced pieces per hour ÷ pieces per shot">Actual Shots/Hr</th>
+                <th>vs Master</th>
+                <th title="Master → actual mold cycle time in seconds">CT (s)</th>
+                <th>Suggested Shots/Hr</th>
                 <th className="left">Status</th>
               </tr>
             </thead>
@@ -427,8 +429,8 @@ export default function CycleTimeTracker({
                       </td>
                       <td>{fmt(p.hrs, 1)}</td>
                       <td>{fmt(p.produced)}</td>
-                      <td>{p.declared ? fmt(p.declared) : "—"}</td>
-                      <td className="strong">{fmt(p.actual)}</td>
+                      <td>{p.shots ? fmt(p.shots) : "—"}</td>
+                      <td className="strong">{fmt(p.actualShots)}</td>
                       <td>
                         <Pct pct={p.pct} />
                       </td>
@@ -436,7 +438,7 @@ export default function CycleTimeTracker({
                         {fmt(p.declaredCt, 1)} → {fmt(p.actualCt, 1)}
                       </td>
                       <td className="strong">
-                        {st.key === "over" || st.key === "slow" ? fmt(p.cavity > 0 ? p.actual / p.cavity : p.actual) : "—"}
+                        {st.key === "over" || st.key === "slow" ? fmt(p.actualShots) : "—"}
                       </td>
                       <td className="left">
                         <Status pct={p.pct} />
@@ -456,8 +458,8 @@ export default function CycleTimeTracker({
                                 <th>Rej</th>
                                 <th>Produced</th>
                                 <th>Target</th>
-                                <th>Actual /Hr</th>
-                                <th>vs Declared</th>
+                                <th>Actual Shots/Hr</th>
+                                <th>vs Master</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -471,7 +473,7 @@ export default function CycleTimeTracker({
                                   <td>{fmt(r.rej)}</td>
                                   <td>{fmt(r.produced)}</td>
                                   <td>{fmt(r.target)}</td>
-                                  <td>{fmt(r.rate)}</td>
+                                  <td>{fmt(r.shotRate)}</td>
                                   <td>
                                     <Pct pct={r.pct} />
                                   </td>
@@ -490,8 +492,9 @@ export default function CycleTimeTracker({
         )}
       </div>
       <p className="ct-note">
-        Target = shots/hr × (12h − planned downtime) × cavity. Declared /Hr is pieces (shots/hr × cavity).
-        Suggested /Hr is the shots/hr to put in Master data.
+        Target = shots/hr × (12h − planned downtime) × pieces per shot (1+1 = 2, 2+2 = 4). Master and actual are
+        both shots per hour: actual = produced pieces per hour ÷ pieces per shot. Suggested Shots/Hr is the value to
+        put in Master data.
       </p>
     </div>
   );
