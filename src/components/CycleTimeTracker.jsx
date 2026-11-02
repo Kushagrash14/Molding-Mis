@@ -99,10 +99,12 @@ export default function CycleTimeTracker({
         if (!sap || sap === "DOWN_12H" || sap.startsWith("MULTI")) return;
         const m = computeMetrics(run, master, reasonCodes);
         const hrs = Number(m.net_run_time) || 0;
+        // Same hours as the target (12h minus planned downtime), so vs Master = produced ÷ target.
+        const tgtHrs = Number(m.available_hours) || 0;
         const ok = Number(m.ok_prod) || 0;
         const rej = Number(m.total_rej) || 0;
         const produced = ok + rej;
-        if (hrs <= 0 || produced <= 0) return;
+        if (hrs <= 0 || tgtHrs <= 0 || produced <= 0) return;
 
         const plantId = run.plant_id || entry.plant_id || "1040";
         const key = `${plantId}_${sap}`;
@@ -119,15 +121,23 @@ export default function CycleTimeTracker({
             combo: family?.combo || "",
             shots: Number(product?.shots_per_hour) || 0,
             hrs: 0,
+            tgtHrs: 0,
+            target: 0,
             produced: 0,
             machines: new Set(),
             runs: [],
           });
         }
         const rec = bySap.get(key);
-        const rate = produced / hrs;
-        const shotRate = rate / (rec.cavity || 1);
+        const target = Number(m.tgt) || 0;
+        const rate = produced / tgtHrs;
+        // Pieces per shot come from the target itself, so 1+1, 2+2 and multi-cavity
+        // parts are counted exactly as the target counts them.
+        const pct = rec.shots > 0 && target > 0 ? (produced / target) * 100 : null;
+        const shotRate = pct !== null ? (rec.shots * pct) / 100 : rate / (rec.cavity || 1);
         rec.hrs += hrs;
+        rec.tgtHrs += tgtHrs;
+        rec.target += target;
         rec.produced += produced;
         rec.machines.add(entry.machine_id);
         rec.runs.push({
@@ -137,26 +147,28 @@ export default function CycleTimeTracker({
           machine: entry.machine_id,
           operator: entry.operator_name || entry.created_by_name || "",
           hrs,
+          tgtHrs,
           ok,
           rej,
           produced,
-          target: Number(m.tgt) || 0,
+          target,
           rate,
           shotRate,
-          pct: rec.shots > 0 ? (shotRate / rec.shots) * 100 : null,
+          pct,
         });
       });
     });
 
     return [...bySap.values()].map((rec) => {
-      const actual = rec.hrs > 0 ? rec.produced / rec.hrs : 0;
-      const actualShots = actual / (rec.cavity || 1);
+      const actual = rec.tgtHrs > 0 ? rec.produced / rec.tgtHrs : 0;
+      const pct = rec.shots > 0 && rec.target > 0 ? (rec.produced / rec.target) * 100 : null;
+      const actualShots = pct !== null ? (rec.shots * pct) / 100 : actual / (rec.cavity || 1);
       return {
         ...rec,
         machines: [...rec.machines],
         actual,
         actualShots,
-        pct: rec.shots > 0 ? (actualShots / rec.shots) * 100 : null,
+        pct,
         declaredCt: rec.shots > 0 ? 3600 / rec.shots : null,
         actualCt: actualShots > 0 ? 3600 / actualShots : null,
         overRuns: rec.runs.filter((r) => r.pct !== null && r.pct >= threshold).length,
@@ -331,6 +343,7 @@ export default function CycleTimeTracker({
                 <th className="left">SAP · Part / Description</th>
                 <th>Cav</th>
                 <th>Run Hrs</th>
+                <th title="12h minus planned downtime: the hours the target is built on">Target Hrs</th>
                 <th>OK</th>
                 <th>Rej</th>
                 <th>Produced</th>
@@ -345,7 +358,7 @@ export default function CycleTimeTracker({
             <tbody>
               {visibleRows.length === 0 && (
                 <tr>
-                  <td colSpan={15} className="ct-empty">
+                  <td colSpan={16} className="ct-empty">
                     {emptyText}
                   </td>
                 </tr>
@@ -358,6 +371,7 @@ export default function CycleTimeTracker({
                   <PartCell p={r.part} />
                   <td>{r.part.combo || r.part.cavity}</td>
                   <td>{fmt(r.hrs, 1)}</td>
+                  <td>{fmt(r.tgtHrs, 1)}</td>
                   <td>{fmt(r.ok)}</td>
                   <td>{fmt(r.rej)}</td>
                   <td className="strong">{fmt(r.produced)}</td>
@@ -492,9 +506,9 @@ export default function CycleTimeTracker({
         )}
       </div>
       <p className="ct-note">
-        Target = shots/hr × (12h − planned downtime) × pieces per shot (1+1 = 2, 2+2 = 4). Master and actual are
-        both shots per hour: actual = produced pieces per hour ÷ pieces per shot. Suggested Shots/Hr is the value to
-        put in Master data.
+        Target = master shots/hr × Target Hrs (12h − planned downtime) × pieces per shot (1+1 = 2, 2+2 = 4).
+        Actual Shots/Hr = produced ÷ Target Hrs ÷ pieces per shot, so vs Master = produced ÷ target. Suggested
+        Shots/Hr is the value to put in Master data.
       </p>
     </div>
   );
