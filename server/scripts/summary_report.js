@@ -1,6 +1,30 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
+import { computeMetrics } from "../../src/lib/calculations.js";
+import { REASON_CODES } from "../../src/data/referenceData.js";
+
+function emptyAgg() {
+  return { ok: 0, rej: 0, tgt: 0, netRun: 0, available: 0 };
+}
+
+function addToAgg(agg, m) {
+  if (!m) return;
+  agg.ok += Number(m.ok_prod) || 0;
+  agg.rej += Number(m.total_rej) || 0;
+  agg.tgt += Number(m.tgt) || 0;
+  agg.netRun += Number(m.net_run_time) || 0;
+  agg.available += Number(m.available_hours) || 0;
+}
+
+function oeeFromAgg(agg) {
+  if (!agg || agg.available <= 0) return null;
+  const produced = agg.ok + agg.rej;
+  const quality = produced > 0 ? agg.ok / produced : 0;
+  const availability = Math.min(1, agg.netRun / agg.available);
+  const performance = agg.tgt > 0 ? produced / agg.tgt : 0;
+  return quality * availability * performance * 100;
+}
 
 function findStore() {
   const candidates = [
@@ -81,10 +105,10 @@ const dates = [
 ];
 
 for (const p of plants) {
-  console.log("\n" + "=".repeat(65));
+  console.log("\n" + "=".repeat(75));
   console.log(`### ${p.name} (Total M/C: ${p.totalMc}) ###`);
-  console.log("=".repeat(65));
-  console.log("Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %");
+  console.log("=".repeat(75));
+  console.log("Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %\tOEE %");
 
   for (const d of dates) {
     const dayLabel = d.slice(8, 10) + "-Oct";
@@ -102,12 +126,17 @@ for (const p of plants) {
     });
 
     const mcEntriesMap = new Map();
+    const dayAgg = emptyAgg();
+
     for (const e of plantEntries) {
       if (!e.machine_id) continue;
       if (!mcEntriesMap.has(e.machine_id)) {
         mcEntriesMap.set(e.machine_id, []);
       }
       mcEntriesMap.get(e.machine_id).push(e);
+
+      const m = computeMetrics(e, store.master || [], store.reasonCodes || REASON_CODES);
+      addToAgg(dayAgg, m);
     }
 
     const filledCount = mcEntriesMap.size;
@@ -129,7 +158,9 @@ for (const p of plants) {
 
     const filledPct = p.totalMc > 0 ? Math.round((filledCount / p.totalMc) * 100) + "%" : "0%";
     const prodStr = totalProd.toLocaleString("en-IN");
+    const dayOeeVal = oeeFromAgg(dayAgg);
+    const oeeStr = dayOeeVal !== null ? `${dayOeeVal.toFixed(1)}%` : "—";
 
-    console.log(`${dayLabel}\t${prodStr}\t${p.totalMc}\t${noPlanCount}\t${filledCount}\t${filledPct}`);
+    console.log(`${dayLabel}\t${prodStr}\t${p.totalMc}\t${noPlanCount}\t${filledCount}\t${filledPct}\t${oeeStr}`);
   }
 }

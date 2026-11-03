@@ -765,6 +765,7 @@ export default function App() {
               locations={locations}
               master={master}
               shifts={shifts}
+              reasonCodes={reasonCodes}
               currentUser={currentUser}
               onRefresh={() => {
                 fetch("/api/entries")

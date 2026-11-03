@@ -1,5 +1,50 @@
 import React, { useState, useMemo } from "react";
 import * as XLSX from "xlsx";
+import { computeMetrics } from "../lib/calculations.js";
+import { REASON_CODES } from "../data/referenceData.js";
+
+/**
+ * Aggregator and OEE Calculation Helpers (Plant-wide weighted OEE)
+ */
+function emptyAgg() {
+  return { ok: 0, rej: 0, tgt: 0, netRun: 0, available: 0, plannedDt: 0, unplannedDt: 0 };
+}
+
+function addToAgg(agg, m) {
+  if (!m) return;
+  agg.ok += Number(m.ok_prod) || 0;
+  agg.rej += Number(m.total_rej) || 0;
+  agg.tgt += Number(m.tgt) || 0;
+  agg.netRun += Number(m.net_run_time) || 0;
+  agg.available += Number(m.available_hours) || 0;
+  agg.plannedDt += Number(m.planned_dt) || 0;
+  agg.unplannedDt += Number(m.unplanned_dt) || 0;
+}
+
+function oeeFromAgg(agg) {
+  if (!agg || agg.available <= 0) return null;
+  const produced = agg.ok + agg.rej;
+  const quality = produced > 0 ? agg.ok / produced : 0;
+  const availability = Math.min(1, agg.netRun / agg.available);
+  const performance = agg.tgt > 0 ? produced / agg.tgt : 0;
+  return {
+    quality: quality * 100,
+    availability: availability * 100,
+    performance: performance * 100,
+    oee: quality * availability * performance * 100,
+  };
+}
+
+function getOeeCellStyle(val) {
+  if (val === null || val === undefined || val === "" || isNaN(val)) {
+    return { bg: "transparent", color: "#94a3b8" };
+  }
+  const num = Number(val);
+  if (num >= 85) return { bg: "#DCFCE7", color: "#166534" }; // Soft Green (Target met)
+  if (num >= 70) return { bg: "#FEF9C3", color: "#854D0E" }; // Soft Amber / Yellow (Acceptable)
+  if (num > 0) return { bg: "#FEE2E2", color: "#991B1B" }; // Soft Red (Action required)
+  return { bg: "transparent", color: "#94a3b8" };
+}
 
 /**
  * Plant Theme Definitions matching Excel screenshot
@@ -135,9 +180,12 @@ export default function DailyUpdateView({
   locations = [],
   master = [],
   shifts = [],
+  reasonCodes = [],
   currentUser,
   onRefresh,
 }) {
+  const activeReasonCodes = reasonCodes && reasonCodes.length > 0 ? reasonCodes : REASON_CODES;
+
   // Date range defaults: 18-Oct-2026 to 25-Oct-2026 (matching the user's review sheet)
   const [startDate, setStartDate] = useState("2026-10-18");
   const [endDate, setEndDate] = useState("2026-10-25");
@@ -203,9 +251,10 @@ export default function DailyUpdateView({
     return map;
   }, [entries]);
 
-  // Main calculation matrix: plant_id -> dateStr -> { totalProd, totalMc, noPlanMc, filledMc, filledPct, pendingMc, machineDetails }
+  // Main calculation matrix: plant_id -> dateStr -> { totalProd, totalMc, noPlanMc, filledMc, filledPct, oee, pendingMc, machineDetails }
   const tableMatrix = useMemo(() => {
     const matrix = {};
+    const grandAgg = emptyAgg();
 
     for (const p of targetPlants) {
       const pId = p.plant_id;
@@ -219,6 +268,8 @@ export default function DailyUpdateView({
           totalProd: 0,
           noPlanOccurrences: 0,
           filledShifts: 0,
+          agg: emptyAgg(),
+          overallOee: null,
         },
       };
 
@@ -244,13 +295,21 @@ export default function DailyUpdateView({
         let noPlanMcCount = 0;
         const filledList = [];
         const noPlanList = [];
+        const dayAgg = emptyAgg();
 
         for (const [mId, mcRuns] of mcEntriesMap.entries()) {
           let mcProd = 0;
           let isNoPlan = false;
           let latestRun = null;
+          const mcAgg = emptyAgg();
 
           for (const e of mcRuns) {
+            const m = computeMetrics(e, master, activeReasonCodes);
+            addToAgg(dayAgg, m);
+            addToAgg(matrix[pId].totals.agg, m);
+            addToAgg(grandAgg, m);
+            addToAgg(mcAgg, m);
+
             if (Array.isArray(e.runs) && e.runs.length > 0) {
               for (const r of e.runs) {
                 mcProd += Number(r.ok_prod) || 0;
@@ -267,11 +326,15 @@ export default function DailyUpdateView({
           totalProd += mcProd;
 
           const mcObj = plantMcs.find((m) => m.machine_id === mId) || { machine_id: mId };
+          const mcK = oeeFromAgg(mcAgg);
+          const mcOee = mcK ? Math.round(mcK.oee * 10) / 10 : null;
+
           const detailItem = {
             machine_id: mId,
             machine_name: mcObj.name || mId,
             tonnage: mcObj.tonnage || "-",
             prod: mcProd,
+            oee: mcOee,
             isNoPlan: mcProd === 0 && isNoPlan,
             sap_code: latestRun?.sap_code || "-",
             material_description: latestRun?.material_description || "-",
@@ -286,6 +349,9 @@ export default function DailyUpdateView({
             noPlanList.push(detailItem);
           }
         }
+
+        const dayK = oeeFromAgg(dayAgg);
+        const dayOee = dayK ? Math.round(dayK.oee * 10) / 10 : null;
 
         const pendingList = plantMcs
           .filter((m) => !mcEntriesMap.has(m.machine_id))
@@ -305,6 +371,7 @@ export default function DailyUpdateView({
           filledMcCount,
           pendingMcCount,
           filledPct,
+          oee: dayOee,
           filledList,
           noPlanList,
           pendingList,
@@ -314,10 +381,17 @@ export default function DailyUpdateView({
         matrix[pId].totals.noPlanOccurrences += noPlanMcCount;
         matrix[pId].totals.filledShifts += filledMcCount;
       }
+
+      // Compute plant-level overall period OEE
+      const plantK = oeeFromAgg(matrix[pId].totals.agg);
+      matrix[pId].totals.overallOee = plantK ? Math.round(plantK.oee * 10) / 10 : null;
     }
 
+    const grandK = oeeFromAgg(grandAgg);
+    matrix._grandOee = grandK ? Math.round(grandK.oee * 10) / 10 : null;
+
     return matrix;
-  }, [targetPlants, plantMachinesMap, dateList, entries]);
+  }, [targetPlants, plantMachinesMap, dateList, entries, entriesLookup, master, activeReasonCodes]);
 
   // Overall KPI cards
   const kpis = useMemo(() => {
@@ -339,12 +413,14 @@ export default function DailyUpdateView({
 
     const avgCoverage =
       grandPossibleShifts > 0 ? Math.round((grandFilledShifts / grandPossibleShifts) * 100) : 0;
+    const overallOee = tableMatrix._grandOee !== undefined ? tableMatrix._grandOee : null;
 
     return {
       grandProd,
       totalTrackedMc,
       avgCoverage,
       grandNoPlan,
+      overallOee,
       activePlantCount: targetPlants.length,
     };
   }, [tableMatrix, targetPlants, dateList]);
@@ -359,8 +435,8 @@ export default function DailyUpdateView({
       const pName = getPlantDisplayName(p);
 
       const rows = [];
-      // Header matching screenshot: Date | Total Prod | Total M/C | No Plan M/C | Filled M/C | Filled %
-      rows.push(["Date", "Total Prod", "Total M/C", "No Plan M/C", "Filled M/C", "Filled %"]);
+      // Header: Date | Total Prod | Total M/C | No Plan M/C | Filled M/C | Filled % | Overall OEE %
+      rows.push(["Date", "Total Prod", "Total M/C", "No Plan M/C", "Filled M/C", "Filled %", "Overall OEE %"]);
 
       for (const d of dateList) {
         const item = data.dates[d];
@@ -372,6 +448,7 @@ export default function DailyUpdateView({
           item.noPlanMcCount > 0 ? item.noPlanMcCount : "",
           item.filledMcCount > 0 ? item.filledMcCount : "",
           item.filledMcCount > 0 ? `${item.filledPct}%` : "",
+          item.oee !== null && item.oee !== undefined ? `${item.oee.toFixed(1)}%` : "",
         ]);
       }
 
@@ -383,10 +460,19 @@ export default function DailyUpdateView({
         data.totals.noPlanOccurrences,
         data.totals.filledShifts,
         "",
+        data.totals.overallOee !== null && data.totals.overallOee !== undefined ? `${data.totals.overallOee.toFixed(1)}%` : "",
       ]);
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws["!cols"] = [{ wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
+      ws["!cols"] = [
+        { wch: 12 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 15 },
+      ];
 
       const sheetName = pName.slice(0, 31).replace(/[\/\\?*:[\]]/g, "_");
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
@@ -404,7 +490,7 @@ export default function DailyUpdateView({
       const pName = getPlantDisplayName(p);
 
       tsv += `\n${pName} (Total M/C: ${data.totalMc})\n`;
-      tsv += "Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %\n";
+      tsv += "Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %\tOverall OEE %\n";
 
       for (const d of dateList) {
         const item = data.dates[d];
@@ -413,8 +499,11 @@ export default function DailyUpdateView({
         const noPlan = item.noPlanMcCount > 0 ? item.noPlanMcCount : "";
         const filled = item.filledMcCount > 0 ? item.filledMcCount : "";
         const pctStr = item.filledMcCount > 0 ? `${item.filledPct}%` : "";
-        tsv += `${item.shortDate}\t${prod}\t${item.totalMc}\t${noPlan}\t${filled}\t${pctStr}\n`;
+        const oeeStr = item.oee !== null && item.oee !== undefined ? `${item.oee.toFixed(1)}%` : "";
+        tsv += `${item.shortDate}\t${prod}\t${item.totalMc}\t${noPlan}\t${filled}\t${pctStr}\t${oeeStr}\n`;
       }
+      const sumOeeStr = data.totals.overallOee !== null && data.totals.overallOee !== undefined ? `${data.totals.overallOee.toFixed(1)}%` : "";
+      tsv += `Total\t${data.totals.totalProd}\t${data.totals.totalMc}\t${data.totals.noPlanOccurrences}\t${data.totals.filledShifts}\t\t${sumOeeStr}\n`;
     }
 
     navigator.clipboard.writeText(tsv).then(() => {
@@ -577,7 +666,7 @@ export default function DailyUpdateView({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: "16px",
           marginBottom: "20px",
         }}
@@ -646,6 +735,40 @@ export default function DailyUpdateView({
           </div>
           <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
             Filled vs. scheduled machine shifts
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+          }}
+        >
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+            Overall Period OEE
+          </div>
+          <div
+            style={{
+              fontSize: "24px",
+              fontWeight: 800,
+              color:
+                kpis.overallOee !== null
+                  ? kpis.overallOee >= 85
+                    ? "#166534"
+                    : kpis.overallOee >= 70
+                    ? "#854d0e"
+                    : "#b91c1c"
+                  : "#64748b",
+              marginTop: "4px",
+            }}
+          >
+            {kpis.overallOee !== null ? `${kpis.overallOee.toFixed(1)}%` : "—"}
+          </div>
+          <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
+            Weighted Availability × Perf × Quality
           </div>
         </div>
 
@@ -956,7 +1079,7 @@ export default function DailyUpdateView({
                   </span>
                 </div>
 
-                {/* Table: ALL 6 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
+                {/* Table: ALL 7 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
                 <div style={{ width: "100%", overflow: "hidden" }}>
                   <table
                     className="daily-mis-table"
@@ -971,12 +1094,13 @@ export default function DailyUpdateView({
                     }}
                   >
                     <colgroup>
-                      <col style={{ width: "16%" }} />
-                      <col style={{ width: "23%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "16%" }} />
-                      <col style={{ width: "15%" }} />
-                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "19%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "14%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "14%" }} />
+                      <col style={{ width: "14%" }} />
                     </colgroup>
                     <thead>
                       <tr
@@ -1050,11 +1174,24 @@ export default function DailyUpdateView({
                             padding: "7px 4px",
                             fontWeight: 800,
                             color: "#0f172a",
+                            borderRight: "1px solid #0f172a",
                             fontSize: "12px",
                             whiteSpace: "nowrap",
                           }}
                         >
                           Filled %
+                        </th>
+                        <th
+                          style={{
+                            padding: "7px 4px",
+                            fontWeight: 800,
+                            color: "#0f172a",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
+                          }}
+                          title="Overall Plant OEE = Availability × Performance × Quality"
+                        >
+                          OEE %
                         </th>
                       </tr>
                     </thead>
@@ -1068,6 +1205,7 @@ export default function DailyUpdateView({
                           filledMcCount: 0,
                           pendingMcCount: data.totalMc,
                           filledPct: 0,
+                          oee: null,
                           filledList: [],
                           noPlanList: [],
                           pendingList: [],
@@ -1089,6 +1227,8 @@ export default function DailyUpdateView({
                           }
                         }
 
+                        // Cell color for OEE %
+                        const oeeStyle = getOeeCellStyle(row.oee);
                         const isClickable = row.filledMcCount > 0 || row.pendingMcCount > 0;
 
                         return (
@@ -1177,10 +1317,22 @@ export default function DailyUpdateView({
                                 fontWeight: 800,
                                 backgroundColor: pctBg,
                                 color: pctColor,
+                                borderRight: "1px solid #cbd5e1",
                                 whiteSpace: "nowrap",
                               }}
                             >
                               {row.filledMcCount > 0 ? `${row.filledPct}%` : ""}
+                            </td>
+                            <td
+                              style={{
+                                padding: "7px 4px",
+                                fontWeight: 800,
+                                backgroundColor: oeeStyle.bg,
+                                color: oeeStyle.color,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {row.oee !== null && row.oee !== undefined ? `${row.oee.toFixed(1)}%` : "—"}
                             </td>
                           </tr>
                         );
@@ -1245,7 +1397,22 @@ export default function DailyUpdateView({
                         >
                           {data.totals.filledShifts}
                         </td>
-                        <td style={{ padding: "7px 4px", color: "#64748b", whiteSpace: "nowrap" }}>-</td>
+                        <td style={{ padding: "7px 4px", color: "#64748b", borderRight: "1px solid #0f172a", whiteSpace: "nowrap" }}>
+                          -
+                        </td>
+                        <td
+                          style={{
+                            padding: "7px 4px",
+                            fontWeight: 800,
+                            backgroundColor: getOeeCellStyle(data.totals.overallOee).bg,
+                            color: getOeeCellStyle(data.totals.overallOee).color,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {data.totals.overallOee !== null && data.totals.overallOee !== undefined
+                            ? `${data.totals.overallOee.toFixed(1)}%`
+                            : "—"}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -1300,6 +1467,20 @@ export default function DailyUpdateView({
               <div>
                 <div style={{ fontSize: "12px", fontWeight: 700, color: "#64748b" }}>
                   {drillModalData.plantName} · {drillModalData.shortDate} ({drillModalData.date})
+                  {drillModalData.oee !== null && drillModalData.oee !== undefined ? (
+                    <span
+                      style={{
+                        marginLeft: "8px",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        backgroundColor: getOeeCellStyle(drillModalData.oee).bg,
+                        color: getOeeCellStyle(drillModalData.oee).color,
+                        fontWeight: 800,
+                      }}
+                    >
+                      Overall OEE: {drillModalData.oee.toFixed(1)}%
+                    </span>
+                  ) : null}
                 </div>
                 <h3 style={{ margin: "2px 0 0 0", fontSize: "18px", fontWeight: 800, color: "#0f172a" }}>
                   Machine Status &amp; Compliance Breakdown
@@ -1397,6 +1578,9 @@ export default function DailyUpdateView({
                           <th style={{ padding: "8px", borderBottom: "1px solid #cbd5e1", textAlign: "right" }}>
                             OK Prod
                           </th>
+                          <th style={{ padding: "8px", borderBottom: "1px solid #cbd5e1", textAlign: "right" }}>
+                            OEE %
+                          </th>
                           <th style={{ padding: "8px", borderBottom: "1px solid #cbd5e1" }}>Status</th>
                         </tr>
                       </thead>
@@ -1418,6 +1602,23 @@ export default function DailyUpdateView({
                               }}
                             >
                               {m.prod.toLocaleString("en-IN")}
+                            </td>
+                            <td
+                              style={{
+                                padding: "8px",
+                                textAlign: "right",
+                                fontWeight: 800,
+                                color:
+                                  m.oee !== null && m.oee !== undefined
+                                    ? m.oee >= 85
+                                      ? "#166534"
+                                      : m.oee >= 70
+                                      ? "#854d0e"
+                                      : "#991b1b"
+                                    : "#94a3b8",
+                              }}
+                            >
+                              {m.oee !== null && m.oee !== undefined ? `${m.oee.toFixed(1)}%` : "—"}
                             </td>
                             <td style={{ padding: "8px" }}>
                               {m.isNoPlan ? (
