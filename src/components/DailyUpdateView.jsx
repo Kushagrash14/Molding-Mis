@@ -139,10 +139,54 @@ function generateDateRange(startStr, endStr) {
 }
 
 /**
+ * Checks if a run or entry represents NO MANPOWER (quick-filled or unplanned manpower downtime)
+ */
+function isNoManpowerRun(run, entry) {
+  if (!run && !entry) return false;
+  const target = run || entry;
+
+  const sap = String(target.sap_code || entry?.sap_code || "").toLowerCase().trim();
+  if (sap.includes("no_manpower") || sap.includes("no manpower") || sap === "no_mp") return true;
+
+  const matDesc = String(target.material_description || entry?.material_description || "").toLowerCase();
+  if (
+    matDesc.includes("no manpower") ||
+    matDesc.includes("no_manpower") ||
+    matDesc.includes("no-manpower")
+  ) {
+    return true;
+  }
+
+  const reasons = target.reasons || entry?.reasons;
+  if (!reasons) return false;
+
+  if (Array.isArray(reasons)) {
+    return reasons.some((r) => {
+      const id = String(r?.reason_id || r?.name || "").toLowerCase();
+      const val = Number(r?.value || r?.minutes || 0);
+      return val > 0 && (id.includes("no_manpower") || id.includes("no manpower") || id === "udt_no_manpower");
+    });
+  }
+
+  if (typeof reasons === "object") {
+    for (const [k, v] of Object.entries(reasons)) {
+      const id = k.toLowerCase();
+      const val = typeof v === "object" && v !== null ? Number(v.value || v.minutes || 0) : Number(v || 0);
+      if (val > 0 && (id.includes("no_manpower") || id.includes("no manpower") || id === "udt_no_manpower")) return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Checks if a run or entry represents NO PLAN (12 hr downtime or quick fill idle)
  */
 function isNoPlanRun(run, entry) {
   if (!run && !entry) return false;
+  // If explicitly NO MANPOWER, exclude from NO PLAN
+  if (isNoManpowerRun(run, entry)) return false;
+
   const target = run || entry;
 
   const sap = String(target.sap_code || entry?.sap_code || "").trim();
@@ -251,7 +295,7 @@ export default function DailyUpdateView({
     return map;
   }, [entries]);
 
-  // Main calculation matrix: plant_id -> dateStr -> { totalProd, totalMc, noPlanMc, filledMc, filledPct, oee, pendingMc, machineDetails }
+  // Main calculation matrix: plant_id -> dateStr -> { totalProd, totalMc, noPlanMc, noManpowerMc, filledMc, filledPct, oee, pendingMc, machineDetails }
   const tableMatrix = useMemo(() => {
     const matrix = {};
     const grandAgg = emptyAgg();
@@ -267,6 +311,7 @@ export default function DailyUpdateView({
         totals: {
           totalProd: 0,
           noPlanOccurrences: 0,
+          noManpowerOccurrences: 0,
           filledShifts: 0,
           agg: emptyAgg(),
           overallOee: null,
@@ -293,13 +338,16 @@ export default function DailyUpdateView({
 
         let totalProd = 0;
         let noPlanMcCount = 0;
+        let noManpowerMcCount = 0;
         const filledList = [];
         const noPlanList = [];
+        const noManpowerList = [];
         const dayAgg = emptyAgg();
 
         for (const [mId, mcRuns] of mcEntriesMap.entries()) {
           let mcProd = 0;
           let isNoPlan = false;
+          let isNoManpower = false;
           let latestRun = null;
           const mcAgg = emptyAgg();
 
@@ -313,12 +361,14 @@ export default function DailyUpdateView({
             if (Array.isArray(e.runs) && e.runs.length > 0) {
               for (const r of e.runs) {
                 mcProd += Number(r.ok_prod) || 0;
-                if (isNoPlanRun(r, e)) isNoPlan = true;
+                if (isNoManpowerRun(r, e)) isNoManpower = true;
+                else if (isNoPlanRun(r, e)) isNoPlan = true;
                 latestRun = r;
               }
             } else {
               mcProd += Number(e.ok_prod) || 0;
-              if (isNoPlanRun(e, e)) isNoPlan = true;
+              if (isNoManpowerRun(e, e)) isNoManpower = true;
+              else if (isNoPlanRun(e, e)) isNoPlan = true;
               latestRun = e;
             }
           }
@@ -336,6 +386,7 @@ export default function DailyUpdateView({
             prod: mcProd,
             oee: mcOee,
             isNoPlan: mcProd === 0 && isNoPlan,
+            isNoManpower: mcProd === 0 && isNoManpower,
             sap_code: latestRun?.sap_code || "-",
             material_description: latestRun?.material_description || "-",
             operator_name: mcRuns[0]?.operator_name || mcRuns[0]?.created_by_name || "-",
@@ -344,7 +395,10 @@ export default function DailyUpdateView({
 
           filledList.push(detailItem);
 
-          if (mcProd === 0 && isNoPlan) {
+          if (mcProd === 0 && isNoManpower) {
+            noManpowerMcCount++;
+            noManpowerList.push(detailItem);
+          } else if (mcProd === 0 && isNoPlan) {
             noPlanMcCount++;
             noPlanList.push(detailItem);
           }
@@ -368,17 +422,20 @@ export default function DailyUpdateView({
           totalProd,
           totalMc,
           noPlanMcCount,
+          noManpowerMcCount,
           filledMcCount,
           pendingMcCount,
           filledPct,
           oee: dayOee,
           filledList,
           noPlanList,
+          noManpowerList,
           pendingList,
         };
 
         matrix[pId].totals.totalProd += totalProd;
         matrix[pId].totals.noPlanOccurrences += noPlanMcCount;
+        matrix[pId].totals.noManpowerOccurrences += noManpowerMcCount;
         matrix[pId].totals.filledShifts += filledMcCount;
       }
 
@@ -400,6 +457,7 @@ export default function DailyUpdateView({
     let grandFilledShifts = 0;
     let grandPossibleShifts = 0;
     let grandNoPlan = 0;
+    let grandNoManpower = 0;
 
     for (const p of targetPlants) {
       const data = tableMatrix[p.plant_id];
@@ -409,6 +467,7 @@ export default function DailyUpdateView({
       grandFilledShifts += data.totals.filledShifts;
       grandPossibleShifts += data.totalMc * dateList.length;
       grandNoPlan += data.totals.noPlanOccurrences;
+      grandNoManpower += data.totals.noManpowerOccurrences;
     }
 
     const avgCoverage =
@@ -420,6 +479,7 @@ export default function DailyUpdateView({
       totalTrackedMc,
       avgCoverage,
       grandNoPlan,
+      grandNoManpower,
       overallOee,
       activePlantCount: targetPlants.length,
     };
@@ -435,8 +495,8 @@ export default function DailyUpdateView({
       const pName = getPlantDisplayName(p);
 
       const rows = [];
-      // Header: Date | Total Prod | Total M/C | No Plan M/C | Filled M/C | Filled % | Overall OEE %
-      rows.push(["Date", "Total Prod", "Total M/C", "No Plan M/C", "Filled M/C", "Filled %", "Overall OEE %"]);
+      // Header: Date | Total Prod | Total M/C | No Plan M/C | No Manpower M/C | Filled M/C | Filled % | Overall OEE %
+      rows.push(["Date", "Total Prod", "Total M/C", "No Plan M/C", "No Manpower M/C", "Filled M/C", "Filled %", "Overall OEE %"]);
 
       for (const d of dateList) {
         const item = data.dates[d];
@@ -446,6 +506,7 @@ export default function DailyUpdateView({
           item.totalProd > 0 ? item.totalProd : "",
           item.totalMc,
           item.noPlanMcCount > 0 ? item.noPlanMcCount : "",
+          item.noManpowerMcCount > 0 ? item.noManpowerMcCount : "",
           item.filledMcCount > 0 ? item.filledMcCount : "",
           item.filledMcCount > 0 ? `${item.filledPct}%` : "",
           item.oee !== null && item.oee !== undefined ? `${item.oee.toFixed(1)}%` : "",
@@ -458,6 +519,7 @@ export default function DailyUpdateView({
         data.totals.totalProd,
         data.totalMc,
         data.totals.noPlanOccurrences,
+        data.totals.noManpowerOccurrences,
         data.totals.filledShifts,
         "",
         data.totals.overallOee !== null && data.totals.overallOee !== undefined ? `${data.totals.overallOee.toFixed(1)}%` : "",
@@ -465,13 +527,14 @@ export default function DailyUpdateView({
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws["!cols"] = [
-        { wch: 12 },
-        { wch: 14 },
-        { wch: 12 },
-        { wch: 14 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 15 },
+        { wch: 12 }, // Date
+        { wch: 14 }, // Total Prod
+        { wch: 12 }, // Total M/C
+        { wch: 14 }, // No Plan M/C
+        { wch: 16 }, // No Manpower M/C
+        { wch: 12 }, // Filled M/C
+        { wch: 12 }, // Filled %
+        { wch: 15 }, // Overall OEE %
       ];
 
       const sheetName = pName.slice(0, 31).replace(/[\/\\?*:[\]]/g, "_");
@@ -490,20 +553,21 @@ export default function DailyUpdateView({
       const pName = getPlantDisplayName(p);
 
       tsv += `\n${pName} (Total M/C: ${data.totalMc})\n`;
-      tsv += "Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %\tOverall OEE %\n";
+      tsv += "Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tNo Manpower M/C\tFilled M/C\tFilled %\tOverall OEE %\n";
 
       for (const d of dateList) {
         const item = data.dates[d];
         if (!item) continue;
         const prod = item.totalProd > 0 ? item.totalProd : "";
         const noPlan = item.noPlanMcCount > 0 ? item.noPlanMcCount : "";
+        const noMp = item.noManpowerMcCount > 0 ? item.noManpowerMcCount : "";
         const filled = item.filledMcCount > 0 ? item.filledMcCount : "";
         const pctStr = item.filledMcCount > 0 ? `${item.filledPct}%` : "";
         const oeeStr = item.oee !== null && item.oee !== undefined ? `${item.oee.toFixed(1)}%` : "";
-        tsv += `${item.shortDate}\t${prod}\t${item.totalMc}\t${noPlan}\t${filled}\t${pctStr}\t${oeeStr}\n`;
+        tsv += `${item.shortDate}\t${prod}\t${item.totalMc}\t${noPlan}\t${noMp}\t${filled}\t${pctStr}\t${oeeStr}\n`;
       }
       const sumOeeStr = data.totals.overallOee !== null && data.totals.overallOee !== undefined ? `${data.totals.overallOee.toFixed(1)}%` : "";
-      tsv += `Total\t${data.totals.totalProd}\t${data.totals.totalMc}\t${data.totals.noPlanOccurrences}\t${data.totals.filledShifts}\t\t${sumOeeStr}\n`;
+      tsv += `Total\t${data.totals.totalProd}\t${data.totals.totalMc}\t${data.totals.noPlanOccurrences}\t${data.totals.noManpowerOccurrences}\t${data.totals.filledShifts}\t\t${sumOeeStr}\n`;
     }
 
     navigator.clipboard.writeText(tsv).then(() => {
@@ -789,6 +853,26 @@ export default function DailyUpdateView({
           </div>
           <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
             12H idle downtime / quick-filled
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+          }}
+        >
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+            No-Manpower Occurrences
+          </div>
+          <div style={{ fontSize: "24px", fontWeight: 800, color: "#ea580c", marginTop: "4px" }}>
+            {kpis.grandNoManpower} <span style={{ fontSize: "14px", fontWeight: 600 }}>shifts</span>
+          </div>
+          <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
+            Operator shortage / quick-filled
           </div>
         </div>
       </div>
@@ -1079,7 +1163,7 @@ export default function DailyUpdateView({
                   </span>
                 </div>
 
-                {/* Table: ALL 7 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
+                {/* Table: ALL 8 COLUMNS DIRECTLY VISIBLE - ZERO SCROLLBAR */}
                 <div style={{ width: "100%", overflow: "hidden" }}>
                   <table
                     className="daily-mis-table"
@@ -1094,13 +1178,14 @@ export default function DailyUpdateView({
                     }}
                   >
                     <colgroup>
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "11%" }} />
                       <col style={{ width: "13%" }} />
-                      <col style={{ width: "19%" }} />
-                      <col style={{ width: "13%" }} />
-                      <col style={{ width: "14%" }} />
-                      <col style={{ width: "13%" }} />
-                      <col style={{ width: "14%" }} />
-                      <col style={{ width: "14%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "11%" }} />
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "12%" }} />
                     </colgroup>
                     <thead>
                       <tr
@@ -1111,7 +1196,7 @@ export default function DailyUpdateView({
                       >
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
@@ -1123,7 +1208,7 @@ export default function DailyUpdateView({
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
@@ -1135,7 +1220,7 @@ export default function DailyUpdateView({
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
@@ -1147,19 +1232,33 @@ export default function DailyUpdateView({
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
                             fontSize: "12px",
                             whiteSpace: "nowrap",
                           }}
+                          title="No Plan Machines (Quick-fill / 12h Planned Downtime)"
                         >
                           No Plan M/C
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
+                            fontWeight: 800,
+                            color: "#0f172a",
+                            borderRight: "1px solid #0f172a",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
+                          }}
+                          title="No Manpower Machines (Quick-fill / Unplanned Manpower Shortage)"
+                        >
+                          No Manpower M/C
+                        </th>
+                        <th
+                          style={{
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
@@ -1171,7 +1270,7 @@ export default function DailyUpdateView({
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
@@ -1183,7 +1282,7 @@ export default function DailyUpdateView({
                         </th>
                         <th
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             color: "#0f172a",
                             fontSize: "12px",
@@ -1202,12 +1301,14 @@ export default function DailyUpdateView({
                           totalProd: 0,
                           totalMc: data.totalMc,
                           noPlanMcCount: 0,
+                          noManpowerMcCount: 0,
                           filledMcCount: 0,
                           pendingMcCount: data.totalMc,
                           filledPct: 0,
                           oee: null,
                           filledList: [],
                           noPlanList: [],
+                          noManpowerList: [],
                           pendingList: [],
                         };
 
@@ -1255,7 +1356,7 @@ export default function DailyUpdateView({
                           >
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
                                 fontWeight: 600,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
@@ -1267,7 +1368,7 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 6px",
+                                padding: "7px 5px",
                                 fontWeight: 700,
                                 color: row.totalProd > 0 ? "#0284c7" : "#64748b",
                                 borderRight: "1px solid #cbd5e1",
@@ -1279,7 +1380,7 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
                                 fontWeight: 600,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
@@ -1290,7 +1391,7 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
                                 fontWeight: 700,
                                 color: row.noPlanMcCount > 0 ? "#d97706" : "#94a3b8",
                                 borderRight: "1px solid #cbd5e1",
@@ -1302,7 +1403,19 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
+                                fontWeight: 700,
+                                color: row.noManpowerMcCount > 0 ? "#c2410c" : "#94a3b8",
+                                borderRight: "1px solid #cbd5e1",
+                                backgroundColor: row.noManpowerMcCount > 0 ? "#ffedd5" : "transparent",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {row.noManpowerMcCount > 0 ? row.noManpowerMcCount : ""}
+                            </td>
+                            <td
+                              style={{
+                                padding: "7px 3px",
                                 fontWeight: 700,
                                 color: "#0f172a",
                                 borderRight: "1px solid #cbd5e1",
@@ -1313,7 +1426,7 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
                                 fontWeight: 800,
                                 backgroundColor: pctBg,
                                 color: pctColor,
@@ -1325,7 +1438,7 @@ export default function DailyUpdateView({
                             </td>
                             <td
                               style={{
-                                padding: "7px 4px",
+                                padding: "7px 3px",
                                 fontWeight: 800,
                                 backgroundColor: oeeStyle.bg,
                                 color: oeeStyle.color,
@@ -1348,7 +1461,7 @@ export default function DailyUpdateView({
                       >
                         <td
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
                             whiteSpace: "nowrap",
@@ -1358,7 +1471,7 @@ export default function DailyUpdateView({
                         </td>
                         <td
                           style={{
-                            padding: "7px 6px",
+                            padding: "7px 5px",
                             color: "#0284c7",
                             borderRight: "1px solid #0f172a",
                             textAlign: "right",
@@ -1369,7 +1482,7 @@ export default function DailyUpdateView({
                         </td>
                         <td
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
                             whiteSpace: "nowrap",
@@ -1379,7 +1492,7 @@ export default function DailyUpdateView({
                         </td>
                         <td
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             color: "#d97706",
                             borderRight: "1px solid #0f172a",
                             whiteSpace: "nowrap",
@@ -1389,7 +1502,17 @@ export default function DailyUpdateView({
                         </td>
                         <td
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
+                            color: "#c2410c",
+                            borderRight: "1px solid #0f172a",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {data.totals.noManpowerOccurrences}
+                        </td>
+                        <td
+                          style={{
+                            padding: "7px 3px",
                             color: "#0f172a",
                             borderRight: "1px solid #0f172a",
                             whiteSpace: "nowrap",
@@ -1397,12 +1520,12 @@ export default function DailyUpdateView({
                         >
                           {data.totals.filledShifts}
                         </td>
-                        <td style={{ padding: "7px 4px", color: "#64748b", borderRight: "1px solid #0f172a", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "7px 3px", color: "#64748b", borderRight: "1px solid #0f172a", whiteSpace: "nowrap" }}>
                           -
                         </td>
                         <td
                           style={{
-                            padding: "7px 4px",
+                            padding: "7px 3px",
                             fontWeight: 800,
                             backgroundColor: getOeeCellStyle(data.totals.overallOee).bg,
                             color: getOeeCellStyle(data.totals.overallOee).color,
@@ -1545,6 +1668,22 @@ export default function DailyUpdateView({
               </button>
 
               <button
+                onClick={() => setDrillTab("no_manpower")}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  border: drillTab === "no_manpower" ? "2px solid #ea580c" : "1px solid #cbd5e1",
+                  backgroundColor: drillTab === "no_manpower" ? "#ffedd5" : "#ffffff",
+                  color: drillTab === "no_manpower" ? "#9a3412" : "#475569",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                👥 No Manpower Machines ({drillModalData.noManpowerMcCount})
+              </button>
+
+              <button
                 onClick={() => setDrillTab("pending")}
                 style={{
                   padding: "6px 14px",
@@ -1621,7 +1760,20 @@ export default function DailyUpdateView({
                               {m.oee !== null && m.oee !== undefined ? `${m.oee.toFixed(1)}%` : "—"}
                             </td>
                             <td style={{ padding: "8px" }}>
-                              {m.isNoPlan ? (
+                              {m.isNoManpower ? (
+                                <span
+                                  style={{
+                                    backgroundColor: "#ffedd5",
+                                    color: "#c2410c",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  NO MANPOWER
+                                </span>
+                              ) : m.isNoPlan ? (
                                 <span
                                   style={{
                                     backgroundColor: "#fef3c7",
@@ -1685,6 +1837,43 @@ export default function DailyUpdateView({
                             </td>
                             <td style={{ padding: "8px", color: "#334155" }}>
                               {m.material_description || "Full shift idle / Quick-filled No Plan"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
+
+              {drillTab === "no_manpower" && (
+                <div>
+                  {drillModalData.noManpowerList.length === 0 ? (
+                    <p style={{ color: "#64748b", fontSize: "13px" }}>
+                      No machines were under No-Manpower downtime on this date.
+                    </p>
+                  ) : (
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                      <thead>
+                        <tr style={{ backgroundColor: "#ffedd5", textAlign: "left", color: "#9a3412" }}>
+                          <th style={{ padding: "8px", borderBottom: "1px solid #fed7aa" }}>Machine</th>
+                          <th style={{ padding: "8px", borderBottom: "1px solid #fed7aa" }}>Tonnage</th>
+                          <th style={{ padding: "8px", borderBottom: "1px solid #fed7aa" }}>Reason Code</th>
+                          <th style={{ padding: "8px", borderBottom: "1px solid #fed7aa" }}>Remark / Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {drillModalData.noManpowerList.map((m) => (
+                          <tr key={m.machine_id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                            <td style={{ padding: "8px", fontWeight: 700, color: "#0f172a" }}>
+                              {m.machine_name}
+                            </td>
+                            <td style={{ padding: "8px", color: "#64748b" }}>{m.tonnage}T</td>
+                            <td style={{ padding: "8px", fontWeight: 700, color: "#c2410c" }}>
+                              UDT - NO MANPOWER (Shortage)
+                            </td>
+                            <td style={{ padding: "8px", color: "#334155" }}>
+                              {m.material_description || "Full shift idle / Quick-filled No Manpower"}
                             </td>
                           </tr>
                         ))}

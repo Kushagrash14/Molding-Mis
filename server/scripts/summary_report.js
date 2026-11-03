@@ -56,9 +56,39 @@ function findStore() {
   return null;
 }
 
+function isNoManpowerEntry(e) {
+  if (!e) return false;
+  const sap = String(e.sap_code || "").toLowerCase().trim();
+  if (sap.includes("no_manpower") || sap.includes("no manpower") || sap === "no_mp") return true;
+
+  const matDesc = String(e.material_description || "").toLowerCase();
+  if (matDesc.includes("no manpower") || matDesc.includes("no_manpower") || matDesc.includes("no-manpower")) return true;
+
+  const r = e.reasons;
+  if (!r) return false;
+  if (Array.isArray(r)) {
+    return r.some((x) => {
+      const id = String(x?.reason_id || x?.name || "").toLowerCase();
+      const val = Number(x?.value || x?.minutes || 0);
+      return val > 0 && (id.includes("no_manpower") || id.includes("no manpower") || id === "udt_no_manpower");
+    });
+  }
+  if (typeof r === "object") {
+    for (const [k, v] of Object.entries(r)) {
+      const id = k.toLowerCase();
+      const val = typeof v === "object" && v !== null ? Number(v.value || v.minutes || 0) : Number(v || 0);
+      if (val > 0 && (id.includes("no_manpower") || id.includes("no manpower") || id === "udt_no_manpower")) return true;
+    }
+  }
+  return false;
+}
+
 function isNoPlanEntry(e) {
   if (!e) return false;
+  if (isNoManpowerEntry(e)) return false;
   if (e.sap_code === "DOWN_12H" || e.sap_code === "NO_PLAN") return true;
+  const matDesc = String(e.material_description || "").toLowerCase();
+  if (matDesc.includes("no plan") || matDesc.includes("no_plan")) return true;
   const r = e.reasons;
   if (!r) return false;
   if (Array.isArray(r)) {
@@ -108,7 +138,7 @@ for (const p of plants) {
   console.log("\n" + "=".repeat(75));
   console.log(`### ${p.name} (Total M/C: ${p.totalMc}) ###`);
   console.log("=".repeat(75));
-  console.log("Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tFilled M/C\tFilled %\tOEE %");
+  console.log("Date\tTotal Prod\tTotal M/C\tNo Plan M/C\tNo Manpower M/C\tFilled M/C\tFilled %\tOEE %");
 
   for (const d of dates) {
     const dayLabel = d.slice(8, 10) + "-Oct";
@@ -142,16 +172,21 @@ for (const p of plants) {
     const filledCount = mcEntriesMap.size;
     let totalProd = 0;
     let noPlanCount = 0;
+    let noManpowerCount = 0;
 
     for (const [mcId, mcList] of mcEntriesMap.entries()) {
       let mcProd = 0;
       let hasNoPlanReason = false;
+      let hasNoManpowerReason = false;
       for (const e of mcList) {
         mcProd += Number(e.ok_prod) || 0;
-        if (isNoPlanEntry(e)) hasNoPlanReason = true;
+        if (isNoManpowerEntry(e)) hasNoManpowerReason = true;
+        else if (isNoPlanEntry(e)) hasNoPlanReason = true;
       }
       totalProd += mcProd;
-      if (mcProd === 0 && hasNoPlanReason) {
+      if (mcProd === 0 && hasNoManpowerReason) {
+        noManpowerCount++;
+      } else if (mcProd === 0 && hasNoPlanReason) {
         noPlanCount++;
       }
     }
@@ -161,6 +196,6 @@ for (const p of plants) {
     const dayOeeVal = oeeFromAgg(dayAgg);
     const oeeStr = dayOeeVal !== null ? `${dayOeeVal.toFixed(1)}%` : "—";
 
-    console.log(`${dayLabel}\t${prodStr}\t${p.totalMc}\t${noPlanCount}\t${filledCount}\t${filledPct}\t${oeeStr}`);
+    console.log(`${dayLabel}\t${prodStr}\t${p.totalMc}\t${noPlanCount}\t${noManpowerCount}\t${filledCount}\t${filledPct}\t${oeeStr}`);
   }
 }
