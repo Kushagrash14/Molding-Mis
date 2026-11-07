@@ -10,10 +10,20 @@ const PRESET_TIMES = [
 
 const PERIOD_OPTIONS = [
   { value: "yesterday", label: "Yesterday / Previous Day (Recommended for Morning Digest)" },
+  { value: "latest_day", label: "Latest Production Day (Most Recent Shifts)" },
   { value: "mtd", label: "Current Month to Date (Full Cumulative Cycle Time Tracker)" },
   { value: "today", label: "Today (Current In-Progress Shifts)" },
   { value: "last7days", label: "Last 7 Days (Rolling Summary)" },
 ];
+
+const PLANT_ORDER = {
+  "2020": 1, // PGTL
+  "4010": 2, // NGM
+  "1040": 3, // PGEL
+  "2060": 4, // DMIC
+  "PLANT-U04": 5,
+  "4020": 6,
+};
 
 const THRESHOLDS = [105, 110, 120, 150];
 const MIN_HOURS = [0, 2, 8, 24];
@@ -61,7 +71,7 @@ export default function AutoEmailManager({
     recipientsTo: [],
     recipientsCc: [],
     recipientsBcc: [],
-    selectedPlants: ["1040", "2020", "4010", "2060"],
+    selectedPlants: ["2020", "4010", "1040", "2060"],
     subject: "Daily Cycle Time Tracker Report - [DATE]",
     bodyIntro:
       "Dear Team,\n\nPlease find the automated Cycle Time Tracker daily report and visual snapshots for the selected production plants attached below.\n\nKindly review any over-cycle deviations and slow molds for process optimization.",
@@ -277,16 +287,18 @@ export default function AutoEmailManager({
   };
 
   const availablePlants = useMemo(() => {
-    return plants.length > 0
-      ? plants
-      : [
-          { plant_id: "1040", name: "1040 - PGEL Pune" },
-          { plant_id: "2020", name: "2020 - PGTL Pune" },
-          { plant_id: "4010", name: "4010 - NGM Pune" },
-          { plant_id: "2060", name: "2060 - DMIC Noida" },
-          { plant_id: "PLANT-U04", name: "Unit-04 - Bhiwadi" },
-          { plant_id: "4020", name: "4020 - NGM Bhiwadi" },
-        ];
+    const list =
+      plants.length > 0
+        ? [...plants]
+        : [
+            { plant_id: "2020", name: "2020 - PGTL Pune" },
+            { plant_id: "4010", name: "4010 - NGM Pune" },
+            { plant_id: "1040", name: "1040 - PGEL Pune" },
+            { plant_id: "2060", name: "2060 - DMIC Noida" },
+            { plant_id: "PLANT-U04", name: "Unit-04 - Bhiwadi" },
+            { plant_id: "4020", name: "4020 - NGM Bhiwadi" },
+          ];
+    return list.sort((a, b) => (PLANT_ORDER[String(a.plant_id)] || 99) - (PLANT_ORDER[String(b.plant_id)] || 99));
   }, [plants]);
 
   if (loading) {

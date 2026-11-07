@@ -2,6 +2,43 @@ import { computeMetrics, findProduct } from "../src/lib/calculations.js";
 import { familyInPlant } from "../src/data/familyMolds.js";
 
 const SLOW_LIMIT = 70;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export const PLANT_PRIORITY = {
+  "2020": 1, // PGTL Pune (First)
+  "4010": 2, // NGM Pune (Second)
+  "1040": 3, // PGEL Pune (Third)
+  "2060": 4, // DMIC Noida
+  "PLANT-U04": 5, // Unit-04 Bhiwadi
+  "4020": 6, // NGM Bhiwadi
+};
+
+export function sortPlantIds(plantIds = []) {
+  return [...plantIds].sort((a, b) => {
+    const pA = PLANT_PRIORITY[String(a)] || 99;
+    const pB = PLANT_PRIORITY[String(b)] || 99;
+    return pA - pB;
+  });
+}
+
+export function getPlantDisplayName(plantId, plantObj = null) {
+  const pid = String(plantId || "");
+  if (pid === "2020") return "PGTL MOLDING (2020 - PGTL Pune)";
+  if (pid === "4010") return "NGM MOLDING (4010 - NGM Pune)";
+  if (pid === "1040") return "PGEL MOLDING (1040 - PGEL Pune)";
+  if (pid === "2060") return "DMIC MOLDING (2060 - DMIC Noida)";
+  if (plantObj?.name) return plantObj.name;
+  return `Plant ${pid}`;
+}
+
+export function getPlantShortCode(plantId) {
+  const pid = String(plantId || "");
+  if (pid === "2020") return "PGTL";
+  if (pid === "4010") return "NGM";
+  if (pid === "1040") return "PGEL";
+  if (pid === "2060") return "DMIC";
+  return pid;
+}
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (c) => ({
@@ -22,6 +59,30 @@ function round(n, d = 0) {
 function fmt(n, d = 0) {
   const v = round(n, d);
   return v === null ? "—" : v.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+export function fmtDateShort(iso) {
+  if (!iso) return "—";
+  const parts = String(iso).slice(0, 10).split("-");
+  if (parts.length !== 3) return iso;
+  const [y, m, d] = parts;
+  const mName = MONTHS[Number(m) - 1] || m;
+  return `${d} ${mName} ${y.slice(2)}`;
+}
+
+export function formatMachineName(id, machines = []) {
+  if (!id) return "—";
+  const m = machines.find((mc) => mc.machine_id === id);
+  if (!m) return id;
+  return m.machine_no ? m.machine_no.split(" (")[0] : id;
+}
+
+export function formatShiftName(id, shifts = []) {
+  if (!id) return "—";
+  const s = shifts.find((sh) => String(sh.shift_id) === String(id) || sh.code === id);
+  const name = s?.name;
+  const tag = name?.match(/\(([^)]+)\)/)?.[1];
+  return tag ? `S${id} ${tag}` : name || `S${id}`;
 }
 
 export function getIstDateStr(offsetDays = 0) {
@@ -57,7 +118,7 @@ export function statusFor(pct, threshold = 110) {
  * Filter entries based on period option
  */
 export function filterEntriesByPeriod(entries, period = "yesterday", customDate = null) {
-  if (!Array.isArray(entries)) return [];
+  if (!Array.isArray(entries) || entries.length === 0) return [];
   const today = getIstDateStr(0);
   const yesterday = getIstDateStr(-1);
   const currentMonth = getIstMonthStr();
@@ -73,8 +134,17 @@ export function filterEntriesByPeriod(entries, period = "yesterday", customDate 
 
   if (period === "yesterday") {
     const list = entries.filter((e) => e.shift_date === yesterday);
-    // If no entries for yesterday (e.g. testing or holiday), fallback to latest date available
     if (list.length > 0) return list;
+    // Fallback: if yesterday has no entries (e.g. testing), use latest available date
+    const sorted = [...entries].filter((e) => e.shift_date).sort((a, b) => (b.shift_date > a.shift_date ? 1 : -1));
+    if (sorted.length > 0) {
+      const latestDate = sorted[0].shift_date;
+      return entries.filter((e) => e.shift_date === latestDate);
+    }
+    return [];
+  }
+
+  if (period === "latest_day") {
     const sorted = [...entries].filter((e) => e.shift_date).sort((a, b) => (b.shift_date > a.shift_date ? 1 : -1));
     if (sorted.length > 0) {
       const latestDate = sorted[0].shift_date;
@@ -86,7 +156,6 @@ export function filterEntriesByPeriod(entries, period = "yesterday", customDate 
   if (period === "mtd") {
     const list = entries.filter((e) => e.shift_date && e.shift_date.startsWith(currentMonth));
     if (list.length > 0) return list;
-    // Fallback if current month has no data yet
     const sorted = [...entries].filter((e) => e.shift_date).sort((a, b) => (b.shift_date > a.shift_date ? 1 : -1));
     if (sorted.length > 0) {
       const latestMonth = sorted[0].shift_date.slice(0, 7);
@@ -104,18 +173,21 @@ export function filterEntriesByPeriod(entries, period = "yesterday", customDate 
 }
 
 /**
- * Compute cycle time data for a specific plant
+ * Compute cycle time data for a specific plant, returning both part-level and run-level suspicious rows
  */
 export function computePlantCycleTime(entries, master, reasonCodes, plantId, options = {}) {
   const threshold = Number(options.threshold) || 110;
   const minHours = options.minHours !== undefined ? Number(options.minHours) : 2;
   const period = options.period || "yesterday";
   const customDate = options.date || null;
+  const machines = options.machines || [];
+  const shifts = options.shifts || [];
 
   const relevantEntries = filterEntriesByPeriod(entries, period, customDate);
 
   const bySap = new Map();
   const dates = new Set();
+  const rawRunsList = [];
 
   relevantEntries.forEach((entry) => {
     const ePlant = String(entry.plant_id || "1040");
@@ -168,11 +240,16 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
       rec.target += target;
       rec.produced += produced;
       rec.machines.add(entry.machine_id);
-      rec.runs.push({
-        id: `${entry.id || entry.shift_date}_${entry.machine_id}_${rec.runs.length}`,
+
+      const runRecord = {
+        id: `${entry.id || entry.entry_id || entry.shift_date}_${entry.machine_id}_${rec.runs.length}`,
         date: entry.shift_date,
+        dateFormatted: fmtDateShort(entry.shift_date),
         shift: entry.shift_id,
+        shiftDisplay: formatShiftName(entry.shift_id, shifts),
         machine: entry.machine_id,
+        machineDisplay: formatMachineName(entry.machine_id, machines),
+        operator: entry.operator_name || entry.created_by_name || "",
         hrs,
         tgtHrs,
         ok,
@@ -182,7 +259,10 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
         rate,
         shotRate,
         pct,
-      });
+      };
+
+      rec.runs.push(runRecord);
+      rawRunsList.push({ ...runRecord, partRef: rec });
     });
   });
 
@@ -218,16 +298,54 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
   const worstPart = overParts[0] || null;
   const totalOverShifts = eligibleParts.reduce((s, p) => s + p.overRuns, 0);
 
+  // Build shift-wise runs matching the CycleTimeTracker.jsx shift mode table
+  const allRuns = rawRunsList
+    .filter((r) => r.hrs >= minHours)
+    .map((r) => {
+      const part = r.partRef;
+      const runStatus = statusFor(r.pct, threshold);
+      const actualShots = r.shotRate;
+      const declaredCt = part.shots > 0 ? 3600 / part.shots : null;
+      const actualCt = actualShots > 0 ? 3600 / actualShots : null;
+
+      return {
+        ...r,
+        part,
+        sap: part.sap,
+        partNo: part.partNo,
+        description: part.description,
+        cavity: part.combo || part.cavity,
+        masterShots: part.shots,
+        actualShots,
+        declaredCt,
+        actualCt,
+        status: runStatus,
+      };
+    });
+
+  // Suspicious runs: All runs where pct >= threshold (CT wrong · faster)
+  // Sorted by Date descending, then % descending (matching user screenshot)
+  const suspiciousRuns = allRuns
+    .filter((r) => r.status.key === "over")
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.pct ?? -1) - (a.pct ?? -1)));
+
+  // Slow runs (< 70%)
+  const slowRuns = allRuns
+    .filter((r) => r.status.key === "slow")
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (a.pct ?? 0) - (b.pct ?? 0)));
+
   const sortedDates = [...dates].sort();
   const dateRangeLabel =
     sortedDates.length === 0
       ? "No records"
       : sortedDates.length === 1
-      ? sortedDates[0]
-      : `${sortedDates[0]} to ${sortedDates[sortedDates.length - 1]}`;
+      ? fmtDateShort(sortedDates[0])
+      : `${fmtDateShort(sortedDates[0])} – ${fmtDateShort(sortedDates[sortedDates.length - 1])}`;
 
   return {
     plantId,
+    plantShortCode: getPlantShortCode(plantId),
+    plantDisplayName: getPlantDisplayName(plantId),
     dateRangeLabel,
     totalRecords: relevantEntries.length,
     kpis: {
@@ -241,159 +359,223 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
     parts: eligibleParts.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1)),
     overParts,
     slowParts,
+    allRuns,
+    suspiciousRuns,
+    slowRuns,
   };
 }
 
 /**
  * Generate a standalone high-resolution SVG visual snapshot card ("Photo")
+ * Formatted exactly like the shift-wise Cycle Time Tracker table in the user's screenshot!
  */
 export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel = "" } = {}) {
-  const width = 1000;
-  const kpis = plantReport?.kpis || { analysed: 0, over: 0, slow: 0, overShifts: 0 };
-  const parts = (plantReport?.parts || []).slice(0, 12); // Show top 12 relevant parts on image card
+  const width = 1320;
+  const kpis = plantReport?.kpis || { analysed: 0, over: 0, slow: 0, overShifts: 0, worst: null };
+  const rows = (plantReport?.suspiciousRuns || []).slice(0, 25); // Show up to top 25 suspicious runs
 
-  const rowHeight = 40;
-  const tableTop = 270;
-  const tableHeight = 44 + (parts.length > 0 ? parts.length * rowHeight : 50);
-  const totalHeight = Math.max(480, tableTop + tableHeight + 60);
+  const rowHeight = 44;
+  const tableTop = 265;
+  const tableHeight = 44 + (rows.length > 0 ? rows.length * rowHeight : 60);
+  const totalHeight = Math.max(520, tableTop + tableHeight + 55);
 
-  // Rows generator
   let rowsSvg = "";
-  if (parts.length === 0) {
+  if (rows.length === 0) {
     rowsSvg = `
-      <rect x="30" y="${tableTop + 44}" width="940" height="50" fill="#ffffff" />
-      <text x="500" y="${tableTop + 75}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" fill="#64748b" font-weight="500">
-        No active molds met the criteria (${plantReport.dateRangeLabel})
+      <rect x="25" y="${tableTop + 44}" width="1270" height="60" fill="#ffffff" />
+      <circle cx="660" cy="${tableTop + 74}" r="14" fill="#dcfce7" />
+      <text x="660" y="${tableTop + 79}" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#15803d" text-anchor="middle">✓</text>
+      <text x="660" y="${tableTop + 95}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#15803d" font-weight="700">
+        No suspicious cycle time deviations recorded for this period (${esc(plantReport.dateRangeLabel)})
       </text>
     `;
   } else {
-    parts.forEach((p, idx) => {
+    rows.forEach((r, idx) => {
       const y = tableTop + 44 + idx * rowHeight;
       const bg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
-      const statusBg = p.status?.bg || "#f1f5f9";
-      const statusColor = p.status?.color || "#475569";
-      const statusText = p.status?.label || "OK";
 
-      const partDisplay = esc((p.partNo || p.sap).slice(0, 26));
-      const descDisplay = esc((p.description || "—").slice(0, 32));
-      const speedup = p.pct !== null ? `${round(p.pct, 1)}%` : "—";
-      const speedColor = p.status?.key === "over" ? "#b91c1c" : p.status?.key === "slow" ? "#b45309" : "#15803d";
-      const masterCt = p.declaredCt !== null ? `${round(p.declaredCt, 1)}s` : "—";
-      const actualCt = p.actualCt !== null ? `${round(p.actualCt, 1)}s` : "—";
-      const produced = fmt(p.produced, 0);
-      const target = fmt(p.target, 0);
+      const dateStr = esc(r.dateFormatted || fmtDateShort(r.date));
+      const shiftStr = esc(r.shiftDisplay || `S${r.shift}`);
+      const machineStr = esc(r.machineDisplay || r.machine);
+      const sapStr = esc(r.sap || "");
+      const partDescStr = esc((r.partNo ? `${r.partNo} · ${r.description || ""}` : r.description || "—").slice(0, 36));
+      const cavStr = esc(String(r.cavity || "1"));
+      const hrsStr = fmt(r.hrs, 1);
+      const okStr = fmt(r.ok, 0);
+      const rejStr = fmt(r.rej, 0);
+      const prodStr = fmt(r.produced, 0);
+      const tgtStr = fmt(r.target, 0);
+      const mShotsStr = r.masterShots ? fmt(r.masterShots, 0) : "—";
+      const actShotsStr = fmt(r.actualShots, 0);
+      const vsMasterStr = r.pct !== null ? `${round(r.pct, 0)}%` : "—";
+      const ctStr = `${round(r.declaredCt, 1)}s → ${round(r.actualCt, 1)}s`;
 
       rowsSvg += `
-        <rect x="30" y="${y}" width="940" height="${rowHeight}" fill="${bg}" />
-        <line x1="30" y1="${y + rowHeight}" x2="970" y2="${y + rowHeight}" stroke="#e2e8f0" stroke-width="1" />
-        <text x="45" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0f172a">${partDisplay}</text>
-        <text x="210" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#475569">${descDisplay}</text>
-        <text x="450" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#334155" text-anchor="middle">${fmt(p.hrs, 1)}h</text>
-        <text x="545" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#334155" text-anchor="middle">${produced} / ${target}</text>
-        <text x="655" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="${speedColor}" text-anchor="middle">${speedup}</text>
-        <text x="755" y="${y + 25}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#475569" text-anchor="middle">${masterCt} → ${actualCt}</text>
-        <g transform="translate(835, ${y + 9})">
-          <rect width="120" height="22" rx="11" fill="${statusBg}" />
-          <text x="60" y="15" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="${statusColor}" text-anchor="middle">${statusText}</text>
+        <rect x="25" y="${y}" width="1270" height="${rowHeight}" fill="${bg}" />
+        <line x1="25" y1="${y + rowHeight}" x2="1295" y2="${y + rowHeight}" stroke="#e2e8f0" stroke-width="1" />
+
+        <!-- Date -->
+        <text x="38" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0f172a">${dateStr}</text>
+
+        <!-- Shift -->
+        <text x="125" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#475569">${shiftStr}</text>
+
+        <!-- Machine -->
+        <text x="195" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#334155">${machineStr}</text>
+
+        <!-- SAP · Part / Description -->
+        <text x="285" y="${y + 19}" font-family="'Consolas', 'Courier New', monospace" font-size="11" font-weight="700" fill="#0369a1">${sapStr}</text>
+        <text x="285" y="${y + 34}" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#64748b">${partDescStr}</text>
+
+        <!-- Cav -->
+        <text x="545" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#334155" text-anchor="middle">${cavStr}</text>
+
+        <!-- Run Hrs -->
+        <text x="605" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#334155" text-anchor="middle">${hrsStr}</text>
+
+        <!-- OK -->
+        <text x="665" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#334155" text-anchor="middle">${okStr}</text>
+
+        <!-- Rej -->
+        <text x="720" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#b91c1c" text-anchor="middle">${rejStr}</text>
+
+        <!-- Produced -->
+        <text x="785" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="800" fill="#0f172a" text-anchor="middle">${prodStr}</text>
+
+        <!-- Target -->
+        <text x="850" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#475569" text-anchor="middle">${tgtStr}</text>
+
+        <!-- Master Shots -->
+        <text x="915" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" fill="#475569" text-anchor="middle">${mShotsStr}</text>
+
+        <!-- Actual Shots -->
+        <text x="980" y="${y + 26}" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="800" fill="#0f172a" text-anchor="middle">${actShotsStr}</text>
+
+        <!-- Vs Master (Red Badge) -->
+        <g transform="translate(1025, ${y + 11})">
+          <rect width="65" height="22" rx="11" fill="#fee2e2" />
+          <text x="32" y="15" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#b91c1c" text-anchor="middle">${vsMasterStr}</text>
+        </g>
+
+        <!-- CT (s) -->
+        <text x="1150" y="${y + 26}" font-family="'Consolas', 'Courier New', monospace" font-size="11" font-weight="600" fill="#0f172a" text-anchor="middle">${ctStr}</text>
+
+        <!-- Status -->
+        <g transform="translate(1195, ${y + 11})">
+          <rect width="90" height="22" rx="11" fill="#fee2e2" />
+          <text x="45" y="15" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#b91c1c" text-anchor="middle">CT wrong · faster</text>
         </g>
       `;
     });
   }
 
+  const worstStr = kpis.worst ? `${kpis.worst.sap} (${round(kpis.worst.pct, 0)}%)` : "—";
+  const displayTitle = esc(plantName || plantReport.plantDisplayName || `Plant ${plantReport.plantId}`);
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${totalHeight}" viewBox="0 0 ${width} ${totalHeight}">
   <defs>
     <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0369a1" />
-      <stop offset="100%" stop-color="#0284c7" />
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
     </linearGradient>
-    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08" flood-color="#0f172a" />
+    <filter id="cardShadow" x="-3%" y="-4%" width="106%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.07" flood-color="#0f172a" />
     </filter>
   </defs>
 
   <!-- Background -->
   <rect width="${width}" height="${totalHeight}" fill="#f1f5f9" />
 
-  <!-- Header Banner -->
-  <rect x="20" y="20" width="960" height="100" rx="12" fill="url(#headerGrad)" filter="url(#cardShadow)" />
-  <text x="45" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="0.5">
-    PG ELECTROPLAST — CYCLE TIME TRACKER
+  <!-- Plant Header Banner -->
+  <rect x="25" y="20" width="1270" height="95" rx="12" fill="url(#headerGrad)" filter="url(#cardShadow)" />
+  <text x="50" y="55" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="0.5">
+    ${displayTitle}
   </text>
-  <text x="45" y="88" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="500" fill="#e0f2fe">
-    Plant: <tspan font-weight="700" fill="#ffffff">${esc(plantName || plantReport.plantId)}</tspan>  ·  Period: <tspan font-weight="700" fill="#ffffff">${esc(periodLabel || plantReport.dateRangeLabel)}</tspan>
+  <text x="50" y="85" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#94a3b8">
+    Cycle Time Tracker · Suspicious (CT Wrong · Faster) Shifts Snapshot  ·  Period: <tspan font-weight="700" fill="#38bdf8">${esc(periodLabel || plantReport.dateRangeLabel)}</tspan>
   </text>
-  <g transform="translate(810, 42)">
-    <rect width="150" height="36" rx="18" fill="rgba(255, 255, 255, 0.2)" />
-    <text x="75" y="23" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">
-      AUTOMATED SNAPSHOT
+  <g transform="translate(1120, 42)">
+    <rect width="155" height="32" rx="16" fill="#dc2626" />
+    <text x="77" y="21" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">
+      SUSPICIOUS CT ALERT
     </text>
   </g>
 
-  <!-- KPI Cards -->
+  <!-- KPI Cards (5 Blocks) -->
   <!-- Card 1: Analysed -->
-  <g transform="translate(20, 135)" filter="url(#cardShadow)">
-    <rect width="225" height="105" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
-    <text x="20" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-transform="uppercase">Molds Analysed</text>
-    <text x="20" y="78" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#0f172a">${kpis.analysed}</text>
-    <circle cx="190" cy="52" r="18" fill="#e0f2fe" />
-    <text x="190" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" fill="#0284c7" text-anchor="middle">⚙</text>
+  <g transform="translate(25, 130)" filter="url(#cardShadow)">
+    <rect width="240" height="95" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+    <text x="20" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#64748b" text-transform="uppercase">Molds Analysed</text>
+    <text x="20" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#0f172a">${kpis.analysed}</text>
   </g>
 
-  <!-- Card 2: Over Cycle (Faster) -->
-  <g transform="translate(265, 135)" filter="url(#cardShadow)">
-    <rect width="225" height="105" rx="10" fill="#ffffff" stroke="#fecaca" stroke-width="1.5" />
-    <text x="20" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#b91c1c" text-transform="uppercase">Faster than CT (Over)</text>
-    <text x="20" y="78" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#dc2626">${kpis.over}</text>
-    <circle cx="190" cy="52" r="18" fill="#fee2e2" />
-    <text x="190" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" fill="#dc2626" text-anchor="middle">⚡</text>
+  <!-- Card 2: Faster than CT (Over) -->
+  <g transform="translate(282, 130)" filter="url(#cardShadow)">
+    <rect width="240" height="95" rx="10" fill="#ffffff" stroke="#fecaca" stroke-width="2" />
+    <text x="20" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#dc2626" text-transform="uppercase">Faster than CT (Over)</text>
+    <text x="20" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#dc2626">${kpis.over}</text>
   </g>
 
-  <!-- Card 3: Slow Running -->
-  <g transform="translate(510, 135)" filter="url(#cardShadow)">
-    <rect width="225" height="105" rx="10" fill="#ffffff" stroke="#fde68a" stroke-width="1.5" />
-    <text x="20" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#b45309" text-transform="uppercase">Running Slow (&lt;70%)</text>
-    <text x="20" y="78" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#d97706">${kpis.slow}</text>
-    <circle cx="190" cy="52" r="18" fill="#fef3c7" />
-    <text x="190" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" fill="#d97706" text-anchor="middle">⚠️</text>
+  <!-- Card 3: Slow Running (<70%) -->
+  <g transform="translate(540, 130)" filter="url(#cardShadow)">
+    <rect width="240" height="95" rx="10" fill="#ffffff" stroke="#fde68a" stroke-width="1.5" />
+    <text x="20" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#d97706" text-transform="uppercase">Running Slow (&lt;70%)</text>
+    <text x="20" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#d97706">${kpis.slow}</text>
   </g>
 
   <!-- Card 4: Over Shifts -->
-  <g transform="translate(755, 135)" filter="url(#cardShadow)">
-    <rect width="225" height="105" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
-    <text x="20" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-transform="uppercase">Over-Speed Shifts</text>
-    <text x="20" y="78" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#4338ca">${kpis.overShifts}</text>
-    <circle cx="190" cy="52" r="18" fill="#e0e7ff" />
-    <text x="190" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" fill="#4338ca" text-anchor="middle">⏱</text>
+  <g transform="translate(797, 130)" filter="url(#cardShadow)">
+    <rect width="240" height="95" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+    <text x="20" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#4338ca" text-transform="uppercase">Over-Speed Shifts</text>
+    <text x="20" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#4338ca">${kpis.overShifts}</text>
+  </g>
+
+  <!-- Card 5: Worst Deviation -->
+  <g transform="translate(1055, 130)" filter="url(#cardShadow)">
+    <rect width="240" height="95" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+    <text x="20" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#64748b" text-transform="uppercase">Worst Part Deviation</text>
+    <text x="20" y="68" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="800" fill="#b91c1c">${worstStr}</text>
   </g>
 
   <!-- Table Container -->
   <g filter="url(#cardShadow)">
-    <rect x="20" y="255" width="960" height="${tableHeight + 20}" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+    <rect x="25" y="245" width="1270" height="${tableHeight + 20}" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
     
-    <!-- Table Header -->
-    <rect x="30" y="265" width="940" height="40" rx="6" fill="#0f172a" />
-    <text x="45" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">PART / SAP</text>
-    <text x="210" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">DESCRIPTION</text>
-    <text x="450" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">RUN HRS</text>
-    <text x="545" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">ACT / TGT</text>
-    <text x="655" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">SPEED %</text>
-    <text x="755" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">MASTER → ACT CT</text>
-    <text x="895" y="290" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">STATUS</text>
+    <!-- Table Header (Matching UI Screenshot) -->
+    <rect x="25" y="245" width="1270" height="42" rx="10" fill="#f8fafc" />
+    <line x1="25" y1="287" x2="1295" y2="287" stroke="#cbd5e1" stroke-width="1.5" />
+
+    <text x="38" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569">DATE</text>
+    <text x="125" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569">SHIFT</text>
+    <text x="195" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569">MACHINE</text>
+    <text x="285" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569">SAP · PART / DESCRIPTION</text>
+    <text x="545" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">CAV</text>
+    <text x="605" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">RUN HRS</text>
+    <text x="665" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">OK</text>
+    <text x="720" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">REJ</text>
+    <text x="785" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">PRODUCED</text>
+    <text x="850" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">TARGET</text>
+    <text x="915" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">M. SHOTS</text>
+    <text x="980" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">ACT. SHOTS</text>
+    <text x="1057" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">VS MASTER</text>
+    <text x="1150" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">CT (S)</text>
+    <text x="1240" y="271" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#475569" text-anchor="middle">STATUS</text>
 
     <!-- Table Rows -->
     ${rowsSvg}
   </g>
 
   <!-- Footer Timestamp -->
-  <text x="30" y="${totalHeight - 15}" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8">
+  <text x="35" y="${totalHeight - 15}" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8">
     PGEL Molding MIS · Automated Snapshot generated at ${new Date().toISOString().replace('T', ' ').slice(0, 19)} IST
   </text>
 </svg>`;
 }
 
 /**
- * Generate full HTML email with plant snapshots and data tables
+ * Generate full HTML email with plant sections in strict priority order (PGTL -> NGM -> PGEL -> DMIC)
+ * and detailed shift-wise suspicious table matching the user's screenshot!
  */
 export function generateCycleTimeEmailHtml({
   plantReports = [],
@@ -406,51 +588,81 @@ export function generateCycleTimeEmailHtml({
   const safeIntro = esc(introText || "Please find the automated Cycle Time Tracker daily report and visual snapshots for the selected production plants below.")
     .replace(/\n/g, "<br/>");
 
+  // Sort plants by user-requested priority: PGTL (2020) -> NGM (4010) -> PGEL (1040) -> others
+  const sortedReports = [...plantReports].sort((a, b) => {
+    const pA = PLANT_PRIORITY[String(a.plantId)] || 99;
+    const pB = PLANT_PRIORITY[String(b.plantId)] || 99;
+    return pA - pB;
+  });
+
   let totalAnalysed = 0;
   let totalOver = 0;
   let totalSlow = 0;
   let totalOverShifts = 0;
 
-  plantReports.forEach((pr) => {
+  sortedReports.forEach((pr) => {
     totalAnalysed += pr.kpis.analysed || 0;
     totalOver += pr.kpis.over || 0;
     totalSlow += pr.kpis.slow || 0;
     totalOverShifts += pr.kpis.overShifts || 0;
   });
 
-  const plantsSectionsHtml = plantReports
+  const plantsSectionsHtml = sortedReports
     .map((pr) => {
-      const pName = pr.plantName || `Plant ${pr.plantId}`;
-      const overList = pr.overParts || [];
-      const slowList = pr.slowParts || [];
-      const topParts = [...overList, ...slowList].slice(0, 8);
+      const pName = pr.plantDisplayName || `Plant ${pr.plantId}`;
+      const suspiciousList = pr.suspiciousRuns || [];
 
       let tableRows = "";
-      if (topParts.length === 0) {
+      if (suspiciousList.length === 0) {
         tableRows = `
           <tr>
-            <td colspan="6" style="padding:16px;text-align:center;color:#64748b;font-size:13px;background:#f8fafc;">
-              No significant deviations recorded for ${esc(pName)} in this period (${esc(pr.dateRangeLabel)}).
+            <td colspan="15" style="padding:20px;text-align:center;color:#15803d;font-size:13px;font-weight:700;background:#f0fdf4;">
+              ✓ No suspicious cycle time deviations recorded for ${esc(pName)} in this period (${esc(pr.dateRangeLabel)}). All active molds operated within standard cycle time limits.
             </td>
           </tr>
         `;
       } else {
-        tableRows = topParts
-          .map((p, i) => {
+        tableRows = suspiciousList
+          .map((r, i) => {
             const bg = i % 2 === 0 ? "#ffffff" : "#f8fafc";
-            const speedColor = p.status.key === "over" ? "#b91c1c" : p.status.key === "slow" ? "#b45309" : "#15803d";
-            const speedBg = p.status.key === "over" ? "#fee2e2" : p.status.key === "slow" ? "#fef3c7" : "#dcfce7";
+            const dateDisplay = esc(r.dateFormatted || fmtDateShort(r.date));
+            const shiftDisplay = esc(r.shiftDisplay || `S${r.shift}`);
+            const machineDisplay = esc(r.machineDisplay || r.machine);
+            const sapDisplay = esc(r.sap || "");
+            const partDescDisplay = esc((r.partNo ? `${r.partNo} · ${r.description || ""}` : r.description || "—").slice(0, 36));
+            const cavDisplay = esc(String(r.cavity || "1"));
+            const vsMasterDisplay = r.pct !== null ? `${round(r.pct, 0)}%` : "—";
+            const ctDisplay = `${round(r.declaredCt, 1)}s → ${round(r.actualCt, 1)}s`;
+
             return `
               <tr style="background:${bg};border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 12px;font-weight:600;color:#0f172a;font-size:13px;">${esc(p.partNo || p.sap)}</td>
-                <td style="padding:10px 12px;color:#475569;font-size:12px;">${esc((p.description || "—").slice(0, 30))}</td>
-                <td style="padding:10px 12px;text-align:center;color:#334155;font-size:12px;">${fmt(p.hrs, 1)}h</td>
-                <td style="padding:10px 12px;text-align:center;color:#334155;font-size:12px;">${fmt(p.produced, 0)} / ${fmt(p.target, 0)}</td>
-                <td style="padding:10px 12px;text-align:center;font-weight:700;color:${speedColor};font-size:13px;">
-                  <span style="background:${speedBg};padding:2px 8px;border-radius:10px;">${round(p.pct, 1)}%</span>
+                <td style="padding:8px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${dateDisplay}</td>
+                <td style="padding:8px 10px;color:#475569;font-size:12px;white-space:nowrap;">${shiftDisplay}</td>
+                <td style="padding:8px 10px;font-weight:600;color:#334155;font-size:12px;white-space:nowrap;">${machineDisplay}</td>
+                <td style="padding:8px 10px;font-size:12px;">
+                  <div style="font-family:Consolas,monospace;font-weight:700;color:#0369a1;font-size:11px;">${sapDisplay}</div>
+                  <div style="color:#64748b;font-size:11px;">${partDescDisplay}</div>
                 </td>
-                <td style="padding:10px 12px;text-align:center;color:#475569;font-size:12px;">
-                  ${round(p.declaredCt, 1)}s → <strong style="color:${speedColor};">${round(p.actualCt, 1)}s</strong>
+                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${cavDisplay}</td>
+                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${fmt(r.hrs, 1)}</td>
+                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${fmt(r.ok, 0)}</td>
+                <td style="padding:8px 10px;text-align:center;color:#b91c1c;font-size:12px;font-weight:600;">${fmt(r.rej, 0)}</td>
+                <td style="padding:8px 10px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.produced, 0)}</td>
+                <td style="padding:8px 10px;text-align:center;color:#475569;font-size:12px;">${fmt(r.target, 0)}</td>
+                <td style="padding:8px 10px;text-align:center;color:#475569;font-size:12px;">${r.masterShots ? fmt(r.masterShots, 0) : "—"}</td>
+                <td style="padding:8px 10px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.actualShots, 0)}</td>
+                <td style="padding:8px 10px;text-align:center;white-space:nowrap;">
+                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:800;font-size:11px;">
+                    ${vsMasterDisplay}
+                  </span>
+                </td>
+                <td style="padding:8px 10px;text-align:center;font-family:Consolas,monospace;font-size:11px;color:#0f172a;white-space:nowrap;">
+                  ${ctDisplay}
+                </td>
+                <td style="padding:8px 10px;text-align:center;white-space:nowrap;">
+                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:700;font-size:10px;">
+                    CT wrong · faster
+                  </span>
                 </td>
               </tr>
             `;
@@ -458,71 +670,84 @@ export function generateCycleTimeEmailHtml({
           .join("");
       }
 
+      const safeAttachmentName = `${pr.plantShortCode || pr.plantId}_${pr.plantId}_Cycle_Time_Suspicious.svg`;
+
       return `
-        <div style="margin-top:24px;border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <div style="margin-top:28px;border:1px solid #cbd5e1;border-radius:14px;background:#ffffff;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.06);">
           <!-- Plant Header -->
-          <div style="background:#0f172a;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="background:#0f172a;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1e293b;">
             <div>
-              <span style="color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">PLANT TRACKER SNAPSHOT</span>
-              <h3 style="margin:2px 0 0 0;color:#ffffff;font-size:17px;font-weight:700;">${esc(pName)}</h3>
+              <span style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
+                PLANT SUSPICIOUS CT REPORT
+              </span>
+              <h2 style="margin:2px 0 0 0;color:#ffffff;font-size:19px;font-weight:800;">${esc(pName)}</h2>
             </div>
             <div style="text-align:right;">
-              <span style="display:inline-block;background:#1e293b;color:#cbd5e1;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">
+              <span style="display:inline-block;background:#1e293b;color:#f8fafc;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;">
                 ${esc(pr.dateRangeLabel)}
               </span>
             </div>
           </div>
 
-          <!-- Plant Mini KPIs -->
-          <div style="display:table;width:100%;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:12px 0;">
+          <!-- Mini KPIs -->
+          <div style="display:table;width:100%;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:10px 0;">
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
-              <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Analysed</div>
-              <div style="font-size:20px;font-weight:800;color:#0f172a;margin-top:2px;">${pr.kpis.analysed}</div>
+              <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Analysed</div>
+              <div style="font-size:22px;font-weight:800;color:#0f172a;margin-top:2px;">${pr.kpis.analysed}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
-              <div style="font-size:11px;font-weight:600;color:#dc2626;text-transform:uppercase;">Faster (Over)</div>
-              <div style="font-size:20px;font-weight:800;color:#dc2626;margin-top:2px;">${pr.kpis.over}</div>
+              <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;">Faster (Over CT)</div>
+              <div style="font-size:22px;font-weight:800;color:#dc2626;margin-top:2px;">${pr.kpis.over}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
-              <div style="font-size:11px;font-weight:600;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
-              <div style="font-size:20px;font-weight:800;color:#d97706;margin-top:2px;">${pr.kpis.slow}</div>
+              <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
+              <div style="font-size:22px;font-weight:800;color:#d97706;margin-top:2px;">${pr.kpis.slow}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;">
-              <div style="font-size:11px;font-weight:600;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
-              <div style="font-size:20px;font-weight:800;color:#4338ca;margin-top:2px;">${pr.kpis.overShifts}</div>
+              <div style="font-size:11px;font-weight:700;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
+              <div style="font-size:22px;font-weight:800;color:#4338ca;margin-top:2px;">${pr.kpis.overShifts}</div>
             </div>
           </div>
 
           ${
             includePhotoAttachment
               ? `
-          <!-- Embedded Visual Photo Snapshot Banner -->
-          <div style="padding:14px 20px 8px;background:#f1f5f9;text-align:center;">
-            <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;">
-              📷 Visual Photo Snapshot Card (Attached: <em>${esc(pName.replace(/\s+/g, "_"))}_Cycle_Time.svg</em>)
+          <!-- Embedded Photo Snapshot -->
+          <div style="padding:14px 20px;background:#f1f5f9;text-align:center;border-bottom:1px solid #e2e8f0;">
+            <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px;">
+              📷 Visual Photo Snapshot Card Attached: <em>${esc(safeAttachmentName)}</em>
             </div>
-            <a href="cid:photo_${esc(pr.plantId)}" style="display:inline-block;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.06);">
-              <img src="cid:photo_${esc(pr.plantId)}" alt="${esc(pName)} Cycle Time Snapshot" style="display:block;max-width:100%;height:auto;border:0;" />
+            <a href="cid:photo_${esc(pr.plantId)}" style="display:inline-block;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.06);max-width:100%;">
+              <img src="cid:photo_${esc(pr.plantId)}" alt="${esc(pName)} Cycle Time Snapshot" style="display:block;width:100%;max-width:100%;height:auto;border:0;" />
             </a>
           </div>
           `
               : ""
           }
 
-          <!-- Deviation Table -->
-          <div style="padding:16px 20px;">
-            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">
-              Top Cycle Time Deviations &amp; Variances:
+          <!-- Detailed Suspicious Shifts Table -->
+          <div style="padding:16px 20px;overflow-x:auto;">
+            <div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:10px;">
+              ⚡ Suspicious ("CT wrong · faster") Shift Runs List:
             </div>
-            <table style="width:100%;border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;">
+            <table style="width:100%;border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;font-size:12px;">
               <thead>
-                <tr style="background:#0f172a;color:#ffffff;font-size:11px;text-transform:uppercase;">
-                  <th style="padding:8px 12px;text-align:left;">Part / Mold</th>
-                  <th style="padding:8px 12px;text-align:left;">Description</th>
-                  <th style="padding:8px 12px;text-align:center;">Run Hrs</th>
-                  <th style="padding:8px 12px;text-align:center;">Act / Tgt</th>
-                  <th style="padding:8px 12px;text-align:center;">Speed %</th>
-                  <th style="padding:8px 12px;text-align:center;">Master → Act CT</th>
+                <tr style="background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;border-top:1px solid #cbd5e1;border-bottom:2px solid #cbd5e1;">
+                  <th style="padding:8px 10px;text-align:left;">Date</th>
+                  <th style="padding:8px 10px;text-align:left;">Shift</th>
+                  <th style="padding:8px 10px;text-align:left;">Machine</th>
+                  <th style="padding:8px 10px;text-align:left;">SAP · Part / Description</th>
+                  <th style="padding:8px 10px;text-align:center;">Cav</th>
+                  <th style="padding:8px 10px;text-align:center;">Run Hrs</th>
+                  <th style="padding:8px 10px;text-align:center;">OK</th>
+                  <th style="padding:8px 10px;text-align:center;">Rej</th>
+                  <th style="padding:8px 10px;text-align:center;">Produced</th>
+                  <th style="padding:8px 10px;text-align:center;">Target</th>
+                  <th style="padding:8px 10px;text-align:center;">M.Shots</th>
+                  <th style="padding:8px 10px;text-align:center;">Act.Shots</th>
+                  <th style="padding:8px 10px;text-align:center;">vs Master</th>
+                  <th style="padding:8px 10px;text-align:center;">CT (s)</th>
+                  <th style="padding:8px 10px;text-align:center;">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -544,66 +769,66 @@ export function generateCycleTimeEmailHtml({
   <title>${esc(subject)}</title>
 </head>
 <body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:Segoe UI,Arial,-apple-system,BlinkMacSystemFont,Roboto,sans-serif;color:#0f172a;">
-  <div style="max-width:760px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+  <div style="max-width:980px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
     
     <!-- Top Header -->
-    <div style="background:linear-gradient(135deg, #0369a1 0%, #0284c7 100%);padding:28px 24px;color:#ffffff;text-align:left;">
-      <div style="display:inline-block;background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
+    <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:28px 24px;color:#ffffff;text-align:left;">
+      <div style="display:inline-block;background:rgba(56,189,248,0.2);color:#38bdf8;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
         PG ELECTROPLAST LIMITED · MOLDING MIS
       </div>
       <h1 style="margin:0;font-size:24px;font-weight:800;line-height:1.2;color:#ffffff;">${esc(subject)}</h1>
-      <p style="margin:6px 0 0 0;font-size:14px;color:#e0f2fe;font-weight:500;">
-        Automated Daily Cycle Time Tracking &amp; Efficiency Report · Period: <strong>${esc(periodLabel || dateStr)}</strong>
+      <p style="margin:6px 0 0 0;font-size:14px;color:#cbd5e1;font-weight:500;">
+        Automated Cycle Time Tracker Report · Period: <strong>${esc(periodLabel || dateStr)}</strong>
       </p>
     </div>
 
-    <!-- Intro / Remarks -->
-    <div style="padding:24px 24px 16px;background:#ffffff;border-bottom:1px solid #f1f5f9;">
+    <!-- Intro Remarks -->
+    <div style="padding:22px 24px;background:#ffffff;border-bottom:1px solid #f1f5f9;">
       <div style="font-size:14px;line-height:1.6;color:#334155;">
         ${safeIntro}
       </div>
     </div>
 
-    <!-- Overall KPI Cards Summary -->
+    <!-- Global KPI Summary -->
     <div style="padding:16px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-      <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
-        Total Across All ${plantReports.length} Selected Plants:
+      <div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+        Consolidated Summary across ${sortedReports.length} Plants:
       </div>
       <div style="display:table;width:100%;">
         <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Molds Analysed</div>
-          <div style="font-size:22px;font-weight:800;color:#0f172a;margin-top:4px;">${totalAnalysed}</div>
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Molds Analysed</div>
+          <div style="font-size:24px;font-weight:800;color:#0f172a;margin-top:2px;">${totalAnalysed}</div>
         </div>
-        <div style="display:table-cell;width:4%;"></div>
-        <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #fecaca;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:600;color:#dc2626;text-transform:uppercase;">Faster (Over CT)</div>
-          <div style="font-size:22px;font-weight:800;color:#dc2626;margin-top:4px;">${totalOver}</div>
+        <div style="display:table-cell;width:3%;"></div>
+        <div style="display:table-cell;width:25%;background:#ffffff;border:2px solid #fecaca;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;">Faster (Over CT)</div>
+          <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:2px;">${totalOver}</div>
         </div>
-        <div style="display:table-cell;width:4%;"></div>
+        <div style="display:table-cell;width:3%;"></div>
         <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #fde68a;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:600;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
-          <div style="font-size:22px;font-weight:800;color:#d97706;margin-top:4px;">${totalSlow}</div>
+          <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
+          <div style="font-size:24px;font-weight:800;color:#d97706;margin-top:2px;">${totalSlow}</div>
         </div>
-        <div style="display:table-cell;width:4%;"></div>
+        <div style="display:table-cell;width:3%;"></div>
         <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:600;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
-          <div style="font-size:22px;font-weight:800;color:#4338ca;margin-top:4px;">${totalOverShifts}</div>
+          <div style="font-size:11px;font-weight:700;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
+          <div style="font-size:24px;font-weight:800;color:#4338ca;margin-top:2px;">${totalOverShifts}</div>
         </div>
       </div>
     </div>
 
-    <!-- Plants Content -->
+    <!-- Plants Content (PGTL -> NGM -> PGEL) -->
     <div style="padding:12px 24px 28px;">
       ${plantsSectionsHtml}
     </div>
 
-    <!-- Email Footer -->
+    <!-- Footer -->
     <div style="background:#0f172a;padding:20px 24px;text-align:center;color:#94a3b8;font-size:12px;border-top:1px solid #1e293b;">
-      <p style="margin:0 0 6px 0;color:#cbd5e1;font-weight:600;">
-        This is an automated notification managed by PGEL Super Admin via Auto Email Manager.
+      <p style="margin:0 0 6px 0;color:#cbd5e1;font-weight:700;">
+        PG Electroplast Limited · Automated Molding MIS Notification System
       </p>
       <p style="margin:0;color:#64748b;">
-        PG Electroplast Limited · Molding MIS &amp; OEE Tracker System · Generated on ${new Date().toISOString().replace('T', ' ').slice(0, 19)} IST
+        Managed by Super Admin via Auto Email Control Center · Generated at ${new Date().toISOString().replace('T', ' ').slice(0, 19)} IST
       </p>
     </div>
 
@@ -622,24 +847,32 @@ export function generateCycleTimeEmailText({
   introText = "",
   periodLabel = "",
 }) {
+  const sortedReports = [...plantReports].sort((a, b) => {
+    const pA = PLANT_PRIORITY[String(a.plantId)] || 99;
+    const pB = PLANT_PRIORITY[String(b.plantId)] || 99;
+    return pA - pB;
+  });
+
   let lines = [
-    `PG ELECTROPLAST LIMITED — CYCLE TIME TRACKER REPORT`,
+    `PG ELECTROPLAST LIMITED — CYCLE TIME TRACKER SUSPICIOUS RUNS REPORT`,
     `Subject: ${subject}`,
     `Period: ${periodLabel}`,
     `Generated: ${new Date().toISOString()}`,
-    `------------------------------------------------------------`,
+    `--------------------------------------------------------------------------------`,
     introText || "Automated Cycle Time Tracker report for selected plants.",
-    `------------------------------------------------------------`,
+    `--------------------------------------------------------------------------------`,
   ];
 
-  plantReports.forEach((pr) => {
-    lines.push(`\n=== Plant: ${pr.plantName || pr.plantId} (${pr.dateRangeLabel}) ===`);
+  sortedReports.forEach((pr) => {
+    lines.push(`\n=== Plant: ${pr.plantDisplayName || pr.plantId} (${pr.dateRangeLabel}) ===`);
     lines.push(`Molds Analysed: ${pr.kpis.analysed} | Faster than CT: ${pr.kpis.over} | Slow: ${pr.kpis.slow} | Over Shifts: ${pr.kpis.overShifts}`);
-    if (pr.overParts && pr.overParts.length > 0) {
-      lines.push(`Top Faster Parts:`);
-      pr.overParts.slice(0, 5).forEach((p) => {
-        lines.push(` - ${p.partNo || p.sap} (${p.description}): ${round(p.pct, 1)}% vs Master CT (${round(p.declaredCt, 1)}s -> ${round(p.actualCt, 1)}s)`);
+    if (pr.suspiciousRuns && pr.suspiciousRuns.length > 0) {
+      lines.push(`Suspicious Shifts ("CT wrong · faster"):`);
+      pr.suspiciousRuns.forEach((r) => {
+        lines.push(` - [${r.dateFormatted || r.date}] ${r.shiftDisplay || r.shift} | ${r.machineDisplay || r.machine} | ${r.sap} (${r.description}) | Prod: ${r.produced}/${r.target} | ${round(r.pct, 0)}% vs Master | CT: ${round(r.declaredCt, 1)}s -> ${round(r.actualCt, 1)}s`);
       });
+    } else {
+      lines.push(`✓ No suspicious runs found for this period.`);
     }
   });
 

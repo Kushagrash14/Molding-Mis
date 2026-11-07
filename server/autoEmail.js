@@ -7,6 +7,9 @@ import {
   generateCycleTimeEmailHtml,
   generateCycleTimeEmailText,
   getIstDateStr,
+  sortPlantIds,
+  getPlantDisplayName,
+  getPlantShortCode,
 } from "./cycleTimeReport.js";
 
 export const autoEmailRouter = express.Router();
@@ -53,10 +56,15 @@ export async function executeCycleTimeEmailJob({
   const master = bootstrap.master || [];
   const reasonCodes = bootstrap.reasonCodes || [];
   const allPlants = bootstrap.plants || [];
+  const machines = bootstrap.machines || [];
+  const shifts = bootstrap.shifts || [];
 
-  const selectedPlantIds = Array.isArray(config.selectedPlants) && config.selectedPlants.length > 0
+  const rawSelectedIds = Array.isArray(config.selectedPlants) && config.selectedPlants.length > 0
     ? config.selectedPlants
     : allPlants.map((p) => p.plant_id);
+
+  // Strictly order plants: PGTL (2020) -> NGM (4010) -> PGEL (1040) -> others
+  const selectedPlantIds = sortPlantIds(rawSelectedIds);
 
   const plantReports = [];
   const attachments = [];
@@ -67,6 +75,8 @@ export async function executeCycleTimeEmailJob({
       ? `Yesterday (${getIstDateStr(-1)})`
       : period === "today"
       ? `Today (${getIstDateStr(0)})`
+      : period === "latest_day"
+      ? `Latest Production Day`
       : period === "mtd"
       ? `Month to Date (${getIstDateStr(0).slice(0, 7)})`
       : period === "last7days"
@@ -75,24 +85,29 @@ export async function executeCycleTimeEmailJob({
 
   for (const plantId of selectedPlantIds) {
     const plantObj = allPlants.find((p) => String(p.plant_id) === String(plantId));
-    const plantName = plantObj ? plantObj.name : `Plant ${plantId}`;
+    const plantDisplayName = getPlantDisplayName(plantId, plantObj);
+    const shortCode = getPlantShortCode(plantId);
 
     const report = computePlantCycleTime(entries, master, reasonCodes, plantId, {
       threshold: config.threshold || 110,
       minHours: config.minHours !== undefined ? config.minHours : 2,
       period,
+      machines,
+      shifts,
     });
 
-    report.plantName = plantName;
+    report.plantDisplayName = plantDisplayName;
+    report.plantShortCode = shortCode;
     plantReports.push(report);
 
-    // Generate high-resolution SVG visual snapshot card
+    // Generate high-resolution SVG visual snapshot card (matching user screenshot)
     const svgContent = generatePlantSvgCard(report, {
-      plantName,
+      plantName: plantDisplayName,
       periodLabel,
     });
 
-    const safeFileName = `${plantName.replace(/[^a-zA-Z0-9_-]/g, "_")}_Cycle_Time.svg`;
+    // Attachment name: e.g. PGTL_2020_Cycle_Time_Suspicious.svg
+    const safeFileName = `${shortCode}_${plantId}_Cycle_Time_Suspicious.svg`;
 
     attachments.push({
       filename: safeFileName,
@@ -269,19 +284,24 @@ autoEmailRouter.get("/preview", (req, res) => {
     const period = req.query.period || baseConfig.period || "yesterday";
     const threshold = Number(req.query.threshold) || baseConfig.threshold || 110;
     const minHours = req.query.minHours !== undefined ? Number(req.query.minHours) : (baseConfig.minHours ?? 2);
-    const selectedPlants = req.query.plants ? req.query.plants.split(",") : (baseConfig.selectedPlants || ["1040"]);
+    const rawSelected = req.query.plants ? req.query.plants.split(",") : (baseConfig.selectedPlants || ["2020", "4010", "1040"]);
+    const selectedPlants = sortPlantIds(rawSelected);
 
     const entries = cloudStorage.getEntries();
     const bootstrap = cloudStorage.getBootstrap();
     const master = bootstrap.master || [];
     const reasonCodes = bootstrap.reasonCodes || [];
     const allPlants = bootstrap.plants || [];
+    const machines = bootstrap.machines || [];
+    const shifts = bootstrap.shifts || [];
 
     const periodLabel =
       period === "yesterday"
         ? `Yesterday (${getIstDateStr(-1)})`
         : period === "today"
         ? `Today (${getIstDateStr(0)})`
+        : period === "latest_day"
+        ? `Latest Production Day`
         : period === "mtd"
         ? `Month to Date (${getIstDateStr(0).slice(0, 7)})`
         : period === "last7days"
@@ -293,18 +313,22 @@ autoEmailRouter.get("/preview", (req, res) => {
 
     for (const plantId of selectedPlants) {
       const plantObj = allPlants.find((p) => String(p.plant_id) === String(plantId));
-      const plantName = plantObj ? plantObj.name : `Plant ${plantId}`;
+      const plantDisplayName = getPlantDisplayName(plantId, plantObj);
+      const shortCode = getPlantShortCode(plantId);
 
       const report = computePlantCycleTime(entries, master, reasonCodes, plantId, {
         threshold,
         minHours,
         period,
+        machines,
+        shifts,
       });
-      report.plantName = plantName;
+      report.plantDisplayName = plantDisplayName;
+      report.plantShortCode = shortCode;
       plantReports.push(report);
 
       const svg = generatePlantSvgCard(report, {
-        plantName,
+        plantName: plantDisplayName,
         periodLabel,
       });
       svgCards[plantId] = svg;
