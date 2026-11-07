@@ -20,9 +20,10 @@ function getIstTimeStr() {
 }
 
 /**
- * Execute email generation and dispatch
+ * Execute email generation and delivery for a specific notification rule or global config
  */
 export async function executeCycleTimeEmailJob({
+  ruleId = null,
   isTest = false,
   testTo = null,
   testCc = null,
@@ -30,7 +31,16 @@ export async function executeCycleTimeEmailJob({
   configOverride = null,
 } = {}) {
   const baseConfig = cloudStorage.getAutoEmailConfig();
-  const config = { ...baseConfig, ...(configOverride || {}) };
+  let matchedRule = null;
+  if (ruleId && Array.isArray(baseConfig.rules)) {
+    matchedRule = baseConfig.rules.find((r) => r.id === ruleId);
+  } else if (!ruleId && Array.isArray(baseConfig.rules) && baseConfig.rules.length > 0) {
+    matchedRule = baseConfig.rules[0];
+  }
+
+  const config = { ...baseConfig, ...(matchedRule || {}), ...(configOverride || {}) };
+  const effectiveRuleId = ruleId || (matchedRule ? matchedRule.id : null);
+  const ruleName = config.name || (matchedRule ? matchedRule.name : "Default Notification");
 
   const recipientsTo = isTest && testTo ? testTo : config.recipientsTo || [];
   const recipientsCc = isTest && testCc ? testCc : config.recipientsCc || [];
@@ -41,11 +51,13 @@ export async function executeCycleTimeEmailJob({
   const bccList = Array.isArray(recipientsBcc) ? recipientsBcc : String(recipientsBcc).split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean);
 
   if (toList.length === 0 && ccList.length === 0) {
-    const msg = "No recipient email addresses found (both To and Cc are empty).";
+    const msg = `No recipient email addresses found for "${ruleName}" (both To and Cc are empty).`;
     if (isTest) throw new Error(msg);
     cloudStorage.addEmailLog({
       type: "scheduled",
       status: "failed",
+      ruleId: effectiveRuleId,
+      ruleName,
       recipients: [],
       plants: config.selectedPlants || [],
       error: msg,
@@ -151,6 +163,15 @@ export async function executeCycleTimeEmailJob({
     const sentTimestamp = new Date().toISOString();
     const curDateStr = getIstDateStr(0);
 
+    if (effectiveRuleId) {
+      cloudStorage.updateAutoEmailRule(effectiveRuleId, {
+        lastSentAt: sentTimestamp,
+        lastSentDateStr: curDateStr,
+        lastStatus: "success",
+        lastError: null,
+      });
+    }
+
     cloudStorage.saveAutoEmailConfig({
       lastSentAt: sentTimestamp,
       lastSentDateStr: curDateStr,
@@ -161,20 +182,29 @@ export async function executeCycleTimeEmailJob({
     cloudStorage.addEmailLog({
       type: isTest ? "test" : "scheduled",
       status: "success",
+      ruleId: effectiveRuleId,
+      ruleName,
       recipients: [...toList, ...ccList],
       plants: plantReports.map((p) => p.plantDisplayName || p.plantId),
       subject,
-      message: `Cycle Time Report successfully sent for ${periodLabel} to ${toList.length + ccList.length} recipients.`,
+      message: `[${ruleName}] Successfully delivered for ${periodLabel} to ${toList.length + ccList.length} recipients.`,
       error: null,
     });
 
     return {
       success: true,
-      message: `Email successfully delivered to ${toList.length + ccList.length} recipients for ${periodLabel}.`,
+      message: `[${ruleName}] Email successfully delivered to ${toList.length + ccList.length} recipients for ${periodLabel}.`,
       info: sendResult,
     };
   } catch (err) {
-    console.error("[AUTO EMAIL] Delivery failed:", err.message);
+    console.error(`[AUTO EMAIL] Delivery failed for "${ruleName}":`, err.message);
+
+    if (effectiveRuleId) {
+      cloudStorage.updateAutoEmailRule(effectiveRuleId, {
+        lastStatus: "failed",
+        lastError: err.message,
+      });
+    }
 
     cloudStorage.saveAutoEmailConfig({
       lastStatus: "failed",
@@ -184,6 +214,8 @@ export async function executeCycleTimeEmailJob({
     cloudStorage.addEmailLog({
       type: isTest ? "test" : "scheduled",
       status: "failed",
+      ruleId: effectiveRuleId,
+      ruleName,
       recipients: [...toList, ...ccList],
       plants: plantReports.map((p) => p.plantDisplayName || p.plantId),
       subject,
@@ -196,33 +228,41 @@ export async function executeCycleTimeEmailJob({
 }
 
 /**
- * Background Scheduler: Runs every 60s, checks IST time vs config.scheduleTime
+ * Background Scheduler: Runs every 60s, checks IST time vs each rule's scheduleTime
  */
 let schedulerInterval = null;
 
 export function initAutoEmailScheduler() {
   if (schedulerInterval) return;
 
-  console.log("[AUTO EMAIL] Initializing cycle time tracker background scheduler (checks every 60s in IST)...");
+  console.log("[AUTO EMAIL] Initializing cycle time tracker background scheduler (checks rules every 60s in IST)...");
 
   schedulerInterval = setInterval(async () => {
     try {
       const config = cloudStorage.getAutoEmailConfig();
-      if (!config || !config.enabled) return;
+      if (!config) return;
 
+      const rules = Array.isArray(config.rules) && config.rules.length > 0 ? config.rules : [config];
       const currentIstTime = getIstTimeStr(); // "HH:mm"
-      const targetTime = (config.scheduleTime || "08:00").trim();
-
-      if (currentIstTime !== targetTime) return;
-
       const currentIstDate = getIstDateStr(0); // "YYYY-MM-DD"
-      if (config.lastSentDateStr === currentIstDate) {
-        // Already sent today at this scheduled time
-        return;
-      }
 
-      console.log(`[AUTO EMAIL] Triggering scheduled Cycle Time Email at ${currentIstTime} IST for ${currentIstDate}...`);
-      await executeCycleTimeEmailJob({ isTest: false });
+      for (const rule of rules) {
+        if (!rule || !rule.enabled) continue;
+        const targetTime = (rule.scheduleTime || "08:00").trim();
+        if (currentIstTime !== targetTime) continue;
+
+        if (rule.lastSentDateStr === currentIstDate) {
+          // Already sent today for this rule
+          continue;
+        }
+
+        console.log(`[AUTO EMAIL] Triggering scheduled notification rule "${rule.name || rule.id}" at ${currentIstTime} IST for ${currentIstDate}...`);
+        await executeCycleTimeEmailJob({
+          ruleId: rule.id,
+          configOverride: rule,
+          isTest: false,
+        });
+      }
     } catch (err) {
       console.error("[AUTO EMAIL SCHEDULER ERROR]:", err.message);
     }
@@ -256,9 +296,10 @@ autoEmailRouter.post("/config", (req, res) => {
 // POST /api/auto-email/send-test
 autoEmailRouter.post("/send-test", async (req, res) => {
   try {
-    const { testTo, testCc, testDate, configOverride } = req.body || {};
+    const { testTo, testCc, testDate, ruleId, configOverride } = req.body || {};
     const result = await executeCycleTimeEmailJob({
       isTest: true,
+      ruleId,
       testTo,
       testCc,
       testDate,
@@ -277,11 +318,17 @@ autoEmailRouter.post("/send-test", async (req, res) => {
 autoEmailRouter.get("/preview", (req, res) => {
   try {
     const baseConfig = cloudStorage.getAutoEmailConfig();
-    const period = req.query.period || baseConfig.dateMode || baseConfig.period || "yesterday";
-    const customDate = req.query.date || (baseConfig.dateMode === "specific" && baseConfig.specificDate ? baseConfig.specificDate : null);
-    const threshold = Number(req.query.threshold) || baseConfig.threshold || 110;
-    const minHours = req.query.minHours !== undefined ? Number(req.query.minHours) : (baseConfig.minHours ?? 2);
-    const rawSelected = req.query.plants ? req.query.plants.split(",") : (baseConfig.selectedPlants || ["2020", "4010", "1040"]);
+    let rule = null;
+    if (req.query.ruleId && Array.isArray(baseConfig.rules)) {
+      rule = baseConfig.rules.find((r) => r.id === req.query.ruleId);
+    }
+    const effectiveConfig = { ...baseConfig, ...(rule || {}) };
+
+    const period = req.query.period || effectiveConfig.dateMode || effectiveConfig.period || "yesterday";
+    const customDate = req.query.date || (effectiveConfig.dateMode === "specific" && effectiveConfig.specificDate ? effectiveConfig.specificDate : null);
+    const threshold = Number(req.query.threshold) || effectiveConfig.threshold || 110;
+    const minHours = req.query.minHours !== undefined ? Number(req.query.minHours) : (effectiveConfig.minHours ?? 2);
+    const rawSelected = req.query.plants ? req.query.plants.split(",") : (effectiveConfig.selectedPlants || ["2020", "4010"]);
     const selectedPlants = sortPlantIds(rawSelected);
 
     const entries = cloudStorage.getEntries();

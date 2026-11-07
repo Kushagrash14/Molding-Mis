@@ -628,18 +628,68 @@ export const cloudStorage = {
 
   getAutoEmailConfig() {
     const s = loadStore();
-    return s.autoEmailConfig || getInitialStore().autoEmailConfig;
+    const cfg = s.autoEmailConfig || getInitialStore().autoEmailConfig;
+    if (!Array.isArray(cfg.rules) || cfg.rules.length === 0) {
+      cfg.rules = [
+        {
+          id: "rule_1",
+          name: "PGTL & NGM Daily Notification",
+          enabled: cfg.enabled ?? false,
+          scheduleTime: cfg.scheduleTime || "07:00",
+          selectedPlants: cfg.selectedPlants && cfg.selectedPlants.length > 0 ? cfg.selectedPlants : ["2020", "4010"],
+          recipientsTo: cfg.recipientsTo || [],
+          recipientsCc: cfg.recipientsCc || [],
+          recipientsBcc: cfg.recipientsBcc || [],
+          subject: cfg.subject || "Daily Cycle Time Tracker Report - [DATE] (PGTL & NGM)",
+          bodyIntro: cfg.bodyIntro || "",
+          period: cfg.period || "yesterday",
+          dateMode: cfg.dateMode || "yesterday",
+          specificDate: cfg.specificDate || "",
+          threshold: cfg.threshold || 110,
+          minHours: cfg.minHours ?? 2,
+          lastSentAt: cfg.lastSentAt || null,
+          lastSentDateStr: cfg.lastSentDateStr || null,
+          lastStatus: cfg.lastStatus || null,
+          lastError: cfg.lastError || null,
+        }
+      ];
+    }
+    return cfg;
   },
 
   saveAutoEmailConfig(cfg) {
     const s = loadStore();
+    const existing = s.autoEmailConfig || getInitialStore().autoEmailConfig;
+    let rules = cfg.rules;
+    if (Array.isArray(rules)) {
+      rules = rules.map((r, i) => ({
+        ...r,
+        id: r.id || `rule_${Date.now()}_${i}`,
+        name: r.name || `Notification Rule ${i + 1}`,
+      }));
+    }
     s.autoEmailConfig = {
-      ...(s.autoEmailConfig || getInitialStore().autoEmailConfig),
+      ...existing,
       ...cfg,
+      ...(rules ? { rules } : {}),
       updated_at: new Date().toISOString(),
     };
     saveStore();
     return s.autoEmailConfig;
+  },
+
+  updateAutoEmailRule(ruleId, updates) {
+    const s = loadStore();
+    const cfg = this.getAutoEmailConfig();
+    const rules = Array.isArray(cfg.rules) ? [...cfg.rules] : [];
+    const idx = rules.findIndex((r) => r.id === ruleId);
+    if (idx >= 0) {
+      rules[idx] = { ...rules[idx], ...updates };
+      s.autoEmailConfig = { ...cfg, rules };
+      saveStore();
+      return rules[idx];
+    }
+    return null;
   },
 
   getEmailLogs() {
@@ -655,6 +705,8 @@ export const cloudStorage = {
       timestamp: new Date().toISOString(),
       type: logEntry.type || "scheduled",
       status: logEntry.status || "success",
+      ruleId: logEntry.ruleId || null,
+      ruleName: logEntry.ruleName || "",
       recipients: logEntry.recipients || [],
       plants: logEntry.plants || [],
       subject: logEntry.subject || "",
