@@ -602,26 +602,13 @@ export function generateCycleTimeEmailHtml({
   periodLabel = "",
   dateStr = "",
 }) {
-  const safeIntro = esc(introText || "Please find the automated Cycle Time Tracker suspicious runs report for the selected production plants below. Kindly review any over-cycle deviations for mold and parameter verification.")
-    .replace(/\n/g, "<br/>");
+  const safeIntro = introText ? esc(introText).replace(/\n/g, "<br/>") : "";
 
   // Sort plants by user-requested priority: PGTL (2020) -> NGM (4010) -> PGEL (1040) -> others
   const sortedReports = [...plantReports].sort((a, b) => {
     const pA = PLANT_PRIORITY[String(a.plantId)] || 99;
     const pB = PLANT_PRIORITY[String(b.plantId)] || 99;
     return pA - pB;
-  });
-
-  let totalAnalysed = 0;
-  let totalOver = 0;
-  let totalSlow = 0;
-  let totalOverShifts = 0;
-
-  sortedReports.forEach((pr) => {
-    totalAnalysed += pr.kpis.analysed || 0;
-    totalOver += pr.kpis.over || 0;
-    totalSlow += pr.kpis.slow || 0;
-    totalOverShifts += pr.kpis.overShifts || 0;
   });
 
   const plantsSectionsHtml = sortedReports
@@ -694,21 +681,23 @@ export function generateCycleTimeEmailHtml({
       }
 
       return `
-        <div style="margin-top:28px;border:1px solid #cbd5e1;border-radius:14px;background:#ffffff;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,0.06);">
-          <!-- Plant Header Banner -->
-          <div style="background:#0f172a;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1e293b;">
-            <div>
-              <span style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
-                PLANT SUSPICIOUS CT REPORT
-              </span>
-              <h2 style="margin:2px 0 0 0;color:#ffffff;font-size:19px;font-weight:800;">${esc(pName)}</h2>
-            </div>
-            <div style="text-align:right;">
-              <span style="display:inline-block;background:#1e293b;color:#f8fafc;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #334155;">
-                📅 ${esc(pr.dateRangeLabel)} · ${esc(pr.shiftsCoveredLabel)}
-              </span>
-            </div>
-          </div>
+        <div style="margin-top:16px;margin-bottom:24px;border:1px solid #cbd5e1;border-radius:14px;background:#ffffff;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,0.06);">
+          <!-- Plant Header Banner (Table-based for 100% Outlook compatibility) -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f172a;border-bottom:2px solid #1e293b;width:100%;">
+            <tr>
+              <td style="padding:16px 20px;vertical-align:middle;text-align:left;">
+                <div style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
+                  PLANT SUSPICIOUS CT REPORT
+                </div>
+                <h2 style="margin:4px 0 0 0;color:#ffffff;font-size:19px;font-weight:800;font-family:Segoe UI,Arial,sans-serif;">${esc(pName)}</h2>
+              </td>
+              <td style="padding:16px 20px;text-align:right;vertical-align:middle;">
+                <span style="display:inline-block;background:#1e293b;color:#f8fafc;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #334155;">
+                  📅 ${esc(pr.dateRangeLabel)} · ${esc(pr.shiftsCoveredLabel)}
+                </span>
+              </td>
+            </tr>
+          </table>
 
           <!-- Mini KPIs -->
           <div style="display:table;width:100%;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:12px 0;">
@@ -776,51 +765,12 @@ export function generateCycleTimeEmailHtml({
 <body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:Segoe UI,Arial,-apple-system,BlinkMacSystemFont,Roboto,sans-serif;color:#0f172a;">
   <div style="max-width:1050px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
     
-    <!-- Top Header -->
-    <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:28px 24px;color:#ffffff;text-align:left;">
-      <div style="display:inline-block;background:rgba(56,189,248,0.2);color:#38bdf8;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
-        PG ELECTROPLAST LIMITED · MOLDING MIS
-      </div>
-      <h1 style="margin:0;font-size:24px;font-weight:800;line-height:1.2;color:#ffffff;">${esc(subject)}</h1>
-      <p style="margin:6px 0 0 0;font-size:14px;color:#cbd5e1;font-weight:500;">
-        Automated Cycle Time Tracker Report · Period: <strong>${esc(periodLabel || dateStr)}</strong>
-      </p>
-    </div>
-
+    ${safeIntro ? `
     <!-- Intro Remarks -->
-    <div style="padding:22px 24px;background:#ffffff;border-bottom:1px solid #f1f5f9;">
-      <div style="font-size:14px;line-height:1.6;color:#334155;">
-        ${safeIntro}
-      </div>
+    <div style="padding:20px 24px 8px;background:#ffffff;font-size:14px;line-height:1.6;color:#334155;border-bottom:1px solid #f1f5f9;">
+      ${safeIntro}
     </div>
-
-    <!-- Global KPI Summary -->
-    <div style="padding:16px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-      <div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
-        Consolidated Summary across ${sortedReports.length} Plants:
-      </div>
-      <div style="display:table;width:100%;">
-        <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Molds Analysed</div>
-          <div style="font-size:24px;font-weight:800;color:#0f172a;margin-top:2px;">${totalAnalysed}</div>
-        </div>
-        <div style="display:table-cell;width:3%;"></div>
-        <div style="display:table-cell;width:25%;background:#ffffff;border:2px solid #fecaca;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;">Faster (Over CT)</div>
-          <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:2px;">${totalOver}</div>
-        </div>
-        <div style="display:table-cell;width:3%;"></div>
-        <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #fde68a;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
-          <div style="font-size:24px;font-weight:800;color:#d97706;margin-top:2px;">${totalSlow}</div>
-        </div>
-        <div style="display:table-cell;width:3%;"></div>
-        <div style="display:table-cell;width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:11px;font-weight:700;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
-          <div style="font-size:24px;font-weight:800;color:#4338ca;margin-top:2px;">${totalOverShifts}</div>
-        </div>
-      </div>
-    </div>
+    ` : ''}
 
     <!-- Plants Content (PGTL -> NGM -> PGEL) -->
     <div style="padding:12px 24px 28px;">
@@ -828,8 +778,8 @@ export function generateCycleTimeEmailHtml({
     </div>
 
     <!-- Footer -->
-    <div style="background:#0f172a;padding:20px 24px;text-align:center;color:#94a3b8;font-size:12px;border-top:1px solid #1e293b;">
-      <p style="margin:0 0 6px 0;color:#cbd5e1;font-weight:700;">
+    <div style="background:#0f172a;padding:18px 24px;text-align:center;color:#94a3b8;font-size:12px;border-top:1px solid #1e293b;">
+      <p style="margin:0 0 4px 0;color:#cbd5e1;font-weight:700;">
         PG Electroplast Limited · Automated Molding MIS Notification System
       </p>
       <p style="margin:0;color:#64748b;">
@@ -858,15 +808,11 @@ export function generateCycleTimeEmailText({
     return pA - pB;
   });
 
-  let lines = [
-    `PG ELECTROPLAST LIMITED — CYCLE TIME TRACKER SUSPICIOUS RUNS REPORT`,
-    `Subject: ${subject}`,
-    `Period: ${periodLabel}`,
-    `Generated: ${new Date().toISOString()}`,
-    `--------------------------------------------------------------------------------`,
-    introText || "Automated Cycle Time Tracker report for selected plants.",
-    `--------------------------------------------------------------------------------`,
-  ];
+  let lines = [];
+  if (introText) {
+    lines.push(introText);
+    lines.push(`--------------------------------------------------------------------------------`);
+  }
 
   sortedReports.forEach((pr) => {
     lines.push(`\n=== Plant: ${pr.plantDisplayName || pr.plantId} (${pr.dateRangeLabel} · ${pr.shiftsCoveredLabel}) ===`);
