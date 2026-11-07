@@ -5,3 +5,4 @@ dist
 .env
 server/data/*.json
 server/data/*.tmp*
+server/data/*.bak

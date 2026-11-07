@@ -30,6 +30,7 @@ import CycleTimeTracker from "./components/CycleTimeTracker.jsx";
 import AccessRequests from "./components/AccessRequests.jsx";
 import DailyUpdateView from "./components/DailyUpdateView.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
+import AutoEmailManager from "./components/AutoEmailManager.jsx";
 import { grantCovers } from "./lib/accessGrants.js";
 
 const TABS_BY_ROLE = {
@@ -54,6 +55,7 @@ const TABS_BY_ROLE = {
     ["master", "Master data"],
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
+    ["auto_email", "Auto Email"],
     ["audit", "Audit log"],
   ],
 };
@@ -843,6 +845,19 @@ export default function App() {
               plants={accessiblePlants}
               selectedPlantId={selectedPlantId}
               selectedMonth={selectedMonth}
+            />
+          )}
+
+          {tab === "auto_email" && role === "admin" && (
+            <AutoEmailManager
+              plants={plants}
+              accessiblePlants={accessiblePlants}
+              master={master}
+              machines={machines}
+              shifts={shifts}
+              reasonCodes={reasonCodes}
+              entries={entries}
+              currentUser={currentUser}
             />
           )}
 

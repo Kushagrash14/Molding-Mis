@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { testConnection } from "./db.js";
 import { cloudStorage } from "./storage.js";
 import { sendLoginOtp } from "./mail.js";
+import { autoEmailRouter, initAutoEmailScheduler } from "./autoEmail.js";
 import {
   securityHeaders,
   rejectCrossSite,
@@ -376,6 +377,8 @@ app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
   }
 });
 
+app.use("/api/auto-email", requireAuth, requireRole("admin"), autoEmailRouter);
+
 app.use("/api", (_req, res) => {
   res.status(404).json({ success: false, error: "Not found." });
 });
@@ -392,4 +395,5 @@ app.listen(PORT, async () => {
   if (!process.env.SMTP_PASS || !process.env.SMTP_USER) {
     console.warn("[AUTH] SMTP_USER and SMTP_PASS are not set. Login emails will fail until they are added to .env.");
   }
+  initAutoEmailScheduler();
 });

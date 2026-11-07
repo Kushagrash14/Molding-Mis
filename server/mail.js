@@ -56,3 +56,42 @@ export async function sendLoginOtp({ to, name, employeeCode, otp }) {
       </div>`,
   });
 }
+
+export async function sendCycleTimeEmail({ to, cc, bcc, subject, html, text, attachments = [] }) {
+  const cfg = smtpConfig();
+  if (!cfg) {
+    const err = new Error("SMTP is not configured on the server (missing SMTP_USER or SMTP_PASS in .env).");
+    err.status = 503;
+    throw err;
+  }
+  const toList = Array.isArray(to) ? to.filter(Boolean).join(", ") : String(to || "").trim();
+  const ccList = Array.isArray(cc) ? cc.filter(Boolean).join(", ") : String(cc || "").trim();
+  const bccList = Array.isArray(bcc) ? bcc.filter(Boolean).join(", ") : String(bcc || "").trim();
+
+  if (!toList && !ccList) {
+    const err = new Error("No valid email recipients specified (To and Cc are empty).");
+    err.status = 400;
+    throw err;
+  }
+
+  const mailOptions = {
+    from: `"PGEL Molding MIS" <${cfg.user}>`,
+    to: toList || ccList,
+    subject: subject || "PGEL Cycle Time Tracker Automated Report",
+    text: text || "Please find the Cycle Time Tracker report attached.",
+    html: html || "",
+    attachments: attachments.map((att) => ({
+      filename: att.filename,
+      content: att.content,
+      contentType: att.contentType || "image/svg+xml",
+      cid: att.cid || undefined,
+    })),
+  };
+  if (toList && ccList) mailOptions.cc = ccList;
+  if (bccList) mailOptions.bcc = bccList;
+
+  const t = transporter(cfg);
+  const info = await t.sendMail(mailOptions);
+  return info;
+}
+

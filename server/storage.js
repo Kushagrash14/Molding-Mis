@@ -110,6 +110,25 @@ function getInitialStore() {
     entries: [],
     auditLog: [],
     accessRequests: [],
+    autoEmailConfig: {
+      enabled: false,
+      scheduleTime: "08:00",
+      recipientsTo: [],
+      recipientsCc: [],
+      recipientsBcc: [],
+      selectedPlants: ["1040", "2020", "4010", "2060"],
+      subject: "Daily Cycle Time Tracker Report - [DATE]",
+      bodyIntro: "Dear Team,\n\nPlease find the automated Cycle Time Tracker daily report and visual snapshots for the selected production plants attached below.\n\nKindly review any over-cycle deviations and slow molds for process optimization.",
+      period: "yesterday",
+      threshold: 110,
+      minHours: 2,
+      includePhotoAttachment: true,
+      lastSentAt: null,
+      lastSentDateStr: null,
+      lastStatus: null,
+      lastError: null,
+    },
+    emailLogs: [],
   };
 }
 
@@ -254,6 +273,16 @@ function loadStore() {
       if (!Array.isArray(store.accessRequests)) {
         store.accessRequests = [];
         saveStore();
+      }
+
+      if (!store.autoEmailConfig || typeof store.autoEmailConfig !== "object") {
+        store.autoEmailConfig = getInitialStore().autoEmailConfig;
+        storeModified = true;
+      }
+
+      if (!Array.isArray(store.emailLogs)) {
+        store.emailLogs = [];
+        storeModified = true;
       }
 
       if (Array.isArray(store.entries)) {
@@ -591,6 +620,47 @@ export const cloudStorage = {
     });
     if (s.auditLog.length > 500) {
       s.auditLog = s.auditLog.slice(0, 500);
+    }
+    saveStore();
+  },
+
+  getAutoEmailConfig() {
+    const s = loadStore();
+    return s.autoEmailConfig || getInitialStore().autoEmailConfig;
+  },
+
+  saveAutoEmailConfig(cfg) {
+    const s = loadStore();
+    s.autoEmailConfig = {
+      ...(s.autoEmailConfig || getInitialStore().autoEmailConfig),
+      ...cfg,
+      updated_at: new Date().toISOString(),
+    };
+    saveStore();
+    return s.autoEmailConfig;
+  },
+
+  getEmailLogs() {
+    const s = loadStore();
+    return s.emailLogs || [];
+  },
+
+  addEmailLog(logEntry) {
+    const s = loadStore();
+    if (!Array.isArray(s.emailLogs)) s.emailLogs = [];
+    s.emailLogs.unshift({
+      id: logEntry.id || `elog_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      timestamp: new Date().toISOString(),
+      type: logEntry.type || "scheduled",
+      status: logEntry.status || "success",
+      recipients: logEntry.recipients || [],
+      plants: logEntry.plants || [],
+      subject: logEntry.subject || "",
+      message: logEntry.message || "",
+      error: logEntry.error || null,
+    });
+    if (s.emailLogs.length > 100) {
+      s.emailLogs = s.emailLogs.slice(0, 100);
     }
     saveStore();
   },
