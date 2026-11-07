@@ -7,6 +7,7 @@ import {
   generateCycleTimeEmailHtml,
   generateCycleTimeEmailText,
   getIstDateStr,
+  fmtDateShort,
   sortPlantIds,
   getPlantDisplayName,
   getPlantShortCode,
@@ -25,6 +26,7 @@ export async function executeCycleTimeEmailJob({
   isTest = false,
   testTo = null,
   testCc = null,
+  testDate = null,
   configOverride = null,
 } = {}) {
   const baseConfig = cloudStorage.getAutoEmailConfig();
@@ -67,21 +69,27 @@ export async function executeCycleTimeEmailJob({
   const selectedPlantIds = sortPlantIds(rawSelectedIds);
 
   const plantReports = [];
-  const attachments = [];
 
-  const period = config.period || "yesterday";
-  const periodLabel =
-    period === "yesterday"
-      ? `Yesterday (${getIstDateStr(-1)})`
-      : period === "today"
-      ? `Today (${getIstDateStr(0)})`
-      : period === "latest_day"
-      ? `Latest Production Day`
-      : period === "mtd"
-      ? `Month to Date (${getIstDateStr(0).slice(0, 7)})`
-      : period === "last7days"
-      ? `Last 7 Days`
-      : period;
+  // Determine date filtering: Specific date or automated period
+  const customDate = testDate || (config.dateMode === "specific" && config.specificDate ? config.specificDate : null);
+  const period = config.dateMode || config.period || "yesterday";
+
+  let periodLabel = "";
+  if (customDate) {
+    periodLabel = `${fmtDateShort(customDate)} (Shift 1 & Shift 2)`;
+  } else if (period === "yesterday") {
+    periodLabel = `Yesterday · ${fmtDateShort(getIstDateStr(-1))} (Shift 1 & Shift 2)`;
+  } else if (period === "today") {
+    periodLabel = `Today · ${fmtDateShort(getIstDateStr(0))} (Shift 1 & Shift 2)`;
+  } else if (period === "latest_day") {
+    periodLabel = `Latest Production Day (Shift 1 & Shift 2)`;
+  } else if (period === "mtd") {
+    periodLabel = `Month to Date (${getIstDateStr(0).slice(0, 7)})`;
+  } else if (period === "last7days") {
+    periodLabel = `Last 7 Days`;
+  } else {
+    periodLabel = period;
+  }
 
   for (const plantId of selectedPlantIds) {
     const plantObj = allPlants.find((p) => String(p.plant_id) === String(plantId));
@@ -92,6 +100,7 @@ export async function executeCycleTimeEmailJob({
       threshold: config.threshold || 110,
       minHours: config.minHours !== undefined ? config.minHours : 2,
       period,
+      date: customDate,
       machines,
       shifts,
     });
@@ -99,40 +108,25 @@ export async function executeCycleTimeEmailJob({
     report.plantDisplayName = plantDisplayName;
     report.plantShortCode = shortCode;
     plantReports.push(report);
-
-    // Generate high-resolution SVG visual snapshot card (matching user screenshot)
-    const svgContent = generatePlantSvgCard(report, {
-      plantName: plantDisplayName,
-      periodLabel,
-    });
-
-    // Attachment name: e.g. PGTL_2020_Cycle_Time_Suspicious.svg
-    const safeFileName = `${shortCode}_${plantId}_Cycle_Time_Suspicious.svg`;
-
-    attachments.push({
-      filename: safeFileName,
-      content: Buffer.from(svgContent, "utf-8"),
-      contentType: "image/svg+xml",
-      cid: `photo_${plantId}`,
-    });
   }
 
   // Generate subject line with placeholders
-  const todayStr = getIstDateStr(0);
+  const displayDateStr = customDate ? fmtDateShort(customDate) : fmtDateShort(getIstDateStr(period === "yesterday" ? -1 : 0));
   const rawSubject = config.subject || "Daily Cycle Time Tracker Report - [DATE]";
   const subject = (isTest ? "[TEST EMAIL] " : "") +
     rawSubject
-      .replace(/\[DATE\]/gi, todayStr)
+      .replace(/\[DATE\]/gi, displayDateStr)
       .replace(/\[PERIOD\]/gi, periodLabel)
       .replace(/\[PLANTS\]/gi, `${selectedPlantIds.length} Plants`);
 
+  // HTML email body: renders the full executive dashboard and suspicious tables directly in HTML!
+  // No external SVG attachments and no broken <img src="cid:...">
   const html = generateCycleTimeEmailHtml({
     plantReports,
     subject,
     introText: config.bodyIntro,
     periodLabel,
-    dateStr: todayStr,
-    includePhotoAttachment: config.includePhotoAttachment !== false,
+    dateStr: displayDateStr,
   });
 
   const text = generateCycleTimeEmailText({
@@ -143,6 +137,7 @@ export async function executeCycleTimeEmailJob({
   });
 
   try {
+    // Deliver email with ZERO separate SVG file attachments so Outlook displays clean inline report
     const sendResult = await sendCycleTimeEmail({
       to: toList,
       cc: ccList,
@@ -150,7 +145,7 @@ export async function executeCycleTimeEmailJob({
       subject,
       html,
       text,
-      attachments: config.includePhotoAttachment !== false ? attachments : [],
+      attachments: [],
     });
 
     const sentTimestamp = new Date().toISOString();
@@ -167,15 +162,15 @@ export async function executeCycleTimeEmailJob({
       type: isTest ? "test" : "scheduled",
       status: "success",
       recipients: [...toList, ...ccList],
-      plants: plantReports.map((p) => p.plantName || p.plantId),
+      plants: plantReports.map((p) => p.plantDisplayName || p.plantId),
       subject,
-      message: `Cycle Time Report successfully sent with ${attachments.length} photo snapshots.`,
+      message: `Cycle Time Report successfully sent for ${periodLabel} to ${toList.length + ccList.length} recipients.`,
       error: null,
     });
 
     return {
       success: true,
-      message: `Email successfully delivered to ${toList.length + ccList.length} recipients.`,
+      message: `Email successfully delivered to ${toList.length + ccList.length} recipients for ${periodLabel}.`,
       info: sendResult,
     };
   } catch (err) {
@@ -190,7 +185,7 @@ export async function executeCycleTimeEmailJob({
       type: isTest ? "test" : "scheduled",
       status: "failed",
       recipients: [...toList, ...ccList],
-      plants: plantReports.map((p) => p.plantName || p.plantId),
+      plants: plantReports.map((p) => p.plantDisplayName || p.plantId),
       subject,
       error: err.message,
     });
@@ -261,11 +256,12 @@ autoEmailRouter.post("/config", (req, res) => {
 // POST /api/auto-email/send-test
 autoEmailRouter.post("/send-test", async (req, res) => {
   try {
-    const { testTo, testCc, configOverride } = req.body || {};
+    const { testTo, testCc, testDate, configOverride } = req.body || {};
     const result = await executeCycleTimeEmailJob({
       isTest: true,
       testTo,
       testCc,
+      testDate,
       configOverride,
     });
     res.json(result);
@@ -281,7 +277,8 @@ autoEmailRouter.post("/send-test", async (req, res) => {
 autoEmailRouter.get("/preview", (req, res) => {
   try {
     const baseConfig = cloudStorage.getAutoEmailConfig();
-    const period = req.query.period || baseConfig.period || "yesterday";
+    const period = req.query.period || baseConfig.dateMode || baseConfig.period || "yesterday";
+    const customDate = req.query.date || (baseConfig.dateMode === "specific" && baseConfig.specificDate ? baseConfig.specificDate : null);
     const threshold = Number(req.query.threshold) || baseConfig.threshold || 110;
     const minHours = req.query.minHours !== undefined ? Number(req.query.minHours) : (baseConfig.minHours ?? 2);
     const rawSelected = req.query.plants ? req.query.plants.split(",") : (baseConfig.selectedPlants || ["2020", "4010", "1040"]);
@@ -295,18 +292,20 @@ autoEmailRouter.get("/preview", (req, res) => {
     const machines = bootstrap.machines || [];
     const shifts = bootstrap.shifts || [];
 
-    const periodLabel =
-      period === "yesterday"
-        ? `Yesterday (${getIstDateStr(-1)})`
-        : period === "today"
-        ? `Today (${getIstDateStr(0)})`
-        : period === "latest_day"
-        ? `Latest Production Day`
-        : period === "mtd"
-        ? `Month to Date (${getIstDateStr(0).slice(0, 7)})`
-        : period === "last7days"
-        ? `Last 7 Days`
-        : period;
+    let periodLabel = "";
+    if (customDate) {
+      periodLabel = `${fmtDateShort(customDate)} (Shift 1 & Shift 2)`;
+    } else if (period === "yesterday") {
+      periodLabel = `Yesterday · ${fmtDateShort(getIstDateStr(-1))} (Shift 1 & Shift 2)`;
+    } else if (period === "today") {
+      periodLabel = `Today · ${fmtDateShort(getIstDateStr(0))} (Shift 1 & Shift 2)`;
+    } else if (period === "latest_day") {
+      periodLabel = `Latest Production Day (Shift 1 & Shift 2)`;
+    } else if (period === "mtd") {
+      periodLabel = `Month to Date (${getIstDateStr(0).slice(0, 7)})`;
+    } else {
+      periodLabel = period;
+    }
 
     const plantReports = [];
     const svgCards = {};
@@ -320,6 +319,7 @@ autoEmailRouter.get("/preview", (req, res) => {
         threshold,
         minHours,
         period,
+        date: customDate,
         machines,
         shifts,
       });
@@ -334,9 +334,9 @@ autoEmailRouter.get("/preview", (req, res) => {
       svgCards[plantId] = svg;
     }
 
-    const todayStr = getIstDateStr(0);
+    const displayDateStr = customDate ? fmtDateShort(customDate) : fmtDateShort(getIstDateStr(period === "yesterday" ? -1 : 0));
     const subject = (baseConfig.subject || "Daily Cycle Time Tracker Report - [DATE]")
-      .replace(/\[DATE\]/gi, todayStr)
+      .replace(/\[DATE\]/gi, displayDateStr)
       .replace(/\[PERIOD\]/gi, periodLabel)
       .replace(/\[PLANTS\]/gi, `${selectedPlants.length} Plants`);
 
@@ -345,14 +345,14 @@ autoEmailRouter.get("/preview", (req, res) => {
       subject,
       introText: baseConfig.bodyIntro,
       periodLabel,
-      dateStr: todayStr,
-      includePhotoAttachment: true,
+      dateStr: displayDateStr,
     });
 
     res.json({
       success: true,
       subject,
       periodLabel,
+      customDate,
       plantReports,
       svgCards,
       sampleHtml,

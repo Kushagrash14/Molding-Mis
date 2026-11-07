@@ -9,12 +9,23 @@ const PRESET_TIMES = [
 ];
 
 const PERIOD_OPTIONS = [
-  { value: "yesterday", label: "Yesterday / Previous Day (Recommended for Morning Digest)" },
-  { value: "latest_day", label: "Latest Production Day (Most Recent Shifts)" },
-  { value: "mtd", label: "Current Month to Date (Full Cumulative Cycle Time Tracker)" },
-  { value: "today", label: "Today (Current In-Progress Shifts)" },
+  { value: "yesterday", label: "Yesterday (Previous Day · Both Shifts 1 & 2)" },
+  { value: "latest_day", label: "Latest Production Day (Most Recent · Both Shifts 1 & 2)" },
+  { value: "specific", label: "Specific Date (Pick Exact Date · Both Shifts 1 & 2)" },
+  { value: "today", label: "Today (Current Shifts 1 & 2)" },
+  { value: "mtd", label: "Current Month to Date (Full Cumulative Month)" },
   { value: "last7days", label: "Last 7 Days (Rolling Summary)" },
 ];
+
+function getIstToday() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
+
+function getIstYesterday() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
 
 const PLANT_ORDER = {
   "2020": 1, // PGTL
@@ -74,11 +85,13 @@ export default function AutoEmailManager({
     selectedPlants: ["2020", "4010", "1040", "2060"],
     subject: "Daily Cycle Time Tracker Report - [DATE]",
     bodyIntro:
-      "Dear Team,\n\nPlease find the automated Cycle Time Tracker daily report and visual snapshots for the selected production plants attached below.\n\nKindly review any over-cycle deviations and slow molds for process optimization.",
+      "Dear Team,\n\nPlease find the automated Cycle Time Tracker suspicious runs report for the selected production plants below.\n\nKindly review any over-cycle deviations for mold and parameter verification.",
     period: "yesterday",
+    dateMode: "yesterday",
+    specificDate: "",
     threshold: 110,
     minHours: 2,
-    includePhotoAttachment: true,
+    includePhotoAttachment: false,
     lastSentAt: null,
     lastStatus: null,
     lastError: null,
@@ -92,6 +105,7 @@ export default function AutoEmailManager({
   // Test send dialog state
   const [showTestModal, setShowTestModal] = useState(false);
   const [testEmailTo, setTestEmailTo] = useState("");
+  const [testDate, setTestDate] = useState("");
   const [testSendResult, setTestSendResult] = useState(null);
 
   // Preview state
@@ -151,7 +165,8 @@ export default function AutoEmailManager({
     try {
       const plantList = (config.selectedPlants || []).join(",");
       const query = new URLSearchParams({
-        period: config.period || "yesterday",
+        period: config.dateMode || config.period || "yesterday",
+        date: config.dateMode === "specific" && config.specificDate ? config.specificDate : "",
         threshold: String(config.threshold || 110),
         minHours: String(config.minHours ?? 2),
         plants: plantList,
@@ -257,6 +272,7 @@ export default function AutoEmailManager({
         body: JSON.stringify({
           testTo: targetTo,
           testCc: testEmailTo ? [] : recipientsCc,
+          testDate: testDate || (config.dateMode === "specific" ? config.specificDate : null),
           configOverride: {
             ...config,
             recipientsTo,
@@ -616,11 +632,15 @@ export default function AutoEmailManager({
               {/* Reporting Range */}
               <div style={{ marginBottom: "18px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>
-                  Production Shift Range
+                  Production Shift Range &amp; Date Mode
                 </label>
                 <select
-                  value={config.period || "yesterday"}
-                  onChange={(e) => setConfig({ ...config, period: e.target.value })}
+                  value={config.dateMode || config.period || "yesterday"}
+                  onChange={(e) => {
+                    const nextVal = e.target.value;
+                    const nextSpecific = nextVal === "specific" && !config.specificDate ? "2026-11-05" : config.specificDate;
+                    setConfig({ ...config, dateMode: nextVal, period: nextVal, specificDate: nextSpecific });
+                  }}
                   style={{
                     width: "100%",
                     padding: "9px 12px",
@@ -629,6 +649,7 @@ export default function AutoEmailManager({
                     fontSize: "13px",
                     background: "#ffffff",
                     color: "#0f172a",
+                    fontWeight: "600",
                   }}
                 >
                   {PERIOD_OPTIONS.map((opt) => (
@@ -638,6 +659,65 @@ export default function AutoEmailManager({
                   ))}
                 </select>
               </div>
+
+              {/* Specific Date Picker (When specific date is selected) */}
+              {(config.dateMode === "specific" || config.period === "specific") && (
+                <div
+                  style={{
+                    marginBottom: "18px",
+                    padding: "14px",
+                    background: "#f0f9ff",
+                    borderRadius: "10px",
+                    border: "1.5px solid #7dd3fc",
+                  }}
+                >
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0369a1", marginBottom: "6px" }}>
+                    Select Exact Date to Dispatch (Both Shift 1 &amp; Shift 2 Included):
+                  </label>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                    <input
+                      type="date"
+                      value={config.specificDate || "2026-11-05"}
+                      onChange={(e) => setConfig({ ...config, specificDate: e.target.value })}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1.5px solid #0284c7",
+                        fontSize: "14px",
+                        fontWeight: "700",
+                        color: "#0f172a",
+                        background: "#ffffff",
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        onClick={() => setConfig({ ...config, specificDate: "2026-11-05" })}
+                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", background: config.specificDate === "2026-11-05" ? "#0284c7" : "#ffffff", color: config.specificDate === "2026-11-05" ? "#ffffff" : "#0369a1", border: "1px solid #0284c7" }}
+                      >
+                        05 Nov 2026
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfig({ ...config, specificDate: "2026-11-04" })}
+                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", background: config.specificDate === "2026-11-04" ? "#0284c7" : "#ffffff", color: config.specificDate === "2026-11-04" ? "#ffffff" : "#0369a1", border: "1px solid #0284c7" }}
+                      >
+                        04 Nov 2026
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfig({ ...config, specificDate: getIstYesterday() })}
+                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600", background: "#ffffff", color: "#334155", border: "1px solid #cbd5e1" }}
+                      >
+                        Yesterday
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#0369a1", marginTop: "6px", fontWeight: "600" }}>
+                    ✓ This report will include both Shift 1 (Day) and Shift 2 (Night) data for {config.specificDate || "2026-11-05"}.
+                  </div>
+                </div>
+              )}
 
               {/* Thresholds Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
@@ -910,33 +990,27 @@ export default function AutoEmailManager({
                 })}
               </div>
 
-              {/* Visual Photo Snapshot Option */}
+              {/* Executive Inline Dashboard Note */}
               <div
                 style={{
                   padding: "14px 16px",
                   borderRadius: "10px",
-                  background: "#f8fafc",
-                  border: "1px dashed #cbd5e1",
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "12px",
                 }}
               >
-                <input
-                  type="checkbox"
-                  id="includePhoto"
-                  checked={config.includePhotoAttachment !== false}
-                  onChange={(e) => setConfig({ ...config, includePhotoAttachment: e.target.checked })}
-                  style={{ width: "18px", height: "18px", marginTop: "2px", cursor: "pointer" }}
-                />
-                <label htmlFor="includePhoto" style={{ cursor: "pointer" }}>
-                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>
-                    📷 Attach High-Resolution Photo Snapshot Cards ("Photo jae")
+                <div style={{ fontSize: "22px" }}>✉️</div>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>
+                    Self-Contained Executive Report (Clean Outlook &amp; Mobile Display)
                   </div>
-                  <div style={{ fontSize: "12px", color: "var(--ink-faint)", marginTop: "2px" }}>
-                    Generates an image-sharp vector snapshot card for every selected plant showing KPIs, speedup %, and cycle time deviations directly in the email and as attachments.
+                  <div style={{ fontSize: "12px", color: "#15803d", marginTop: "2px", lineHeight: "1.5" }}>
+                    Each selected plant is rendered as an inline visual dashboard card with KPIs and the detailed shift-wise table. Zero broken image placeholders in Outlook, zero raw file attachments, instant delivery.
                   </div>
-                </label>
+                </div>
               </div>
             </div>
 
@@ -1435,6 +1509,79 @@ export default function AutoEmailManager({
               </span>
             </div>
 
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "700", marginBottom: "6px", color: "#0f172a" }}>
+                📅 Select Date for Test Email:
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <input
+                  type="date"
+                  value={testDate || config.specificDate || "2026-11-05"}
+                  onChange={(e) => setTestDate(e.target.value)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #0284c7",
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    background: "#f0f9ff",
+                    color: "#0369a1",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setTestDate("2026-11-05")}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    background: (testDate || config.specificDate) === "2026-11-05" ? "#0284c7" : "#f8fafc",
+                    color: (testDate || config.specificDate) === "2026-11-05" ? "#ffffff" : "#334155",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  05 Nov 2026
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTestDate("2026-11-04")}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    background: testDate === "2026-11-04" ? "#0284c7" : "#f8fafc",
+                    color: testDate === "2026-11-04" ? "#ffffff" : "#334155",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  04 Nov 2026
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTestDate(getIstYesterday())}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    background: testDate === getIstYesterday() ? "#0284c7" : "#f8fafc",
+                    color: testDate === getIstYesterday() ? "#ffffff" : "#334155",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  Yesterday
+                </button>
+              </div>
+              <span style={{ fontSize: "11px", color: "#047857", marginTop: "4px", display: "block", fontWeight: "600" }}>
+                ✓ Includes both Shift 1 (Day) and Shift 2 (Night) for this date.
+              </span>
+            </div>
+
             <div
               style={{
                 background: "#f8fafc",
@@ -1446,8 +1593,8 @@ export default function AutoEmailManager({
               }}
             >
               <div><strong>Selected Plants:</strong> {config.selectedPlants?.join(", ") || "None"}</div>
-              <div><strong>Period:</strong> {config.period}</div>
-              <div><strong>Photos Included:</strong> {config.includePhotoAttachment !== false ? "Yes (SVG Cards)" : "No"}</div>
+              <div><strong>Target Date:</strong> {testDate || (config.dateMode === "specific" ? config.specificDate : config.dateMode || config.period)} (Both Shift 1 & 2)</div>
+              <div><strong>Dashboard:</strong> Native Executive HTML Dashboard (No broken image icons, zero raw attachments)</div>
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>

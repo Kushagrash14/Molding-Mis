@@ -115,31 +115,34 @@ export function statusFor(pct, threshold = 110) {
 }
 
 /**
- * Filter entries based on period option
+ * Filter entries based on period option or specific custom date.
+ * Guarantees both Shift 1 and Shift 2 for that date are returned.
  */
 export function filterEntriesByPeriod(entries, period = "yesterday", customDate = null) {
   if (!Array.isArray(entries) || entries.length === 0) return [];
+
+  // If a specific customDate is provided (e.g. "2026-11-05"), strictly use that date
+  if (customDate) {
+    const target = String(customDate).trim().slice(0, 10);
+    return entries.filter((e) => String(e.shift_date || "").slice(0, 10) === target);
+  }
+
   const today = getIstDateStr(0);
   const yesterday = getIstDateStr(-1);
   const currentMonth = getIstMonthStr();
 
-  if (customDate) {
-    return entries.filter((e) => e.shift_date === customDate);
-  }
-
   if (period === "today") {
-    const list = entries.filter((e) => e.shift_date === today);
-    if (list.length > 0) return list;
+    return entries.filter((e) => String(e.shift_date || "").slice(0, 10) === today);
   }
 
   if (period === "yesterday") {
-    const list = entries.filter((e) => e.shift_date === yesterday);
+    const list = entries.filter((e) => String(e.shift_date || "").slice(0, 10) === yesterday);
     if (list.length > 0) return list;
-    // Fallback: if yesterday has no entries (e.g. testing), use latest available date
+    // Fallback: if yesterday has no entries (e.g. testing or holiday), use the latest available date
     const sorted = [...entries].filter((e) => e.shift_date).sort((a, b) => (b.shift_date > a.shift_date ? 1 : -1));
     if (sorted.length > 0) {
-      const latestDate = sorted[0].shift_date;
-      return entries.filter((e) => e.shift_date === latestDate);
+      const latestDate = sorted[0].shift_date.slice(0, 10);
+      return entries.filter((e) => String(e.shift_date || "").slice(0, 10) === latestDate);
     }
     return [];
   }
@@ -147,8 +150,8 @@ export function filterEntriesByPeriod(entries, period = "yesterday", customDate 
   if (period === "latest_day") {
     const sorted = [...entries].filter((e) => e.shift_date).sort((a, b) => (b.shift_date > a.shift_date ? 1 : -1));
     if (sorted.length > 0) {
-      const latestDate = sorted[0].shift_date;
-      return entries.filter((e) => e.shift_date === latestDate);
+      const latestDate = sorted[0].shift_date.slice(0, 10);
+      return entries.filter((e) => String(e.shift_date || "").slice(0, 10) === latestDate);
     }
     return [];
   }
@@ -173,7 +176,8 @@ export function filterEntriesByPeriod(entries, period = "yesterday", customDate 
 }
 
 /**
- * Compute cycle time data for a specific plant, returning both part-level and run-level suspicious rows
+ * Compute cycle time data for a specific plant, returning both part-level and run-level suspicious rows.
+ * Both Shift 1 (Day) and Shift 2 (Night) are analyzed.
  */
 export function computePlantCycleTime(entries, master, reasonCodes, plantId, options = {}) {
   const threshold = Number(options.threshold) || 110;
@@ -187,12 +191,14 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
 
   const bySap = new Map();
   const dates = new Set();
+  const foundShifts = new Set();
   const rawRunsList = [];
 
   relevantEntries.forEach((entry) => {
     const ePlant = String(entry.plant_id || "1040");
     if (plantId && plantId !== "all" && ePlant !== String(plantId)) return;
     if (entry.shift_date) dates.add(entry.shift_date);
+    if (entry.shift_id) foundShifts.add(String(entry.shift_id));
 
     runsOf(entry).forEach((run) => {
       const sap = run.sap_code;
@@ -342,11 +348,21 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
       ? fmtDateShort(sortedDates[0])
       : `${fmtDateShort(sortedDates[0])} – ${fmtDateShort(sortedDates[sortedDates.length - 1])}`;
 
+  const shiftsCoveredLabel =
+    foundShifts.has("1") && foundShifts.has("2")
+      ? "Both Shift 1 (Day) & Shift 2 (Night)"
+      : foundShifts.has("1")
+      ? "Shift 1 (Day)"
+      : foundShifts.has("2")
+      ? "Shift 2 (Night)"
+      : "All Shifts";
+
   return {
     plantId,
     plantShortCode: getPlantShortCode(plantId),
     plantDisplayName: getPlantDisplayName(plantId),
     dateRangeLabel,
+    shiftsCoveredLabel,
     totalRecords: relevantEntries.length,
     kpis: {
       analysed: eligibleParts.length,
@@ -366,8 +382,8 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
 }
 
 /**
- * Generate a standalone high-resolution SVG visual snapshot card ("Photo")
- * Formatted exactly like the shift-wise Cycle Time Tracker table in the user's screenshot!
+ * Generate full SVG visual dashboard card matching the UI cycle time snapshot table.
+ * Used for admin panel preview and standalone visual export.
  */
 export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel = "" } = {}) {
   const width = 1320;
@@ -386,7 +402,7 @@ export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel 
       <circle cx="660" cy="${tableTop + 74}" r="14" fill="#dcfce7" />
       <text x="660" y="${tableTop + 79}" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#15803d" text-anchor="middle">✓</text>
       <text x="660" y="${tableTop + 95}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#15803d" font-weight="700">
-        No suspicious cycle time deviations recorded for this period (${esc(plantReport.dateRangeLabel)})
+        No suspicious cycle time deviations recorded for this period (${esc(plantReport?.dateRangeLabel || "")})
       </text>
     `;
   } else {
@@ -470,7 +486,7 @@ export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel 
   }
 
   const worstStr = kpis.worst ? `${kpis.worst.sap} (${round(kpis.worst.pct, 0)}%)` : "—";
-  const displayTitle = esc(plantName || plantReport.plantDisplayName || `Plant ${plantReport.plantId}`);
+  const displayTitle = esc(plantName || plantReport?.plantDisplayName || `Plant ${plantReport?.plantId}`);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${totalHeight}" viewBox="0 0 ${width} ${totalHeight}">
@@ -493,7 +509,7 @@ export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel 
     ${displayTitle}
   </text>
   <text x="50" y="85" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#94a3b8">
-    Cycle Time Tracker · Suspicious (CT Wrong · Faster) Shifts Snapshot  ·  Period: <tspan font-weight="700" fill="#38bdf8">${esc(periodLabel || plantReport.dateRangeLabel)}</tspan>
+    Cycle Time Tracker · Suspicious (CT Wrong · Faster) Shifts Snapshot  ·  Period: <tspan font-weight="700" fill="#38bdf8">${esc(periodLabel || plantReport?.dateRangeLabel || "")}</tspan>
   </text>
   <g transform="translate(1120, 42)">
     <rect width="155" height="32" rx="16" fill="#dc2626" />
@@ -574,8 +590,10 @@ export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel 
 }
 
 /**
- * Generate full HTML email with plant sections in strict priority order (PGTL -> NGM -> PGEL -> DMIC)
- * and detailed shift-wise suspicious table matching the user's screenshot!
+ * Generate full executive HTML email with plant sections in strict priority order (PGTL -> NGM -> PGEL -> DMIC)
+ * and detailed shift-wise suspicious table.
+ * NO broken external image tags (<img src="cid:...">), NO separate SVG attachments.
+ * Native HTML/CSS dashboard tables render with 100% fidelity directly in Outlook, Gmail, and phones!
  */
 export function generateCycleTimeEmailHtml({
   plantReports = [],
@@ -583,9 +601,8 @@ export function generateCycleTimeEmailHtml({
   introText = "",
   periodLabel = "",
   dateStr = "",
-  includePhotoAttachment = true,
 }) {
-  const safeIntro = esc(introText || "Please find the automated Cycle Time Tracker daily report and visual snapshots for the selected production plants below.")
+  const safeIntro = esc(introText || "Please find the automated Cycle Time Tracker suspicious runs report for the selected production plants below. Kindly review any over-cycle deviations for mold and parameter verification.")
     .replace(/\n/g, "<br/>");
 
   // Sort plants by user-requested priority: PGTL (2020) -> NGM (4010) -> PGEL (1040) -> others
@@ -616,8 +633,14 @@ export function generateCycleTimeEmailHtml({
       if (suspiciousList.length === 0) {
         tableRows = `
           <tr>
-            <td colspan="15" style="padding:20px;text-align:center;color:#15803d;font-size:13px;font-weight:700;background:#f0fdf4;">
-              ✓ No suspicious cycle time deviations recorded for ${esc(pName)} in this period (${esc(pr.dateRangeLabel)}). All active molds operated within standard cycle time limits.
+            <td colspan="15" style="padding:22px;text-align:center;background:#f0fdf4;border-top:1px solid #bbf7d0;">
+              <div style="font-size:18px;margin-bottom:4px;">✅</div>
+              <div style="font-size:13px;font-weight:700;color:#166534;">
+                No suspicious cycle time deviations on ${esc(pr.dateRangeLabel)} (${esc(pr.shiftsCoveredLabel)})
+              </div>
+              <div style="font-size:12px;color:#15803d;margin-top:2px;">
+                All active molds in ${esc(pName)} operated within standard master cycle time parameters.
+              </div>
             </td>
           </tr>
         `;
@@ -636,31 +659,31 @@ export function generateCycleTimeEmailHtml({
 
             return `
               <tr style="background:${bg};border-bottom:1px solid #e2e8f0;">
-                <td style="padding:8px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${dateDisplay}</td>
-                <td style="padding:8px 10px;color:#475569;font-size:12px;white-space:nowrap;">${shiftDisplay}</td>
-                <td style="padding:8px 10px;font-weight:600;color:#334155;font-size:12px;white-space:nowrap;">${machineDisplay}</td>
-                <td style="padding:8px 10px;font-size:12px;">
-                  <div style="font-family:Consolas,monospace;font-weight:700;color:#0369a1;font-size:11px;">${sapDisplay}</div>
-                  <div style="color:#64748b;font-size:11px;">${partDescDisplay}</div>
+                <td style="padding:10px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${dateDisplay}</td>
+                <td style="padding:10px 10px;color:#334155;font-size:12px;white-space:nowrap;font-weight:600;">${shiftDisplay}</td>
+                <td style="padding:10px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${machineDisplay}</td>
+                <td style="padding:10px 10px;font-size:12px;">
+                  <div style="font-family:Consolas,monospace;font-weight:700;color:#0369a1;font-size:12px;">${sapDisplay}</div>
+                  <div style="color:#64748b;font-size:11px;margin-top:2px;">${partDescDisplay}</div>
                 </td>
-                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${cavDisplay}</td>
-                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${fmt(r.hrs, 1)}</td>
-                <td style="padding:8px 10px;text-align:center;color:#334155;font-size:12px;">${fmt(r.ok, 0)}</td>
-                <td style="padding:8px 10px;text-align:center;color:#b91c1c;font-size:12px;font-weight:600;">${fmt(r.rej, 0)}</td>
-                <td style="padding:8px 10px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.produced, 0)}</td>
-                <td style="padding:8px 10px;text-align:center;color:#475569;font-size:12px;">${fmt(r.target, 0)}</td>
-                <td style="padding:8px 10px;text-align:center;color:#475569;font-size:12px;">${r.masterShots ? fmt(r.masterShots, 0) : "—"}</td>
-                <td style="padding:8px 10px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.actualShots, 0)}</td>
-                <td style="padding:8px 10px;text-align:center;white-space:nowrap;">
-                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:800;font-size:11px;">
+                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;font-weight:600;">${cavDisplay}</td>
+                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;">${fmt(r.hrs, 1)}</td>
+                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;">${fmt(r.ok, 0)}</td>
+                <td style="padding:10px 8px;text-align:center;color:#b91c1c;font-size:12px;font-weight:600;">${fmt(r.rej, 0)}</td>
+                <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.produced, 0)}</td>
+                <td style="padding:10px 8px;text-align:center;color:#475569;font-size:12px;">${fmt(r.target, 0)}</td>
+                <td style="padding:10px 8px;text-align:center;color:#475569;font-size:12px;">${r.masterShots ? fmt(r.masterShots, 0) : "—"}</td>
+                <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.actualShots, 0)}</td>
+                <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
+                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:800;font-size:11px;display:inline-block;">
                     ${vsMasterDisplay}
                   </span>
                 </td>
-                <td style="padding:8px 10px;text-align:center;font-family:Consolas,monospace;font-size:11px;color:#0f172a;white-space:nowrap;">
+                <td style="padding:10px 8px;text-align:center;font-family:Consolas,monospace;font-size:11px;color:#0f172a;white-space:nowrap;font-weight:600;">
                   ${ctDisplay}
                 </td>
-                <td style="padding:8px 10px;text-align:center;white-space:nowrap;">
-                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:700;font-size:10px;">
+                <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
+                  <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:700;font-size:10px;display:inline-block;">
                     CT wrong · faster
                   </span>
                 </td>
@@ -670,11 +693,9 @@ export function generateCycleTimeEmailHtml({
           .join("");
       }
 
-      const safeAttachmentName = `${pr.plantShortCode || pr.plantId}_${pr.plantId}_Cycle_Time_Suspicious.svg`;
-
       return `
-        <div style="margin-top:28px;border:1px solid #cbd5e1;border-radius:14px;background:#ffffff;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.06);">
-          <!-- Plant Header -->
+        <div style="margin-top:28px;border:1px solid #cbd5e1;border-radius:14px;background:#ffffff;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,0.06);">
+          <!-- Plant Header Banner -->
           <div style="background:#0f172a;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1e293b;">
             <div>
               <span style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
@@ -683,47 +704,31 @@ export function generateCycleTimeEmailHtml({
               <h2 style="margin:2px 0 0 0;color:#ffffff;font-size:19px;font-weight:800;">${esc(pName)}</h2>
             </div>
             <div style="text-align:right;">
-              <span style="display:inline-block;background:#1e293b;color:#f8fafc;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;">
-                ${esc(pr.dateRangeLabel)}
+              <span style="display:inline-block;background:#1e293b;color:#f8fafc;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #334155;">
+                📅 ${esc(pr.dateRangeLabel)} · ${esc(pr.shiftsCoveredLabel)}
               </span>
             </div>
           </div>
 
           <!-- Mini KPIs -->
-          <div style="display:table;width:100%;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:10px 0;">
+          <div style="display:table;width:100%;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:12px 0;">
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
               <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Analysed</div>
-              <div style="font-size:22px;font-weight:800;color:#0f172a;margin-top:2px;">${pr.kpis.analysed}</div>
+              <div style="font-size:24px;font-weight:800;color:#0f172a;margin-top:2px;">${pr.kpis.analysed}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
               <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;">Faster (Over CT)</div>
-              <div style="font-size:22px;font-weight:800;color:#dc2626;margin-top:2px;">${pr.kpis.over}</div>
+              <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:2px;">${pr.kpis.over}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;border-right:1px solid #e2e8f0;">
               <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;">Slow (&lt;70%)</div>
-              <div style="font-size:22px;font-weight:800;color:#d97706;margin-top:2px;">${pr.kpis.slow}</div>
+              <div style="font-size:24px;font-weight:800;color:#d97706;margin-top:2px;">${pr.kpis.slow}</div>
             </div>
             <div style="display:table-cell;width:25%;text-align:center;">
               <div style="font-size:11px;font-weight:700;color:#4338ca;text-transform:uppercase;">Over Shifts</div>
-              <div style="font-size:22px;font-weight:800;color:#4338ca;margin-top:2px;">${pr.kpis.overShifts}</div>
+              <div style="font-size:24px;font-weight:800;color:#4338ca;margin-top:2px;">${pr.kpis.overShifts}</div>
             </div>
           </div>
-
-          ${
-            includePhotoAttachment
-              ? `
-          <!-- Embedded Photo Snapshot -->
-          <div style="padding:14px 20px;background:#f1f5f9;text-align:center;border-bottom:1px solid #e2e8f0;">
-            <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px;">
-              📷 Visual Photo Snapshot Card Attached: <em>${esc(safeAttachmentName)}</em>
-            </div>
-            <a href="cid:photo_${esc(pr.plantId)}" style="display:inline-block;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.06);max-width:100%;">
-              <img src="cid:photo_${esc(pr.plantId)}" alt="${esc(pName)} Cycle Time Snapshot" style="display:block;width:100%;max-width:100%;height:auto;border:0;" />
-            </a>
-          </div>
-          `
-              : ""
-          }
 
           <!-- Detailed Suspicious Shifts Table -->
           <div style="padding:16px 20px;overflow-x:auto;">
@@ -737,17 +742,17 @@ export function generateCycleTimeEmailHtml({
                   <th style="padding:8px 10px;text-align:left;">Shift</th>
                   <th style="padding:8px 10px;text-align:left;">Machine</th>
                   <th style="padding:8px 10px;text-align:left;">SAP · Part / Description</th>
-                  <th style="padding:8px 10px;text-align:center;">Cav</th>
-                  <th style="padding:8px 10px;text-align:center;">Run Hrs</th>
-                  <th style="padding:8px 10px;text-align:center;">OK</th>
-                  <th style="padding:8px 10px;text-align:center;">Rej</th>
-                  <th style="padding:8px 10px;text-align:center;">Produced</th>
-                  <th style="padding:8px 10px;text-align:center;">Target</th>
-                  <th style="padding:8px 10px;text-align:center;">M.Shots</th>
-                  <th style="padding:8px 10px;text-align:center;">Act.Shots</th>
-                  <th style="padding:8px 10px;text-align:center;">vs Master</th>
-                  <th style="padding:8px 10px;text-align:center;">CT (s)</th>
-                  <th style="padding:8px 10px;text-align:center;">Status</th>
+                  <th style="padding:8px 8px;text-align:center;">Cav</th>
+                  <th style="padding:8px 8px;text-align:center;">Run Hrs</th>
+                  <th style="padding:8px 8px;text-align:center;">OK</th>
+                  <th style="padding:8px 8px;text-align:center;">Rej</th>
+                  <th style="padding:8px 8px;text-align:center;">Produced</th>
+                  <th style="padding:8px 8px;text-align:center;">Target</th>
+                  <th style="padding:8px 8px;text-align:center;">M.Shots</th>
+                  <th style="padding:8px 8px;text-align:center;">Act.Shots</th>
+                  <th style="padding:8px 8px;text-align:center;">vs Master</th>
+                  <th style="padding:8px 8px;text-align:center;">CT (s)</th>
+                  <th style="padding:8px 8px;text-align:center;">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -769,7 +774,7 @@ export function generateCycleTimeEmailHtml({
   <title>${esc(subject)}</title>
 </head>
 <body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:Segoe UI,Arial,-apple-system,BlinkMacSystemFont,Roboto,sans-serif;color:#0f172a;">
-  <div style="max-width:980px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+  <div style="max-width:1050px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
     
     <!-- Top Header -->
     <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:28px 24px;color:#ffffff;text-align:left;">
@@ -864,7 +869,7 @@ export function generateCycleTimeEmailText({
   ];
 
   sortedReports.forEach((pr) => {
-    lines.push(`\n=== Plant: ${pr.plantDisplayName || pr.plantId} (${pr.dateRangeLabel}) ===`);
+    lines.push(`\n=== Plant: ${pr.plantDisplayName || pr.plantId} (${pr.dateRangeLabel} · ${pr.shiftsCoveredLabel}) ===`);
     lines.push(`Molds Analysed: ${pr.kpis.analysed} | Faster than CT: ${pr.kpis.over} | Slow: ${pr.kpis.slow} | Over Shifts: ${pr.kpis.overShifts}`);
     if (pr.suspiciousRuns && pr.suspiciousRuns.length > 0) {
       lines.push(`Suspicious Shifts ("CT wrong · faster"):`);
