@@ -341,21 +341,32 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (a.pct ?? 0) - (b.pct ?? 0)));
 
   const sortedDates = [...dates].sort();
+  const targetDateFallback = customDate
+    ? fmtDateShort(customDate)
+    : period === "yesterday"
+    ? fmtDateShort(getIstDateStr(-1))
+    : period === "today"
+    ? fmtDateShort(getIstDateStr(0))
+    : "Target Date";
+
+  const hasActiveShift = sortedDates.length > 0 && eligibleParts.length > 0;
+
   const dateRangeLabel =
     sortedDates.length === 0
-      ? "No records"
+      ? targetDateFallback
       : sortedDates.length === 1
       ? fmtDateShort(sortedDates[0])
       : `${fmtDateShort(sortedDates[0])} – ${fmtDateShort(sortedDates[sortedDates.length - 1])}`;
 
-  const shiftsCoveredLabel =
-    foundShifts.has("1") && foundShifts.has("2")
-      ? "Both Shift 1 (Day) & Shift 2 (Night)"
-      : foundShifts.has("1")
-      ? "Shift 1 (Day)"
-      : foundShifts.has("2")
-      ? "Shift 2 (Night)"
-      : "All Shifts";
+  const shiftsCoveredLabel = !hasActiveShift
+    ? "No Active Shift"
+    : foundShifts.has("1") && foundShifts.has("2")
+    ? "Both Shift 1 (Day) & Shift 2 (Night)"
+    : foundShifts.has("1")
+    ? "Shift 1 (Day)"
+    : foundShifts.has("2")
+    ? "Shift 2 (Night)"
+    : "All Shifts";
 
   return {
     plantId,
@@ -363,6 +374,7 @@ export function computePlantCycleTime(entries, master, reasonCodes, plantId, opt
     plantDisplayName: getPlantDisplayName(plantId),
     dateRangeLabel,
     shiftsCoveredLabel,
+    hasActiveShift,
     totalRecords: relevantEntries.length,
     kpis: {
       analysed: eligibleParts.length,
@@ -395,14 +407,25 @@ export function generatePlantSvgCard(plantReport, { plantName = "", periodLabel 
   const tableHeight = 44 + (rows.length > 0 ? rows.length * rowHeight : 60);
   const totalHeight = Math.max(520, tableTop + tableHeight + 55);
 
+  const hasActiveShift = plantReport?.hasActiveShift ?? (plantReport?.totalRecords > 0 && plantReport?.kpis?.analysed > 0);
+
   let rowsSvg = "";
-  if (rows.length === 0) {
+  if (!hasActiveShift) {
     rowsSvg = `
-      <rect x="25" y="${tableTop + 44}" width="1270" height="60" fill="#ffffff" />
+      <rect x="25" y="${tableTop + 44}" width="1270" height="60" fill="#f8fafc" />
+      <circle cx="660" cy="${tableTop + 74}" r="14" fill="#e2e8f0" />
+      <text x="660" y="${tableTop + 79}" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#475569" text-anchor="middle">ℹ</text>
+      <text x="660" y="${tableTop + 95}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#334155" font-weight="800">
+        No Active Shift – Cycle Time Not Available (${esc(plantReport?.dateRangeLabel || "")})
+      </text>
+    `;
+  } else if (rows.length === 0) {
+    rowsSvg = `
+      <rect x="25" y="${tableTop + 44}" width="1270" height="60" fill="#f0fdf4" />
       <circle cx="660" cy="${tableTop + 74}" r="14" fill="#dcfce7" />
       <text x="660" y="${tableTop + 79}" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#15803d" text-anchor="middle">✓</text>
-      <text x="660" y="${tableTop + 95}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#15803d" font-weight="700">
-        No suspicious cycle time deviations recorded for this period (${esc(plantReport?.dateRangeLabel || "")})
+      <text x="660" y="${tableTop + 95}" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#15803d" font-weight="800">
+        Standard Master Cycle Time Maintained (${esc(plantReport?.dateRangeLabel || "")})
       </text>
     `;
   } else {
@@ -615,18 +638,33 @@ export function generateCycleTimeEmailHtml({
     .map((pr) => {
       const pName = pr.plantDisplayName || `Plant ${pr.plantId}`;
       const suspiciousList = pr.suspiciousRuns || [];
+      const hasActiveShift = pr.hasActiveShift ?? (pr.totalRecords > 0 && pr.kpis.analysed > 0);
 
       let tableRows = "";
-      if (suspiciousList.length === 0) {
+      if (!hasActiveShift) {
         tableRows = `
           <tr>
-            <td colspan="15" style="padding:22px;text-align:center;background:#f0fdf4;border-top:1px solid #bbf7d0;">
-              <div style="font-size:18px;margin-bottom:4px;">✅</div>
-              <div style="font-size:13px;font-weight:700;color:#166534;">
-                No suspicious cycle time deviations on ${esc(pr.dateRangeLabel)} (${esc(pr.shiftsCoveredLabel)})
+            <td colspan="16" style="padding:28px 20px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;">
+              <div style="font-size:24px;margin-bottom:6px;">ℹ️</div>
+              <div style="font-size:15px;font-weight:800;color:#334155;letter-spacing:0.3px;">
+                No Active Shift – Cycle Time Not Available
               </div>
-              <div style="font-size:12px;color:#15803d;margin-top:2px;">
-                All active molds in ${esc(pName)} operated within standard master cycle time parameters.
+              <div style="font-size:12px;color:#64748b;margin-top:4px;">
+                No production shift or machine entries recorded for ${esc(pName)} on ${esc(pr.dateRangeLabel)}.
+              </div>
+            </td>
+          </tr>
+        `;
+      } else if (suspiciousList.length === 0) {
+        tableRows = `
+          <tr>
+            <td colspan="16" style="padding:28px 20px;text-align:center;background:#f0fdf4;border-top:1px solid #bbf7d0;">
+              <div style="font-size:24px;margin-bottom:6px;">✅</div>
+              <div style="font-size:15px;font-weight:800;color:#166534;letter-spacing:0.3px;">
+                Standard Master Cycle Time Maintained
+              </div>
+              <div style="font-size:12px;color:#15803d;margin-top:4px;">
+                All active molds in ${esc(pName)} operated within standard master cycle time parameters on ${esc(pr.dateRangeLabel)} (${esc(pr.shiftsCoveredLabel)}).
               </div>
             </td>
           </tr>
@@ -646,27 +684,28 @@ export function generateCycleTimeEmailHtml({
 
             return `
               <tr style="background:${bg};border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${dateDisplay}</td>
-                <td style="padding:10px 10px;color:#334155;font-size:12px;white-space:nowrap;font-weight:600;">${shiftDisplay}</td>
-                <td style="padding:10px 10px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${machineDisplay}</td>
+                <td style="padding:10px 8px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${dateDisplay}</td>
+                <td style="padding:10px 8px;color:#334155;font-size:12px;white-space:nowrap;font-weight:600;">${shiftDisplay}</td>
+                <td style="padding:10px 8px;font-weight:700;color:#0f172a;font-size:12px;white-space:nowrap;">${machineDisplay}</td>
                 <td style="padding:10px 10px;font-size:12px;">
                   <div style="font-family:Consolas,monospace;font-weight:700;color:#0369a1;font-size:12px;">${sapDisplay}</div>
                   <div style="color:#64748b;font-size:11px;margin-top:2px;">${partDescDisplay}</div>
                 </td>
-                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;font-weight:600;">${cavDisplay}</td>
-                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;">${fmt(r.hrs, 1)}</td>
-                <td style="padding:10px 8px;text-align:center;color:#334155;font-size:12px;">${fmt(r.ok, 0)}</td>
-                <td style="padding:10px 8px;text-align:center;color:#b91c1c;font-size:12px;font-weight:600;">${fmt(r.rej, 0)}</td>
-                <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.produced, 0)}</td>
-                <td style="padding:10px 8px;text-align:center;color:#475569;font-size:12px;">${fmt(r.target, 0)}</td>
-                <td style="padding:10px 8px;text-align:center;color:#475569;font-size:12px;">${r.masterShots ? fmt(r.masterShots, 0) : "—"}</td>
-                <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.actualShots, 0)}</td>
-                <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
+                <td style="padding:10px 6px;text-align:center;color:#334155;font-size:12px;font-weight:600;">${cavDisplay}</td>
+                <td style="padding:10px 6px;text-align:center;color:#334155;font-size:12px;">${fmt(r.hrs, 1)}</td>
+                <td style="padding:10px 6px;text-align:center;color:#334155;font-size:12px;">${fmt(r.tgtHrs ?? r.hrs, 1)}</td>
+                <td style="padding:10px 6px;text-align:center;color:#334155;font-size:12px;">${fmt(r.ok, 0)}</td>
+                <td style="padding:10px 6px;text-align:center;color:#b91c1c;font-size:12px;font-weight:600;">${fmt(r.rej, 0)}</td>
+                <td style="padding:10px 6px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.produced, 0)}</td>
+                <td style="padding:10px 6px;text-align:center;color:#475569;font-size:12px;">${fmt(r.target, 0)}</td>
+                <td style="padding:10px 6px;text-align:center;color:#475569;font-size:12px;">${r.masterShots ? fmt(r.masterShots, 0) : "—"}</td>
+                <td style="padding:10px 6px;text-align:center;font-weight:800;color:#0f172a;font-size:12px;">${fmt(r.actualShots, 0)}</td>
+                <td style="padding:10px 6px;text-align:center;white-space:nowrap;">
                   <span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:10px;font-weight:800;font-size:11px;display:inline-block;">
                     ${vsMasterDisplay}
                   </span>
                 </td>
-                <td style="padding:10px 8px;text-align:center;font-family:Consolas,monospace;font-size:11px;color:#0f172a;white-space:nowrap;font-weight:600;">
+                <td style="padding:10px 6px;text-align:center;font-family:Consolas,monospace;font-size:11px;color:#0f172a;white-space:nowrap;font-weight:600;">
                   ${ctDisplay}
                 </td>
                 <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
@@ -687,7 +726,7 @@ export function generateCycleTimeEmailHtml({
             <tr>
               <td style="padding:16px 20px;vertical-align:middle;text-align:left;">
                 <div style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
-                  PLANT SUSPICIOUS CT REPORT
+                  PLANT CYCLE TIME REPORT
                 </div>
                 <h2 style="margin:4px 0 0 0;color:#ffffff;font-size:19px;font-weight:800;font-family:Segoe UI,Arial,sans-serif;">${esc(pName)}</h2>
               </td>
@@ -719,28 +758,33 @@ export function generateCycleTimeEmailHtml({
             </div>
           </div>
 
-          <!-- Detailed Suspicious Shifts Table -->
+          <!-- Detailed Shifts Table -->
           <div style="padding:16px 20px;overflow-x:auto;">
-            <div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:10px;">
-              ⚡ Suspicious ("CT wrong · faster") Shift Runs List:
+            <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:${suspiciousList.length > 0 ? '#b91c1c' : '#475569'};">
+              ${
+                suspiciousList.length > 0
+                  ? `⚡ Over-Speed ("CT wrong · faster") Shift Runs (${suspiciousList.length}):`
+                  : `Shift Status &amp; Cycle Time Details:`
+              }
             </div>
             <table style="width:100%;border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;font-size:12px;">
               <thead>
                 <tr style="background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;border-top:1px solid #cbd5e1;border-bottom:2px solid #cbd5e1;">
-                  <th style="padding:8px 10px;text-align:left;">Date</th>
-                  <th style="padding:8px 10px;text-align:left;">Shift</th>
-                  <th style="padding:8px 10px;text-align:left;">Machine</th>
-                  <th style="padding:8px 10px;text-align:left;">SAP · Part / Description</th>
-                  <th style="padding:8px 8px;text-align:center;">Cav</th>
-                  <th style="padding:8px 8px;text-align:center;">Run Hrs</th>
-                  <th style="padding:8px 8px;text-align:center;">OK</th>
-                  <th style="padding:8px 8px;text-align:center;">Rej</th>
-                  <th style="padding:8px 8px;text-align:center;">Produced</th>
-                  <th style="padding:8px 8px;text-align:center;">Target</th>
-                  <th style="padding:8px 8px;text-align:center;">M.Shots</th>
-                  <th style="padding:8px 8px;text-align:center;">Act.Shots</th>
-                  <th style="padding:8px 8px;text-align:center;">vs Master</th>
-                  <th style="padding:8px 8px;text-align:center;">CT (s)</th>
+                  <th style="padding:8px 8px;text-align:left;">Date</th>
+                  <th style="padding:8px 8px;text-align:left;">Shift</th>
+                  <th style="padding:8px 8px;text-align:left;">Machine</th>
+                  <th style="padding:8px 10px;text-align:left;">SAP / Part / Description</th>
+                  <th style="padding:8px 6px;text-align:center;">Cav</th>
+                  <th style="padding:8px 6px;text-align:center;">Run Hrs</th>
+                  <th style="padding:8px 6px;text-align:center;">Target Hrs</th>
+                  <th style="padding:8px 6px;text-align:center;">OK</th>
+                  <th style="padding:8px 6px;text-align:center;">Rej</th>
+                  <th style="padding:8px 6px;text-align:center;">Produced</th>
+                  <th style="padding:8px 6px;text-align:center;">Target</th>
+                  <th style="padding:8px 6px;text-align:center;">Master Shots/Hr</th>
+                  <th style="padding:8px 6px;text-align:center;">Actual Shots/Hr</th>
+                  <th style="padding:8px 6px;text-align:center;">vs Master</th>
+                  <th style="padding:8px 6px;text-align:center;">CT (s)</th>
                   <th style="padding:8px 8px;text-align:center;">Status</th>
                 </tr>
               </thead>
@@ -818,12 +862,14 @@ export function generateCycleTimeEmailText({
     lines.push(`\n=== Plant: ${pr.plantDisplayName || pr.plantId} (${pr.dateRangeLabel} · ${pr.shiftsCoveredLabel}) ===`);
     lines.push(`Molds Analysed: ${pr.kpis.analysed} | Faster than CT: ${pr.kpis.over} | Slow: ${pr.kpis.slow} | Over Shifts: ${pr.kpis.overShifts}`);
     if (pr.suspiciousRuns && pr.suspiciousRuns.length > 0) {
-      lines.push(`Suspicious Shifts ("CT wrong · faster"):`);
+      lines.push(`Over-Speed Shifts ("CT wrong · faster"):`);
       pr.suspiciousRuns.forEach((r) => {
         lines.push(` - [${r.dateFormatted || r.date}] ${r.shiftDisplay || r.shift} | ${r.machineDisplay || r.machine} | ${r.sap} (${r.description}) | Prod: ${r.produced}/${r.target} | ${round(r.pct, 0)}% vs Master | CT: ${round(r.declaredCt, 1)}s -> ${round(r.actualCt, 1)}s`);
       });
+    } else if (!pr.hasActiveShift || pr.kpis.analysed === 0) {
+      lines.push(`ℹ️ No Active Shift – Cycle Time Not Available`);
     } else {
-      lines.push(`✓ No suspicious runs found for this period.`);
+      lines.push(`✓ Standard master cycle time maintained for all active molds.`);
     }
   });
 
