@@ -137,17 +137,7 @@ export default function AccessRequests({
           <h2>Entry access requests &amp; Approvals</h2>
           <p>Review operator unlock requests or grant proactive Special Approvals to unlock shifts directly.</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {pendingCount > 0 && <span className="ar-count">{pendingCount} pending</span>}
-          <button
-            type="button"
-            className="ar-special-btn"
-            onClick={() => setShowSpecialModal(true)}
-            title="Directly unlock past dates & shifts for selected plants"
-          >
-            ✨ Special Approval
-          </button>
-        </div>
+        {pendingCount > 0 && <span className="ar-count">{pendingCount} pending</span>}
       </div>
 
       {/* Filter and Search Bar */}
@@ -183,40 +173,53 @@ export default function AccessRequests({
           </button>
         </div>
 
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            placeholder="Search by operator, plant, date..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: "6px 12px",
-              borderRadius: "8px",
-              border: "1px solid #cbd5e1",
-              fontSize: "12px",
-              width: "220px",
-              background: "#ffffff",
-            }}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ position: "relative" }}>
+            <input
+              type="text"
+              placeholder="Search by operator, plant, date..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               style={{
-                position: "absolute",
-                right: "8px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                color: "#94a3b8",
-                cursor: "pointer",
-                fontWeight: "bold",
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid #cbd5e1",
+                fontSize: "12px",
+                width: "210px",
+                height: "31px",
+                boxSizing: "border-box",
+                background: "#ffffff",
               }}
-            >
-              ×
-            </button>
-          )}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                style={{
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "#94a3b8",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="ar-special-btn"
+            onClick={() => setShowSpecialModal(true)}
+            title="Directly unlock past dates & shifts for selected plants"
+          >
+            ✨ Special Approval
+          </button>
         </div>
       </div>
 
