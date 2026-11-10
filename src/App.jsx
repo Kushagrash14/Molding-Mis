@@ -249,11 +249,18 @@ export default function App() {
   ]);
 
   // Lock system: any submitted entry outside the eligible shift window (older than 24h standard / 48h weekend grace window) gets locked automatically.
-  // Exception: every entry from 1 Oct through 16 Oct 2026 is kept unlocked.
+  // Exception: entries covered by an active grant / Special Approval or the unlocked window remain editable.
   useEffect(() => {
     setEntries((prev) =>
       prev.map((e) => {
         if (isDateInUnlockedWindow(e.shift_date)) {
+          if (e.status === "locked") {
+            return { ...e, status: "submitted", locked_at: null };
+          }
+          return e;
+        }
+        const granted = Boolean(grantCovers(accessRequests, e.entered_by, e.plant_id, e.shift_date));
+        if (granted) {
           if (e.status === "locked") {
             return { ...e, status: "submitted", locked_at: null };
           }
@@ -265,7 +272,7 @@ export default function App() {
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shifts]);
+  }, [shifts, accessRequests]);
 
   useEffect(() => {
     let live = true;
@@ -542,6 +549,13 @@ export default function App() {
           }
           return e;
         }
+        const granted = Boolean(grantCovers(accessRequests, e.entered_by, e.plant_id, e.shift_date));
+        if (granted) {
+          if (e.status === "locked") {
+            return { ...e, status: "submitted", locked_at: null };
+          }
+          return e;
+        }
         if (e.status === "submitted" && isShiftEntryLocked(e, shifts)) {
           count++;
           return { ...e, status: "locked", locked_at: new Date().toISOString() };
@@ -552,7 +566,7 @@ export default function App() {
     alert(
       count > 0
         ? `${count} historical entry(ies) past shift cutoff grace window (24h standard / 48h Saturday) locked.`
-        : "All submitted entries are within active shift, grace window (24h standard / 48h Saturday), or the 1–16 Oct unlocked window."
+        : "All submitted entries are within active shift, grace window (24h standard / 48h Saturday), or active approval window."
     );
   }
 

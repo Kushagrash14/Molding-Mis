@@ -349,7 +349,9 @@ export function assertPlant(user, plantId) {
 export function assertCanWriteEntry(user, entry) {
   const data = assertPlant(user, entry?.plant_id);
   if (user.role === "admin") return;
-  if (user.role !== "operator") throw httpError(403, "Your role cannot edit production entries.");
+  if (user.role !== "operator" && user.role !== "plant_head") {
+    throw httpError(403, "Your role cannot edit production entries.");
+  }
   if (unlockedWindow(entry.shift_date)) return;
   if (activeGrant(user, entry.plant_id, entry.shift_date)) return;
   if (shiftPastGrace(entry.shift_date, entry.shift_id, data.shifts)) {

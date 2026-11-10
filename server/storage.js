@@ -421,6 +421,23 @@ export const cloudStorage = {
       entry.locked_at = null;
     }
 
+    // If covered by an active grant / Special Approval, entry is always editable and submitted
+    const grants = s.accessRequests || [];
+    const now = Date.now();
+    const hasGrant = grants.some(
+      (g) =>
+        g.status === "approved" &&
+        (!g.requested_by || g.requested_by === "*" || g.requested_by === "all" || g.is_special || g.requested_by === entry.entered_by) &&
+        String(g.plant_id || "1040") === String(entry.plant_id || "1040") &&
+        g.unlock_until &&
+        new Date(g.unlock_until).getTime() > now &&
+        (g.dates || []).includes(shiftDay)
+    );
+    if (hasGrant) {
+      entry.status = "submitted";
+      entry.locked_at = null;
+    }
+
     let idx = s.entries.findIndex((e) => e.entry_id === entry.entry_id);
     if (idx < 0) {
       idx = s.entries.findIndex(
@@ -459,6 +476,21 @@ export const cloudStorage = {
       normalizeEntryIdentity(entry);
       const shiftDay = String(entry.shift_date || "").slice(0, 10);
       if ((shiftDay >= "2026-10-01" && shiftDay <= "2026-10-16") || shiftDay === "2026-10-19" || shiftDay === "2026-10-20" || shiftDay === "2026-10-23") {
+        entry.status = "submitted";
+        entry.locked_at = null;
+      }
+      const grants = s.accessRequests || [];
+      const now = Date.now();
+      const hasGrant = grants.some(
+        (g) =>
+          g.status === "approved" &&
+          (!g.requested_by || g.requested_by === "*" || g.requested_by === "all" || g.is_special || g.requested_by === entry.entered_by) &&
+          String(g.plant_id || "1040") === String(entry.plant_id || "1040") &&
+          g.unlock_until &&
+          new Date(g.unlock_until).getTime() > now &&
+          (g.dates || []).includes(shiftDay)
+      );
+      if (hasGrant) {
         entry.status = "submitted";
         entry.locked_at = null;
       }
@@ -658,6 +690,19 @@ export const cloudStorage = {
       changed_at: new Date(now).toISOString(),
     });
     if (s.auditLog.length > 500) s.auditLog = s.auditLog.slice(0, 500);
+
+    // Immediately unlock any existing entries in the database for these plants and dates
+    if (Array.isArray(s.entries)) {
+      s.entries.forEach((e) => {
+        const shiftDay = String(e.shift_date || "").slice(0, 10);
+        if (cleanPlantIds.includes(String(e.plant_id || "1040")) && cleanDates.includes(shiftDay)) {
+          if (e.status === "locked") {
+            e.status = "submitted";
+            e.locked_at = null;
+          }
+        }
+      });
+    }
 
     saveStore();
     return createdRequests;
