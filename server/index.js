@@ -316,6 +316,43 @@ app.post("/api/access-requests/:id/decide", requireAuth, requireRole("plant_head
   }
 });
 
+app.post("/api/access-requests/special", requireAuth, requireRole("plant_head", "admin"), (req, res) => {
+  try {
+    const { plant_ids, dates, duration_hours, note } = req.body || {};
+    if (!Array.isArray(plant_ids) || plant_ids.length === 0) {
+      return res.status(400).json({ success: false, error: "Please select at least one plant." });
+    }
+    if (!Array.isArray(dates) || dates.length === 0) {
+      return res.status(400).json({ success: false, error: "Please select at least one date." });
+    }
+    for (const pid of plant_ids) {
+      assertPlant(req.user, pid);
+    }
+    const requests = cloudStorage.createSpecialApproval({
+      plant_ids,
+      dates,
+      duration_hours: Number(duration_hours) || 24,
+      note,
+      user: req.user,
+    });
+    res.json({ success: true, requests });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.post("/api/access-requests/:id/revoke", requireAuth, requireRole("plant_head", "admin"), (req, res) => {
+  try {
+    const existing = cloudStorage.listAccessRequests().find((r) => r.id === req.params.id);
+    if (!existing) return res.status(404).json({ success: false, error: "Request not found." });
+    assertPlant(req.user, existing.plant_id);
+    const request = cloudStorage.revokeAccessRequest(req.params.id, req.user);
+    res.json({ success: true, request });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
   try {
     const entries = cloudStorage.getEntries();
@@ -326,7 +363,7 @@ app.post("/api/lock-cutoff", requireAuth, requireRole("admin"), (_req, res) => {
       return grants.some(
         (g) =>
           g.status === "approved" &&
-          g.requested_by === e.entered_by &&
+          (!g.requested_by || g.requested_by === "*" || g.requested_by === "all" || g.is_special || g.requested_by === e.entered_by) &&
           String(g.plant_id || "1040") === String(e.plant_id || "1040") &&
           g.unlock_until &&
           new Date(g.unlock_until).getTime() > now &&

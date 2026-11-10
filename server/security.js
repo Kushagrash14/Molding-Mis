@@ -323,7 +323,7 @@ function activeGrant(user, plantId, shiftDate) {
   return cloudStorage.listAccessRequests().some(
     (g) =>
       g.status === "approved" &&
-      g.requested_by === user.id &&
+      (!g.requested_by || g.requested_by === "*" || g.requested_by === "all" || g.is_special || g.requested_by === user.id) &&
       String(g.plant_id || "1040") === String(plantId || "1040") &&
       g.unlock_until &&
       new Date(g.unlock_until).getTime() > now &&
@@ -364,7 +364,10 @@ export function scopeBootstrap(user) {
   const requests = (data.accessRequests || []).filter((r) => {
     if (isAdmin) return true;
     if (user.role === "plant_head") return allowed.has(String(r.plant_id));
-    return r.requested_by === user.id;
+    return (
+      r.requested_by === user.id ||
+      (allowed.has(String(r.plant_id)) && (r.is_special || r.requested_by === "*" || r.requested_by === "all"))
+    );
   });
   return {
     currentUser: user,

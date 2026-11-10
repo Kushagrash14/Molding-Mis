@@ -610,6 +610,83 @@ export const cloudStorage = {
     return request;
   },
 
+  createSpecialApproval({ plant_ids, dates, duration_hours, note, user }) {
+    const s = loadStore();
+    if (!Array.isArray(s.accessRequests)) s.accessRequests = [];
+    const cleanDates = Array.isArray(dates)
+      ? [...new Set(dates.map((d) => String(d).slice(0, 10)))].filter(Boolean).sort()
+      : [];
+    if (cleanDates.length === 0) {
+      throw new Error("At least one date is required.");
+    }
+    const cleanPlantIds = Array.isArray(plant_ids) ? [...new Set(plant_ids.map(String))].filter(Boolean) : [];
+    if (cleanPlantIds.length === 0) {
+      throw new Error("At least one plant is required.");
+    }
+    const duration = Math.max(0.5, Math.min(168, Number(duration_hours) || 24));
+    const now = Date.now();
+    const unlockUntilIso = new Date(now + duration * 60 * 60 * 1000).toISOString();
+    const createdRequests = [];
+
+    cleanPlantIds.forEach((plantId) => {
+      const req = {
+        id: `req_sp_${now}_${plantId}_${Math.random().toString(36).slice(2, 6)}`,
+        is_special: true,
+        plant_id: plantId,
+        requested_by: "*",
+        requested_by_name: `All Operators (Special Approval)`,
+        dates: cleanDates,
+        duration_hours: duration,
+        note: String(note || "Special Approval granted by Plant Head").slice(0, 300),
+        status: "approved",
+        created_at: new Date(now).toISOString(),
+        decided_by: user?.id || null,
+        decided_by_name: user?.name || "Plant Head",
+        decided_at: new Date(now).toISOString(),
+        unlock_until: unlockUntilIso,
+      };
+      s.accessRequests.unshift(req);
+      createdRequests.push(req);
+    });
+
+    s.auditLog.unshift({
+      id: `aud_${now}`,
+      action: "SPECIAL_APPROVAL",
+      summary: `✨ Special Approval: Unlocked dates [${cleanDates.join(", ")}] for Plant(s) [${cleanPlantIds.join(", ")}] for ${duration}h by ${user?.name || "Plant Head"}`,
+      changed_by: user?.id || "plant_head",
+      changed_by_name: user?.name || "Plant Head",
+      changed_at: new Date(now).toISOString(),
+    });
+    if (s.auditLog.length > 500) s.auditLog = s.auditLog.slice(0, 500);
+
+    saveStore();
+    return createdRequests;
+  },
+
+  revokeAccessRequest(id, user) {
+    const s = loadStore();
+    const request = (s.accessRequests || []).find((r) => r.id === id);
+    if (!request) throw new Error("Request not found.");
+    request.status = "revoked";
+    request.unlock_until = new Date().toISOString();
+    request.revoked_by = user?.id || null;
+    request.revoked_by_name = user?.name || null;
+    request.revoked_at = new Date().toISOString();
+
+    s.auditLog.unshift({
+      id: `aud_${Date.now()}`,
+      action: "REVOKE_APPROVAL",
+      summary: `🔒 Revoked unlock permission for Plant ${request.plant_id} on dates [${(request.dates || []).join(", ")}] by ${user?.name || "Plant Head"}`,
+      changed_by: user?.id || "plant_head",
+      changed_by_name: user?.name || "Plant Head",
+      changed_at: new Date().toISOString(),
+    });
+    if (s.auditLog.length > 500) s.auditLog = s.auditLog.slice(0, 500);
+
+    saveStore();
+    return request;
+  },
+
   addAuditLog(auditEntry) {
     const s = loadStore();
     s.auditLog.unshift({

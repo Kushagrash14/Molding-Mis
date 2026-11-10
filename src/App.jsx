@@ -56,6 +56,7 @@ const TABS_BY_ROLE = {
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
     ["auto_email", "Auto Email"],
+    ["requests", "Requests"],
     ["audit", "Audit log"],
   ],
 };
@@ -609,6 +610,34 @@ export default function App() {
     setAccessRequests((prev) => prev.map((r) => (r.id === data.request.id ? data.request : r)));
   }
 
+  async function submitSpecialApproval(payload) {
+    const res = await fetch("/api/access-requests/special", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !Array.isArray(data.requests)) {
+      throw new Error(data.error || "Could not grant special approval.");
+    }
+    const newIds = new Set(data.requests.map((r) => r.id));
+    setAccessRequests((prev) => [...data.requests, ...prev.filter((r) => !newIds.has(r.id))]);
+    return data.requests;
+  }
+
+  async function revokeAccessRequest(id) {
+    const res = await fetch(`/api/access-requests/${id}/revoke`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.request) {
+      alert(data.error || "Could not revoke approval.");
+      return;
+    }
+    setAccessRequests((prev) => prev.map((r) => (r.id === data.request.id ? data.request : r)));
+  }
+
   function tryEdit(entry) {
     const granted = grantCovers(accessRequests, entry.entered_by, entry.plant_id, entry.shift_date);
     const isLocked = isShiftEntryLocked(entry, shifts) && !granted;
@@ -826,12 +855,14 @@ export default function App() {
             />
           )}
 
-          {tab === "requests" && role === "plant_head" && (
+          {tab === "requests" && (role === "plant_head" || role === "admin") && (
             <AccessRequests
               requests={accessRequests}
               plants={accessiblePlants}
               currentUser={currentUser}
               onDecide={decideAccessRequest}
+              onSpecialApproval={submitSpecialApproval}
+              onRevoke={revokeAccessRequest}
             />
           )}
 

@@ -15,13 +15,13 @@ export function datesBetween(start, end) {
 
 export function grantCovers(grants, userId, plantId, shiftDate) {
   const day = String(shiftDate || "").slice(0, 10);
-  if (!day || !userId) return null;
+  if (!day) return null;
   const now = Date.now();
   return (
     (grants || []).find(
       (g) =>
         g.status === "approved" &&
-        g.requested_by === userId &&
+        (!g.requested_by || g.requested_by === "*" || g.requested_by === "all" || g.is_special || g.requested_by === userId) &&
         String(g.plant_id || "1040") === String(plantId || "1040") &&
         g.unlock_until &&
         new Date(g.unlock_until).getTime() > now &&
