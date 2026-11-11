@@ -822,12 +822,9 @@ export function generateCycleTimeEmailHtml({
     </div>
 
     <!-- Footer -->
-    <div style="background:#0f172a;padding:18px 24px;text-align:center;color:#94a3b8;font-size:12px;border-top:1px solid #1e293b;">
-      <p style="margin:0 0 4px 0;color:#cbd5e1;font-weight:700;">
+    <div style="background:#0f172a;padding:16px 24px;text-align:center;color:#cbd5e1;font-size:12px;border-top:1px solid #1e293b;">
+      <p style="margin:0;color:#cbd5e1;font-weight:700;">
         PG Electroplast Limited · Automated Molding MIS Notification System
-      </p>
-      <p style="margin:0;color:#64748b;">
-        Managed by Super Admin via Auto Email Control Center · Generated at ${new Date().toISOString().replace('T', ' ').slice(0, 19)} IST
       </p>
     </div>
 
