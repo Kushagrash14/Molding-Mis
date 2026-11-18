@@ -31,6 +31,7 @@ import AccessRequests from "./components/AccessRequests.jsx";
 import DailyUpdateView from "./components/DailyUpdateView.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
 import AutoEmailManager from "./components/AutoEmailManager.jsx";
+import MaterialConsumptionView from "./components/MaterialConsumptionView.jsx";
 import { grantCovers } from "./lib/accessGrants.js";
 
 const TABS_BY_ROLE = {
@@ -52,6 +53,7 @@ const TABS_BY_ROLE = {
   admin: [
     ["all", "All entries"],
     ["daily_update", "Daily Update"],
+    ["consumption", "Material Consumption"],
     ["master", "Master data"],
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
@@ -820,6 +822,20 @@ export default function App() {
                   })
                   .catch((err) => console.error(err));
               }}
+            />
+          )}
+
+          {tab === "consumption" && role === "admin" && (
+            <MaterialConsumptionView
+              entries={authorizedEntries}
+              master={master}
+              plants={accessiblePlants.length > 0 ? accessiblePlants : plants}
+              machines={machines}
+              shifts={shifts}
+              reasonCodes={reasonCodes}
+              selectedPlantId={selectedPlantId}
+              onSelectPlant={setSelectedPlantId}
+              currentUser={currentUser}
             />
           )}
 
