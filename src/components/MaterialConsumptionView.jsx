@@ -45,6 +45,18 @@ function getOffsetDateStr(offsetDays) {
   return `${y}-${m}-${day}`;
 }
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+function fmtMonthLabel(ym) {
+  if (!ym || ym.length < 7) return ym;
+  const [y, m] = ym.split("-");
+  const idx = Number(m) - 1;
+  return `${MONTH_NAMES[idx] || m} ${y}`;
+}
+
 export default function MaterialConsumptionView({
   entries = [],
   master = [],
@@ -57,37 +69,85 @@ export default function MaterialConsumptionView({
   currentUser,
 }) {
   // Filters
-  const [dateFilterType, setDateFilterType] = useState("month"); // 'today', 'yesterday', 'last7', 'month', 'custom'
-  const [customStartDate, setCustomStartDate] = useState(() => getOffsetDateStr(-7));
+  const [dateFilterType, setDateFilterType] = useState("month"); // 'today', 'yesterday', 'last7', 'month', 'lastMonth', 'selectMonth', 'custom', 'allTime'
+  const [selectedYm, setSelectedYm] = useState(() => getTodayStr().slice(0, 7));
+  const [customStartDate, setCustomStartDate] = useState(() => getOffsetDateStr(-30));
   const [customEndDate, setCustomEndDate] = useState(() => getTodayStr());
   const [plantFilter, setPlantFilter] = useState(selectedPlantId || "all");
   const [shiftFilter, setShiftFilter] = useState("all");
   const [machineFilter, setMachineFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("summary"); // 'summary' (by part) or 'detailed' (by shift run)
+  const [viewMode, setViewMode] = useState("machine"); // 'machine', 'summary' (part), 'detailed' (shift run)
+  const [expandedMachineId, setExpandedMachineId] = useState(null);
   const [selectedExampleSap, setSelectedExampleSap] = useState(null);
 
   // Sync internal plant filter with external selectedPlantId if changed
   const activePlantId = plantFilter;
 
-  // Determine active date range
-  const { startDate, endDate } = useMemo(() => {
+  // Extract all available months present in data + past 12 months for quick jumping back in time
+  const availableMonths = useMemo(() => {
+    const set = new Set();
+    entries.forEach((e) => {
+      if (e.shift_date && e.shift_date.length >= 7) {
+        set.add(e.shift_date.slice(0, 7));
+      }
+    });
+    // Add past 12 months from today
+    const now = new Date();
+    for (let i = 0; i < 18; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      set.add(ym);
+    }
+    return Array.from(set).sort().reverse();
+  }, [entries]);
+
+  // Determine active date range based on filter type
+  const { startDate, endDate, dateRangeLabel } = useMemo(() => {
     const today = getTodayStr();
-    if (dateFilterType === "today") return { startDate: today, endDate: today };
+    if (dateFilterType === "today") {
+      return { startDate: today, endDate: today, dateRangeLabel: `Today (${today})` };
+    }
     if (dateFilterType === "yesterday") {
       const yest = getOffsetDateStr(-1);
-      return { startDate: yest, endDate: yest };
+      return { startDate: yest, endDate: yest, dateRangeLabel: `Yesterday (${yest})` };
     }
     if (dateFilterType === "last7") {
-      return { startDate: getOffsetDateStr(-6), endDate: today };
+      const start = getOffsetDateStr(-6);
+      return { startDate: start, endDate: today, dateRangeLabel: `Last 7 Days (${start} to ${today})` };
     }
     if (dateFilterType === "month") {
       const y = today.slice(0, 4);
       const m = today.slice(5, 7);
-      return { startDate: `${y}-${m}-01`, endDate: today };
+      return { startDate: `${y}-${m}-01`, endDate: today, dateRangeLabel: `This Month (${fmtMonthLabel(`${y}-${m}`)})` };
     }
-    return { startDate: customStartDate, endDate: customEndDate };
-  }, [dateFilterType, customStartDate, customEndDate]);
+    if (dateFilterType === "lastMonth") {
+      const d = new Date();
+      d.setDate(1);
+      d.setMonth(d.getMonth() - 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+      const s = `${y}-${m}-01`;
+      const e = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+      return { startDate: s, endDate: e, dateRangeLabel: `Last Month (${fmtMonthLabel(`${y}-${m}`)})` };
+    }
+    if (dateFilterType === "selectMonth") {
+      const [y, m] = selectedYm.split("-");
+      const lastDay = new Date(Number(y), Number(m), 0).getDate();
+      const s = `${selectedYm}-01`;
+      const e = `${selectedYm}-${String(lastDay).padStart(2, "0")}`;
+      return { startDate: s, endDate: e, dateRangeLabel: fmtMonthLabel(selectedYm) };
+    }
+    if (dateFilterType === "allTime") {
+      return { startDate: "1970-01-01", endDate: "2099-12-31", dateRangeLabel: "All Time (Complete History)" };
+    }
+    return {
+      startDate: customStartDate,
+      endDate: customEndDate,
+      dateRangeLabel: `${customStartDate} to ${customEndDate}`,
+    };
+  }, [dateFilterType, selectedYm, customStartDate, customEndDate]);
 
   // Extract flattened run-level records with consumption metrics
   const processedData = useMemo(() => {
@@ -114,7 +174,8 @@ export default function MaterialConsumptionView({
         const ok = Number(m.ok_prod) || 0;
         const rej = Number(m.total_rej) || 0;
         const produced = ok + rej;
-        if (produced <= 0 && (!run.run_hour || Number(run.run_hour) <= 0)) return;
+        const runHour = Number(m.net_run_time) || Number(run.run_hour) || 0;
+        if (produced <= 0 && runHour <= 0) return;
 
         const product = findProduct(master, sap, runPlant);
         const family = familyInPlant(master, sap, runPlant);
@@ -151,6 +212,7 @@ export default function MaterialConsumptionView({
           plantName: plantObj?.name || runPlant,
           machineId: entry.machine_id,
           machineNo: mcObj?.machine_no || entry.machine_id,
+          runHour,
           sapCode: sap,
           partNo: product?.part_no || run.part_no || "—",
           description: product?.material_description || run.material_description || "—",
@@ -187,6 +249,79 @@ export default function MaterialConsumptionView({
         r.plantName.toLowerCase().includes(q)
     );
   }, [processedData, searchTerm]);
+
+  // Aggregate by Machine for the Machine-Wise View
+  const machineSummary = useMemo(() => {
+    const map = new Map();
+    filteredRecords.forEach((r) => {
+      const key = `${r.plantId}_${r.machineId}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          plantId: r.plantId,
+          plantName: r.plantName,
+          machineId: r.machineId,
+          machineNo: r.machineNo,
+          runHours: 0,
+          runsCount: 0,
+          partsMap: new Map(),
+          shots: 0,
+          ok: 0,
+          rej: 0,
+          produced: 0,
+          fgWeight: 0,
+          rejWeight: 0,
+          runnerScrap: 0,
+          totalConsumption: 0,
+        });
+      }
+      const agg = map.get(key);
+      agg.runsCount += 1;
+      agg.runHours += r.runHour;
+      agg.shots += r.shots;
+      agg.ok += r.ok;
+      agg.rej += r.rej;
+      agg.produced += r.produced;
+      agg.fgWeight += r.fgWeight;
+      agg.rejWeight += r.rejWeight;
+      agg.runnerScrap += r.runnerScrap;
+      agg.totalConsumption += r.totalConsumption;
+
+      if (!agg.partsMap.has(r.sapCode)) {
+        agg.partsMap.set(r.sapCode, {
+          sapCode: r.sapCode,
+          partNo: r.partNo,
+          description: r.description,
+          moldCombo: r.moldCombo,
+          partWt: r.partWt,
+          runWt: r.runWt,
+          netWt: r.netWt,
+          ok: 0,
+          rej: 0,
+          produced: 0,
+          fgWeight: 0,
+          runnerScrap: 0,
+          rejWeight: 0,
+          totalConsumption: 0,
+        });
+      }
+      const pAgg = agg.partsMap.get(r.sapCode);
+      pAgg.ok += r.ok;
+      pAgg.rej += r.rej;
+      pAgg.produced += r.produced;
+      pAgg.fgWeight += r.fgWeight;
+      pAgg.runnerScrap += r.runnerScrap;
+      pAgg.rejWeight += r.rejWeight;
+      pAgg.totalConsumption += r.totalConsumption;
+    });
+
+    return Array.from(map.values())
+      .map((m) => ({
+        ...m,
+        partsList: Array.from(m.partsMap.values()).sort((a, b) => b.totalConsumption - a.totalConsumption),
+      }))
+      .sort((a, b) => b.totalConsumption - a.totalConsumption);
+  }, [filteredRecords]);
 
   // Aggregate by Part (SAP Code) for the Summary View
   const partSummary = useMemo(() => {
@@ -229,7 +364,6 @@ export default function MaterialConsumptionView({
       agg.totalConsumption += r.totalConsumption;
     });
 
-    // Sort by Total Consumption descending
     return Array.from(map.values()).sort((a, b) => b.totalConsumption - a.totalConsumption);
   }, [filteredRecords]);
 
@@ -283,7 +417,6 @@ export default function MaterialConsumptionView({
       const found = partSummary.find((p) => p.sapCode === selectedExampleSap);
       if (found) return found;
     }
-    // Default to the highest consumption part or sample
     return partSummary[0] || null;
   }, [partSummary, selectedExampleSap]);
 
@@ -292,11 +425,68 @@ export default function MaterialConsumptionView({
     try {
       const wb = XLSX.utils.book_new();
 
-      // Sheet 1: Part-Wise Summary
+      // Sheet 1: Machine-Wise Summary
+      const machineSheetData = [
+        ["MACHINE-WISE MATERIAL CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", ""],
+        [`Period: ${dateRangeLabel} | Plant: ${activePlantId === "all" ? "All Plants" : activePlantId}`, "", "", "", "", "", "", "", "", "", "", ""],
+        [`Total Consumption: ${fmtNum(totals.totalConsumption, 2)} kg (${fmtNum(totals.totalTonnes, 3)} MT) | FG: ${fmtNum(totals.fgPct, 1)}% | Runner: ${fmtNum(totals.runnerPct, 1)}% | Rejection: ${fmtNum(totals.rejPct, 1)}%`, "", "", "", "", "", "", "", "", "", "", ""],
+        [],
+        [
+          "Plant",
+          "Machine No",
+          "Molds Run Count",
+          "Run Hours",
+          "OK Qty (pcs)",
+          "Rej Qty (pcs)",
+          "Total Produced",
+          "FG Net Wt (kg)",
+          "Runner Scrap (kg)",
+          "Rej Scrap (kg)",
+          "Total Consumption (kg)",
+          "Share %",
+        ],
+      ];
+
+      machineSummary.forEach((m) => {
+        const share = totals.totalConsumption > 0 ? (m.totalConsumption / totals.totalConsumption) * 100 : 0;
+        machineSheetData.push([
+          m.plantName,
+          m.machineNo,
+          m.partsList.length,
+          Number(m.runHours.toFixed(1)),
+          m.ok,
+          m.rej,
+          m.produced,
+          Number(m.fgWeight.toFixed(2)),
+          Number(m.runnerScrap.toFixed(2)),
+          Number(m.rejWeight.toFixed(2)),
+          Number(m.totalConsumption.toFixed(2)),
+          Number(share.toFixed(1)),
+        ]);
+      });
+
+      machineSheetData.push([
+        "TOTAL",
+        "",
+        "",
+        "",
+        totals.ok,
+        totals.rej,
+        totals.produced,
+        Number(totals.fgWeight.toFixed(2)),
+        Number(totals.runnerScrap.toFixed(2)),
+        Number(totals.rejWeight.toFixed(2)),
+        Number(totals.totalConsumption.toFixed(2)),
+        100.0,
+      ]);
+
+      const wsMachine = XLSX.utils.aoa_to_sheet(machineSheetData);
+      XLSX.utils.book_append_sheet(wb, wsMachine, "Machine Summary");
+
+      // Sheet 2: Part-Wise Summary
       const summarySheetData = [
-        ["MATERIAL CONSUMPTION SUMMARY REPORT", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        [`Period: ${startDate} to ${endDate} | Plant: ${activePlantId === "all" ? "All Plants" : activePlantId}`, "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        [`Total Consumption: ${fmtNum(totals.totalConsumption, 2)} kg (${fmtNum(totals.totalTonnes, 3)} MT) | FG: ${fmtNum(totals.fgPct, 1)}% | Runner Scrap: ${fmtNum(totals.runnerPct, 1)}% | Rejection Scrap: ${fmtNum(totals.rejPct, 1)}%`, "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["PART-WISE MATERIAL CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`Period: ${dateRangeLabel} | Plant: ${activePlantId === "all" ? "All Plants" : activePlantId}`, "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [],
         [
           "Plant",
@@ -311,8 +501,8 @@ export default function MaterialConsumptionView({
           "Rej Qty (pcs)",
           "Total Produced",
           "FG Net Wt (kg)",
-          "Rej Scrap (kg)",
           "Runner Scrap (kg)",
+          "Rej Scrap (kg)",
           "Total Consumption (kg)",
           "Share %",
         ],
@@ -333,37 +523,17 @@ export default function MaterialConsumptionView({
           p.rej,
           p.produced,
           Number(p.fgWeight.toFixed(2)),
-          Number(p.rejWeight.toFixed(2)),
           Number(p.runnerScrap.toFixed(2)),
+          Number(p.rejWeight.toFixed(2)),
           Number(p.totalConsumption.toFixed(2)),
           Number(share.toFixed(1)),
         ]);
       });
 
-      // Add summary total row
-      summarySheetData.push([
-        "TOTAL",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        totals.ok,
-        totals.rej,
-        totals.produced,
-        Number(totals.fgWeight.toFixed(2)),
-        Number(totals.rejWeight.toFixed(2)),
-        Number(totals.runnerScrap.toFixed(2)),
-        Number(totals.totalConsumption.toFixed(2)),
-        100.0,
-      ]);
-
       const wsSummary = XLSX.utils.aoa_to_sheet(summarySheetData);
       XLSX.utils.book_append_sheet(wb, wsSummary, "Part Summary");
 
-      // Sheet 2: Detailed Shift Runs Log
+      // Sheet 3: Shift Detailed Log
       const detailedSheetData = [
         [
           "Date",
@@ -381,8 +551,8 @@ export default function MaterialConsumptionView({
           "Run Wt (kg)",
           "Net Wt (kg)",
           "FG Wt (kg)",
-          "Rej Wt (kg)",
           "Runner Wt (kg)",
+          "Rej Wt (kg)",
           "Total Consumption (kg)",
         ],
       ];
@@ -404,8 +574,8 @@ export default function MaterialConsumptionView({
           Number(r.runWt.toFixed(4)),
           Number(r.netWt.toFixed(4)),
           Number(r.fgWeight.toFixed(2)),
-          Number(r.rejWeight.toFixed(2)),
           Number(r.runnerScrap.toFixed(2)),
+          Number(r.rejWeight.toFixed(2)),
           Number(r.totalConsumption.toFixed(2)),
         ]);
       });
@@ -413,7 +583,8 @@ export default function MaterialConsumptionView({
       const wsDetailed = XLSX.utils.aoa_to_sheet(detailedSheetData);
       XLSX.utils.book_append_sheet(wb, wsDetailed, "Shift Detailed Log");
 
-      const fileName = `Material_Consumption_${startDate}_to_${endDate}.xlsx`;
+      const cleanDate = dateRangeLabel.replace(/[^a-zA-Z0-9_-]/g, "_");
+      const fileName = `Material_Consumption_${cleanDate}.xlsx`;
       XLSX.writeFile(wb, fileName);
     } catch (err) {
       console.error("Excel export error:", err);
@@ -455,7 +626,7 @@ export default function MaterialConsumptionView({
             </span>
           </div>
           <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-            Plant-wide plastic polymer consumption, Finished Goods (FG) net weight, runner scrap &amp; rejection scrap reconciliation.
+            Plant &amp; Machine-wise polymer consumption, Finished Goods (FG) net weight, runner scrap &amp; rejection loss audit.
           </p>
         </div>
 
@@ -478,7 +649,7 @@ export default function MaterialConsumptionView({
               boxShadow: "0 2px 4px rgba(22, 163, 74, 0.2)",
             }}
           >
-            <span>📥</span> Download Excel Report
+            <span>📥</span> Download Excel (3 Sheets)
           </button>
         </div>
       </div>
@@ -499,7 +670,7 @@ export default function MaterialConsumptionView({
           justifyContent: "space-between",
         }}
       >
-        {/* Quick Date Pills */}
+        {/* Quick Date Pills & Deep History Picker */}
         <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
           <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569", marginRight: "4px" }}>
             Date Range:
@@ -509,7 +680,10 @@ export default function MaterialConsumptionView({
             { id: "yesterday", label: "Yesterday" },
             { id: "last7", label: "Last 7 Days" },
             { id: "month", label: "This Month" },
-            { id: "custom", label: "Custom" },
+            { id: "lastMonth", label: "Last Month" },
+            { id: "selectMonth", label: "Select Month 📅" },
+            { id: "custom", label: "Custom Range" },
+            { id: "allTime", label: "All Time" },
           ].map((pill) => (
             <button
               key={pill.id}
@@ -531,8 +705,48 @@ export default function MaterialConsumptionView({
             </button>
           ))}
 
+          {/* Deep Past Month Selector */}
+          {dateFilterType === "selectMonth" && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "4px" }}>
+              <select
+                value={selectedYm}
+                onChange={(e) => setSelectedYm(e.target.value)}
+                style={{
+                  padding: "5px 10px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  border: "1.5px solid #3b82f6",
+                  borderRadius: "6px",
+                  background: "#eff6ff",
+                  color: "#1d4ed8",
+                }}
+              >
+                {availableMonths.map((ym) => (
+                  <option key={ym} value={ym}>
+                    {fmtMonthLabel(ym)}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="month"
+                value={selectedYm}
+                onChange={(e) => setSelectedYm(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  fontSize: "12px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+                title="Or pick any custom month/year directly"
+              />
+            </div>
+          )}
+
+          {/* Custom Date Range Pickers (Go as far back as needed) */}
           {dateFilterType === "custom" && (
             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "6px" }}>
+              <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>From:</span>
               <input
                 type="date"
                 value={customStartDate}
@@ -544,7 +758,7 @@ export default function MaterialConsumptionView({
                   borderRadius: "6px",
                 }}
               />
-              <span style={{ fontSize: "12px", color: "#64748b" }}>to</span>
+              <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>To:</span>
               <input
                 type="date"
                 value={customEndDate}
@@ -560,7 +774,7 @@ export default function MaterialConsumptionView({
           )}
         </div>
 
-        {/* Dropdowns: Plant, Shift, Machine */}
+        {/* Dropdowns: Plant, Shift, Machine, Search */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           {/* Plant Selector */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -754,7 +968,7 @@ export default function MaterialConsumptionView({
           </div>
         </div>
 
-        {/* Card 5: Production & Shots */}
+        {/* Card 5: Production & Machines */}
         <div
           style={{
             background: "#ffffff",
@@ -766,18 +980,18 @@ export default function MaterialConsumptionView({
           }}
         >
           <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Total Production &amp; Shots
+            Active Machines &amp; Shots
           </div>
           <div style={{ fontSize: "24px", fontWeight: "800", color: "#3730a3", marginTop: "4px" }}>
-            {fmtInt(totals.produced)} <span style={{ fontSize: "14px", fontWeight: "600" }}>pcs</span>
+            {machineSummary.length} <span style={{ fontSize: "14px", fontWeight: "600" }}>Machines</span>
           </div>
           <div style={{ fontSize: "12px", color: "#4f46e5", fontWeight: "600", marginTop: "2px" }}>
-            Shots: <strong>{fmtInt(totals.shots)}</strong> | OK: <strong>{fmtInt(totals.ok)}</strong>
+            Shots: <strong>{fmtInt(totals.shots)}</strong> | Prod: <strong>{fmtInt(totals.produced)}</strong> pcs
           </div>
         </div>
       </div>
 
-      {/* Material Balance Bar (Visual Stacked Bar) */}
+      {/* Material Balance Bar */}
       <div
         style={{
           background: "#ffffff",
@@ -788,9 +1002,9 @@ export default function MaterialConsumptionView({
           marginBottom: "20px",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
           <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>
-            Material Distribution &amp; Yield Breakdown:
+            Material Balance ({dateRangeLabel}):
           </span>
           <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>
             Yield (FG / Consumed): <strong style={{ color: "#16a34a" }}>{fmtNum(totals.fgPct, 1)}%</strong> | Total Scrap: <strong style={{ color: "#dc2626" }}>{fmtNum(totals.scrapPct, 1)}%</strong>
@@ -851,7 +1065,7 @@ export default function MaterialConsumptionView({
           marginBottom: "24px",
         }}
       >
-        {/* Table View Switcher Header */}
+        {/* Table View Switcher Header (3 Views) */}
         <div
           style={{
             padding: "12px 20px",
@@ -864,7 +1078,26 @@ export default function MaterialConsumptionView({
             gap: "10px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => setViewMode("machine")}
+              style={{
+                padding: "6px 14px",
+                fontSize: "12px",
+                fontWeight: "700",
+                borderRadius: "6px",
+                border: "1px solid",
+                borderColor: viewMode === "machine" ? "#2563eb" : "#cbd5e1",
+                background: viewMode === "machine" ? "#eff6ff" : "#ffffff",
+                color: viewMode === "machine" ? "#1e40af" : "#64748b",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span>🏭</span> Machine-Wise Summary ({machineSummary.length} Machines)
+            </button>
             <button
               onClick={() => setViewMode("summary")}
               style={{
@@ -877,9 +1110,12 @@ export default function MaterialConsumptionView({
                 background: viewMode === "summary" ? "#eff6ff" : "#ffffff",
                 color: viewMode === "summary" ? "#1e40af" : "#64748b",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              📊 Part-Wise Summary ({partSummary.length} Parts)
+              <span>📊</span> Part-Wise Summary ({partSummary.length} Parts)
             </button>
             <button
               onClick={() => setViewMode("detailed")}
@@ -893,19 +1129,197 @@ export default function MaterialConsumptionView({
                 background: viewMode === "detailed" ? "#eff6ff" : "#ffffff",
                 color: viewMode === "detailed" ? "#1e40af" : "#64748b",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              📋 Shift-Wise Detailed Log ({filteredRecords.length} Runs)
+              <span>📋</span> Shift-Wise Detailed Log ({filteredRecords.length} Runs)
             </button>
           </div>
 
           <div style={{ fontSize: "12px", color: "#64748b" }}>
-            Showing <strong>{viewMode === "summary" ? partSummary.length : filteredRecords.length}</strong> records
+            Active View: <strong>{viewMode === "machine" ? "Machine Breakdown" : viewMode === "summary" ? "Part Breakdown" : "Shift Log"}</strong>
           </div>
         </div>
 
-        {/* View 1: Part-Wise Summary Table */}
-        {viewMode === "summary" ? (
+        {/* View 1: Machine-Wise Summary Table */}
+        {viewMode === "machine" && (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+              <thead>
+                <tr style={{ background: "#f1f5f9", color: "#475569", borderBottom: "2px solid #e2e8f0" }}>
+                  <th style={{ padding: "10px 12px", textAlign: "left" }}>#</th>
+                  <th style={{ padding: "10px 12px", textAlign: "left" }}>MACHINE NO &amp; TONNAGE</th>
+                  <th style={{ padding: "10px 12px", textAlign: "left" }}>PLANT</th>
+                  <th style={{ padding: "10px 12px", textAlign: "center" }}>MOLDS RUN</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right" }}>RUN HRS</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right" }}>OK (PCS)</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right" }}>REJ (PCS)</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PRODUCED</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ WT (KG)</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL CONSUMED</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PLANT SHARE %</th>
+                  <th style={{ padding: "10px 12px", textAlign: "center" }}>DRILL DOWN</th>
+                </tr>
+              </thead>
+              <tbody>
+                {machineSummary.length === 0 ? (
+                  <tr>
+                    <td colSpan={14} style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>
+                      No machine records found for the selected filters.
+                    </td>
+                  </tr>
+                ) : (
+                  machineSummary.map((m, idx) => {
+                    const share = totals.totalConsumption > 0 ? (m.totalConsumption / totals.totalConsumption) * 100 : 0;
+                    const isExpanded = expandedMachineId === m.key;
+                    return (
+                      <React.Fragment key={m.key}>
+                        <tr
+                          style={{
+                            borderBottom: "1px solid #f1f5f9",
+                            background: isExpanded ? "#f8fafc" : idx % 2 === 0 ? "#ffffff" : "#fcfcfd",
+                          }}
+                        >
+                          <td style={{ padding: "10px 12px", color: "#94a3b8" }}>{idx + 1}</td>
+                          <td style={{ padding: "10px 12px", fontWeight: "800", color: "#0f172a" }}>
+                            {m.machineNo}
+                          </td>
+                          <td style={{ padding: "10px 12px", color: "#64748b" }}>{m.plantName}</td>
+                          <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                            <span style={{ padding: "2px 8px", background: "#eff6ff", color: "#1d4ed8", borderRadius: "12px", fontWeight: "700" }}>
+                              {m.partsList.length} molds
+                            </span>
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Consolas, monospace", fontWeight: "600" }}>
+                            {fmtNum(m.runHours, 1)}h
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", color: "#16a34a", fontWeight: "700" }}>
+                            {fmtInt(m.ok)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", color: m.rej > 0 ? "#dc2626" : "#94a3b8" }}>
+                            {fmtInt(m.rej)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: "700" }}>
+                            {fmtInt(m.produced)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", color: "#166534", fontWeight: "600" }}>
+                            {fmtNum(m.fgWeight, 2)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", color: "#92400e", fontWeight: "600" }}>
+                            {fmtNum(m.runnerScrap, 2)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b", fontWeight: "600" }}>
+                            {fmtNum(m.rejWeight, 2)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: "800", color: "#1e3a8a", fontSize: "13px" }}>
+                            {fmtNum(m.totalConsumption, 2)} kg
+                            <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "500" }}>
+                              ≈ {fmtNum(m.totalConsumption / 1000, 3)} MT
+                            </div>
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: "700", color: "#475569" }}>
+                            {fmtNum(share, 1)}%
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                            <button
+                              onClick={() => setExpandedMachineId(isExpanded ? null : m.key)}
+                              style={{
+                                padding: "4px 8px",
+                                fontSize: "11px",
+                                fontWeight: "700",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: "4px",
+                                background: isExpanded ? "#2563eb" : "#ffffff",
+                                color: isExpanded ? "#ffffff" : "#475569",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {isExpanded ? "▲ Hide Parts" : "▼ View Parts"}
+                            </button>
+                          </td>
+                        </tr>
+
+                        {/* Expanded Drill-down: Parts Run on this Machine */}
+                        {isExpanded && (
+                          <tr style={{ background: "#f8fafc" }}>
+                            <td colSpan={14} style={{ padding: "12px 18px 18px 40px", borderBottom: "2px solid #e2e8f0" }}>
+                              <div style={{ fontSize: "12px", fontWeight: "700", color: "#1e3a8a", marginBottom: "8px" }}>
+                                🔍 Parts Molds Run on {m.machineNo} ({m.partsList.length} distinct products):
+                              </div>
+                              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", background: "#ffffff", borderRadius: "6px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+                                <thead>
+                                  <tr style={{ background: "#f1f5f9", color: "#475569" }}>
+                                    <th style={{ padding: "6px 10px", textAlign: "left" }}>SAP Code</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "left" }}>Material Description</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "center" }}>Cavity</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right" }}>Part Wt</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right" }}>Run Wt</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right" }}>OK Pcs</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right" }}>Rej Pcs</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right" }}>Produced</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#166534" }}>FG Wt (kg)</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#92400e" }}>Runner (kg)</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#991b1b" }}>Rej (kg)</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>Consumed (kg)</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {m.partsList.map((pt) => (
+                                    <tr key={pt.sapCode} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                      <td style={{ padding: "6px 10px", fontFamily: "Consolas, monospace", fontWeight: "700", color: "#0284c7" }}>{pt.sapCode}</td>
+                                      <td style={{ padding: "6px 10px", fontWeight: "600" }}>{pt.description}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "center" }}>{pt.moldCombo}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", fontFamily: "Consolas, monospace" }}>{fmtNum(pt.partWt, 4)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", fontFamily: "Consolas, monospace" }}>{fmtNum(pt.runWt, 4)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#16a34a", fontWeight: "700" }}>{fmtInt(pt.ok)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: pt.rej > 0 ? "#dc2626" : "#94a3b8" }}>{fmtInt(pt.rej)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "700" }}>{fmtInt(pt.produced)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#166534" }}>{fmtNum(pt.fgWeight, 2)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#92400e" }}>{fmtNum(pt.runnerScrap, 2)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#991b1b" }}>{fmtNum(pt.rejWeight, 2)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "800", color: "#1e3a8a" }}>{fmtNum(pt.totalConsumption, 2)} kg</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
+                )}
+              </tbody>
+              {machineSummary.length > 0 && (
+                <tfoot>
+                  <tr style={{ background: "#f8fafc", borderTop: "2px solid #cbd5e1", fontWeight: "800" }}>
+                    <td colSpan={5} style={{ padding: "12px", textAlign: "right", color: "#0f172a" }}>
+                      GRAND TOTAL:
+                    </td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#16a34a" }}>{fmtInt(totals.ok)}</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtInt(totals.rej)}</td>
+                    <td style={{ padding: "12px", textAlign: "right" }}>{fmtInt(totals.produced)}</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#166534" }}>{fmtNum(totals.fgWeight, 2)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#d97706" }}>{fmtNum(totals.runnerScrap, 2)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtNum(totals.rejWeight, 2)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#1e3a8a", fontSize: "14px" }}>
+                      {fmtNum(totals.totalConsumption, 2)} kg
+                    </td>
+                    <td style={{ padding: "12px", textAlign: "right" }}>100%</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        )}
+
+        {/* View 2: Part-Wise Summary Table */}
+        {viewMode === "summary" && (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
@@ -1021,8 +1435,10 @@ export default function MaterialConsumptionView({
               )}
             </table>
           </div>
-        ) : (
-          /* View 2: Shift-Wise Detailed Log Table */
+        )}
+
+        {/* View 3: Shift-Wise Detailed Log Table */}
+        {viewMode === "detailed" && (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
@@ -1176,7 +1592,7 @@ export default function MaterialConsumptionView({
                 💡 Live Example Breakdown: <span style={{ color: "#0284c7", fontFamily: "Consolas, monospace" }}>{examplePart.sapCode}</span> — {examplePart.description}
               </div>
               <div style={{ fontSize: "11px", color: "#64748b" }}>
-                (Click any row in the table above to test with that part)
+                (Click any row in Part-Wise table above to test with that part)
               </div>
             </div>
 
