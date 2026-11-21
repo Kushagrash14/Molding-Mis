@@ -360,7 +360,6 @@ app.delete("/api/master/reasons/:id", requireAuth, requireRole("admin"), (req, r
     sendError(res, err);
   }
 });
-});
 
 app.post("/api/access-requests", requireAuth, requireRole("operator"), (req, res) => {
   try {
