@@ -15,8 +15,8 @@ function runsOf(entry) {
   ];
 }
 
-function fmtNum(n, d = 2) {
-  if (n === null || n === undefined || isNaN(n)) return "0.00";
+function fmtNum(n, d = 0) {
+  if (n === null || n === undefined || isNaN(n)) return "0";
   return Number(n).toLocaleString("en-IN", {
     minimumFractionDigits: d,
     maximumFractionDigits: d,
@@ -427,9 +427,9 @@ export default function MaterialConsumptionView({
 
       // Sheet 1: Machine-Wise Summary
       const machineSheetData = [
-        ["MACHINE-WISE MATERIAL CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", ""],
+        ["MACHINE-WISE RM CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", ""],
         [`Period: ${dateRangeLabel} | Plant: ${activePlantId === "all" ? "All Plants" : activePlantId}`, "", "", "", "", "", "", "", "", "", "", ""],
-        [`Total Consumption: ${fmtNum(totals.totalConsumption, 2)} kg (${fmtNum(totals.totalTonnes, 3)} MT) | FG: ${fmtNum(totals.fgPct, 1)}% | Runner: ${fmtNum(totals.runnerPct, 1)}% | Rejection: ${fmtNum(totals.rejPct, 1)}%`, "", "", "", "", "", "", "", "", "", "", ""],
+        [`Total RM Consumption: ${fmtInt(totals.totalConsumption)} kg (${(totals.totalConsumption / 1000).toFixed(1)} MT) | FG: ${Math.round(totals.fgPct)}% | Runner: ${Math.round(totals.runnerPct)}% | Rejection: ${Math.round(totals.rejPct)}%`, "", "", "", "", "", "", "", "", "", "", ""],
         [],
         [
           "Plant",
@@ -442,7 +442,7 @@ export default function MaterialConsumptionView({
           "FG Net Wt (kg)",
           "Runner Scrap (kg)",
           "Rej Scrap (kg)",
-          "Total Consumption (kg)",
+          "Total RM Consumption (kg)",
           "Share %",
         ],
       ];
@@ -457,11 +457,11 @@ export default function MaterialConsumptionView({
           m.ok,
           m.rej,
           m.produced,
-          Number(m.fgWeight.toFixed(2)),
-          Number(m.runnerScrap.toFixed(2)),
-          Number(m.rejWeight.toFixed(2)),
-          Number(m.totalConsumption.toFixed(2)),
-          Number(share.toFixed(1)),
+          Math.round(m.fgWeight),
+          Math.round(m.runnerScrap),
+          Math.round(m.rejWeight),
+          Math.round(m.totalConsumption),
+          Math.round(share),
         ]);
       });
 
@@ -473,11 +473,11 @@ export default function MaterialConsumptionView({
         totals.ok,
         totals.rej,
         totals.produced,
-        Number(totals.fgWeight.toFixed(2)),
-        Number(totals.runnerScrap.toFixed(2)),
-        Number(totals.rejWeight.toFixed(2)),
-        Number(totals.totalConsumption.toFixed(2)),
-        100.0,
+        Math.round(totals.fgWeight),
+        Math.round(totals.runnerScrap),
+        Math.round(totals.rejWeight),
+        Math.round(totals.totalConsumption),
+        100,
       ]);
 
       const wsMachine = XLSX.utils.aoa_to_sheet(machineSheetData);
@@ -485,7 +485,7 @@ export default function MaterialConsumptionView({
 
       // Sheet 2: Part-Wise Summary
       const summarySheetData = [
-        ["PART-WISE MATERIAL CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["PART-WISE RM CONSUMPTION REPORT", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [`Period: ${dateRangeLabel} | Plant: ${activePlantId === "all" ? "All Plants" : activePlantId}`, "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [],
         [
@@ -503,7 +503,7 @@ export default function MaterialConsumptionView({
           "FG Net Wt (kg)",
           "Runner Scrap (kg)",
           "Rej Scrap (kg)",
-          "Total Consumption (kg)",
+          "Total RM Consumption (kg)",
           "Share %",
         ],
       ];
@@ -522,11 +522,11 @@ export default function MaterialConsumptionView({
           p.ok,
           p.rej,
           p.produced,
-          Number(p.fgWeight.toFixed(2)),
-          Number(p.runnerScrap.toFixed(2)),
-          Number(p.rejWeight.toFixed(2)),
-          Number(p.totalConsumption.toFixed(2)),
-          Number(share.toFixed(1)),
+          Math.round(p.fgWeight),
+          Math.round(p.runnerScrap),
+          Math.round(p.rejWeight),
+          Math.round(p.totalConsumption),
+          Math.round(share),
         ]);
       });
 
@@ -553,7 +553,7 @@ export default function MaterialConsumptionView({
           "FG Wt (kg)",
           "Runner Wt (kg)",
           "Rej Wt (kg)",
-          "Total Consumption (kg)",
+          "Total RM Consumption (kg)",
         ],
       ];
 
@@ -573,10 +573,10 @@ export default function MaterialConsumptionView({
           Number(r.partWt.toFixed(4)),
           Number(r.runWt.toFixed(4)),
           Number(r.netWt.toFixed(4)),
-          Number(r.fgWeight.toFixed(2)),
-          Number(r.runnerScrap.toFixed(2)),
-          Number(r.rejWeight.toFixed(2)),
-          Number(r.totalConsumption.toFixed(2)),
+          Math.round(r.fgWeight),
+          Math.round(r.runnerScrap),
+          Math.round(r.rejWeight),
+          Math.round(r.totalConsumption),
         ]);
       });
 
@@ -584,7 +584,7 @@ export default function MaterialConsumptionView({
       XLSX.utils.book_append_sheet(wb, wsDetailed, "Shift Detailed Log");
 
       const cleanDate = dateRangeLabel.replace(/[^a-zA-Z0-9_-]/g, "_");
-      const fileName = `Material_Consumption_${cleanDate}.xlsx`;
+      const fileName = `RM_Consumption_${cleanDate}.xlsx`;
       XLSX.writeFile(wb, fileName);
     } catch (err) {
       console.error("Excel export error:", err);
@@ -608,7 +608,7 @@ export default function MaterialConsumptionView({
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
             <h1 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>
-              Material Consumption Analytics
+              RM Consumption Analytics
             </h1>
             <span
               style={{
@@ -626,7 +626,7 @@ export default function MaterialConsumptionView({
             </span>
           </div>
           <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-            Plant &amp; Machine-wise polymer consumption, Finished Goods (FG) net weight, runner scrap &amp; rejection loss audit.
+            Plant &amp; Machine-wise Raw Material (RM) consumption, Finished Goods (FG) net weight, runner scrap &amp; rejection loss audit.
           </p>
         </div>
 
@@ -892,13 +892,13 @@ export default function MaterialConsumptionView({
           }}
         >
           <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Total Polymer Consumed
+            Total RM Consumed
           </div>
           <div style={{ fontSize: "24px", fontWeight: "800", color: "#1e3a8a", marginTop: "4px" }}>
-            {fmtNum(totals.totalConsumption, 1)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
+            {fmtInt(totals.totalConsumption)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
           </div>
           <div style={{ fontSize: "12px", color: "#2563eb", fontWeight: "700", marginTop: "2px" }}>
-            ≈ {fmtNum(totals.totalTonnes, 3)} Metric Tonnes (MT)
+            ≈ {(totals.totalConsumption / 1000).toFixed(1)} Metric Tonnes (MT)
           </div>
         </div>
 
@@ -914,13 +914,13 @@ export default function MaterialConsumptionView({
           }}
         >
           <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Finished Goods (FG) Net Plastic
+            Finished Goods (FG) Net RM
           </div>
           <div style={{ fontSize: "24px", fontWeight: "800", color: "#166534", marginTop: "4px" }}>
-            {fmtNum(totals.fgWeight, 1)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
+            {fmtInt(totals.fgWeight)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
           </div>
           <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: "700", marginTop: "2px" }}>
-            {fmtNum(totals.fgPct, 1)}% of total consumed
+            {Math.round(totals.fgPct)}% of total consumed
           </div>
         </div>
 
@@ -939,10 +939,10 @@ export default function MaterialConsumptionView({
             Runner Scrap Generated
           </div>
           <div style={{ fontSize: "24px", fontWeight: "800", color: "#92400e", marginTop: "4px" }}>
-            {fmtNum(totals.runnerScrap, 1)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
+            {fmtInt(totals.runnerScrap)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
           </div>
           <div style={{ fontSize: "12px", color: "#d97706", fontWeight: "700", marginTop: "2px" }}>
-            {fmtNum(totals.runnerPct, 1)}% runner loss
+            {Math.round(totals.runnerPct)}% runner loss
           </div>
         </div>
 
@@ -961,10 +961,10 @@ export default function MaterialConsumptionView({
             Part Rejection Scrap
           </div>
           <div style={{ fontSize: "24px", fontWeight: "800", color: "#991b1b", marginTop: "4px" }}>
-            {fmtNum(totals.rejWeight, 1)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
+            {fmtInt(totals.rejWeight)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
           </div>
           <div style={{ fontSize: "12px", color: "#dc2626", fontWeight: "700", marginTop: "2px" }}>
-            {fmtNum(totals.rejPct, 1)}% ({fmtInt(totals.rej)} rejected pcs)
+            {Math.round(totals.rejPct)}% ({fmtInt(totals.rej)} rejected pcs)
           </div>
         </div>
 
@@ -1004,16 +1004,16 @@ export default function MaterialConsumptionView({
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
           <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>
-            Material Balance ({dateRangeLabel}):
+            RM Balance ({dateRangeLabel}):
           </span>
           <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>
-            Yield (FG / Consumed): <strong style={{ color: "#16a34a" }}>{fmtNum(totals.fgPct, 1)}%</strong> | Total Scrap: <strong style={{ color: "#dc2626" }}>{fmtNum(totals.scrapPct, 1)}%</strong>
+            Yield (FG / Consumed): <strong style={{ color: "#16a34a" }}>{Math.round(totals.fgPct)}%</strong> | Total Scrap: <strong style={{ color: "#dc2626" }}>{Math.round(totals.scrapPct)}%</strong>
           </span>
         </div>
 
         <div style={{ height: "18px", display: "flex", borderRadius: "6px", overflow: "hidden", background: "#f1f5f9" }}>
           <div
-            title={`Finished Goods: ${fmtNum(totals.fgPct, 1)}% (${fmtNum(totals.fgWeight, 1)} kg)`}
+            title={`Finished Goods: ${Math.round(totals.fgPct)}% (${fmtInt(totals.fgWeight)} kg)`}
             style={{
               width: `${totals.fgPct}%`,
               background: "#16a34a",
@@ -1021,7 +1021,7 @@ export default function MaterialConsumptionView({
             }}
           />
           <div
-            title={`Runner Scrap: ${fmtNum(totals.runnerPct, 1)}% (${fmtNum(totals.runnerScrap, 1)} kg)`}
+            title={`Runner Scrap: ${Math.round(totals.runnerPct)}% (${fmtInt(totals.runnerScrap)} kg)`}
             style={{
               width: `${totals.runnerPct}%`,
               background: "#d97706",
@@ -1029,7 +1029,7 @@ export default function MaterialConsumptionView({
             }}
           />
           <div
-            title={`Rejection Scrap: ${fmtNum(totals.rejPct, 1)}% (${fmtNum(totals.rejWeight, 1)} kg)`}
+            title={`Rejection Scrap: ${Math.round(totals.rejPct)}% (${fmtInt(totals.rejWeight)} kg)`}
             style={{
               width: `${totals.rejPct}%`,
               background: "#dc2626",
@@ -1041,15 +1041,15 @@ export default function MaterialConsumptionView({
         <div style={{ display: "flex", gap: "20px", marginTop: "8px", fontSize: "11px", fontWeight: "600" }}>
           <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#166534" }}>
             <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#16a34a" }}></span>
-            Finished Goods ({fmtNum(totals.fgPct, 1)}%)
+            Finished Goods ({Math.round(totals.fgPct)}%)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#92400e" }}>
             <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#d97706" }}></span>
-            Runner Scrap ({fmtNum(totals.runnerPct, 1)}%)
+            Runner Scrap ({Math.round(totals.runnerPct)}%)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#991b1b" }}>
             <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#dc2626" }}></span>
-            Rejection Scrap ({fmtNum(totals.rejPct, 1)}%)
+            Rejection Scrap ({Math.round(totals.rejPct)}%)
           </span>
         </div>
       </div>
@@ -1160,7 +1160,7 @@ export default function MaterialConsumptionView({
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL CONSUMED</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL RM CONSUMED</th>
                   <th style={{ padding: "10px 12px", textAlign: "right" }}>PLANT SHARE %</th>
                   <th style={{ padding: "10px 12px", textAlign: "center" }}>DRILL DOWN</th>
                 </tr>
@@ -1207,22 +1207,22 @@ export default function MaterialConsumptionView({
                             {fmtInt(m.produced)}
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "right", color: "#166534", fontWeight: "600" }}>
-                            {fmtNum(m.fgWeight, 2)}
+                            {fmtInt(m.fgWeight)}
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "right", color: "#92400e", fontWeight: "600" }}>
-                            {fmtNum(m.runnerScrap, 2)}
+                            {fmtInt(m.runnerScrap)}
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b", fontWeight: "600" }}>
-                            {fmtNum(m.rejWeight, 2)}
+                            {fmtInt(m.rejWeight)}
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: "800", color: "#1e3a8a", fontSize: "13px" }}>
-                            {fmtNum(m.totalConsumption, 2)} kg
+                            {fmtInt(m.totalConsumption)} kg
                             <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "500" }}>
-                              ≈ {fmtNum(m.totalConsumption / 1000, 3)} MT
+                              ≈ {(m.totalConsumption / 1000).toFixed(1)} MT
                             </div>
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: "700", color: "#475569" }}>
-                            {fmtNum(share, 1)}%
+                            {Math.round(share)}%
                           </td>
                           <td style={{ padding: "10px 12px", textAlign: "center" }}>
                             <button
@@ -1264,7 +1264,7 @@ export default function MaterialConsumptionView({
                                     <th style={{ padding: "6px 10px", textAlign: "right", color: "#166534" }}>FG Wt (kg)</th>
                                     <th style={{ padding: "6px 10px", textAlign: "right", color: "#92400e" }}>Runner (kg)</th>
                                     <th style={{ padding: "6px 10px", textAlign: "right", color: "#991b1b" }}>Rej (kg)</th>
-                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>Consumed (kg)</th>
+                                    <th style={{ padding: "6px 10px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>RM Consumed (kg)</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -1278,10 +1278,10 @@ export default function MaterialConsumptionView({
                                       <td style={{ padding: "6px 10px", textAlign: "right", color: "#16a34a", fontWeight: "700" }}>{fmtInt(pt.ok)}</td>
                                       <td style={{ padding: "6px 10px", textAlign: "right", color: pt.rej > 0 ? "#dc2626" : "#94a3b8" }}>{fmtInt(pt.rej)}</td>
                                       <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "700" }}>{fmtInt(pt.produced)}</td>
-                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#166534" }}>{fmtNum(pt.fgWeight, 2)}</td>
-                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#92400e" }}>{fmtNum(pt.runnerScrap, 2)}</td>
-                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#991b1b" }}>{fmtNum(pt.rejWeight, 2)}</td>
-                                      <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "800", color: "#1e3a8a" }}>{fmtNum(pt.totalConsumption, 2)} kg</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#166534" }}>{fmtInt(pt.fgWeight)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#92400e" }}>{fmtInt(pt.runnerScrap)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", color: "#991b1b" }}>{fmtInt(pt.rejWeight)}</td>
+                                      <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "800", color: "#1e3a8a" }}>{fmtInt(pt.totalConsumption)} kg</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1303,11 +1303,11 @@ export default function MaterialConsumptionView({
                     <td style={{ padding: "12px", textAlign: "right", color: "#16a34a" }}>{fmtInt(totals.ok)}</td>
                     <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtInt(totals.rej)}</td>
                     <td style={{ padding: "12px", textAlign: "right" }}>{fmtInt(totals.produced)}</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#166534" }}>{fmtNum(totals.fgWeight, 2)} kg</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#d97706" }}>{fmtNum(totals.runnerScrap, 2)} kg</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtNum(totals.rejWeight, 2)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#166534" }}>{fmtInt(totals.fgWeight)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#d97706" }}>{fmtInt(totals.runnerScrap)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtInt(totals.rejWeight)} kg</td>
                     <td style={{ padding: "12px", textAlign: "right", color: "#1e3a8a", fontSize: "14px" }}>
-                      {fmtNum(totals.totalConsumption, 2)} kg
+                      {fmtInt(totals.totalConsumption)} kg
                     </td>
                     <td style={{ padding: "12px", textAlign: "right" }}>100%</td>
                     <td></td>
@@ -1337,7 +1337,7 @@ export default function MaterialConsumptionView({
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL CONSUMED</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL RM CONSUMED</th>
                   <th style={{ padding: "10px 12px", textAlign: "right" }}>SHARE %</th>
                 </tr>
               </thead>
@@ -1395,19 +1395,19 @@ export default function MaterialConsumptionView({
                           {fmtInt(p.produced)}
                         </td>
                         <td style={{ padding: "9px 12px", textAlign: "right", color: "#166534", fontWeight: "600" }}>
-                          {fmtNum(p.fgWeight, 2)}
+                          {fmtInt(p.fgWeight)}
                         </td>
                         <td style={{ padding: "9px 12px", textAlign: "right", color: "#92400e", fontWeight: "600" }}>
-                          {fmtNum(p.runnerScrap, 2)}
+                          {fmtInt(p.runnerScrap)}
                         </td>
                         <td style={{ padding: "9px 12px", textAlign: "right", color: "#991b1b", fontWeight: "600" }}>
-                          {fmtNum(p.rejWeight, 2)}
+                          {fmtInt(p.rejWeight)}
                         </td>
                         <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: "800", color: "#1e3a8a", fontSize: "13px" }}>
-                          {fmtNum(p.totalConsumption, 2)} kg
+                          {fmtInt(p.totalConsumption)} kg
                         </td>
                         <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: "600", color: "#64748b" }}>
-                          {fmtNum(share, 1)}%
+                          {Math.round(share)}%
                         </td>
                       </tr>
                     );
@@ -1423,11 +1423,11 @@ export default function MaterialConsumptionView({
                     <td style={{ padding: "12px", textAlign: "right", color: "#16a34a" }}>{fmtInt(totals.ok)}</td>
                     <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtInt(totals.rej)}</td>
                     <td style={{ padding: "12px", textAlign: "right" }}>{fmtInt(totals.produced)}</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#166534" }}>{fmtNum(totals.fgWeight, 2)} kg</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#d97706" }}>{fmtNum(totals.runnerScrap, 2)} kg</td>
-                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtNum(totals.rejWeight, 2)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#166534" }}>{fmtInt(totals.fgWeight)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#d97706" }}>{fmtInt(totals.runnerScrap)} kg</td>
+                    <td style={{ padding: "12px", textAlign: "right", color: "#dc2626" }}>{fmtInt(totals.rejWeight)} kg</td>
                     <td style={{ padding: "12px", textAlign: "right", color: "#1e3a8a", fontSize: "14px" }}>
-                      {fmtNum(totals.totalConsumption, 2)} kg
+                      {fmtInt(totals.totalConsumption)} kg
                     </td>
                     <td style={{ padding: "12px", textAlign: "right" }}>100%</td>
                   </tr>
@@ -1458,7 +1458,7 @@ export default function MaterialConsumptionView({
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
                   <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL CONSUMED</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL RM CONSUMED</th>
                 </tr>
               </thead>
               <tbody>
@@ -1491,11 +1491,11 @@ export default function MaterialConsumptionView({
                       <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: "700" }}>{fmtInt(r.produced)}</td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Consolas, monospace" }}>{fmtNum(r.partWt, 4)}</td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Consolas, monospace" }}>{fmtNum(r.runWt, 4)}</td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#166534", fontWeight: "600" }}>{fmtNum(r.fgWeight, 2)}</td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#92400e", fontWeight: "600" }}>{fmtNum(r.runnerScrap, 2)}</td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#991b1b", fontWeight: "600" }}>{fmtNum(r.rejWeight, 2)}</td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#166534", fontWeight: "600" }}>{fmtInt(r.fgWeight)}</td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#92400e", fontWeight: "600" }}>{fmtInt(r.runnerScrap)}</td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", color: "#991b1b", fontWeight: "600" }}>{fmtInt(r.rejWeight)}</td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: "800", color: "#1e3a8a", fontSize: "13px" }}>
-                        {fmtNum(r.totalConsumption, 2)} kg
+                        {fmtInt(r.totalConsumption)} kg
                       </td>
                     </tr>
                   ))
@@ -1521,12 +1521,12 @@ export default function MaterialConsumptionView({
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
           <span style={{ fontSize: "20px" }}>📐</span>
           <h2 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#0f172a" }}>
-            How Material Consumption is Calculated (Standard Manufacturing Logic &amp; Formulas)
+            How RM Consumption is Calculated (Standard Manufacturing Logic &amp; Formulas)
           </h2>
         </div>
 
         <p style={{ margin: "0 0 18px 0", fontSize: "13px", color: "#475569", lineHeight: "1.6" }}>
-          Plastic injection molding manufacturing me raw material consumption calculate karne ka yeh official, standard engineering aur shop-floor reconciliation formula hai:
+          Plastic injection molding manufacturing me raw material (RM) consumption calculate karne ka yeh official, standard engineering aur shop-floor reconciliation formula hai:
         </p>
 
         {/* 3 Formula Columns */}
@@ -1549,13 +1549,13 @@ export default function MaterialConsumptionView({
           <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a" }}></span>
-              <strong style={{ fontSize: "13px", color: "#166534" }}>2. Total Material Consumed</strong>
+              <strong style={{ fontSize: "13px", color: "#166534" }}>2. Total RM Consumed</strong>
             </div>
             <div style={{ background: "#f0fdf4", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#15803d", marginBottom: "8px" }}>
-              Total Consumed (kg) = (OK + Rejection) × Net Wt/Pc
+              Total RM Consumed (kg) = (OK + Rejection) × Net Wt/Pc
             </div>
             <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
-              Plastic OK part me bhi lagta hai aur Rejection part me bhi lagta hai. Isliye Total Produced Pieces (OK + Rej) se multiply hota hai.
+              RM (Plastic) OK part me bhi lagta hai aur Rejection part me bhi lagta hai. Isliye Total Produced Pieces (OK + Rej) se multiply hota hai.
             </div>
           </div>
 
@@ -1618,13 +1618,13 @@ export default function MaterialConsumptionView({
 
             <div style={{ fontSize: "12px", color: "#334155", lineHeight: "1.8", fontFamily: "Consolas, monospace", background: "#f1f5f9", padding: "14px", borderRadius: "8px" }}>
               <div><strong>Step 1:</strong> Net Wt/Piece = {fmtNum(examplePart.partWt, 4)} + ({fmtNum(examplePart.runWt, 4)} ÷ {examplePart.cavityFactor}) = <strong style={{ color: "#0284c7" }}>{fmtNum(examplePart.netWt, 4)} kg/pc</strong></div>
-              <div><strong>Step 2:</strong> Total Consumed = {fmtInt(examplePart.produced)} pcs × {fmtNum(examplePart.netWt, 4)} kg/pc = <strong style={{ color: "#1e3a8a", fontSize: "13px" }}>{fmtNum(examplePart.totalConsumption, 2)} kg</strong></div>
+              <div><strong>Step 2:</strong> Total RM Consumed = {fmtInt(examplePart.produced)} pcs × {fmtNum(examplePart.netWt, 4)} kg/pc ≈ <strong style={{ color: "#1e3a8a", fontSize: "13px" }}>{fmtInt(examplePart.totalConsumption)} kg</strong></div>
               <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #cbd5e1", color: "#475569" }}>
-                <strong>Verification Breakup:</strong><br />
-                • Finished Goods (FG) Weight = {fmtInt(examplePart.ok)} × {fmtNum(examplePart.partWt, 4)} = <strong style={{ color: "#166534" }}>{fmtNum(examplePart.fgWeight, 2)} kg</strong><br />
-                • Rejection Scrap Weight = {fmtInt(examplePart.rej)} × {fmtNum(examplePart.partWt, 4)} = <strong style={{ color: "#991b1b" }}>{fmtNum(examplePart.rejWeight, 2)} kg</strong><br />
-                • Runner Scrap Weight = {fmtInt(examplePart.shots)} shots × {fmtNum(examplePart.runWt, 4)} = <strong style={{ color: "#92400e" }}>{fmtNum(examplePart.runnerScrap, 2)} kg</strong><br />
-                • <strong>Sum Total = {fmtNum(examplePart.fgWeight, 2)} + {fmtNum(examplePart.rejWeight, 2)} + {fmtNum(examplePart.runnerScrap, 2)} = <span style={{ color: "#1e3a8a" }}>{fmtNum(examplePart.totalConsumption, 2)} kg</span> (Exact 100% Match)</strong>
+                <strong>Verification Breakup (Rounded):</strong><br />
+                • Finished Goods (FG) Weight = {fmtInt(examplePart.ok)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#166534" }}>{fmtInt(examplePart.fgWeight)} kg</strong><br />
+                • Rejection Scrap Weight = {fmtInt(examplePart.rej)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#991b1b" }}>{fmtInt(examplePart.rejWeight)} kg</strong><br />
+                • Runner Scrap Weight = {fmtInt(examplePart.shots)} shots × {fmtNum(examplePart.runWt, 4)} ≈ <strong style={{ color: "#92400e" }}>{fmtInt(examplePart.runnerScrap)} kg</strong><br />
+                • <strong>Sum Total = {fmtInt(examplePart.fgWeight)} + {fmtInt(examplePart.rejWeight)} + {fmtInt(examplePart.runnerScrap)} = <span style={{ color: "#1e3a8a" }}>{fmtInt(examplePart.totalConsumption)} kg</span> (Exact Rounded Match)</strong>
               </div>
             </div>
           </div>
@@ -1636,7 +1636,7 @@ export default function MaterialConsumptionView({
             🔥 <strong>Hot Runner Molds:</strong> Hot runner molds me runner solidify nahi hota (Runner Wt = 0), isliye direct <code style={{ background: "#e2e8f0", padding: "1px 4px", borderRadius: "3px" }}>Consumption = Produced × Part Wt</code> hota hai.
           </div>
           <div>
-            ❄️ <strong>Cold Runner Molds:</strong> Cold runner molds me runner solid nikalta hai, isliye runner weight add karna compulsory hota hai warna store me polymer ka deficit/shortage show hoga.
+            ❄️ <strong>Cold Runner Molds:</strong> Cold runner molds me runner solid nikalta hai, isliye runner weight add karna compulsory hota hai warna store me RM ka deficit/shortage show hoga.
           </div>
         </div>
       </div>

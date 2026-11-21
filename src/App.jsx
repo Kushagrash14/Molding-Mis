@@ -53,7 +53,7 @@ const TABS_BY_ROLE = {
   admin: [
     ["all", "All entries"],
     ["daily_update", "Daily Update"],
-    ["consumption", "Material Consumption"],
+    ["consumption", "RM Consumption"],
     ["master", "Master data"],
     ["dashboard", "Dashboard"],
     ["cycle", "Cycle Time Tracker"],
