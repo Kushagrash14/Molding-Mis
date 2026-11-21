@@ -16,30 +16,28 @@ export function getUserAccessiblePlants(user, plants = [], locations = []) {
 
   // Super Admin / Corporate Head Office access
   const isCorporateAll =
-    !user.assigned_plant_ids ||
-    user.assigned_plant_ids.includes("all") ||
-    user.assigned_location_id === "all" ||
-    (Array.isArray(user.assigned_location_ids) && user.assigned_location_ids.includes("all"));
+    user.assigned_plant_ids?.includes("all") ||
+    (user.role === "admin" && (!user.assigned_plant_ids || user.assigned_plant_ids.length === 0));
 
   if (isCorporateAll) {
     return plants;
   }
 
   const assignedPlantSet = new Set(
-    Array.isArray(user.assigned_plant_ids) ? user.assigned_plant_ids : []
+    (Array.isArray(user.assigned_plant_ids) ? user.assigned_plant_ids : [])
+      .filter((id) => id && id !== "all")
+      .map(String)
   );
   const assignedLocSet = new Set(
-    Array.isArray(user.assigned_location_ids)
-      ? user.assigned_location_ids
-      : user.assigned_location_id
-      ? [user.assigned_location_id]
-      : []
+    (Array.isArray(user.assigned_location_ids) ? user.assigned_location_ids : [])
+      .filter((id) => id && id !== "all")
+      .map(String)
   );
 
   // A plant is accessible if its plant_id is explicitly selected
   // OR if its parent location_id is selected!
   return plants.filter(
-    (p) => assignedPlantSet.has(p.plant_id) || assignedLocSet.has(p.location_id)
+    (p) => assignedPlantSet.has(String(p.plant_id)) || assignedLocSet.has(String(p.location_id))
   );
 }
 
@@ -70,10 +68,8 @@ export function formatUserScopeLabel(user, plants = [], locations = []) {
   if (!user) return "No Access";
 
   const isCorporateAll =
-    !user.assigned_plant_ids ||
-    user.assigned_plant_ids.includes("all") ||
-    user.assigned_location_id === "all" ||
-    (Array.isArray(user.assigned_location_ids) && user.assigned_location_ids.includes("all"));
+    user.assigned_plant_ids?.includes("all") ||
+    (user.role === "admin" && (!user.assigned_plant_ids || user.assigned_plant_ids.length === 0));
 
   const accessiblePlants = getUserAccessiblePlants(user, plants, locations);
 

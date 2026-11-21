@@ -240,7 +240,6 @@ app.delete("/api/entries/:id", requireAuth, requireRole("admin"), (req, res) => 
 
 app.post("/api/master/products", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    assertPlant(req.user, req.body?.plant_id);
     const product = cloudStorage.saveProduct(req.body);
     res.json({ success: true, product });
   } catch (err) {
@@ -252,7 +251,6 @@ app.delete("/api/master/products/:sap_code", requireAuth, requireRole("admin"), 
   try {
     const plantId = String(req.query.plant_id || "");
     if (!plantId) return res.status(400).json({ success: false, error: "Plant is required." });
-    assertPlant(req.user, plantId);
     const ok = cloudStorage.deleteProduct(req.params.sap_code, plantId);
     res.json({ success: ok });
   } catch (err) {
@@ -262,11 +260,6 @@ app.delete("/api/master/products/:sap_code", requireAuth, requireRole("admin"), 
 
 app.post("/api/master/machines", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    const existing = cloudStorage.getBootstrap().machines.find(
-      (m) => m.machine_id === String(req.body?.machine_id || "").trim().toUpperCase()
-    );
-    if (existing) assertPlant(req.user, existing.plant_id);
-    assertPlant(req.user, req.body?.plant_id);
     const machine = cloudStorage.saveMachine(req.body);
     res.json({ success: true, machine });
   } catch (err) {
@@ -276,13 +269,97 @@ app.post("/api/master/machines", requireAuth, requireRole("admin"), (req, res) =
 
 app.delete("/api/master/machines/:id", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    const existing = cloudStorage.getBootstrap().machines.find((m) => m.machine_id === req.params.id);
-    if (existing) assertPlant(req.user, existing.plant_id);
     const ok = cloudStorage.deleteMachine(req.params.id);
     res.json({ success: ok });
   } catch (err) {
     sendError(res, err);
   }
+});
+
+// Locations CRUD
+app.post("/api/master/locations", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const location = cloudStorage.saveLocation(req.body);
+    res.json({ success: true, location });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.delete("/api/master/locations/:id", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const ok = cloudStorage.deleteLocation(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+// Plants CRUD
+app.post("/api/master/plants", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const plant = cloudStorage.savePlant(req.body);
+    res.json({ success: true, plant });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.delete("/api/master/plants/:id", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const ok = cloudStorage.deletePlant(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+// Shifts CRUD
+app.post("/api/master/shifts", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const shift = cloudStorage.saveShift(req.body);
+    res.json({ success: true, shift });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.post("/api/master/shifts/bulk", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const shifts = cloudStorage.saveAllShifts(req.body?.shifts || []);
+    res.json({ success: true, shifts });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.delete("/api/master/shifts/:id", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const ok = cloudStorage.deleteShift(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+// Downtime Reasons CRUD
+app.post("/api/master/reasons", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const reason = cloudStorage.saveReason(req.body);
+    res.json({ success: true, reason });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+app.delete("/api/master/reasons/:id", requireAuth, requireRole("admin"), (req, res) => {
+  try {
+    const ok = cloudStorage.deleteReason(req.params.id);
+    res.json({ success: ok });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
 });
 
 app.post("/api/access-requests", requireAuth, requireRole("operator"), (req, res) => {

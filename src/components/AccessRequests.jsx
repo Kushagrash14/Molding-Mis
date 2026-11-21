@@ -48,9 +48,11 @@ export default function AccessRequests({
 
   // Plants accessible to current user
   const userAllowedPlantIds = useMemo(() => {
-    if (currentUser?.role === "admin") return plants.map((p) => String(p.plant_id));
-    const assigned = (currentUser?.assigned_plant_ids || []).map(String);
-    if (assigned.length === 0) return plants.map((p) => String(p.plant_id));
+    const isCorporateAll =
+      currentUser?.assigned_plant_ids?.includes("all") ||
+      (currentUser?.role === "admin" && (!currentUser?.assigned_plant_ids || currentUser?.assigned_plant_ids.length === 0));
+    if (isCorporateAll) return plants.map((p) => String(p.plant_id));
+    const assigned = (currentUser?.assigned_plant_ids || []).filter((id) => id && id !== "all").map(String);
     return assigned;
   }, [currentUser, plants]);
 

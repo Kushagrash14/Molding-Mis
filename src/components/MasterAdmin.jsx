@@ -20,6 +20,8 @@ export default function MasterAdmin({
   setPlants,
   users = [],
   setUsers,
+  currentUser,
+  setCurrentUser,
   entries = [],
 }) {
   const [activeTab, setActiveTab] = useState("products");
@@ -116,7 +118,7 @@ export default function MasterAdmin({
   // ==========================
   // LOCATIONS CRUD
   // ==========================
-  function handleAddLocation() {
+  async function handleAddLocation() {
     const cleanName = newLocation.name.trim();
     if (!cleanName) {
       alert("Please enter a Location Name (e.g. Pune, Bhiwadi, Noida).");
@@ -134,25 +136,53 @@ export default function MasterAdmin({
       cleanId = `${baseId}-${counter++}`;
     }
 
-    setLocations((prev) => [
-      ...prev,
-      {
-        location_id: cleanId,
-        name: cleanName,
-      },
-    ]);
+    const locObj = { location_id: cleanId, name: cleanName };
+    setLocations((prev) => [...prev, locObj]);
     setNewLocation({ name: "" });
+
+    try {
+      const res = await fetch("/api/master/locations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save location");
+      alert(`Location "${cleanName}" added successfully!`);
+    } catch (err) {
+      console.error("Cloud location save error:", err);
+      alert(`Error saving location: ${err.message}`);
+    }
   }
 
-  function handleSaveLocationEdit() {
+  async function handleSaveLocationEdit() {
     if (!editingLocation) return;
+    const cleanName = editingLocation.name.trim();
+    if (!cleanName) {
+      alert("Location name cannot be empty.");
+      return;
+    }
+    const locObj = { location_id: editingLocation.location_id, name: cleanName };
     setLocations((prev) =>
-      prev.map((l) => (l.location_id === editingLocation.location_id ? { location_id: editingLocation.location_id, name: editingLocation.name.trim() } : l))
+      prev.map((l) => (l.location_id === locObj.location_id ? locObj : l))
     );
+    try {
+      const res = await fetch("/api/master/locations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update location");
+      alert(`Location "${cleanName}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud location update error:", err);
+      alert(`Error updating location: ${err.message}`);
+    }
     setEditingLocation(null);
   }
 
-  function handleDeleteLocation(locId) {
+  async function handleDeleteLocation(locId) {
     const attachedPlants = plants.filter((p) => p.location_id === locId);
     if (attachedPlants.length > 0) {
       alert(
@@ -162,13 +192,24 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete Location "${locId}"?`)) {
       setLocations((prev) => prev.filter((l) => l.location_id !== locId));
+      try {
+        const res = await fetch(`/api/master/locations/${encodeURIComponent(locId)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete location");
+        alert(`Location "${locId}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud location delete error:", err);
+        alert(`Error deleting location: ${err.message}`);
+      }
     }
   }
 
   // ==========================
   // PLANTS CRUD
   // ==========================
-  function handleAddPlant() {
+  async function handleAddPlant() {
     const cleanCode = newPlant.plant_id.trim().toUpperCase();
     const cleanName = newPlant.name.trim();
     if (!cleanCode || !cleanName) {
@@ -180,50 +221,94 @@ export default function MasterAdmin({
       return;
     }
 
-    setPlants((prev) => [
-      ...prev,
-      {
-        plant_id: cleanCode,
-        name: cleanName,
-        location_id: newPlant.location_id || (locations[0] ? locations[0].location_id : "LOC-PUN"),
-      },
-    ]);
+    const plantObj = {
+      plant_id: cleanCode,
+      name: cleanName,
+      location_id: newPlant.location_id || (locations[0] ? locations[0].location_id : "LOC-PUN"),
+    };
+
+    setPlants((prev) => [...prev, plantObj]);
     setNewPlant({
       plant_id: "",
       name: "",
       location_id: locations[0]?.location_id || "LOC-PUN",
     });
+
+    try {
+      const res = await fetch("/api/master/plants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plantObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save plant");
+      alert(`Plant "${cleanName}" (${cleanCode}) added successfully!`);
+    } catch (err) {
+      console.error("Cloud plant save error:", err);
+      alert(`Error saving plant: ${err.message}`);
+    }
   }
 
-  function handleSavePlantEdit() {
+  async function handleSavePlantEdit() {
     if (!editingPlant) return;
+    const cleanName = editingPlant.name.trim();
+    if (!cleanName) {
+      alert("Plant name cannot be empty.");
+      return;
+    }
+    const plantObj = {
+      plant_id: editingPlant.plant_id,
+      name: cleanName,
+      location_id: editingPlant.location_id,
+    };
     setPlants((prev) =>
-      prev.map((p) => (p.plant_id === editingPlant.plant_id ? {
-        plant_id: editingPlant.plant_id,
-        name: editingPlant.name.trim(),
-        location_id: editingPlant.location_id,
-      } : p))
+      prev.map((p) => (p.plant_id === plantObj.plant_id ? plantObj : p))
     );
+    try {
+      const res = await fetch("/api/master/plants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plantObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update plant");
+      alert(`Plant "${cleanName}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud plant update error:", err);
+      alert(`Error updating plant: ${err.message}`);
+    }
     setEditingPlant(null);
   }
 
-  function handleDeletePlant(plantId) {
+  async function handleDeletePlant(plantId) {
     if (confirm(`Are you sure you want to delete Plant "${plantId}"?`)) {
       setPlants((prev) => prev.filter((p) => p.plant_id !== plantId));
+      try {
+        const res = await fetch(`/api/master/plants/${encodeURIComponent(plantId)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete plant");
+        alert(`Plant "${plantId}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud plant delete error:", err);
+        alert(`Error deleting plant: ${err.message}`);
+      }
     }
   }
 
   // ==========================
   // PRODUCT (SAP MASTER) CRUD
   // ==========================
-  function handleAddProduct() {
+  async function handleAddProduct() {
     const cleanSap = newProduct.sap_code.trim();
     if (!cleanSap || !newProduct.part_no.trim()) {
       alert("SAP Code and Part Number are required.");
       return;
     }
-    if (master.some((m) => m.sap_code.toLowerCase() === cleanSap.toLowerCase())) {
-      alert(`SAP Code "${cleanSap}" already exists.`);
+    const targetPlant = newProduct.plant_id || plants[0]?.plant_id || "1040";
+    if (master.some((m) => m.sap_code.toLowerCase() === cleanSap.toLowerCase() && String(m.plant_id || "1040") === String(targetPlant))) {
+      alert(`SAP Code "${cleanSap}" already exists in Plant ${targetPlant}.`);
       return;
     }
 
@@ -238,15 +323,23 @@ export default function MasterAdmin({
       part_wt: Number(newProduct.part_wt) || 0,
       run_wt: Number(newProduct.run_wt) || 0,
       manpower: Number(newProduct.manpower) || 2,
-      plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
+      plant_id: targetPlant,
     };
 
     setMaster((prev) => [...prev, prodObj]);
-    fetch("/api/master/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(prodObj),
-    }).catch((err) => console.error("Cloud product save error:", err));
+    try {
+      const res = await fetch("/api/master/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(prodObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save product");
+      alert(`Product "${cleanSap}" saved successfully!`);
+    } catch (err) {
+      console.error("Cloud product save error:", err);
+      alert(`Error saving product: ${err.message}`);
+    }
 
     setNewProduct({
       sap_code: "",
@@ -258,36 +351,56 @@ export default function MasterAdmin({
       part_wt: 0.15,
       run_wt: 0.0,
       manpower: 2,
-      plant_id: newProduct.plant_id || plants[0]?.plant_id || "1040",
+      plant_id: targetPlant,
     });
   }
 
-  function handleSaveProductEdit() {
+  async function handleSaveProductEdit() {
     if (!editingProduct) return;
     setMaster((prev) =>
-      prev.map((m) => (m.sap_code === editingProduct.sap_code ? editingProduct : m))
+      prev.map((m) =>
+        m.sap_code === editingProduct.sap_code && String(m.plant_id || "1040") === String(editingProduct.plant_id || "1040")
+          ? editingProduct
+          : m
+      )
     );
-    fetch("/api/master/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editingProduct),
-    }).catch((err) => console.error("Cloud product update error:", err));
+    try {
+      const res = await fetch("/api/master/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingProduct),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update product");
+      alert(`Product "${editingProduct.sap_code}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud product update error:", err);
+      alert(`Error updating product: ${err.message}`);
+    }
     setEditingProduct(null);
   }
 
-  function handleDeleteProduct(sap_code, plant_id) {
+  async function handleDeleteProduct(sap_code, plant_id) {
     if (confirm(`Are you sure you want to remove SAP product "${sap_code}" from Master?`)) {
-      setMaster((prev) => prev.filter((m) => !(m.sap_code === sap_code && m.plant_id === plant_id)));
-      fetch(`/api/master/products/${encodeURIComponent(sap_code)}?plant_id=${encodeURIComponent(plant_id || "")}`, {
-        method: "DELETE",
-      }).catch((err) => console.error("Cloud product delete error:", err));
+      setMaster((prev) => prev.filter((m) => !(m.sap_code === sap_code && String(m.plant_id || "1040") === String(plant_id || "1040"))));
+      try {
+        const res = await fetch(`/api/master/products/${encodeURIComponent(sap_code)}?plant_id=${encodeURIComponent(plant_id || "")}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete product");
+        alert(`Product "${sap_code}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud product delete error:", err);
+        alert(`Error deleting product: ${err.message}`);
+      }
     }
   }
 
   // ==========================
   // MACHINES MASTER CRUD
   // ==========================
-  function handleAddMachine() {
+  async function handleAddMachine() {
     const cleanId = newMachine.machine_id.trim().toUpperCase();
     const cleanName = newMachine.machine_no.trim();
     if (!cleanId || !cleanName) {
@@ -306,11 +419,19 @@ export default function MasterAdmin({
     };
 
     setMachines((prev) => [...prev, mcObj]);
-    fetch("/api/master/machines", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(mcObj),
-    }).catch((err) => console.error("Cloud machine save error:", err));
+    try {
+      const res = await fetch("/api/master/machines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mcObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save machine");
+      alert(`Machine "${cleanId}" added successfully!`);
+    } catch (err) {
+      console.error("Cloud machine save error:", err);
+      alert(`Error saving machine: ${err.message}`);
+    }
 
     setNewMachine({
       machine_id: "",
@@ -319,20 +440,28 @@ export default function MasterAdmin({
     });
   }
 
-  function handleSaveMachineEdit() {
+  async function handleSaveMachineEdit() {
     if (!editingMachine) return;
     setMachines((prev) =>
       prev.map((m) => (m.machine_id === editingMachine.machine_id ? editingMachine : m))
     );
-    fetch("/api/master/machines", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editingMachine),
-    }).catch((err) => console.error("Cloud machine update error:", err));
+    try {
+      const res = await fetch("/api/master/machines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingMachine),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update machine");
+      alert(`Machine "${editingMachine.machine_id}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud machine update error:", err);
+      alert(`Error updating machine: ${err.message}`);
+    }
     setEditingMachine(null);
   }
 
-  function handleDeleteMachine(machine_id) {
+  async function handleDeleteMachine(machine_id) {
     const isUsedInEntries = entries.some((e) => e.machine_id === machine_id);
     if (isUsedInEntries) {
       alert(
@@ -342,18 +471,39 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete Machine "${machine_id}"?`)) {
       setMachines((prev) => prev.filter((m) => m.machine_id !== machine_id));
-      fetch(`/api/master/machines/${encodeURIComponent(machine_id)}`, {
-        method: "DELETE",
-      }).catch((err) => console.error("Cloud machine delete error:", err));
+      try {
+        const res = await fetch(`/api/master/machines/${encodeURIComponent(machine_id)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete machine");
+        alert(`Machine "${machine_id}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud machine delete error:", err);
+        alert(`Error deleting machine: ${err.message}`);
+      }
     }
   }
 
   // ==========================
   // SHIFTS MASTER CRUD
   // ==========================
-  function handleApplyTwoShiftStandard() {
+  async function handleApplyTwoShiftStandard() {
     if (confirm("Reset configured shift master to PGEL Standard 2-Shift Schedule (Shift 1: 07:00–19:00 Day & Shift 2: 19:00–07:00 Night)? Existing entries will retain their logged shift records.")) {
       setShifts(SHIFTS);
+      try {
+        const res = await fetch("/api/master/shifts/bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shifts: SHIFTS }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to apply 2-shift standard");
+        alert("Standard 2-Shift Schedule applied successfully!");
+      } catch (err) {
+        console.error("Cloud shift bulk error:", err);
+        alert(`Error applying standard shifts: ${err.message}`);
+      }
     }
   }
 
@@ -367,7 +517,7 @@ export default function MasterAdmin({
     });
   }
 
-  function handleAddShift() {
+  async function handleAddShift() {
     const cleanId = newShift.shift_id.trim().toUpperCase();
     const shiftName = (newShift.name || `Shift ${cleanId}`).trim();
     if (!cleanId) {
@@ -391,19 +541,18 @@ export default function MasterAdmin({
 
     const generatedCode = `${shiftName} (${newShift.start_time}–${newShift.end_time} · ${netHours}h${isOvernight ? " 🌙" : ""})`;
 
-    setShifts((prev) => [
-      ...prev,
-      {
-        shift_id: cleanId,
-        name: shiftName,
-        start_time: newShift.start_time,
-        end_time: newShift.end_time,
-        break_mins: Number(newShift.break_mins) || 0,
-        planned_hours: netHours,
-        is_overnight: isOvernight,
-        code: generatedCode,
-      },
-    ]);
+    const shiftObj = {
+      shift_id: cleanId,
+      name: shiftName,
+      start_time: newShift.start_time,
+      end_time: newShift.end_time,
+      break_mins: Number(newShift.break_mins) || 0,
+      planned_hours: netHours,
+      is_overnight: isOvernight,
+      code: generatedCode,
+    };
+
+    setShifts((prev) => [...prev, shiftObj]);
     setNewShift({
       shift_id: "",
       name: "",
@@ -411,9 +560,23 @@ export default function MasterAdmin({
       end_time: "14:00",
       break_mins: 0,
     });
+
+    try {
+      const res = await fetch("/api/master/shifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(shiftObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save shift");
+      alert(`Shift "${shiftName}" added successfully!`);
+    } catch (err) {
+      console.error("Cloud shift save error:", err);
+      alert(`Error saving shift: ${err.message}`);
+    }
   }
 
-  function handleSaveShiftEdit() {
+  async function handleSaveShiftEdit() {
     if (!editingShift) return;
     const { netHours, isOvernight } = calculateShiftDuration(
       editingShift.start_time,
@@ -423,23 +586,34 @@ export default function MasterAdmin({
     const shiftName = (editingShift.name || `Shift ${editingShift.shift_id}`).trim();
     const generatedCode = `${shiftName} (${editingShift.start_time}–${editingShift.end_time} · ${netHours}h${isOvernight ? " 🌙" : ""})`;
 
+    const updatedShift = {
+      ...editingShift,
+      name: shiftName,
+      planned_hours: netHours,
+      is_overnight: isOvernight,
+      code: generatedCode,
+    };
+
     setShifts((prev) =>
-      prev.map((s) =>
-        s.shift_id === editingShift.shift_id
-          ? {
-              ...editingShift,
-              name: shiftName,
-              planned_hours: netHours,
-              is_overnight: isOvernight,
-              code: generatedCode,
-            }
-          : s
-      )
+      prev.map((s) => (s.shift_id === updatedShift.shift_id ? updatedShift : s))
     );
+    try {
+      const res = await fetch("/api/master/shifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedShift),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update shift");
+      alert(`Shift "${shiftName}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud shift update error:", err);
+      alert(`Error updating shift: ${err.message}`);
+    }
     setEditingShift(null);
   }
 
-  function handleDeleteShift(shift_id) {
+  async function handleDeleteShift(shift_id) {
     const isUsedInEntries = entries.some((e) => e.shift_id === shift_id);
     if (isUsedInEntries) {
       alert(
@@ -449,13 +623,24 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete Shift "${shift_id}"?`)) {
       setShifts((prev) => prev.filter((s) => s.shift_id !== shift_id));
+      try {
+        const res = await fetch(`/api/master/shifts/${encodeURIComponent(shift_id)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete shift");
+        alert(`Shift "${shift_id}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud shift delete error:", err);
+        alert(`Error deleting shift: ${err.message}`);
+      }
     }
   }
 
   // ==========================
   // REASON CODES CRUD
   // ==========================
-  function handleAddReason() {
+  async function handleAddReason() {
     const cleanName = newReason.name.trim().toUpperCase();
     if (!cleanName) {
       alert("Reason name is required.");
@@ -471,33 +656,58 @@ export default function MasterAdmin({
     }
 
     const unit = newReason.category === "rejection" ? "qty" : "min";
-    setReasonCodes((prev) => [
-      ...prev,
-      {
-        reason_id: autoId,
-        name: cleanName,
-        category: newReason.category,
-        unit,
-      },
-    ]);
+    const reasonObj = {
+      reason_id: autoId,
+      name: cleanName,
+      category: newReason.category,
+      unit,
+    };
 
+    setReasonCodes((prev) => [...prev, reasonObj]);
     setNewReason({
       reason_id: "",
       name: "",
       category: "rejection",
       unit: "qty",
     });
+
+    try {
+      const res = await fetch("/api/master/reasons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reasonObj),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to save reason code");
+      alert(`Reason "${cleanName}" added successfully!`);
+    } catch (err) {
+      console.error("Cloud reason save error:", err);
+      alert(`Error saving reason: ${err.message}`);
+    }
   }
 
-  function handleSaveReasonEdit() {
+  async function handleSaveReasonEdit() {
     if (!editingReason) return;
     setReasonCodes((prev) =>
       prev.map((r) => (r.reason_id === editingReason.reason_id ? editingReason : r))
     );
+    try {
+      const res = await fetch("/api/master/reasons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingReason),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update reason code");
+      alert(`Reason "${editingReason.name || editingReason.reason_id}" updated successfully!`);
+    } catch (err) {
+      console.error("Cloud reason update error:", err);
+      alert(`Error updating reason: ${err.message}`);
+    }
     setEditingReason(null);
   }
 
-  function handleDeleteReason(reason_id) {
+  async function handleDeleteReason(reason_id) {
     const isUsedInEntries = entries.some((e) =>
       (e.reasons || []).some((r) => r.reason_id === reason_id && Number(r.value) > 0)
     );
@@ -509,6 +719,17 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete reason code "${reason_id}"?`)) {
       setReasonCodes((prev) => prev.filter((r) => r.reason_id !== reason_id));
+      try {
+        const res = await fetch(`/api/master/reasons/${encodeURIComponent(reason_id)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete reason code");
+        alert(`Reason code "${reason_id}" deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud reason delete error:", err);
+        alert(`Error deleting reason: ${err.message}`);
+      }
     }
   }
 
@@ -588,7 +809,7 @@ export default function MasterAdmin({
   // ==========================
   // USERS MASTER CRUD
   // ==========================
-  function handleAddUser() {
+  async function handleAddUser() {
     const cleanUsername = newUser.username.trim().toLowerCase();
     const cleanEmail = (newUser.email || `${cleanUsername}@pgel.in`).trim().toLowerCase();
     const cleanName = newUser.name.trim();
@@ -612,13 +833,13 @@ export default function MasterAdmin({
       assignedLocs = ["all"];
       assignedLoc = "all";
     } else {
-      const validPlants = (newUser.assigned_plant_ids || []).filter((id) => id !== "all");
+      const validPlants = (newUser.assigned_plant_ids || []).filter((id) => id && id !== "all");
       if (validPlants.length === 0) {
         alert("Please select at least one manufacturing plant / unit for this user.");
         return;
       }
       assignedPlants = validPlants;
-      assignedLocs = (newUser.assigned_location_ids || []).filter((id) => id !== "all");
+      assignedLocs = (newUser.assigned_location_ids || []).filter((id) => id && id !== "all");
       const firstPlant = plants.find((p) => assignedPlants.includes(p.plant_id));
       assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-PUN";
     }
@@ -636,14 +857,26 @@ export default function MasterAdmin({
       assigned_location_id: assignedLoc,
       assigned_location_ids: assignedLocs,
       assigned_plant_ids: assignedPlants,
+      updated_at: new Date().toISOString(),
     };
 
     setUsers((prev) => [...prev, createdUser]);
-    fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(createdUser),
-    }).catch((err) => console.error("Cloud user save error:", err));
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createdUser),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to create user.");
+      if (data.user) {
+        setUsers((prev) => [...prev.filter((u) => u.id !== data.user.id), data.user]);
+      }
+      alert(`User "${createdUser.name}" created successfully!`);
+    } catch (err) {
+      console.error("Cloud user save error:", err);
+      alert(`Error creating user: ${err.message}`);
+    }
 
     setNewUser({
       username: "",
@@ -660,32 +893,31 @@ export default function MasterAdmin({
 
   function startEditUser(u) {
     const isAll =
-      !u.assigned_plant_ids ||
-      u.assigned_plant_ids.includes("all") ||
-      u.assigned_location_id === "all" ||
-      (Array.isArray(u.assigned_location_ids) && u.assigned_location_ids.includes("all"));
+      u.assigned_plant_ids?.includes("all") ||
+      (u.role === "admin" && (!u.assigned_plant_ids || u.assigned_plant_ids.length === 0));
 
     const accessible = getUserAccessiblePlants(u, plants, locations);
     const initialPlantIds = isAll
       ? ["all"]
-      : accessible.map((p) => p.plant_id);
+      : (u.assigned_plant_ids || []).filter((id) => id && id !== "all");
     const initialLocIds = isAll
       ? ["all"]
-      : Array.isArray(u.assigned_location_ids)
-      ? u.assigned_location_ids
-      : u.assigned_location_id
-      ? [u.assigned_location_id]
-      : [];
+      : (Array.isArray(u.assigned_location_ids)
+          ? u.assigned_location_ids
+          : u.assigned_location_id && u.assigned_location_id !== "all"
+          ? [u.assigned_location_id]
+          : []
+        ).filter((id) => id && id !== "all");
 
     setEditingUser({
       ...u,
       scope_type: isAll ? "all" : "custom",
-      assigned_plant_ids: initialPlantIds,
+      assigned_plant_ids: initialPlantIds.length > 0 ? initialPlantIds : accessible.map((p) => p.plant_id),
       assigned_location_ids: initialLocIds,
     });
   }
 
-  function handleSaveUserEdit() {
+  async function handleSaveUserEdit() {
     if (!editingUser) return;
     let assignedLoc = "all";
     let assignedPlants = ["all"];
@@ -696,13 +928,13 @@ export default function MasterAdmin({
       assignedLocs = ["all"];
       assignedLoc = "all";
     } else {
-      const validPlants = (editingUser.assigned_plant_ids || []).filter((id) => id !== "all");
+      const validPlants = (editingUser.assigned_plant_ids || []).filter((id) => id && id !== "all");
       if (validPlants.length === 0) {
         alert("Please select at least one manufacturing plant / unit for this user.");
         return;
       }
       assignedPlants = validPlants;
-      assignedLocs = (editingUser.assigned_location_ids || []).filter((id) => id !== "all");
+      assignedLocs = (editingUser.assigned_location_ids || []).filter((id) => id && id !== "all");
       const firstPlant = plants.find((p) => assignedPlants.includes(p.plant_id));
       assignedLoc = firstPlant ? firstPlant.location_id : locations[0]?.location_id || "LOC-PUN";
     }
@@ -712,18 +944,35 @@ export default function MasterAdmin({
       assigned_location_id: assignedLoc,
       assigned_location_ids: assignedLocs,
       assigned_plant_ids: assignedPlants,
+      updated_at: new Date().toISOString(),
     };
 
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
-    fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
-    }).catch((err) => console.error("Cloud user update error:", err));
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to update user access.");
+      }
+      if (data.user) {
+        setUsers((prev) => prev.map((u) => (u.id === data.user.id ? data.user : u)));
+        if (currentUser && (currentUser.id === data.user.id || currentUser.username === data.user.username) && setCurrentUser) {
+          setCurrentUser(data.user);
+        }
+      }
+      alert(`User "${updated.name || updated.username}" access changes saved successfully!`);
+    } catch (err) {
+      console.error("Cloud user update error:", err);
+      alert(`Error updating user: ${err.message}`);
+    }
     setEditingUser(null);
   }
 
-  function handleDeleteUser(id) {
+  async function handleDeleteUser(id) {
     const target = users.find((u) => u.id === id);
     if (target?.username === "admin") {
       alert("Root admin account cannot be deleted.");
@@ -731,9 +980,17 @@ export default function MasterAdmin({
     }
     if (confirm(`Are you sure you want to delete user "${target?.name || id}"?`)) {
       setUsers((prev) => prev.filter((u) => u.id !== id));
-      fetch(`/api/users/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      }).catch((err) => console.error("Cloud user delete error:", err));
+      try {
+        const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete user.");
+        alert(`User deleted successfully.`);
+      } catch (err) {
+        console.error("Cloud user delete error:", err);
+        alert(`Error deleting user: ${err.message}`);
+      }
     }
   }
 

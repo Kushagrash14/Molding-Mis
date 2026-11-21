@@ -187,9 +187,9 @@ function loadStore() {
             console.log(`[CLOUD STORE] Added new seed location: ${sl.name} (${sl.location_id})`);
           }
         }
-        const validLocIds = new Set(LOCATIONS.map((l) => l.location_id));
+        // Only prune known legacy mock locations
         const prevLocLen = store.locations.length;
-        store.locations = store.locations.filter((l) => validLocIds.has(l.location_id));
+        store.locations = store.locations.filter((l) => l.location_id !== "LOC-GN");
         if (store.locations.length !== prevLocLen) {
           storeModified = true;
           console.log(`[CLOUD STORE] Pruned ${prevLocLen - store.locations.length} legacy locations.`);
@@ -205,10 +205,10 @@ function loadStore() {
         }
       }
 
-      // Prune legacy/removed plants (e.g. PLANT-U01, PLANT-U02)
-      const validPlantIds = new Set(PLANTS.map((p) => p.plant_id));
+      // Prune legacy/removed mock plants (e.g. PLANT-U01, PLANT-U02, PLANT-U03)
+      const legacyMockPlants = new Set(["PLANT-U01", "PLANT-U02", "PLANT-U03"]);
       const prevPlantLen = store.plants.length;
-      store.plants = store.plants.filter((p) => validPlantIds.has(p.plant_id));
+      store.plants = store.plants.filter((p) => !legacyMockPlants.has(p.plant_id));
       if (store.plants.length !== prevPlantLen) {
         storeModified = true;
         console.log(`[CLOUD STORE] Pruned ${prevPlantLen - store.plants.length} legacy plants.`);
@@ -362,6 +362,37 @@ export const cloudStorage = {
         (cleanEmpCode && u.employee_code?.toLowerCase() === cleanEmpCode.toLowerCase())
     );
 
+    const isAll =
+      userData.scope_type === "all" ||
+      (Array.isArray(userData.assigned_plant_ids) && userData.assigned_plant_ids.includes("all"));
+
+    let assignedPlantIds = ["1040"];
+    let assignedLocationIds = [];
+    let assignedLocationId = "LOC-PUN";
+
+    if (isAll) {
+      assignedPlantIds = ["all"];
+      assignedLocationIds = ["all"];
+      assignedLocationId = "all";
+    } else {
+      const validPlants = (Array.isArray(userData.assigned_plant_ids)
+        ? userData.assigned_plant_ids
+        : [userData.assigned_plant_ids]
+      ).filter((id) => id && id !== "all");
+
+      assignedPlantIds = validPlants.length > 0 ? validPlants : ["1040"];
+      assignedLocationIds = (Array.isArray(userData.assigned_location_ids)
+        ? userData.assigned_location_ids
+        : []
+      ).filter((id) => id && id !== "all");
+
+      const firstPlant = (s.plants || []).find((p) => assignedPlantIds.includes(p.plant_id));
+      assignedLocationId =
+        userData.assigned_location_id && userData.assigned_location_id !== "all"
+          ? userData.assigned_location_id
+          : firstPlant?.location_id || assignedLocationIds[0] || "LOC-PUN";
+    }
+
     const userObj = {
       id: userData.id || `u_${Date.now()}`,
       username: cleanUsername,
@@ -370,9 +401,9 @@ export const cloudStorage = {
       name: userData.name || cleanUsername,
       role: userData.role || "operator",
       department: userData.department || "",
-      assigned_location_id: userData.assigned_location_id || "all",
-      assigned_location_ids: userData.assigned_location_ids || ["all"],
-      assigned_plant_ids: userData.assigned_plant_ids || ["1040"],
+      assigned_location_id: assignedLocationId,
+      assigned_location_ids: assignedLocationIds,
+      assigned_plant_ids: assignedPlantIds,
       created_at: userData.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -384,7 +415,7 @@ export const cloudStorage = {
     }
 
     saveStore();
-    console.log(`[CLOUD STORE] Saved user on AWS: ${userObj.name} (${userObj.email})`);
+    console.log(`[CLOUD STORE] Saved user: ${userObj.name} (${userObj.email}), role: ${userObj.role}, plants: ${JSON.stringify(userObj.assigned_plant_ids)}`);
     return userObj;
   },
 
@@ -588,6 +619,140 @@ export const cloudStorage = {
     s.machines = s.machines.filter((m) => m.machine_id !== machineId);
     if (s.machines.length !== initialLen) {
       saveStore();
+      return true;
+    }
+    return false;
+  },
+
+  // Locations CRUD
+  saveLocation(loc) {
+    const s = loadStore();
+    const cleanId = (loc.location_id || "").trim().toUpperCase();
+    const cleanName = (loc.name || "").trim();
+    if (!cleanId || !cleanName) throw new Error("Location ID and Name are required");
+    if (!s.locations) s.locations = [];
+    const idx = s.locations.findIndex((l) => l.location_id === cleanId);
+    const locObj = { location_id: cleanId, name: cleanName, updated_at: new Date().toISOString() };
+    if (idx >= 0) {
+      s.locations[idx] = locObj;
+    } else {
+      s.locations.push(locObj);
+    }
+    saveStore();
+    console.log(`[CLOUD STORE] Saved location: ${locObj.name} (${locObj.location_id})`);
+    return locObj;
+  },
+
+  deleteLocation(locId) {
+    const s = loadStore();
+    const hasPlants = (s.plants || []).some((p) => p.location_id === locId);
+    if (hasPlants) throw new Error("Cannot delete location because plants are assigned to it");
+    const initLen = (s.locations || []).length;
+    s.locations = (s.locations || []).filter((l) => l.location_id !== locId);
+    if (s.locations.length !== initLen) {
+      saveStore();
+      console.log(`[CLOUD STORE] Deleted location: ${locId}`);
+      return true;
+    }
+    return false;
+  },
+
+  // Plants CRUD
+  savePlant(plant) {
+    const s = loadStore();
+    const cleanId = (plant.plant_id || "").trim().toUpperCase();
+    const cleanName = (plant.name || "").trim();
+    const locId = (plant.location_id || "").trim();
+    if (!cleanId || !cleanName) throw new Error("Plant Code and Name are required");
+    if (!s.plants) s.plants = [];
+    const idx = s.plants.findIndex((p) => p.plant_id === cleanId);
+    const plantObj = { plant_id: cleanId, name: cleanName, location_id: locId, updated_at: new Date().toISOString() };
+    if (idx >= 0) {
+      s.plants[idx] = plantObj;
+    } else {
+      s.plants.push(plantObj);
+    }
+    saveStore();
+    console.log(`[CLOUD STORE] Saved plant: ${plantObj.name} (${plantObj.plant_id})`);
+    return plantObj;
+  },
+
+  deletePlant(plantId) {
+    const s = loadStore();
+    const initLen = (s.plants || []).length;
+    s.plants = (s.plants || []).filter((p) => p.plant_id !== plantId);
+    if (s.plants.length !== initLen) {
+      saveStore();
+      console.log(`[CLOUD STORE] Deleted plant: ${plantId}`);
+      return true;
+    }
+    return false;
+  },
+
+  // Shifts CRUD
+  saveShift(shift) {
+    const s = loadStore();
+    const cleanId = (shift.shift_id || "").trim();
+    if (!cleanId) throw new Error("Shift ID is required");
+    if (!s.shifts) s.shifts = [];
+    const idx = s.shifts.findIndex((sh) => sh.shift_id === cleanId);
+    const shiftObj = { ...shift, shift_id: cleanId, updated_at: new Date().toISOString() };
+    if (idx >= 0) {
+      s.shifts[idx] = shiftObj;
+    } else {
+      s.shifts.push(shiftObj);
+    }
+    saveStore();
+    console.log(`[CLOUD STORE] Saved shift: ${shiftObj.name || shiftObj.shift_id}`);
+    return shiftObj;
+  },
+
+  saveAllShifts(shifts) {
+    const s = loadStore();
+    if (!Array.isArray(shifts) || shifts.length === 0) throw new Error("Shifts array required");
+    s.shifts = shifts.map((sh) => ({ ...sh, updated_at: new Date().toISOString() }));
+    saveStore();
+    console.log(`[CLOUD STORE] Saved ${shifts.length} shifts standard`);
+    return s.shifts;
+  },
+
+  deleteShift(shiftId) {
+    const s = loadStore();
+    const initLen = (s.shifts || []).length;
+    s.shifts = (s.shifts || []).filter((sh) => sh.shift_id !== shiftId);
+    if (s.shifts.length !== initLen) {
+      saveStore();
+      console.log(`[CLOUD STORE] Deleted shift: ${shiftId}`);
+      return true;
+    }
+    return false;
+  },
+
+  // Downtime Reasons CRUD
+  saveReason(reason) {
+    const s = loadStore();
+    const cleanId = (reason.reason_id || "").trim();
+    if (!cleanId) throw new Error("Reason ID is required");
+    if (!s.reasonCodes) s.reasonCodes = [];
+    const idx = s.reasonCodes.findIndex((r) => r.reason_id === cleanId);
+    const reasonObj = { ...reason, reason_id: cleanId, updated_at: new Date().toISOString() };
+    if (idx >= 0) {
+      s.reasonCodes[idx] = reasonObj;
+    } else {
+      s.reasonCodes.push(reasonObj);
+    }
+    saveStore();
+    console.log(`[CLOUD STORE] Saved downtime reason: ${reasonObj.description || reasonObj.reason_id}`);
+    return reasonObj;
+  },
+
+  deleteReason(reasonId) {
+    const s = loadStore();
+    const initLen = (s.reasonCodes || []).length;
+    s.reasonCodes = (s.reasonCodes || []).filter((r) => r.reason_id !== reasonId);
+    if (s.reasonCodes.length !== initLen) {
+      saveStore();
+      console.log(`[CLOUD STORE] Deleted downtime reason: ${reasonId}`);
       return true;
     }
     return false;

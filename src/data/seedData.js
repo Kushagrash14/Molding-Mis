@@ -32306,12 +32306,10 @@ export const USERS = [
     "name": "Plant Operator",
     "role": "operator",
     "department": "Shopfloor Operations",
-    "assigned_location_id": "all",
-    "assigned_location_ids": [
-      "all"
-    ],
+    "assigned_location_id": "LOC-PUN",
+    "assigned_location_ids": [],
     "assigned_plant_ids": [
-      "all"
+      "1040"
     ]
   }
 ];

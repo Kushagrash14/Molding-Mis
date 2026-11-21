@@ -209,12 +209,10 @@ export default function App() {
   // Strictly filter entries visible to currentUser based on assigned plant scope
   const authorizedEntries = useMemo(() => {
     if (!currentUser) return [];
-    if (
+    const isCorporateAll =
       currentUser.assigned_plant_ids?.includes("all") ||
-      currentUser.assigned_location_id === "all" ||
-      (Array.isArray(currentUser.assigned_location_ids) &&
-        currentUser.assigned_location_ids.includes("all"))
-    ) {
+      (currentUser.role === "admin" && (!currentUser.assigned_plant_ids || currentUser.assigned_plant_ids.length === 0));
+    if (isCorporateAll) {
       return entries;
     }
     return entries.filter((e) => accessiblePlants.some((p) => p.plant_id === e.plant_id));
@@ -429,7 +427,7 @@ export default function App() {
         };
 
         if (Array.isArray(data.users) && data.users.length > 0) {
-          stableSet(setUsers, data.users);
+          setUsers(data.users);
         }
         if (Array.isArray(data.entries)) {
           smartMergeEntries(data.entries);
@@ -865,6 +863,8 @@ export default function App() {
                 setPlants={setPlants}
                 users={users}
                 setUsers={setUsers}
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
                 entries={entries}
               />
             </div>

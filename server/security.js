@@ -50,8 +50,25 @@ export function publicUser(user) {
   if (!user) return null;
   const rawRole = String(user.role || "operator").trim().toLowerCase();
   const role = rawRole === "it_admin" ? "admin" : rawRole;
-  const plantIds = asIdList(user.assigned_plant_ids);
-  const locationIds = asIdList(user.assigned_location_ids || user.assigned_location_id);
+  const rawPlantIds = asIdList(user.assigned_plant_ids);
+  const rawLocIds = asIdList(user.assigned_location_ids || user.assigned_location_id);
+
+  const isCorporateAll =
+    rawPlantIds.includes("all") ||
+    (role === "admin" && rawPlantIds.length === 0);
+
+  const assignedPlants = isCorporateAll
+    ? ["all"]
+    : rawPlantIds.filter((id) => id && id !== "all");
+  const assignedLocs = isCorporateAll
+    ? ["all"]
+    : rawLocIds.filter((id) => id && id !== "all");
+  const assignedLoc = isCorporateAll
+    ? "all"
+    : user.assigned_location_id && user.assigned_location_id !== "all"
+    ? user.assigned_location_id
+    : assignedLocs[0] || "";
+
   return {
     id: user.id,
     username: user.username,
@@ -60,29 +77,27 @@ export function publicUser(user) {
     name: user.name || user.username,
     role,
     department: user.department || "",
-    assigned_location_id: locationIds[0] || user.assigned_location_id || "all",
-    assigned_location_ids: locationIds.length ? locationIds : ["all"],
-    assigned_plant_ids: plantIds.length ? plantIds : ["1040"],
+    assigned_location_id: assignedLoc,
+    assigned_location_ids: assignedLocs,
+    assigned_plant_ids: assignedPlants.length > 0 ? assignedPlants : ["1040"],
+    created_at: user.created_at || "",
+    updated_at: user.updated_at || user.created_at || new Date().toISOString(),
   };
 }
 
 export function accessiblePlantIds(user, plants = []) {
   const safe = publicUser(user);
-  const all =
-    !safe.assigned_plant_ids ||
+  if (!safe) return [];
+
+  const isCorporateAll =
     safe.assigned_plant_ids.includes("all") ||
-    safe.assigned_location_id === "all" ||
-    (Array.isArray(safe.assigned_location_ids) && safe.assigned_location_ids.includes("all"));
-  if (all) return plants.map((p) => String(p.plant_id));
-  const plantSet = new Set((safe.assigned_plant_ids || []).map(String));
-  const locSet = new Set(
-    (Array.isArray(safe.assigned_location_ids)
-      ? safe.assigned_location_ids
-      : safe.assigned_location_id
-        ? [safe.assigned_location_id]
-        : []
-    ).map(String)
-  );
+    (safe.role === "admin" && (!safe.assigned_plant_ids || safe.assigned_plant_ids.length === 0));
+
+  if (isCorporateAll) return plants.map((p) => String(p.plant_id));
+
+  const plantSet = new Set((safe.assigned_plant_ids || []).filter((id) => id && id !== "all").map(String));
+  const locSet = new Set((safe.assigned_location_ids || []).filter((id) => id && id !== "all").map(String));
+
   return plants
     .filter((p) => plantSet.has(String(p.plant_id)) || locSet.has(String(p.location_id)))
     .map((p) => String(p.plant_id));
