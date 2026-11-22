@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { computeMetrics, normalizeReasonsMap } from "../lib/calculations.js";
 import MaterialConsumptionView from "./MaterialConsumptionView.jsx";
+import RmConsumptionTrendView from "./RmConsumptionTrendView.jsx";
 
 /**
  * Creates smooth cubic bezier curve SVG path from array of points [{x, y}]
@@ -142,6 +143,8 @@ function MetricAreaChart({
   unit = "",
   decimals = 1,
   showLabelThreshold = 0,
+  emptyMessage = "No entries logged for this month",
+  rotateLabels = true,
 }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize();
@@ -236,7 +239,7 @@ function MetricAreaChart({
 
         {plotted.length === 0 && (
           <text x={width / 2} y={padTop + chartH / 2} textAnchor="middle" fill="#94a3b8" fontSize="11" fontWeight="600">
-            No entries logged for this month
+            {emptyMessage}
           </text>
         )}
 
@@ -306,7 +309,7 @@ function MetricAreaChart({
               y={height - 12}
               textAnchor="middle"
               className="ms-axis-tick x-tick"
-              transform={`rotate(-25, ${p.x}, ${height - 12})`}
+              transform={rotateLabels ? `rotate(-25, ${p.x}, ${height - 12})` : undefined}
             >
               {p.label}
             </text>
@@ -354,7 +357,11 @@ function MetricAreaChart({
 /**
  * Defects Pareto: rejection reasons sorted by count with cumulative % line
  */
-function DefectsParetoChart({ paretoData = [] }) {
+function DefectsParetoChart({
+  paretoData = [],
+  title = "DEFECTS PARETO",
+  emptyMessage = "No rejections logged for this month",
+}) {
   const items = paretoData || [];
 
   // Compute dynamic maxCount for Y axis scaling in Pareto
@@ -386,7 +393,7 @@ function DefectsParetoChart({ paretoData = [] }) {
     <div className="ms-graph-card">
       <div className="ms-graph-header">
         <span className="ms-graph-dot" style={{ backgroundColor: "#64748b" }} />
-        <span className="ms-graph-title">DEFECTS PARETO</span>
+        <span className="ms-graph-title">{title}</span>
       </div>
 
       <div className="ms-graph-svg-wrap" ref={wrapRef}>
@@ -403,7 +410,7 @@ function DefectsParetoChart({ paretoData = [] }) {
               fontWeight: 600,
             }}
           >
-            No rejections logged for this month
+            {emptyMessage}
           </div>
         ) : (
           <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
@@ -638,13 +645,14 @@ export default function MoldsenseDashboard({
   });
   const rmExportRef = useRef(null);
 
-  // Operator: Monthly MIS only. Others: Monthly MIS + Daily OEE. Admin also gets RM Consumption.
+  // Operator: Monthly MIS only. Others get Yearly MIS + Daily OEE. Admin also gets RM tabs.
   const TABS = isOperator
     ? ["Monthly MIS"]
     : isAdmin
-      ? ["Monthly MIS", "Daily OEE Matrix", "RM Consumption"]
-      : ["Monthly MIS", "Daily OEE Matrix"];
+      ? ["Monthly MIS", "Yearly MIS", "Daily OEE Matrix", "RM Consumption", "RM Consumption Trend"]
+      : ["Monthly MIS", "Yearly MIS", "Daily OEE Matrix"];
   const currentTab = isOperator ? "Monthly MIS" : activeTab;
+  const selectedYear = String(selectedMonth || "").slice(0, 4) || String(new Date().getFullYear());
 
   // Only plants this user can access (App already passes accessiblePlants). All = those plants only.
   const plantOptions = useMemo(() => {
@@ -796,6 +804,136 @@ export default function MoldsenseDashboard({
       });
   }, [monthRows, reasonCodes]);
 
+  // Year rows for Yearly MIS (same plant filter, all 12 months of selected year)
+  const yearRows = useMemo(() => {
+    return entries
+      .filter((e) => {
+        if (!e.shift_date || !e.shift_date.startsWith(selectedYear)) return false;
+        if (selectedPlantId && selectedPlantId !== "all" && (e.plant_id || "1040") !== selectedPlantId) return false;
+        return true;
+      })
+      .map((e) => ({
+        entry: e,
+        month: parseInt(e.shift_date.split("-")[1], 10),
+        m: computeMetrics(e, master, reasonCodes),
+      }));
+  }, [entries, selectedYear, selectedPlantId, master, reasonCodes]);
+
+  const monthlySeries = useMemo(() => {
+    const byMonth = {};
+    yearRows.forEach((row) => {
+      if (!byMonth[row.month]) byMonth[row.month] = [];
+      byMonth[row.month].push(row);
+    });
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const lastMonth =
+      Number(selectedYear) < currentYear ? 12 : Number(selectedYear) > currentYear ? 0 : currentMonth;
+
+    const months = [];
+    for (let month = 1; month <= 12; month++) {
+      const label = new Date(Number(selectedYear), month - 1, 1).toLocaleString("en-US", { month: "short" });
+      const rows = byMonth[month] || [];
+
+      // Future months (and months with no logs) stay null so charts skip them
+      if (month > lastMonth || rows.length === 0) {
+        months.push({
+          day: month,
+          label,
+          prodK: null,
+          rejPct: null,
+          mc: null,
+          plannedDtHrs: null,
+          unplannedDtHrs: null,
+          defectPcs: null,
+        });
+        continue;
+      }
+
+      const agg = emptyAgg();
+      const runningMcs = new Set();
+      rows.forEach(({ entry, m }) => {
+        addToAgg(agg, m);
+        if ((Number(m.ok_prod) || 0) > 0 || (Number(m.net_run_time) || 0) > 0) {
+          runningMcs.add(entry.machine_id);
+        }
+      });
+      const produced = agg.ok + agg.rej;
+      months.push({
+        day: month,
+        label,
+        prodK: round1(agg.ok / 1000),
+        rejPct: produced > 0 ? Number(((agg.rej / produced) * 100).toFixed(2)) : 0,
+        mc: runningMcs.size,
+        plannedDtHrs: round1(agg.plannedDt),
+        unplannedDtHrs: round1(agg.unplannedDt),
+        defectPcs: agg.rej,
+      });
+    }
+    return months;
+  }, [yearRows, selectedYear]);
+
+  const yearKpis = useMemo(() => {
+    const agg = emptyAgg();
+    const runningMcs = new Set();
+    yearRows.forEach(({ entry, m }) => {
+      addToAgg(agg, m);
+      if ((Number(m.ok_prod) || 0) > 0 || (Number(m.net_run_time) || 0) > 0) {
+        runningMcs.add(entry.machine_id);
+      }
+    });
+    const produced = agg.ok + agg.rej;
+    const k = oeeFromAgg(agg);
+    return {
+      target: agg.tgt,
+      production: agg.ok,
+      prodVsPlan: agg.tgt > 0 ? (agg.ok / agg.tgt) * 100 : null,
+      oee: k ? k.oee : null,
+      rejPct: produced > 0 ? (agg.rej / produced) * 100 : null,
+      activeMc: runningMcs.size,
+    };
+  }, [yearRows]);
+
+  const yearParetoData = useMemo(() => {
+    const defectCounts = {};
+    let totalDefects = 0;
+
+    const processReasons = (reasonsObj) => {
+      if (!reasonsObj) return;
+      Object.entries(normalizeReasonsMap(reasonsObj)).forEach(([reason_id, val]) => {
+        const num = Number(val) || 0;
+        if (num <= 0) return;
+        const rc = reasonCodes.find((r) => r.reason_id === reason_id || r.code === reason_id);
+        const isRejection = rc ? rc.category === "rejection" : reason_id.startsWith("rej_");
+        if (!isRejection) return;
+        const name = rc?.name || rc?.reason_name || reason_id.replace(/^rej_/, "").replace(/_/g, " ").toUpperCase();
+        defectCounts[name] = (defectCounts[name] || 0) + num;
+        totalDefects += num;
+      });
+    };
+
+    yearRows.forEach(({ entry }) => {
+      if (Array.isArray(entry.runs) && entry.runs.length > 1) {
+        entry.runs.forEach((r) => processReasons(r.reasons));
+      } else {
+        processReasons(entry.reasons);
+      }
+    });
+
+    if (totalDefects === 0) return [];
+
+    let runningSum = 0;
+    return Object.entries(defectCounts)
+      .map(([defect, count]) => ({ defect, count }))
+      .sort((a, b) => b.count - a.count)
+      .map((item) => {
+        runningSum += item.count;
+        return { ...item, cumPct: Math.round((runningSum / totalDefects) * 100) };
+      });
+  }, [yearRows, reasonCodes]);
+
   // Machine × Day OEE matrix, combining all shifts of a machine on a day
   const { matrixData, plantRow } = useMemo(() => {
     const perMachine = new Map();
@@ -869,6 +1007,7 @@ export default function MoldsenseDashboard({
                   if (t !== "RM Consumption") setShowFilters(false);
                 }
               }}
+              title={t === "Yearly MIS" ? `Year ${selectedYear}` : undefined}
             >
               {t}
             </button>
@@ -938,7 +1077,7 @@ export default function MoldsenseDashboard({
         )}
       </div>
 
-      {/* Monthly MIS Tab: KPI strip + 3x2 Graphs Grid */}
+      {/* Monthly MIS Tab: KPI strip + 3x2 Graphs Grid (per day) */}
       {currentTab === "Monthly MIS" && (
         <div className="ms-content-area">
           <div className="ms-kpi-grid">
@@ -961,7 +1100,6 @@ export default function MoldsenseDashboard({
               unit=" K pcs"
               showLabelThreshold={0.4}
             />
-
             <MetricAreaChart
               title="PLANNED DOWNTIME (HRS)"
               color="#0284c7"
@@ -973,7 +1111,6 @@ export default function MoldsenseDashboard({
               unit=" hrs"
               showLabelThreshold={1.0}
             />
-
             <MetricAreaChart
               title="REJECTION (%)"
               color="#dc2626"
@@ -986,7 +1123,6 @@ export default function MoldsenseDashboard({
               unit="%"
               showLabelThreshold={0.05}
             />
-
             <MetricAreaChart
               title="ACTIVE MACHINES"
               color="#9333ea"
@@ -998,7 +1134,6 @@ export default function MoldsenseDashboard({
               unit=" mc"
               showLabelThreshold={0}
             />
-
             <MetricAreaChart
               title="UNPLANNED DOWNTIME (HRS)"
               color="#ea580c"
@@ -1010,8 +1145,95 @@ export default function MoldsenseDashboard({
               unit=" hrs"
               showLabelThreshold={1.0}
             />
-
             <DefectsParetoChart paretoData={paretoData} />
+          </div>
+        </div>
+      )}
+
+      {/* Yearly MIS: same graphs as Monthly, but month-wise for 12 months */}
+      {!isOperator && currentTab === "Yearly MIS" && (
+        <div className="ms-content-area">
+          <div className="ms-year-banner">Year {selectedYear} · Month-wise MIS</div>
+          <div className="ms-kpi-grid">
+            <KpiCard color="#2563eb" label="Target" value={formatCount(yearKpis.target)} />
+            <KpiCard color="#16a34a" label="Production" value={formatCount(yearKpis.production)} />
+            <KpiCard color="#2563eb" label="Prod vs Plan" value={formatPct(yearKpis.prodVsPlan)} />
+            <KpiCard color="#16a34a" label="OEE (Average)" value={formatPct(yearKpis.oee)} />
+            <KpiCard color="#dc2626" label="Rejection %" value={formatPct(yearKpis.rejPct)} />
+            <KpiCard color="#9333ea" label="Active MC" value={yearKpis.activeMc} />
+          </div>
+
+          <div className="ms-charts-grid">
+            <MetricAreaChart
+              title="PROD QTY (K) — MONTHLY"
+              color="#2563eb"
+              data={monthlySeries}
+              dataKey="prodK"
+              defaultYMax={100}
+              defaultYTicks={[0, 25, 50, 75, 100]}
+              unit=" K pcs"
+              showLabelThreshold={1}
+              emptyMessage={`No entries logged for ${selectedYear}`}
+              rotateLabels={false}
+            />
+            <MetricAreaChart
+              title="PLANNED DOWNTIME (HRS) — MONTHLY"
+              color="#0284c7"
+              data={monthlySeries}
+              dataKey="plannedDtHrs"
+              defaultYMax={100}
+              defaultYTicks={[0, 25, 50, 75, 100]}
+              decimals={1}
+              unit=" hrs"
+              showLabelThreshold={2}
+              emptyMessage={`No entries logged for ${selectedYear}`}
+              rotateLabels={false}
+            />
+            <MetricAreaChart
+              title="REJECTION (%) — MONTHLY"
+              color="#dc2626"
+              data={monthlySeries}
+              dataKey="rejPct"
+              defaultYMax={2.0}
+              defaultYTicks={[0.0, 0.5, 1.0, 1.5, 2.0]}
+              isPercent={true}
+              decimals={2}
+              unit="%"
+              showLabelThreshold={0.05}
+              emptyMessage={`No entries logged for ${selectedYear}`}
+              rotateLabels={false}
+            />
+            <MetricAreaChart
+              title="ACTIVE MACHINES — MONTHLY"
+              color="#9333ea"
+              data={monthlySeries}
+              dataKey="mc"
+              defaultYMax={20}
+              defaultYTicks={[0, 5, 10, 15, 20]}
+              decimals={0}
+              unit=" mc"
+              showLabelThreshold={0}
+              emptyMessage={`No entries logged for ${selectedYear}`}
+              rotateLabels={false}
+            />
+            <MetricAreaChart
+              title="UNPLANNED DOWNTIME (HRS) — MONTHLY"
+              color="#ea580c"
+              data={monthlySeries}
+              dataKey="unplannedDtHrs"
+              defaultYMax={200}
+              defaultYTicks={[0, 50, 100, 150, 200]}
+              decimals={1}
+              unit=" hrs"
+              showLabelThreshold={5}
+              emptyMessage={`No entries logged for ${selectedYear}`}
+              rotateLabels={false}
+            />
+            <DefectsParetoChart
+              title={`DEFECTS PARETO — ${selectedYear}`}
+              paretoData={yearParetoData}
+              emptyMessage={`No rejections logged for ${selectedYear}`}
+            />
           </div>
         </div>
       )}
@@ -1042,6 +1264,18 @@ export default function MoldsenseDashboard({
             currentUser={currentUser}
           />
         </div>
+      )}
+
+      {isAdmin && currentTab === "RM Consumption Trend" && (
+        <RmConsumptionTrendView
+          entries={entries}
+          master={master}
+          machines={machines}
+          plants={plantOptions}
+          reasonCodes={reasonCodes}
+          selectedPlantId={plantValue}
+          selectedMonth={selectedMonth}
+        />
       )}
     </div>
   );
