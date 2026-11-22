@@ -493,7 +493,7 @@ function getOeeCellStyle(val) {
   if (val === null || val === undefined || val === "") return null;
   const num = Number(val);
   if (num >= 110) return { bg: "#1e293b", color: "#ffffff" }; // >110% dark navy
-  if (num >= 100) return { bg: "#fecdd3", color: "#9f1239" }; // >100% pink
+  if (num >= 100) return { bg: "#dbeafe", color: "#1d4ed8" }; // >100% blue
   if (num >= 85) return { bg: "#bbf7d0", color: "#166534" }; // 85-99% green
   if (num >= 75) return { bg: "#fef08a", color: "#854d0e" }; // 75-84% yellow
   return { bg: "#fee2e2", color: "#991b1b" }; // <75% red
@@ -713,6 +713,7 @@ export default function MoldsenseDashboard({
           prodK: null,
           rejPct: null,
           mc: null,
+          oee: null,
           plannedDtHrs: null,
           unplannedDtHrs: null,
           defectPcs: null,
@@ -730,6 +731,7 @@ export default function MoldsenseDashboard({
       });
 
       const produced = agg.ok + agg.rej;
+      const dayOee = oeeFromAgg(agg);
 
       days.push({
         day,
@@ -737,6 +739,7 @@ export default function MoldsenseDashboard({
         prodK: round1(agg.ok / 1000),
         rejPct: produced > 0 ? Number(((agg.rej / produced) * 100).toFixed(2)) : 0,
         mc: runningMcs.size,
+        oee: dayOee ? Number(dayOee.oee.toFixed(1)) : null,
         plannedDtHrs: round1(agg.plannedDt),
         unplannedDtHrs: round1(agg.unplannedDt),
         defectPcs: agg.rej,
@@ -848,6 +851,7 @@ export default function MoldsenseDashboard({
           prodK: null,
           rejPct: null,
           mc: null,
+          oee: null,
           plannedDtHrs: null,
           unplannedDtHrs: null,
           defectPcs: null,
@@ -864,12 +868,14 @@ export default function MoldsenseDashboard({
         }
       });
       const produced = agg.ok + agg.rej;
+      const monthOee = oeeFromAgg(agg);
       months.push({
         day: month,
         label,
         prodK: round1(agg.ok / 1000),
         rejPct: produced > 0 ? Number(((agg.rej / produced) * 100).toFixed(2)) : 0,
         mc: runningMcs.size,
+        oee: monthOee ? Number(monthOee.oee.toFixed(1)) : null,
         plannedDtHrs: round1(agg.plannedDt),
         unplannedDtHrs: round1(agg.unplannedDt),
         defectPcs: agg.rej,
@@ -1127,15 +1133,16 @@ export default function MoldsenseDashboard({
               showLabelThreshold={0.05}
             />
             <MetricAreaChart
-              title="ACTIVE MACHINES"
-              color="#9333ea"
+              title="OEE (%) — DAILY"
+              color="#7c3aed"
               data={dailySeries}
-              dataKey="mc"
-              defaultYMax={15}
-              defaultYTicks={[0, 5, 10, 15]}
-              decimals={0}
-              unit=" mc"
-              showLabelThreshold={0}
+              dataKey="oee"
+              defaultYMax={100}
+              defaultYTicks={[0, 25, 50, 75, 100]}
+              isPercent={true}
+              decimals={1}
+              unit="%"
+              showLabelThreshold={40}
             />
             <MetricAreaChart
               title="UNPLANNED DOWNTIME (HRS)"
@@ -1207,15 +1214,16 @@ export default function MoldsenseDashboard({
               rotateLabels={false}
             />
             <MetricAreaChart
-              title="ACTIVE MACHINES — MONTHLY"
-              color="#9333ea"
+              title="OEE (%) — MONTHLY"
+              color="#7c3aed"
               data={monthlySeries}
-              dataKey="mc"
-              defaultYMax={20}
-              defaultYTicks={[0, 5, 10, 15, 20]}
-              decimals={0}
-              unit=" mc"
-              showLabelThreshold={0}
+              dataKey="oee"
+              defaultYMax={100}
+              defaultYTicks={[0, 25, 50, 75, 100]}
+              isPercent={true}
+              decimals={1}
+              unit="%"
+              showLabelThreshold={40}
               emptyMessage={`No entries logged for ${selectedYear}`}
               rotateLabels={false}
             />
