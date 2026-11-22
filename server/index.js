@@ -148,7 +148,79 @@ app.get("/api/entries", requireAuth, (req, res) => {
       entries = entries.filter((e) => e.updated_at && new Date(e.updated_at) > sinceDate);
     }
   }
-  res.json({ success: true, entries });
+
+  // Optional filters for Level-2 paged Plant Entries
+  const plantId = req.query.plant_id && req.query.plant_id !== "all" ? String(req.query.plant_id) : null;
+  if (plantId) {
+    if (!allowed.has(plantId)) {
+      return res.status(403).json({ success: false, error: "Plant not accessible." });
+    }
+    entries = entries.filter((e) => String(e.plant_id) === plantId);
+  }
+
+  const enteredBy = req.query.entered_by ? String(req.query.entered_by) : null;
+  if (enteredBy) {
+    entries = entries.filter((e) => String(e.entered_by) === enteredBy);
+  }
+
+  const q = String(req.query.q || "").trim().toLowerCase();
+  if (q) {
+    const machineMap = new Map((data.machines || []).map((m) => [String(m.machine_id), m]));
+    const plantMap = new Map((data.plants || []).map((p) => [String(p.plant_id), p]));
+    entries = entries.filter((e) => {
+      const mc = machineMap.get(String(e.machine_id));
+      const mcText = `${mc?.machine_no || ""} ${e.machine_id || ""}`.toLowerCase();
+      const pObj = plantMap.get(String(e.plant_id));
+      const plantText = `${pObj?.name || ""} ${e.plant_id || ""}`.toLowerCase();
+      const runsMatch = (e.runs || []).some(
+        (r) =>
+          String(r.sap_code || "").toLowerCase().includes(q) ||
+          String(r.part_no || "").toLowerCase().includes(q) ||
+          String(r.material_description || "").toLowerCase().includes(q) ||
+          (r.cavity_parts || []).some(
+            (cp) =>
+              String(cp.sap_code || "").toLowerCase().includes(q) ||
+              String(cp.material_description || "").toLowerCase().includes(q) ||
+              String(cp.part_no || "").toLowerCase().includes(q)
+          )
+      );
+      return (
+        String(e.sap_code || "").toLowerCase().includes(q) ||
+        String(e.primary_sap_code || "").toLowerCase().includes(q) ||
+        String(e.shift_date || "").toLowerCase().includes(q) ||
+        String(e.shift_id || "").toLowerCase().includes(q) ||
+        String(e.entered_by_name || "").toLowerCase().includes(q) ||
+        mcText.includes(q) ||
+        plantText.includes(q) ||
+        runsMatch
+      );
+    });
+  }
+
+  // Newest first (created_at, fallback shift_date)
+  entries = [...entries].sort((a, b) => {
+    const ta = new Date(a.created_at || a.shift_date || 0).getTime();
+    const tb = new Date(b.created_at || b.shift_date || 0).getTime();
+    return tb - ta;
+  });
+
+  const total = entries.length;
+  const hasPaging = req.query.limit != null && String(req.query.limit).length > 0;
+  if (hasPaging) {
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+    const page = entries.slice(offset, offset + limit);
+    return res.json({
+      success: true,
+      entries: page,
+      total,
+      limit,
+      offset,
+      hasMore: offset + page.length < total,
+    });
+  }
+
+  res.json({ success: true, entries, total });
 });
 
 app.post("/api/entries", requireAuth, limitWrites, (req, res) => {

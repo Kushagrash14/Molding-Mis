@@ -744,6 +744,7 @@ export default function App() {
               onEdit={tryEdit}
               accessGrants={accessRequests}
               viewerId={currentUser.id}
+              serverPaging
             />
           )}
 
@@ -768,6 +769,7 @@ export default function App() {
                 reasonCodes={reasonCodes}
                 viewerRole="supervisor"
                 onEdit={() => {}}
+                serverPaging
               />
             </div>
           )}
@@ -796,6 +798,7 @@ export default function App() {
                 reasonCodes={reasonCodes}
                 viewerRole="admin"
                 onEdit={tryEdit}
+                serverPaging
               />
             </div>
           )}

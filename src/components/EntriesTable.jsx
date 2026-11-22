@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { computeMetrics, pct, inr, isEntryPastTwelveHours } from "../lib/calculations.js";
 import { grantCovers } from "../lib/accessGrants.js";
 import { exportProductionToExcel, exportProductionToCSV } from "../lib/excelExport.js";
@@ -20,21 +20,100 @@ export default function EntriesTable({
   scopeToUser,
   accessGrants = [],
   viewerId,
+  serverPaging = false,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterPlant, setFilterPlant] = useState("all");
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [pagedRows, setPagedRows] = useState([]);
+  const [serverTotal, setServerTotal] = useState(0);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const fetchSeqRef = useRef(0);
 
   const tableScrollRef = useRef(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollTop = 0;
     }
-  }, [filterPlant, searchTerm]);
+  }, [filterPlant, debouncedSearch]);
+
+  const fetchPaged = useCallback(
+    async (offset, { append } = { append: false }) => {
+      const seq = ++fetchSeqRef.current;
+      if (append) setLoadingMore(true);
+      else setLoadingPage(true);
+      setLoadError("");
+      try {
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          offset: String(offset),
+        });
+        if (filterPlant !== "all") params.set("plant_id", filterPlant);
+        if (debouncedSearch) params.set("q", debouncedSearch);
+        if (scopeToUser) params.set("entered_by", String(scopeToUser));
+
+        const res = await fetch(`/api/entries?${params.toString()}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          throw new Error(data.error || "Failed to load entries.");
+        }
+        if (seq !== fetchSeqRef.current) return;
+        const page = Array.isArray(data.entries) ? data.entries : [];
+        setServerTotal(Number(data.total) || page.length);
+        setPagedRows((prev) => (append ? [...prev, ...page] : page));
+      } catch (err) {
+        if (seq !== fetchSeqRef.current) return;
+        setLoadError(err.message || "Failed to load entries.");
+        if (!append) {
+          setPagedRows([]);
+          setServerTotal(0);
+        }
+      } finally {
+        if (seq === fetchSeqRef.current) {
+          setLoadingPage(false);
+          setLoadingMore(false);
+        }
+      }
+    },
+    [filterPlant, debouncedSearch, scopeToUser]
+  );
+
+  useEffect(() => {
+    if (!serverPaging) return undefined;
+    fetchPaged(0, { append: false });
+    return undefined;
+  }, [serverPaging, fetchPaged]);
+
+  // Keep visible server rows in sync after local edit/save in App
+  useEffect(() => {
+    if (!serverPaging || !Array.isArray(entries) || entries.length === 0) return;
+    const byId = new Map(entries.map((e) => [e.entry_id, e]));
+    setPagedRows((prev) => {
+      let changed = false;
+      const next = prev.map((row) => {
+        const fresh = byId.get(row.entry_id);
+        if (fresh && fresh !== row) {
+          changed = true;
+          return fresh;
+        }
+        return row;
+      });
+      return changed ? next : prev;
+    });
+  }, [entries, serverPaging]);
 
   const list = scopeToUser ? entries.filter((e) => e.entered_by === scopeToUser) : entries;
 
@@ -63,10 +142,10 @@ export default function EntriesTable({
       );
 
       return (
-        e.sap_code.toLowerCase().includes(term) ||
-        e.shift_date.toLowerCase().includes(term) ||
-        e.shift_id.toLowerCase().includes(term) ||
-        mc.toLowerCase().includes(term) ||
+        String(e.sap_code || "").toLowerCase().includes(term) ||
+        String(e.shift_date || "").toLowerCase().includes(term) ||
+        String(e.shift_id || "").toLowerCase().includes(term) ||
+        String(mc || "").toLowerCase().includes(term) ||
         plantText.toLowerCase().includes(term) ||
         (e.entered_by_name || "").toLowerCase().includes(term) ||
         matchesRuns
@@ -78,13 +157,12 @@ export default function EntriesTable({
     return [...filtered].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, [filtered]);
 
-  // Level-1 roller: render only first N rows (data/filter/export stay full & correct)
-  const visibleRows = useMemo(
-    () => sorted.slice(0, visibleCount),
-    [sorted, visibleCount]
-  );
-  const totalMatches = sorted.length;
-  const showingCount = Math.min(visibleCount, totalMatches);
+  // Level-2: server pages. Level-1 fallback: client slice.
+  const visibleRows = serverPaging ? pagedRows : sorted.slice(0, visibleCount);
+  const totalMatches = serverPaging ? serverTotal : sorted.length;
+  const showingCount = serverPaging
+    ? pagedRows.length
+    : Math.min(visibleCount, totalMatches);
   const hasMore = showingCount < totalMatches;
 
   function handleExportExcel() {
@@ -280,7 +358,27 @@ export default function EntriesTable({
             </tr>
           </thead>
           <tbody>
-            {totalMatches === 0 && (
+            {loadingPage && visibleRows.length === 0 && (
+              <tr className="empty-row">
+                <td
+                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 10 : 15}
+                  style={{ textAlign: "center", padding: "28px", color: "var(--ink-faint)" }}
+                >
+                  Loading entries…
+                </td>
+              </tr>
+            )}
+            {!loadingPage && loadError && visibleRows.length === 0 && (
+              <tr className="empty-row">
+                <td
+                  colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 10 : 15}
+                  style={{ textAlign: "center", padding: "28px", color: "#b91c1c" }}
+                >
+                  {loadError}
+                </td>
+              </tr>
+            )}
+            {!loadingPage && !loadError && totalMatches === 0 && (
               <tr className="empty-row">
                 <td
                   colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 10 : 15}
@@ -463,33 +561,54 @@ export default function EntriesTable({
         </table>
       </div>
 
-      {totalMatches > 0 && (
+      {(totalMatches > 0 || loadingPage || loadError) && (
         <div className="table-pagination entries-load-more">
           <span>
-            Showing <strong>{showingCount}</strong> of <strong>{totalMatches}</strong> entries
-            {hasMore ? ` · next batch +${Math.min(PAGE_SIZE, totalMatches - showingCount)}` : ""}
+            {loadingPage && showingCount === 0
+              ? "Fetching from server…"
+              : (
+                <>
+                  Showing <strong>{showingCount}</strong> of <strong>{totalMatches}</strong> entries
+                  {serverPaging ? " · server page" : ""}
+                  {hasMore ? ` · next +${Math.min(PAGE_SIZE, totalMatches - showingCount)}` : ""}
+                </>
+              )}
           </span>
           <div className="pagination-controls">
             {hasMore ? (
               <button
                 type="button"
                 className="pagination-btn active"
-                onClick={() => setVisibleCount((n) => Math.min(n + PAGE_SIZE, totalMatches))}
+                disabled={loadingMore || loadingPage}
+                onClick={() => {
+                  if (serverPaging) {
+                    fetchPaged(pagedRows.length, { append: true });
+                  } else {
+                    setVisibleCount((n) => Math.min(n + PAGE_SIZE, totalMatches));
+                  }
+                }}
               >
-                Load more ({Math.min(PAGE_SIZE, totalMatches - showingCount)})
+                {loadingMore
+                  ? "Loading…"
+                  : `Load more (${Math.min(PAGE_SIZE, totalMatches - showingCount)})`}
               </button>
             ) : (
               <button type="button" className="pagination-btn" disabled>
-                All loaded
+                {totalMatches > 0 ? "All loaded" : "—"}
               </button>
             )}
-            {visibleCount > PAGE_SIZE && (
+            {showingCount > PAGE_SIZE && (
               <button
                 type="button"
                 className="pagination-btn"
+                disabled={loadingPage || loadingMore}
                 onClick={() => {
-                  setVisibleCount(PAGE_SIZE);
                   if (tableScrollRef.current) tableScrollRef.current.scrollTop = 0;
+                  if (serverPaging) {
+                    fetchPaged(0, { append: false });
+                  } else {
+                    setVisibleCount(PAGE_SIZE);
+                  }
                 }}
               >
                 Show first 50
