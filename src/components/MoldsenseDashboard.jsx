@@ -634,6 +634,9 @@ export default function MoldsenseDashboard({
 }) {
   const isOperator = userRole === "operator";
   const isAdmin = userRole === "admin";
+  const isPlantHead = userRole === "plant_head";
+  // Yearly MIS + both RM tabs: admin and plant head
+  const canSeeRm = isAdmin || isPlantHead;
   const [activeTab, setActiveTab] = useState("Monthly MIS");
   const [showFilters, setShowFilters] = useState(false);
   const [rmViewMode, setRmViewMode] = useState("machine");
@@ -645,10 +648,10 @@ export default function MoldsenseDashboard({
   });
   const rmExportRef = useRef(null);
 
-  // Operator: Monthly MIS only. Others get Yearly MIS + Daily OEE. Admin also gets RM tabs.
+  // Operator: Monthly only. Plant head + admin: Yearly + Daily OEE + both RM tabs. Others: Yearly + Daily OEE.
   const TABS = isOperator
     ? ["Monthly MIS"]
-    : isAdmin
+    : canSeeRm
       ? ["Monthly MIS", "Yearly MIS", "Daily OEE Matrix", "RM Consumption", "RM Consumption Trend"]
       : ["Monthly MIS", "Yearly MIS", "Daily OEE Matrix"];
   const currentTab = isOperator ? "Monthly MIS" : activeTab;
@@ -1243,7 +1246,7 @@ export default function MoldsenseDashboard({
         <DailyOeeMatrixView matrixData={matrixData} plantRow={plantRow} monthInfo={monthInfo} />
       )}
 
-      {isAdmin && currentTab === "RM Consumption" && (
+      {canSeeRm && currentTab === "RM Consumption" && (
         <div className="ms-content-area ms-rm-area">
           <MaterialConsumptionView
             embedded
@@ -1266,7 +1269,7 @@ export default function MoldsenseDashboard({
         </div>
       )}
 
-      {isAdmin && currentTab === "RM Consumption Trend" && (
+      {canSeeRm && currentTab === "RM Consumption Trend" && (
         <RmConsumptionTrendView
           entries={entries}
           master={master}
