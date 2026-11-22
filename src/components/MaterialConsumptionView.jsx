@@ -593,15 +593,6 @@ export default function MaterialConsumptionView({
     }
   };
 
-  const filterSelect = {
-    padding: "5px 10px",
-    fontSize: "12px",
-    fontWeight: "600",
-    border: "1px solid #cbd5e1",
-    borderRadius: "5px",
-    background: "#ffffff",
-  };
-
   const extraFilterCount =
     (dateFilterType !== "month" ? 1 : 0) +
     (shiftFilter !== "all" ? 1 : 0) +
@@ -609,106 +600,47 @@ export default function MaterialConsumptionView({
     (searchTerm.trim() ? 1 : 0);
 
   return (
-    <div style={{ padding: "10px 14px 16px", maxWidth: "1560px", margin: "0 auto", color: "#0f172a" }}>
-      {/* One row: title · plant · filter · excel */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "10px",
-          flexWrap: "wrap",
-          gap: "8px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#0f172a" }}>
-            RM Consumption Analytics
-          </h1>
-          <span
-            style={{
-              background: "#4f46e5",
-              color: "#ffffff",
-              fontSize: "10px",
-              fontWeight: "700",
-              padding: "2px 7px",
-              borderRadius: "4px",
-            }}
-          >
-            Super Admin
-          </span>
-        </div>
+    <div className="rm-consumption-page" style={{ padding: "0 0 12px", color: "#0f172a" }}>
+      {/* Single thin toolbar — overrides global select { width:100%; height:44px } */}
+      <div className="rm-toolbar">
+        <h1 className="rm-toolbar-title">RM Consumption</h1>
+        <span className="rm-toolbar-badge">Admin</span>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <select
-            value={plantFilter}
-            onChange={(e) => {
-              setPlantFilter(e.target.value);
-              if (onSelectPlant) onSelectPlant(e.target.value);
-            }}
-            style={{ ...filterSelect, minWidth: "180px" }}
-            title="Plant"
-          >
-            <option value="all">All Plants</option>
-            {plants.map((p) => (
-              <option key={p.plant_id} value={p.plant_id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+        <select
+          className="rm-toolbar-select"
+          value={plantFilter}
+          onChange={(e) => {
+            setPlantFilter(e.target.value);
+            if (onSelectPlant) onSelectPlant(e.target.value);
+          }}
+          title="Plant"
+        >
+          <option value="all">All Plants</option>
+          {plants.map((p) => (
+            <option key={p.plant_id} value={p.plant_id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
 
-          <button
-            type="button"
-            onClick={() => setShowFilters((v) => !v)}
-            style={{
-              padding: "5px 12px",
-              fontSize: "12px",
-              fontWeight: "700",
-              borderRadius: "5px",
-              border: "1px solid",
-              borderColor: showFilters || extraFilterCount > 0 ? "#3b82f6" : "#cbd5e1",
-              background: showFilters || extraFilterCount > 0 ? "#eff6ff" : "#ffffff",
-              color: showFilters || extraFilterCount > 0 ? "#1d4ed8" : "#334155",
-              cursor: "pointer",
-            }}
-          >
-            Filters{extraFilterCount > 0 ? ` (${extraFilterCount})` : ""}{showFilters ? " ▴" : " ▾"}
-          </button>
+        <button
+          type="button"
+          className={`rm-toolbar-btn${showFilters || extraFilterCount > 0 ? " active" : ""}`}
+          onClick={() => setShowFilters((v) => !v)}
+        >
+          Filters{extraFilterCount > 0 ? ` (${extraFilterCount})` : ""}
+        </button>
 
-          <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>{dateRangeLabel}</span>
+        <span className="rm-toolbar-range">{dateRangeLabel}</span>
 
-          <button
-            onClick={handleExportExcel}
-            style={{
-              padding: "5px 12px",
-              background: "#16a34a",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "5px",
-              fontSize: "12px",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Download Excel
-          </button>
-        </div>
+        <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
+          Excel
+        </button>
       </div>
 
       {showFilters && (
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "8px",
-            padding: "10px 12px",
-            border: "1px solid #e2e8f0",
-            marginBottom: "10px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
+        <div className="rm-filter-panel">
+          <div className="rm-filter-row">
             {[
               { id: "today", label: "Today" },
               { id: "yesterday", label: "Yesterday" },
@@ -722,29 +654,19 @@ export default function MaterialConsumptionView({
               <button
                 key={pill.id}
                 type="button"
+                className={`rm-pill${dateFilterType === pill.id ? " active" : ""}`}
                 onClick={() => setDateFilterType(pill.id)}
-                style={{
-                  padding: "3px 9px",
-                  fontSize: "11px",
-                  fontWeight: "600",
-                  borderRadius: "5px",
-                  border: "1px solid",
-                  borderColor: dateFilterType === pill.id ? "#3b82f6" : "#cbd5e1",
-                  background: dateFilterType === pill.id ? "#eff6ff" : "#ffffff",
-                  color: dateFilterType === pill.id ? "#1d4ed8" : "#475569",
-                  cursor: "pointer",
-                }}
               >
                 {pill.label}
               </button>
             ))}
 
             {dateFilterType === "selectMonth" && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <>
                 <select
+                  className="rm-toolbar-select"
                   value={selectedYm}
                   onChange={(e) => setSelectedYm(e.target.value)}
-                  style={{ ...filterSelect, borderColor: "#3b82f6", background: "#eff6ff", color: "#1d4ed8" }}
                 >
                   {availableMonths.map((ym) => (
                     <option key={ym} value={ym}>
@@ -754,34 +676,38 @@ export default function MaterialConsumptionView({
                 </select>
                 <input
                   type="month"
+                  className="rm-toolbar-input"
                   value={selectedYm}
                   onChange={(e) => setSelectedYm(e.target.value)}
-                  style={filterSelect}
                 />
-              </div>
+              </>
             )}
 
             {dateFilterType === "custom" && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <>
                 <input
                   type="date"
+                  className="rm-toolbar-input"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  style={filterSelect}
                 />
                 <span style={{ fontSize: "11px", color: "#64748b" }}>to</span>
                 <input
                   type="date"
+                  className="rm-toolbar-input"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  style={filterSelect}
                 />
-              </div>
+              </>
             )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <select value={shiftFilter} onChange={(e) => setShiftFilter(e.target.value)} style={filterSelect}>
+          <div className="rm-filter-row">
+            <select
+              className="rm-toolbar-select"
+              value={shiftFilter}
+              onChange={(e) => setShiftFilter(e.target.value)}
+            >
               <option value="all">All Shifts</option>
               {shifts.map((s) => (
                 <option key={s.shift_id} value={s.shift_id}>
@@ -791,9 +717,9 @@ export default function MaterialConsumptionView({
             </select>
 
             <select
+              className="rm-toolbar-select"
               value={machineFilter}
               onChange={(e) => setMachineFilter(e.target.value)}
-              style={{ ...filterSelect, maxWidth: "180px" }}
             >
               <option value="all">All Machines</option>
               {machines
@@ -807,10 +733,10 @@ export default function MaterialConsumptionView({
 
             <input
               type="text"
+              className="rm-toolbar-input rm-search"
               placeholder="Search SAP, part, machine…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ ...filterSelect, flex: "1 1 200px", minWidth: "160px", fontWeight: "500" }}
             />
           </div>
         </div>
@@ -820,9 +746,9 @@ export default function MaterialConsumptionView({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: "8px",
-          marginBottom: "10px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: "6px",
+          marginBottom: "8px",
         }}
       >
         {[
@@ -872,7 +798,7 @@ export default function MaterialConsumptionView({
             style={{
               background: "#ffffff",
               borderRadius: "7px",
-              padding: "8px 10px",
+              padding: "6px 8px",
               border: "1px solid #e2e8f0",
               borderLeft: `3px solid ${card.border}`,
               minWidth: 0,
@@ -881,10 +807,10 @@ export default function MaterialConsumptionView({
             <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.02em" }}>
               {card.label}
             </div>
-            <div style={{ fontSize: "17px", fontWeight: "800", color: card.color, marginTop: "2px", lineHeight: 1.2 }}>
+            <div style={{ fontSize: "15px", fontWeight: "800", color: card.color, marginTop: "1px", lineHeight: 1.2 }}>
               {card.value}
             </div>
-            <div style={{ fontSize: "11px", color: card.subColor, fontWeight: "600", marginTop: "1px" }}>{card.sub}</div>
+            <div style={{ fontSize: "10px", color: card.subColor, fontWeight: "600" }}>{card.sub}</div>
           </div>
         ))}
       </div>
@@ -893,13 +819,13 @@ export default function MaterialConsumptionView({
       <div
         style={{
           background: "#ffffff",
-          borderRadius: "7px",
-          padding: "8px 12px",
+          borderRadius: "6px",
+          padding: "5px 10px",
           border: "1px solid #e2e8f0",
-          marginBottom: "10px",
+          marginBottom: "8px",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px", flexWrap: "wrap", gap: "4px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
           <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569" }}>
             RM Balance · {dateRangeLabel}
           </span>
