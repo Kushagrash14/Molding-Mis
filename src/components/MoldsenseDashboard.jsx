@@ -209,42 +209,35 @@ function MetricAreaChart({
     return `${linePath} L ${last.x.toFixed(1)} ${bottomY} L ${first.x.toFixed(1)} ${bottomY} Z`;
   }, [linePath, plotted, padTop, chartH]);
 
-  // Dynamic value labels: skip crowded points so %/numbers never overlap
+  // Keep EVERY value label — only nudge up/down so neighbors don't overlap
   const labelLayout = useMemo(() => {
-    const minGap = isPercent ? 34 : 28;
-    const candidates = [];
+    const show = new Array(points.length).fill(false);
+    const dy = new Array(points.length).fill(-9);
+    const placed = []; // { x, textY, dy }
+
+    const labelH = 11;
+    const minXGap = isPercent ? 30 : 26;
+
     points.forEach((p, idx) => {
       if (p.val === null || p.val === undefined) return;
       if (!(p.val > showLabelThreshold)) return;
-      const prev = idx > 0 ? points[idx - 1] : null;
-      const next = idx < points.length - 1 ? points[idx + 1] : null;
-      const isPeak =
-        (!prev || prev.val === null || p.val >= prev.val) &&
-        (!next || next.val === null || p.val >= next.val);
-      const isValley =
-        (!prev || prev.val === null || p.val <= prev.val) &&
-        (!next || next.val === null || p.val <= next.val);
-      const edge = idx === 0 || idx === points.length - 1;
-      let rank = Math.abs(p.val);
-      if (isPeak) rank += 1000;
-      if (isValley) rank += 500;
-      if (edge) rank += 200;
-      candidates.push({ idx, x: p.x, y: p.y, rank, isPeak, isValley });
-    });
-    candidates.sort((a, b) => b.rank - a.rank);
+      show[idx] = true;
 
-    const placed = [];
-    const show = new Array(points.length).fill(false);
-    const dy = new Array(points.length).fill(-8);
-
-    candidates.forEach((c) => {
-      const clash = placed.some((p) => Math.abs(p.x - c.x) < minGap && Math.abs(p.y - c.y) < 16);
-      if (clash) return;
-      show[c.idx] = true;
-      // Alternate above/below when neighbors are somewhat close, to stay readable
-      const near = placed.find((p) => Math.abs(p.x - c.x) < minGap * 1.6);
-      dy[c.idx] = near ? (near.dy < 0 ? 14 : -8) : c.isValley ? 14 : -8;
-      placed.push({ x: c.x, y: c.y, dy: dy[c.idx] });
+      // Prefer above; if that collides with a nearby label, flip below (and vice versa)
+      const tryOffsets = [-9, 13, -18, 18, -24, 24];
+      let chosen = tryOffsets[0];
+      for (const off of tryOffsets) {
+        const textY = p.y + off;
+        const hits = placed.some(
+          (q) => Math.abs(q.x - p.x) < minXGap && Math.abs(q.textY - textY) < labelH
+        );
+        if (!hits) {
+          chosen = off;
+          break;
+        }
+      }
+      dy[idx] = chosen;
+      placed.push({ x: p.x, textY: p.y + chosen, dy: chosen });
     });
 
     return { show, dy };
