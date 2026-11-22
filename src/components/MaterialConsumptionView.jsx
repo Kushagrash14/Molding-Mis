@@ -67,6 +67,9 @@ export default function MaterialConsumptionView({
   selectedPlantId = "all",
   onSelectPlant,
   currentUser,
+  embedded = false,
+  filtersOpen,
+  onFiltersOpenChange,
 }) {
   // Filters
   const [dateFilterType, setDateFilterType] = useState("month"); // 'today', 'yesterday', 'last7', 'month', 'lastMonth', 'selectMonth', 'custom', 'allTime'
@@ -80,9 +83,23 @@ export default function MaterialConsumptionView({
   const [viewMode, setViewMode] = useState("machine"); // 'machine', 'summary' (part), 'detailed' (shift run)
   const [expandedMachineId, setExpandedMachineId] = useState(null);
   const [selectedExampleSap, setSelectedExampleSap] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [internalShowFilters, setInternalShowFilters] = useState(false);
 
-  // Sync internal plant filter with external selectedPlantId if changed
+  const showFilters = typeof filtersOpen === "boolean" ? filtersOpen : internalShowFilters;
+  const setShowFilters = (next) => {
+    const value = typeof next === "function" ? next(showFilters) : next;
+    if (typeof onFiltersOpenChange === "function") onFiltersOpenChange(value);
+    else setInternalShowFilters(value);
+  };
+
+  // Keep plant in sync with dashboard / top plant picker
+  React.useEffect(() => {
+    if (selectedPlantId != null && selectedPlantId !== plantFilter) {
+      setPlantFilter(selectedPlantId || "all");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlantId]);
+
   const activePlantId = plantFilter;
 
   // Extract all available months present in data + past 12 months for quick jumping back in time
@@ -600,43 +617,56 @@ export default function MaterialConsumptionView({
     (searchTerm.trim() ? 1 : 0);
 
   return (
-    <div className="rm-consumption-page" style={{ padding: "0 0 12px", color: "#0f172a" }}>
-      {/* Single thin toolbar — overrides global select { width:100%; height:44px } */}
-      <div className="rm-toolbar">
-        <h1 className="rm-toolbar-title">RM Consumption</h1>
-        <span className="rm-toolbar-badge">Admin</span>
+    <div className={`rm-consumption-page${embedded ? " embedded" : ""}`} style={{ padding: embedded ? "0" : "0 0 12px", color: "#0f172a" }}>
+      {!embedded && (
+        <div className="rm-toolbar">
+          <h1 className="rm-toolbar-title">RM Consumption</h1>
+          <span className="rm-toolbar-badge">Admin</span>
 
-        <select
-          className="rm-toolbar-select"
-          value={plantFilter}
-          onChange={(e) => {
-            setPlantFilter(e.target.value);
-            if (onSelectPlant) onSelectPlant(e.target.value);
-          }}
-          title="Plant"
-        >
-          <option value="all">All Plants</option>
-          {plants.map((p) => (
-            <option key={p.plant_id} value={p.plant_id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          <select
+            className="rm-toolbar-select"
+            value={plantFilter}
+            onChange={(e) => {
+              setPlantFilter(e.target.value);
+              if (onSelectPlant) onSelectPlant(e.target.value);
+            }}
+            title="Plant"
+          >
+            {plants.length > 1 && <option value="all">All Plants</option>}
+            {plants.map((p) => (
+              <option key={p.plant_id} value={p.plant_id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
 
-        <button
-          type="button"
-          className={`rm-toolbar-btn${showFilters || extraFilterCount > 0 ? " active" : ""}`}
-          onClick={() => setShowFilters((v) => !v)}
-        >
-          Filters{extraFilterCount > 0 ? ` (${extraFilterCount})` : ""}
-        </button>
+          <button
+            type="button"
+            className={`rm-toolbar-btn${showFilters || extraFilterCount > 0 ? " active" : ""}`}
+            onClick={() => setShowFilters((v) => !v)}
+          >
+            Filters{extraFilterCount > 0 ? ` (${extraFilterCount})` : ""}
+          </button>
 
-        <span className="rm-toolbar-range">{dateRangeLabel}</span>
+          <span className="rm-toolbar-range">{dateRangeLabel}</span>
 
-        <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
-          Excel
-        </button>
-      </div>
+          <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
+            Excel
+          </button>
+        </div>
+      )}
+
+      {embedded && (
+        <div className="rm-embedded-meta">
+          <span className="rm-toolbar-range">{dateRangeLabel}</span>
+          {extraFilterCount > 0 && (
+            <span className="rm-active-filters">{extraFilterCount} extra filter{extraFilterCount > 1 ? "s" : ""} on</span>
+          )}
+          <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
+            Download Excel
+          </button>
+        </div>
+      )}
 
       {showFilters && (
         <div className="rm-filter-panel">

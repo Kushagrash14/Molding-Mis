@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { computeMetrics, normalizeReasonsMap } from "../lib/calculations.js";
+import MaterialConsumptionView from "./MaterialConsumptionView.jsx";
 
 /**
  * Creates smooth cubic bezier curve SVG path from array of points [{x, y}]
@@ -615,17 +616,42 @@ export default function MoldsenseDashboard({
   entries = [],
   master = [],
   machines = [],
+  plants = [],
+  shifts = [],
   reasonCodes = [],
   selectedPlantId = "1040",
+  onSelectPlant,
   selectedMonth = "2026-09",
   userRole = "operator",
+  currentUser,
 }) {
   const isOperator = userRole === "operator";
+  const isAdmin = userRole === "admin";
   const [activeTab, setActiveTab] = useState("Monthly MIS");
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Operator strictly gets ONLY Monthly MIS; Supervisors and Admins get both tabs
-  const TABS = isOperator ? ["Monthly MIS"] : ["Monthly MIS", "Daily OEE Matrix"];
+  // Operator: Monthly MIS only. Others: Monthly MIS + Daily OEE. Admin also gets RM Consumption.
+  const TABS = isOperator
+    ? ["Monthly MIS"]
+    : isAdmin
+      ? ["Monthly MIS", "Daily OEE Matrix", "RM Consumption"]
+      : ["Monthly MIS", "Daily OEE Matrix"];
   const currentTab = isOperator ? "Monthly MIS" : activeTab;
+
+  // Only plants this user can access (App already passes accessiblePlants). All = those plants only.
+  const plantOptions = useMemo(() => {
+    const list = Array.isArray(plants) ? plants : [];
+    return list;
+  }, [plants]);
+
+  const plantValue =
+    selectedPlantId === "all" || plantOptions.some((p) => String(p.plant_id) === String(selectedPlantId))
+      ? selectedPlantId || "all"
+      : plantOptions[0]?.plant_id || "all";
+
+  const handlePlantChange = (value) => {
+    if (typeof onSelectPlant === "function") onSelectPlant(value);
+  };
 
   const monthInfo = useMemo(() => getMonthInfo(selectedMonth), [selectedMonth]);
 
@@ -822,7 +848,6 @@ export default function MoldsenseDashboard({
 
   return (
     <div className="mis-dashboard-container">
-      {/* Tab Navigation Strip (Only Monthly MIS for Operator, 2 Tabs for Supervisor/Admin) */}
       <div className="ms-tab-bar">
         <div className="ms-tab-group">
           {TABS.map((t) => (
@@ -831,13 +856,46 @@ export default function MoldsenseDashboard({
               type="button"
               className={`ms-tab-item ${currentTab === t ? "active" : ""}`}
               onClick={() => {
-                if (!isOperator) setActiveTab(t);
+                if (!isOperator) {
+                  setActiveTab(t);
+                  if (t !== "RM Consumption") setShowFilters(false);
+                }
               }}
             >
               {t}
             </button>
           ))}
         </div>
+
+        {!isOperator && (
+          <div className="ms-tab-controls">
+            <label className="ms-plant-label">
+              <span>Plant</span>
+              <select
+                className="ms-plant-select"
+                value={plantOptions.length > 1 ? plantValue : plantOptions[0]?.plant_id || plantValue}
+                onChange={(e) => handlePlantChange(e.target.value)}
+              >
+                {plantOptions.length > 1 && <option value="all">All ({plantOptions.length} plants)</option>}
+                {plantOptions.map((p) => (
+                  <option key={p.plant_id} value={p.plant_id}>
+                    {p.name || p.plant_id}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {currentTab === "RM Consumption" && (
+              <button
+                type="button"
+                className={`ms-filter-btn${showFilters ? " active" : ""}`}
+                onClick={() => setShowFilters((v) => !v)}
+              >
+                Filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Monthly MIS Tab: KPI strip + 3x2 Graphs Grid */}
@@ -921,6 +979,25 @@ export default function MoldsenseDashboard({
       {/* Daily OEE Matrix Tab: Machine × Day Heatmap (Strictly blocked for Operator) */}
       {!isOperator && currentTab === "Daily OEE Matrix" && (
         <DailyOeeMatrixView matrixData={matrixData} plantRow={plantRow} monthInfo={monthInfo} />
+      )}
+
+      {isAdmin && currentTab === "RM Consumption" && (
+        <div className="ms-content-area ms-rm-area">
+          <MaterialConsumptionView
+            embedded
+            filtersOpen={showFilters}
+            onFiltersOpenChange={setShowFilters}
+            entries={entries}
+            master={master}
+            plants={plantOptions}
+            machines={machines}
+            shifts={shifts}
+            reasonCodes={reasonCodes}
+            selectedPlantId={plantValue}
+            onSelectPlant={handlePlantChange}
+            currentUser={currentUser}
+          />
+        </div>
       )}
     </div>
   );
