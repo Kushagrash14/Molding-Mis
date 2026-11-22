@@ -5,6 +5,8 @@ import { exportProductionToExcel, exportProductionToCSV } from "../lib/excelExpo
 import Pill from "./Pill.jsx";
 import ExcelExportModal from "./ExcelExportModal.jsx";
 
+const PAGE_SIZE = 50;
+
 export default function EntriesTable({
   entries,
   master,
@@ -24,9 +26,11 @@ export default function EntriesTable({
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const tableScrollRef = useRef(null);
   useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollTop = 0;
     }
@@ -73,6 +77,15 @@ export default function EntriesTable({
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, [filtered]);
+
+  // Level-1 roller: render only first N rows (data/filter/export stay full & correct)
+  const visibleRows = useMemo(
+    () => sorted.slice(0, visibleCount),
+    [sorted, visibleCount]
+  );
+  const totalMatches = sorted.length;
+  const showingCount = Math.min(visibleCount, totalMatches);
+  const hasMore = showingCount < totalMatches;
 
   function handleExportExcel() {
     if (sorted.length === 0) {
@@ -267,7 +280,7 @@ export default function EntriesTable({
             </tr>
           </thead>
           <tbody>
-            {sorted.length === 0 && (
+            {totalMatches === 0 && (
               <tr className="empty-row">
                 <td
                   colSpan={viewerRole === "admin" ? 16 : viewerRole === "operator" ? 10 : 15}
@@ -277,7 +290,7 @@ export default function EntriesTable({
                 </td>
               </tr>
             )}
-            {sorted.map((e) => {
+            {visibleRows.map((e) => {
               const metrics = computeMetrics(e, master, reasonCodes);
               const isEntryLocked =
                 isEntryPastTwelveHours(e, shifts) &&
@@ -449,6 +462,42 @@ export default function EntriesTable({
           </tbody>
         </table>
       </div>
+
+      {totalMatches > 0 && (
+        <div className="table-pagination entries-load-more">
+          <span>
+            Showing <strong>{showingCount}</strong> of <strong>{totalMatches}</strong> entries
+            {hasMore ? ` · next batch +${Math.min(PAGE_SIZE, totalMatches - showingCount)}` : ""}
+          </span>
+          <div className="pagination-controls">
+            {hasMore ? (
+              <button
+                type="button"
+                className="pagination-btn active"
+                onClick={() => setVisibleCount((n) => Math.min(n + PAGE_SIZE, totalMatches))}
+              >
+                Load more ({Math.min(PAGE_SIZE, totalMatches - showingCount)})
+              </button>
+            ) : (
+              <button type="button" className="pagination-btn" disabled>
+                All loaded
+              </button>
+            )}
+            {visibleCount > PAGE_SIZE && (
+              <button
+                type="button"
+                className="pagination-btn"
+                onClick={() => {
+                  setVisibleCount(PAGE_SIZE);
+                  if (tableScrollRef.current) tableScrollRef.current.scrollTop = 0;
+                }}
+              >
+                Show first 50
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {showExportModal && (
         <ExcelExportModal

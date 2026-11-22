@@ -6354,6 +6354,14 @@ tbody tr:last-child td {
   background: #f8fafc;
 }
 
+.entries-load-more {
+  margin-top: 0;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: #f8fafc;
+}
+
 /* Docked pagination bar inside Master Table Card */
 .master-table-card .table-pagination {
   flex-shrink: 0;
