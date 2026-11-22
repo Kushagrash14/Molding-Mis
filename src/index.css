@@ -7149,6 +7149,23 @@ main.content:has(.mis-dashboard-container.rm-mode) {
   min-height: 0;
   overflow: auto;
 }
+.rm-formula-help {
+  margin: 12px 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+}
+.rm-formula-help > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  list-style: none;
+}
+.rm-formula-help > summary::-webkit-details-marker {
+  display: none;
+}
 .rm-data-table {
   width: 100%;
   border-collapse: separate;

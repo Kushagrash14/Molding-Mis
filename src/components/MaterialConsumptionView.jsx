@@ -1239,138 +1239,125 @@ export default function MaterialConsumptionView({
               </tbody>
             </table>
         )}
-      </div>
-      </div>
 
-      {!embedded && (
-      <details
-        style={{
-          background: "#f8fafc",
-          borderRadius: "8px",
-          border: "1px solid #e2e8f0",
-          padding: "8px 12px",
-        }}
-      >
-        <summary style={{ cursor: "pointer", fontSize: "12px", fontWeight: "700", color: "#475569", listStyle: "none" }}>
-          How RM is calculated · Net Wt = Part Wt + (Runner ÷ Cavities) · Total = (OK+Rej) × Net Wt · click to expand
-        </summary>
-        <div style={{ marginTop: "10px" }}>
-        <p style={{ margin: "0 0 10px 0", fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
-          Shop-floor reconciliation: RM on OK + rejection + runner scrap.
-        </p>
+        {/* Formula help — bottom of scroll (embedded + standalone) */}
+        <details className="rm-formula-help">
+          <summary>
+            How RM is calculated · Net Wt = Part Wt + (Runner ÷ Cavities) · Total = (OK+Rej) × Net Wt · click to expand
+          </summary>
+          <div style={{ marginTop: "10px" }}>
+          <p style={{ margin: "0 0 10px 0", fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
+            Shop-floor reconciliation: RM on OK + rejection + runner scrap.
+          </p>
 
-        {/* 3 Formula Columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: "16px", marginBottom: "22px" }}>
-          {/* Card 1: Per-Piece Formula */}
-          <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#2563eb" }}></span>
-              <strong style={{ fontSize: "13px", color: "#1e3a8a" }}>1. Net Weight Per Piece</strong>
-            </div>
-            <div style={{ background: "#eff6ff", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#1e40af", marginBottom: "8px" }}>
-              Net Wt/Pc = Part Wt + (Runner Wt ÷ Active Cavities)
-            </div>
-            <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
-              Har 1 finished part banane me uska apna plastic weight lagta hai, plus runner/sprue ka uske hisse ka plastic share lagta hai.
-            </div>
-          </div>
-
-          {/* Card 2: Total Consumption Formula */}
-          <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a" }}></span>
-              <strong style={{ fontSize: "13px", color: "#166534" }}>2. Total RM Consumed</strong>
-            </div>
-            <div style={{ background: "#f0fdf4", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#15803d", marginBottom: "8px" }}>
-              Total RM Consumed (kg) = (OK + Rejection) × Net Wt/Pc
-            </div>
-            <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
-              RM (Plastic) OK part me bhi lagta hai aur Rejection part me bhi lagta hai. Isliye Total Produced Pieces (OK + Rej) se multiply hota hai.
-            </div>
-          </div>
-
-          {/* Card 3: 3-Way Store Audit Reconciliation */}
-          <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#7c3aed" }}></span>
-              <strong style={{ fontSize: "13px", color: "#5b21b6" }}>3. Store &amp; Scrap Reconciliation</strong>
-            </div>
-            <div style={{ background: "#f5f3ff", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#6d28d9", marginBottom: "8px" }}>
-              Total = FG Net Wt + Rejection Scrap + Runner Scrap
-            </div>
-            <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
-              • FG Wt = OK × Part Wt<br />
-              • Rej Wt = Rejection × Part Wt<br />
-              • Runner Scrap = Total Shots × Runner Wt
-            </div>
-          </div>
-        </div>
-
-        {/* Live Interactive Calculation Card */}
-        {examplePart && (
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: "10px",
-              padding: "18px 22px",
-              border: "1.5px solid #93c5fd",
-              boxShadow: "0 2px 4px rgba(37,99,235,0.06)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-              <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e3a8a" }}>
-                💡 Live Example Breakdown: <span style={{ color: "#0284c7", fontFamily: "Consolas, monospace" }}>{examplePart.sapCode}</span> — {examplePart.description}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: "16px", marginBottom: "22px" }}>
+            <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#2563eb" }}></span>
+                <strong style={{ fontSize: "13px", color: "#1e3a8a" }}>1. Net Weight Per Piece</strong>
               </div>
-              <div style={{ fontSize: "11px", color: "#64748b" }}>
-                (Click any row in Part-Wise table above to test with that part)
+              <div style={{ background: "#eff6ff", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#1e40af", marginBottom: "8px" }}>
+                Net Wt/Pc = Part Wt + (Runner Wt ÷ Active Cavities)
+              </div>
+              <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
+                Har 1 finished part banane me uska apna plastic weight lagta hai, plus runner/sprue ka uske hisse ka plastic share lagta hai.
               </div>
             </div>
 
+            <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a" }}></span>
+                <strong style={{ fontSize: "13px", color: "#166534" }}>2. Total RM Consumed</strong>
+              </div>
+              <div style={{ background: "#f0fdf4", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#15803d", marginBottom: "8px" }}>
+                Total RM Consumed (kg) = (OK + Rejection) × Net Wt/Pc
+              </div>
+              <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
+                RM (Plastic) OK part me bhi lagta hai aur Rejection part me bhi lagta hai. Isliye Total Produced Pieces (OK + Rej) se multiply hota hai.
+              </div>
+            </div>
+
+            <div style={{ background: "#ffffff", borderRadius: "8px", padding: "16px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#7c3aed" }}></span>
+                <strong style={{ fontSize: "13px", color: "#5b21b6" }}>3. Store &amp; Scrap Reconciliation</strong>
+              </div>
+              <div style={{ background: "#f5f3ff", padding: "10px 12px", borderRadius: "6px", fontFamily: "Consolas, monospace", fontSize: "12px", color: "#6d28d9", marginBottom: "8px" }}>
+                Total = FG Net Wt + Rejection Scrap + Runner Scrap
+              </div>
+              <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
+                • FG Wt = OK × Part Wt<br />
+                • Rej Wt = Rejection × Part Wt<br />
+                • Runner Scrap = Total Shots × Runner Wt
+              </div>
+            </div>
+          </div>
+
+          {examplePart && (
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "12px",
-                padding: "12px 14px",
-                background: "#f8fafc",
-                borderRadius: "8px",
-                fontSize: "12px",
-                marginBottom: "14px",
+                background: "#ffffff",
+                borderRadius: "10px",
+                padding: "18px 22px",
+                border: "1.5px solid #93c5fd",
+                boxShadow: "0 2px 4px rgba(37,99,235,0.06)",
               }}
             >
-              <div><strong>Part Weight:</strong> {fmtNum(examplePart.partWt, 4)} kg ({Number((examplePart.partWt * 1000).toFixed(1))}g)</div>
-              <div><strong>Runner Weight:</strong> {fmtNum(examplePart.runWt, 4)} kg ({Number((examplePart.runWt * 1000).toFixed(1))}g)</div>
-              <div><strong>Cavity:</strong> {examplePart.moldCombo} (Factor: {examplePart.cavityFactor})</div>
-              <div><strong>OK Produced:</strong> {fmtInt(examplePart.ok)} pcs</div>
-              <div><strong>Rejections:</strong> {fmtInt(examplePart.rej)} pcs</div>
-              <div><strong>Total Produced:</strong> {fmtInt(examplePart.produced)} pcs</div>
-            </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e3a8a" }}>
+                  Live Example Breakdown: <span style={{ color: "#0284c7", fontFamily: "Consolas, monospace" }}>{examplePart.sapCode}</span> — {examplePart.description}
+                </div>
+                <div style={{ fontSize: "11px", color: "#64748b" }}>
+                  (Click any row in Part-Wise table above to test with that part)
+                </div>
+              </div>
 
-            <div style={{ fontSize: "12px", color: "#334155", lineHeight: "1.8", fontFamily: "Consolas, monospace", background: "#f1f5f9", padding: "14px", borderRadius: "8px" }}>
-              <div><strong>Step 1:</strong> Net Wt/Piece = {fmtNum(examplePart.partWt, 4)} + ({fmtNum(examplePart.runWt, 4)} ÷ {examplePart.cavityFactor}) = <strong style={{ color: "#0284c7" }}>{fmtNum(examplePart.netWt, 4)} kg/pc</strong></div>
-              <div><strong>Step 2:</strong> Total RM Consumed = {fmtInt(examplePart.produced)} pcs × {fmtNum(examplePart.netWt, 4)} kg/pc ≈ <strong style={{ color: "#1e3a8a", fontSize: "13px" }}>{fmtInt(examplePart.totalConsumption)} kg</strong></div>
-              <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #cbd5e1", color: "#475569" }}>
-                <strong>Verification Breakup (Rounded):</strong><br />
-                • Finished Goods (FG) Weight = {fmtInt(examplePart.ok)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#166534" }}>{fmtInt(examplePart.fgWeight)} kg</strong><br />
-                • Rejection Scrap Weight = {fmtInt(examplePart.rej)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#991b1b" }}>{fmtInt(examplePart.rejWeight)} kg</strong><br />
-                • Runner Scrap Weight = {fmtInt(examplePart.shots)} shots × {fmtNum(examplePart.runWt, 4)} ≈ <strong style={{ color: "#92400e" }}>{fmtInt(examplePart.runnerScrap)} kg</strong><br />
-                • <strong>Sum Total = {fmtInt(examplePart.fgWeight)} + {fmtInt(examplePart.rejWeight)} + {fmtInt(examplePart.runnerScrap)} = <span style={{ color: "#1e3a8a" }}>{fmtInt(examplePart.totalConsumption)} kg</span> (Exact Rounded Match)</strong>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "12px",
+                  padding: "12px 14px",
+                  background: "#f8fafc",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  marginBottom: "14px",
+                }}
+              >
+                <div><strong>Part Weight:</strong> {fmtNum(examplePart.partWt, 4)} kg ({Number((examplePart.partWt * 1000).toFixed(1))}g)</div>
+                <div><strong>Runner Weight:</strong> {fmtNum(examplePart.runWt, 4)} kg ({Number((examplePart.runWt * 1000).toFixed(1))}g)</div>
+                <div><strong>Cavity:</strong> {examplePart.moldCombo} (Factor: {examplePart.cavityFactor})</div>
+                <div><strong>OK Produced:</strong> {fmtInt(examplePart.ok)} pcs</div>
+                <div><strong>Rejections:</strong> {fmtInt(examplePart.rej)} pcs</div>
+                <div><strong>Total Produced:</strong> {fmtInt(examplePart.produced)} pcs</div>
+              </div>
+
+              <div style={{ fontSize: "12px", color: "#334155", lineHeight: "1.8", fontFamily: "Consolas, monospace", background: "#f1f5f9", padding: "14px", borderRadius: "8px" }}>
+                <div><strong>Step 1:</strong> Net Wt/Piece = {fmtNum(examplePart.partWt, 4)} + ({fmtNum(examplePart.runWt, 4)} ÷ {examplePart.cavityFactor}) = <strong style={{ color: "#0284c7" }}>{fmtNum(examplePart.netWt, 4)} kg/pc</strong></div>
+                <div><strong>Step 2:</strong> Total RM Consumed = {fmtInt(examplePart.produced)} pcs × {fmtNum(examplePart.netWt, 4)} kg/pc ≈ <strong style={{ color: "#1e3a8a", fontSize: "13px" }}>{fmtInt(examplePart.totalConsumption)} kg</strong></div>
+                <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #cbd5e1", color: "#475569" }}>
+                  <strong>Verification Breakup (Rounded):</strong><br />
+                  • Finished Goods (FG) Weight = {fmtInt(examplePart.ok)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#166534" }}>{fmtInt(examplePart.fgWeight)} kg</strong><br />
+                  • Rejection Scrap Weight = {fmtInt(examplePart.rej)} × {fmtNum(examplePart.partWt, 4)} ≈ <strong style={{ color: "#991b1b" }}>{fmtInt(examplePart.rejWeight)} kg</strong><br />
+                  • Runner Scrap Weight = {fmtInt(examplePart.shots)} shots × {fmtNum(examplePart.runWt, 4)} ≈ <strong style={{ color: "#92400e" }}>{fmtInt(examplePart.runnerScrap)} kg</strong><br />
+                  • <strong>Sum Total = {fmtInt(examplePart.fgWeight)} + {fmtInt(examplePart.rejWeight)} + {fmtInt(examplePart.runnerScrap)} = <span style={{ color: "#1e3a8a" }}>{fmtInt(examplePart.totalConsumption)} kg</span> (Exact Rounded Match)</strong>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "11px", color: "#64748b" }}>
-          <div>
-            <strong>Hot runner:</strong> Runner Wt = 0 → Consumption = Produced × Part Wt
+          <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "11px", color: "#64748b" }}>
+            <div>
+              <strong>Hot runner:</strong> Runner Wt = 0 → Consumption = Produced × Part Wt
+            </div>
+            <div>
+              <strong>Cold runner:</strong> Runner Wt add karna zaroori hai, warna store deficit dikhega
+            </div>
           </div>
-          <div>
-            <strong>Cold runner:</strong> Runner Wt add karna zaroori hai, warna store deficit dikhega
           </div>
-        </div>
-        </div>
-      </details>
-      )}
+        </details>
+      </div>
+      </div>
     </div>
   );
 }
