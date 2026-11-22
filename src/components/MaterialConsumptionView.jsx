@@ -656,18 +656,6 @@ export default function MaterialConsumptionView({
         </div>
       )}
 
-      {embedded && (
-        <div className="rm-embedded-meta">
-          <span className="rm-toolbar-range">{dateRangeLabel}</span>
-          {extraFilterCount > 0 && (
-            <span className="rm-active-filters">{extraFilterCount} extra filter{extraFilterCount > 1 ? "s" : ""} on</span>
-          )}
-          <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
-            Download Excel
-          </button>
-        </div>
-      )}
-
       {showFilters && (
         <div className="rm-filter-panel">
           <div className="rm-filter-row">
@@ -929,6 +917,12 @@ export default function MaterialConsumptionView({
               {tab.label}
             </button>
           ))}
+          <span style={{ marginLeft: "auto", fontSize: "11px", color: "#64748b", fontWeight: "600" }}>
+            {dateRangeLabel}
+          </span>
+          <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
+            Excel
+          </button>
         </div>
 
         {/* View 1: Machine-Wise Summary Table */}
