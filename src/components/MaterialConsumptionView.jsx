@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useLayoutEffect } from "react";
 import * as XLSX from "xlsx";
 import { computeMetrics, findProduct } from "../lib/calculations.js";
 import { familyInPlant } from "../data/familyMolds.js";
@@ -70,6 +70,10 @@ export default function MaterialConsumptionView({
   embedded = false,
   filtersOpen,
   onFiltersOpenChange,
+  viewMode: controlledViewMode,
+  onViewModeChange,
+  onChromeChange,
+  exportRef,
 }) {
   // Filters
   const [dateFilterType, setDateFilterType] = useState("month"); // 'today', 'yesterday', 'last7', 'month', 'lastMonth', 'selectMonth', 'custom', 'allTime'
@@ -80,7 +84,13 @@ export default function MaterialConsumptionView({
   const [shiftFilter, setShiftFilter] = useState("all");
   const [machineFilter, setMachineFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("machine"); // 'machine', 'summary' (part), 'detailed' (shift run)
+  const [internalViewMode, setInternalViewMode] = useState("machine"); // 'machine', 'summary' (part), 'detailed' (shift run)
+  const viewMode = controlledViewMode ?? internalViewMode;
+  const setViewMode = (next) => {
+    const value = typeof next === "function" ? next(viewMode) : next;
+    if (typeof onViewModeChange === "function") onViewModeChange(value);
+    else setInternalViewMode(value);
+  };
   const [expandedMachineId, setExpandedMachineId] = useState(null);
   const [selectedExampleSap, setSelectedExampleSap] = useState(null);
   const [internalShowFilters, setInternalShowFilters] = useState(false);
@@ -438,6 +448,22 @@ export default function MaterialConsumptionView({
     return partSummary[0] || null;
   }, [partSummary, selectedExampleSap]);
 
+  React.useEffect(() => {
+    if (typeof onChromeChange !== "function") return;
+    onChromeChange({
+      machineCount: machineSummary.length,
+      partCount: partSummary.length,
+      shiftCount: filteredRecords.length,
+      dateRangeLabel,
+    });
+  }, [
+    onChromeChange,
+    machineSummary.length,
+    partSummary.length,
+    filteredRecords.length,
+    dateRangeLabel,
+  ]);
+
   // Export to Excel function
   const handleExportExcel = () => {
     try {
@@ -609,6 +635,14 @@ export default function MaterialConsumptionView({
       alert("Failed to export Excel report: " + err.message);
     }
   };
+
+  useLayoutEffect(() => {
+    if (!exportRef) return undefined;
+    exportRef.current = handleExportExcel;
+    return () => {
+      exportRef.current = null;
+    };
+  });
 
   const extraFilterCount =
     (dateFilterType !== "month" ? 1 : 0) +
@@ -813,40 +847,42 @@ export default function MaterialConsumptionView({
         ))}
       </div>
 
-        <div className="rm-view-tabs">
-          {[
-            { id: "machine", label: `Machine (${machineSummary.length})` },
-            { id: "summary", label: `Part (${partSummary.length})` },
-            { id: "detailed", label: `Shift Log (${filteredRecords.length})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setViewMode(tab.id)}
-              style={{
-                padding: "4px 10px",
-                fontSize: "11px",
-                fontWeight: "700",
-                borderRadius: "5px",
-                border: "1px solid",
-                borderColor: viewMode === tab.id ? "#2563eb" : "#cbd5e1",
-                background: viewMode === tab.id ? "#eff6ff" : "#ffffff",
-                color: viewMode === tab.id ? "#1e40af" : "#64748b",
-                cursor: "pointer",
-              }}
-            >
-              {tab.label}
+        {!embedded && (
+          <div className="rm-view-tabs">
+            {[
+              { id: "machine", label: `Machine (${machineSummary.length})` },
+              { id: "summary", label: `Part (${partSummary.length})` },
+              { id: "detailed", label: `Shift Log (${filteredRecords.length})` },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setViewMode(tab.id)}
+                style={{
+                  padding: "4px 10px",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  borderRadius: "5px",
+                  border: "1px solid",
+                  borderColor: viewMode === tab.id ? "#2563eb" : "#cbd5e1",
+                  background: viewMode === tab.id ? "#eff6ff" : "#ffffff",
+                  color: viewMode === tab.id ? "#1e40af" : "#64748b",
+                  cursor: "pointer",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+            <span style={{ marginLeft: "auto", fontSize: "11px", color: "#64748b", fontWeight: "600" }}>
+              {dateRangeLabel}
+            </span>
+            <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
+              Excel
             </button>
-          ))}
-          <span style={{ marginLeft: "auto", fontSize: "11px", color: "#64748b", fontWeight: "600" }}>
-            {dateRangeLabel}
-          </span>
-          <button type="button" className="rm-toolbar-excel" onClick={handleExportExcel}>
-            Excel
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="rm-table-card">
+      <div className={`rm-table-card${embedded ? " rm-table-card--solo" : ""}`}>
       <div className="rm-table-scroll">
         {/* View 1: Machine-Wise Summary Table */}
         {viewMode === "machine" && (

@@ -629,6 +629,14 @@ export default function MoldsenseDashboard({
   const isAdmin = userRole === "admin";
   const [activeTab, setActiveTab] = useState("Monthly MIS");
   const [showFilters, setShowFilters] = useState(false);
+  const [rmViewMode, setRmViewMode] = useState("machine");
+  const [rmChrome, setRmChrome] = useState({
+    machineCount: 0,
+    partCount: 0,
+    shiftCount: 0,
+    dateRangeLabel: "",
+  });
+  const rmExportRef = useRef(null);
 
   // Operator: Monthly MIS only. Others: Monthly MIS + Daily OEE. Admin also gets RM Consumption.
   const TABS = isOperator
@@ -869,6 +877,27 @@ export default function MoldsenseDashboard({
 
         {!isOperator && (
           <div className="ms-tab-controls">
+            {currentTab === "RM Consumption" && (
+              <div className="ms-rm-view-group" role="tablist" aria-label="RM view">
+                {[
+                  { id: "machine", label: `Machine (${rmChrome.machineCount})` },
+                  { id: "summary", label: `Part (${rmChrome.partCount})` },
+                  { id: "detailed", label: `Shift Log (${rmChrome.shiftCount})` },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={rmViewMode === tab.id}
+                    className={`ms-rm-view-btn${rmViewMode === tab.id ? " active" : ""}`}
+                    onClick={() => setRmViewMode(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <label className="ms-plant-label">
               <span>Plant</span>
               <select
@@ -886,13 +915,24 @@ export default function MoldsenseDashboard({
             </label>
 
             {currentTab === "RM Consumption" && (
-              <button
-                type="button"
-                className={`ms-filter-btn${showFilters ? " active" : ""}`}
-                onClick={() => setShowFilters((v) => !v)}
-              >
-                Filters
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={`ms-filter-btn${showFilters ? " active" : ""}`}
+                  onClick={() => setShowFilters((v) => !v)}
+                >
+                  Filters
+                </button>
+                <button
+                  type="button"
+                  className="ms-excel-btn"
+                  onClick={() => {
+                    if (typeof rmExportRef.current === "function") rmExportRef.current();
+                  }}
+                >
+                  Excel
+                </button>
+              </>
             )}
           </div>
         )}
@@ -987,6 +1027,10 @@ export default function MoldsenseDashboard({
             embedded
             filtersOpen={showFilters}
             onFiltersOpenChange={setShowFilters}
+            viewMode={rmViewMode}
+            onViewModeChange={setRmViewMode}
+            onChromeChange={setRmChrome}
+            exportRef={rmExportRef}
             entries={entries}
             master={master}
             plants={plantOptions}
