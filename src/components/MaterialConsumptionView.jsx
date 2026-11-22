@@ -592,134 +592,117 @@ export default function MaterialConsumptionView({
     }
   };
 
+  const filterSelect = {
+    padding: "4px 8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    border: "1px solid #cbd5e1",
+    borderRadius: "5px",
+    background: "#ffffff",
+  };
+
   return (
-    <div style={{ padding: "20px 24px", maxWidth: "1560px", margin: "0 auto", color: "#0f172a" }}>
-      {/* Top Banner & Header */}
+    <div style={{ padding: "10px 14px 16px", maxWidth: "1560px", margin: "0 auto", color: "#0f172a" }}>
+      {/* Header + Excel on one tight row */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "20px",
+          alignItems: "center",
+          marginBottom: "10px",
           flexWrap: "wrap",
-          gap: "14px",
+          gap: "8px",
         }}
       >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
-            <h1 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>
-              RM Consumption Analytics
-            </h1>
-            <span
-              style={{
-                background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-                color: "#ffffff",
-                fontSize: "11px",
-                fontWeight: "700",
-                padding: "3px 9px",
-                borderRadius: "20px",
-                letterSpacing: "0.5px",
-                boxShadow: "0 2px 4px rgba(79, 70, 229, 0.25)",
-              }}
-            >
-              🔒 Super Admin Exclusive
-            </span>
-          </div>
-          <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-            Plant &amp; Machine-wise Raw Material (RM) consumption, Finished Goods (FG) net weight, runner scrap &amp; rejection loss audit.
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button
-            onClick={handleExportExcel}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#0f172a" }}>
+            RM Consumption Analytics
+          </h1>
+          <span
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "7px",
-              padding: "9px 16px",
-              background: "#16a34a",
+              background: "#4f46e5",
               color: "#ffffff",
-              border: "none",
-              borderRadius: "7px",
-              fontSize: "13px",
-              fontWeight: "600",
-              cursor: "pointer",
-              boxShadow: "0 2px 4px rgba(22, 163, 74, 0.2)",
+              fontSize: "10px",
+              fontWeight: "700",
+              padding: "2px 7px",
+              borderRadius: "4px",
             }}
           >
-            <span>📥</span> Download Excel (3 Sheets)
-          </button>
+            Super Admin
+          </span>
+          <span style={{ fontSize: "12px", color: "#64748b" }}>
+            Plant / machine RM, FG, runner &amp; rejection audit
+          </span>
         </div>
+        <button
+          onClick={handleExportExcel}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            padding: "6px 12px",
+            background: "#16a34a",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "12px",
+            fontWeight: "600",
+            cursor: "pointer",
+          }}
+        >
+          Download Excel
+        </button>
       </div>
 
-      {/* Filter Toolbar */}
+      {/* Compact filter toolbar — one dense block, full width */}
       <div
         style={{
           background: "#ffffff",
-          borderRadius: "10px",
-          padding: "16px 20px",
+          borderRadius: "8px",
+          padding: "8px 10px",
           border: "1px solid #e2e8f0",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          marginBottom: "20px",
+          marginBottom: "10px",
           display: "flex",
-          flexWrap: "wrap",
-          gap: "16px",
-          alignItems: "center",
-          justifyContent: "space-between",
+          flexDirection: "column",
+          gap: "6px",
         }}
       >
-        {/* Quick Date Pills & Deep History Picker */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-          <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569", marginRight: "4px" }}>
-            Date Range:
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
           {[
             { id: "today", label: "Today" },
             { id: "yesterday", label: "Yesterday" },
             { id: "last7", label: "Last 7 Days" },
             { id: "month", label: "This Month" },
             { id: "lastMonth", label: "Last Month" },
-            { id: "selectMonth", label: "Select Month 📅" },
-            { id: "custom", label: "Custom Range" },
+            { id: "selectMonth", label: "Select Month" },
+            { id: "custom", label: "Custom" },
             { id: "allTime", label: "All Time" },
           ].map((pill) => (
             <button
               key={pill.id}
               onClick={() => setDateFilterType(pill.id)}
               style={{
-                padding: "6px 12px",
-                fontSize: "12px",
+                padding: "3px 9px",
+                fontSize: "11px",
                 fontWeight: "600",
-                borderRadius: "6px",
+                borderRadius: "5px",
                 border: "1px solid",
                 borderColor: dateFilterType === pill.id ? "#3b82f6" : "#cbd5e1",
                 background: dateFilterType === pill.id ? "#eff6ff" : "#ffffff",
                 color: dateFilterType === pill.id ? "#1d4ed8" : "#475569",
                 cursor: "pointer",
-                transition: "all 0.15s ease",
               }}
             >
               {pill.label}
             </button>
           ))}
 
-          {/* Deep Past Month Selector */}
           {dateFilterType === "selectMonth" && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "4px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               <select
                 value={selectedYm}
                 onChange={(e) => setSelectedYm(e.target.value)}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  border: "1.5px solid #3b82f6",
-                  borderRadius: "6px",
-                  background: "#eff6ff",
-                  color: "#1d4ed8",
-                }}
+                style={{ ...filterSelect, borderColor: "#3b82f6", background: "#eff6ff", color: "#1d4ed8" }}
               >
                 {availableMonths.map((ym) => (
                   <option key={ym} value={ym}>
@@ -731,326 +714,199 @@ export default function MaterialConsumptionView({
                 type="month"
                 value={selectedYm}
                 onChange={(e) => setSelectedYm(e.target.value)}
-                style={{
-                  padding: "4px 8px",
-                  fontSize: "12px",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
+                style={filterSelect}
                 title="Or pick any custom month/year directly"
               />
             </div>
           )}
 
-          {/* Custom Date Range Pickers (Go as far back as needed) */}
           {dateFilterType === "custom" && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "6px" }}>
-              <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>From:</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                style={{
-                  padding: "5px 8px",
-                  fontSize: "12px",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                }}
+                style={filterSelect}
               />
-              <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>To:</span>
+              <span style={{ fontSize: "11px", color: "#64748b" }}>to</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                style={{
-                  padding: "5px 8px",
-                  fontSize: "12px",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                }}
+                style={filterSelect}
               />
             </div>
           )}
         </div>
 
-        {/* Dropdowns: Plant, Shift, Machine, Search */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-          {/* Plant Selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>Plant:</span>
-            <select
-              value={plantFilter}
-              onChange={(e) => {
-                setPlantFilter(e.target.value);
-                if (onSelectPlant) onSelectPlant(e.target.value);
-              }}
-              style={{
-                padding: "6px 10px",
-                fontSize: "12px",
-                fontWeight: "600",
-                border: "1px solid #cbd5e1",
-                borderRadius: "6px",
-                background: "#ffffff",
-              }}
-            >
-              <option value="all">All Plants</option>
-              {plants.map((p) => (
-                <option key={p.plant_id} value={p.plant_id}>
-                  {p.name}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <select
+            value={plantFilter}
+            onChange={(e) => {
+              setPlantFilter(e.target.value);
+              if (onSelectPlant) onSelectPlant(e.target.value);
+            }}
+            style={filterSelect}
+            title="Plant"
+          >
+            <option value="all">All Plants</option>
+            {plants.map((p) => (
+              <option key={p.plant_id} value={p.plant_id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          <select value={shiftFilter} onChange={(e) => setShiftFilter(e.target.value)} style={filterSelect} title="Shift">
+            <option value="all">All Shifts</option>
+            {shifts.map((s) => (
+              <option key={s.shift_id} value={s.shift_id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={machineFilter}
+            onChange={(e) => setMachineFilter(e.target.value)}
+            style={{ ...filterSelect, maxWidth: "160px" }}
+            title="Machine"
+          >
+            <option value="all">All Machines</option>
+            {machines
+              .filter((mc) => activePlantId === "all" || String(mc.plant_id || "1040") === activePlantId)
+              .map((mc) => (
+                <option key={mc.machine_id} value={mc.machine_id}>
+                  {mc.machine_no}
                 </option>
               ))}
-            </select>
-          </div>
+          </select>
 
-          {/* Shift Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>Shift:</span>
-            <select
-              value={shiftFilter}
-              onChange={(e) => setShiftFilter(e.target.value)}
-              style={{
-                padding: "6px 10px",
-                fontSize: "12px",
-                fontWeight: "600",
-                border: "1px solid #cbd5e1",
-                borderRadius: "6px",
-                background: "#ffffff",
-              }}
-            >
-              <option value="all">All Shifts</option>
-              {shifts.map((s) => (
-                <option key={s.shift_id} value={s.shift_id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Machine Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>Machine:</span>
-            <select
-              value={machineFilter}
-              onChange={(e) => setMachineFilter(e.target.value)}
-              style={{
-                padding: "6px 10px",
-                fontSize: "12px",
-                fontWeight: "600",
-                border: "1px solid #cbd5e1",
-                borderRadius: "6px",
-                background: "#ffffff",
-                maxWidth: "140px",
-              }}
-            >
-              <option value="all">All Machines</option>
-              {machines
-                .filter((mc) => activePlantId === "all" || String(mc.plant_id || "1040") === activePlantId)
-                .map((mc) => (
-                  <option key={mc.machine_id} value={mc.machine_id}>
-                    {mc.machine_no}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* Search Box */}
           <input
             type="text"
-            placeholder="Search SAP, part, machine..."
+            placeholder="Search SAP, part, machine…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              padding: "6px 12px",
-              fontSize: "12px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "6px",
-              width: "180px",
+              ...filterSelect,
+              flex: "1 1 220px",
+              minWidth: "160px",
+              fontWeight: "500",
             }}
           />
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI strip — dense 5-column row */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-          gap: "14px",
-          marginBottom: "20px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: "8px",
+          marginBottom: "10px",
         }}
       >
-        {/* Card 1: Total Consumption */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "10px",
-            padding: "16px 18px",
-            border: "1px solid #e2e8f0",
-            borderLeft: "5px solid #2563eb",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Total RM Consumed
+        {[
+          {
+            label: "Total RM Consumed",
+            value: `${fmtInt(totals.totalConsumption)} kg`,
+            sub: `≈ ${(totals.totalConsumption / 1000).toFixed(1)} MT`,
+            color: "#1e3a8a",
+            subColor: "#2563eb",
+            border: "#2563eb",
+          },
+          {
+            label: "Finished Goods (FG)",
+            value: `${fmtInt(totals.fgWeight)} kg`,
+            sub: `${Math.round(totals.fgPct)}% of consumed`,
+            color: "#166534",
+            subColor: "#16a34a",
+            border: "#16a34a",
+          },
+          {
+            label: "Runner Scrap",
+            value: `${fmtInt(totals.runnerScrap)} kg`,
+            sub: `${Math.round(totals.runnerPct)}% runner loss`,
+            color: "#92400e",
+            subColor: "#d97706",
+            border: "#d97706",
+          },
+          {
+            label: "Rejection Scrap",
+            value: `${fmtInt(totals.rejWeight)} kg`,
+            sub: `${Math.round(totals.rejPct)}% · ${fmtInt(totals.rej)} pcs`,
+            color: "#991b1b",
+            subColor: "#dc2626",
+            border: "#dc2626",
+          },
+          {
+            label: "Machines & Shots",
+            value: `${machineSummary.length} Machines`,
+            sub: `Shots ${fmtInt(totals.shots)} · Prod ${fmtInt(totals.produced)}`,
+            color: "#3730a3",
+            subColor: "#4f46e5",
+            border: "#6366f1",
+          },
+        ].map((card) => (
+          <div
+            key={card.label}
+            style={{
+              background: "#ffffff",
+              borderRadius: "7px",
+              padding: "8px 10px",
+              border: "1px solid #e2e8f0",
+              borderLeft: `3px solid ${card.border}`,
+              minWidth: 0,
+            }}
+          >
+            <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.02em" }}>
+              {card.label}
+            </div>
+            <div style={{ fontSize: "17px", fontWeight: "800", color: card.color, marginTop: "2px", lineHeight: 1.2 }}>
+              {card.value}
+            </div>
+            <div style={{ fontSize: "11px", color: card.subColor, fontWeight: "600", marginTop: "1px" }}>{card.sub}</div>
           </div>
-          <div style={{ fontSize: "24px", fontWeight: "800", color: "#1e3a8a", marginTop: "4px" }}>
-            {fmtInt(totals.totalConsumption)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
-          </div>
-          <div style={{ fontSize: "12px", color: "#2563eb", fontWeight: "700", marginTop: "2px" }}>
-            ≈ {(totals.totalConsumption / 1000).toFixed(1)} Metric Tonnes (MT)
-          </div>
-        </div>
-
-        {/* Card 2: FG Net Weight */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "10px",
-            padding: "16px 18px",
-            border: "1px solid #e2e8f0",
-            borderLeft: "5px solid #16a34a",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Finished Goods (FG) Net RM
-          </div>
-          <div style={{ fontSize: "24px", fontWeight: "800", color: "#166534", marginTop: "4px" }}>
-            {fmtInt(totals.fgWeight)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
-          </div>
-          <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: "700", marginTop: "2px" }}>
-            {Math.round(totals.fgPct)}% of total consumed
-          </div>
-        </div>
-
-        {/* Card 3: Runner Scrap */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "10px",
-            padding: "16px 18px",
-            border: "1px solid #e2e8f0",
-            borderLeft: "5px solid #d97706",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Runner Scrap Generated
-          </div>
-          <div style={{ fontSize: "24px", fontWeight: "800", color: "#92400e", marginTop: "4px" }}>
-            {fmtInt(totals.runnerScrap)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
-          </div>
-          <div style={{ fontSize: "12px", color: "#d97706", fontWeight: "700", marginTop: "2px" }}>
-            {Math.round(totals.runnerPct)}% runner loss
-          </div>
-        </div>
-
-        {/* Card 4: Rejection Scrap */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "10px",
-            padding: "16px 18px",
-            border: "1px solid #e2e8f0",
-            borderLeft: "5px solid #dc2626",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Part Rejection Scrap
-          </div>
-          <div style={{ fontSize: "24px", fontWeight: "800", color: "#991b1b", marginTop: "4px" }}>
-            {fmtInt(totals.rejWeight)} <span style={{ fontSize: "14px", fontWeight: "600" }}>kg</span>
-          </div>
-          <div style={{ fontSize: "12px", color: "#dc2626", fontWeight: "700", marginTop: "2px" }}>
-            {Math.round(totals.rejPct)}% ({fmtInt(totals.rej)} rejected pcs)
-          </div>
-        </div>
-
-        {/* Card 5: Production & Machines */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "10px",
-            padding: "16px 18px",
-            border: "1px solid #e2e8f0",
-            borderLeft: "5px solid #6366f1",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-            Active Machines &amp; Shots
-          </div>
-          <div style={{ fontSize: "24px", fontWeight: "800", color: "#3730a3", marginTop: "4px" }}>
-            {machineSummary.length} <span style={{ fontSize: "14px", fontWeight: "600" }}>Machines</span>
-          </div>
-          <div style={{ fontSize: "12px", color: "#4f46e5", fontWeight: "600", marginTop: "2px" }}>
-            Shots: <strong>{fmtInt(totals.shots)}</strong> | Prod: <strong>{fmtInt(totals.produced)}</strong> pcs
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Material Balance Bar */}
+      {/* Material Balance — compact */}
       <div
         style={{
           background: "#ffffff",
-          borderRadius: "10px",
-          padding: "14px 20px",
+          borderRadius: "7px",
+          padding: "8px 12px",
           border: "1px solid #e2e8f0",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          marginBottom: "20px",
+          marginBottom: "10px",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
-          <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>
-            RM Balance ({dateRangeLabel}):
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px", flexWrap: "wrap", gap: "4px" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569" }}>
+            RM Balance · {dateRangeLabel}
           </span>
-          <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>
-            Yield (FG / Consumed): <strong style={{ color: "#16a34a" }}>{Math.round(totals.fgPct)}%</strong> | Total Scrap: <strong style={{ color: "#dc2626" }}>{Math.round(totals.scrapPct)}%</strong>
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "11px", fontWeight: "600", flexWrap: "wrap" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#166534" }}>
+              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#16a34a" }} />
+              FG {Math.round(totals.fgPct)}%
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#92400e" }}>
+              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#d97706" }} />
+              Runner {Math.round(totals.runnerPct)}%
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#991b1b" }}>
+              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#dc2626" }} />
+              Rej {Math.round(totals.rejPct)}%
+            </span>
+            <span style={{ color: "#64748b" }}>
+              Yield <strong style={{ color: "#16a34a" }}>{Math.round(totals.fgPct)}%</strong> · Scrap{" "}
+              <strong style={{ color: "#dc2626" }}>{Math.round(totals.scrapPct)}%</strong>
+            </span>
+          </div>
         </div>
-
-        <div style={{ height: "18px", display: "flex", borderRadius: "6px", overflow: "hidden", background: "#f1f5f9" }}>
-          <div
-            title={`Finished Goods: ${Math.round(totals.fgPct)}% (${fmtInt(totals.fgWeight)} kg)`}
-            style={{
-              width: `${totals.fgPct}%`,
-              background: "#16a34a",
-              transition: "width 0.3s ease",
-            }}
-          />
-          <div
-            title={`Runner Scrap: ${Math.round(totals.runnerPct)}% (${fmtInt(totals.runnerScrap)} kg)`}
-            style={{
-              width: `${totals.runnerPct}%`,
-              background: "#d97706",
-              transition: "width 0.3s ease",
-            }}
-          />
-          <div
-            title={`Rejection Scrap: ${Math.round(totals.rejPct)}% (${fmtInt(totals.rejWeight)} kg)`}
-            style={{
-              width: `${totals.rejPct}%`,
-              background: "#dc2626",
-              transition: "width 0.3s ease",
-            }}
-          />
-        </div>
-
-        <div style={{ display: "flex", gap: "20px", marginTop: "8px", fontSize: "11px", fontWeight: "600" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#166534" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#16a34a" }}></span>
-            Finished Goods ({Math.round(totals.fgPct)}%)
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#92400e" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#d97706" }}></span>
-            Runner Scrap ({Math.round(totals.runnerPct)}%)
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#991b1b" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#dc2626" }}></span>
-            Rejection Scrap ({Math.round(totals.rejPct)}%)
-          </span>
+        <div style={{ height: "10px", display: "flex", borderRadius: "4px", overflow: "hidden", background: "#f1f5f9" }}>
+          <div title={`FG ${Math.round(totals.fgPct)}%`} style={{ width: `${totals.fgPct}%`, background: "#16a34a" }} />
+          <div title={`Runner ${Math.round(totals.runnerPct)}%`} style={{ width: `${totals.runnerPct}%`, background: "#d97706" }} />
+          <div title={`Rej ${Math.round(totals.rejPct)}%`} style={{ width: `${totals.rejPct}%`, background: "#dc2626" }} />
         </div>
       </div>
 
@@ -1058,89 +914,46 @@ export default function MaterialConsumptionView({
       <div
         style={{
           background: "#ffffff",
-          borderRadius: "10px",
+          borderRadius: "8px",
           border: "1px solid #e2e8f0",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
           overflow: "hidden",
-          marginBottom: "24px",
+          marginBottom: "12px",
         }}
       >
-        {/* Table View Switcher Header (3 Views) */}
         <div
           style={{
-            padding: "12px 20px",
+            padding: "6px 10px",
             background: "#f8fafc",
             borderBottom: "1px solid #e2e8f0",
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "10px",
+            gap: "6px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          {[
+            { id: "machine", label: `Machine (${machineSummary.length})` },
+            { id: "summary", label: `Part (${partSummary.length})` },
+            { id: "detailed", label: `Shift Log (${filteredRecords.length})` },
+          ].map((tab) => (
             <button
-              onClick={() => setViewMode("machine")}
+              key={tab.id}
+              onClick={() => setViewMode(tab.id)}
               style={{
-                padding: "6px 14px",
-                fontSize: "12px",
+                padding: "4px 10px",
+                fontSize: "11px",
                 fontWeight: "700",
-                borderRadius: "6px",
+                borderRadius: "5px",
                 border: "1px solid",
-                borderColor: viewMode === "machine" ? "#2563eb" : "#cbd5e1",
-                background: viewMode === "machine" ? "#eff6ff" : "#ffffff",
-                color: viewMode === "machine" ? "#1e40af" : "#64748b",
+                borderColor: viewMode === tab.id ? "#2563eb" : "#cbd5e1",
+                background: viewMode === tab.id ? "#eff6ff" : "#ffffff",
+                color: viewMode === tab.id ? "#1e40af" : "#64748b",
                 cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
               }}
             >
-              <span>🏭</span> Machine-Wise Summary ({machineSummary.length} Machines)
+              {tab.label}
             </button>
-            <button
-              onClick={() => setViewMode("summary")}
-              style={{
-                padding: "6px 14px",
-                fontSize: "12px",
-                fontWeight: "700",
-                borderRadius: "6px",
-                border: "1px solid",
-                borderColor: viewMode === "summary" ? "#2563eb" : "#cbd5e1",
-                background: viewMode === "summary" ? "#eff6ff" : "#ffffff",
-                color: viewMode === "summary" ? "#1e40af" : "#64748b",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span>📊</span> Part-Wise Summary ({partSummary.length} Parts)
-            </button>
-            <button
-              onClick={() => setViewMode("detailed")}
-              style={{
-                padding: "6px 14px",
-                fontSize: "12px",
-                fontWeight: "700",
-                borderRadius: "6px",
-                border: "1px solid",
-                borderColor: viewMode === "detailed" ? "#2563eb" : "#cbd5e1",
-                background: viewMode === "detailed" ? "#eff6ff" : "#ffffff",
-                color: viewMode === "detailed" ? "#1e40af" : "#64748b",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span>📋</span> Shift-Wise Detailed Log ({filteredRecords.length} Runs)
-            </button>
-          </div>
-
-          <div style={{ fontSize: "12px", color: "#64748b" }}>
-            Active View: <strong>{viewMode === "machine" ? "Machine Breakdown" : viewMode === "summary" ? "Part Breakdown" : "Shift Log"}</strong>
-          </div>
+          ))}
         </div>
 
         {/* View 1: Machine-Wise Summary Table */}
@@ -1506,27 +1319,20 @@ export default function MaterialConsumptionView({
         )}
       </div>
 
-      {/* ============================================================== */}
-      {/* THE CALCULATION LOGIC & AUDIT GUIDE (At the Bottom)            */}
-      {/* ============================================================== */}
-      <div
+      <details
         style={{
-          background: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
-          borderRadius: "12px",
-          border: "1.5px solid #cbd5e1",
-          padding: "24px 28px",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+          background: "#f8fafc",
+          borderRadius: "8px",
+          border: "1px solid #e2e8f0",
+          padding: "8px 12px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-          <span style={{ fontSize: "20px" }}>📐</span>
-          <h2 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#0f172a" }}>
-            How RM Consumption is Calculated (Standard Manufacturing Logic &amp; Formulas)
-          </h2>
-        </div>
-
-        <p style={{ margin: "0 0 18px 0", fontSize: "13px", color: "#475569", lineHeight: "1.6" }}>
-          Plastic injection molding manufacturing me raw material (RM) consumption calculate karne ka yeh official, standard engineering aur shop-floor reconciliation formula hai:
+        <summary style={{ cursor: "pointer", fontSize: "12px", fontWeight: "700", color: "#475569", listStyle: "none" }}>
+          How RM is calculated · Net Wt = Part Wt + (Runner ÷ Cavities) · Total = (OK+Rej) × Net Wt · click to expand
+        </summary>
+        <div style={{ marginTop: "10px" }}>
+        <p style={{ margin: "0 0 10px 0", fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>
+          Shop-floor reconciliation: RM on OK + rejection + runner scrap.
         </p>
 
         {/* 3 Formula Columns */}
@@ -1630,16 +1436,16 @@ export default function MaterialConsumptionView({
           </div>
         )}
 
-        {/* Cold vs Hot Runner Note */}
-        <div style={{ marginTop: "16px", display: "flex", gap: "24px", flexWrap: "wrap", fontSize: "12px", color: "#64748b" }}>
+        <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "11px", color: "#64748b" }}>
           <div>
-            🔥 <strong>Hot Runner Molds:</strong> Hot runner molds me runner solidify nahi hota (Runner Wt = 0), isliye direct <code style={{ background: "#e2e8f0", padding: "1px 4px", borderRadius: "3px" }}>Consumption = Produced × Part Wt</code> hota hai.
+            <strong>Hot runner:</strong> Runner Wt = 0 → Consumption = Produced × Part Wt
           </div>
           <div>
-            ❄️ <strong>Cold Runner Molds:</strong> Cold runner molds me runner solid nikalta hai, isliye runner weight add karna compulsory hota hai warna store me RM ka deficit/shortage show hoga.
+            <strong>Cold runner:</strong> Runner Wt add karna zaroori hai, warna store deficit dikhega
           </div>
         </div>
-      </div>
+        </div>
+      </details>
     </div>
   );
 }
