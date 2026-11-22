@@ -274,7 +274,8 @@ function AreaChart({
 }
 
 /** Professional grouped bars: FG / Runner / Rej on the same actual kg scale */
-function GroupedComparisonBarChart({ title, data = [] }) {
+/** One bar per day — FG (bottom) + Runner + Rej (top) stacked colours */
+function StackedComparisonBarChart({ title, data = [] }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize();
   const padLeft = 44;
@@ -284,6 +285,7 @@ function GroupedComparisonBarChart({ title, data = [] }) {
   const chartW = Math.max(1, width - padLeft - padRight);
   const chartH = Math.max(1, height - padTop - padBottom);
 
+  // Bottom → top stack order
   const series = [
     { key: "fgKg", color: "#16a34a", label: "FG" },
     { key: "runnerKg", color: "#d97706", label: "Runner" },
@@ -291,13 +293,13 @@ function GroupedComparisonBarChart({ title, data = [] }) {
   ];
 
   const yMax = useMemo(() => {
-    const vals = data
-      .flatMap((d) => [d.fgKg, d.runnerKg, d.rejKg])
-      .filter((v) => v !== null && v !== undefined)
-      .map(Number);
-    const peak = vals.length ? Math.max(...vals) : 0;
+    const totals = data.map((d) => {
+      if (d.fgKg == null && d.runnerKg == null && d.rejKg == null) return 0;
+      return (Number(d.fgKg) || 0) + (Number(d.runnerKg) || 0) + (Number(d.rejKg) || 0);
+    });
+    const peak = Math.max(...totals, 0);
     if (peak <= 0) return 100;
-    let ceiling = peak * 1.15;
+    let ceiling = peak * 1.12;
     if (ceiling <= 500) return Math.ceil(ceiling / 50) * 50;
     if (ceiling <= 2000) return Math.ceil(ceiling / 100) * 100;
     if (ceiling <= 10000) return Math.ceil(ceiling / 500) * 500;
@@ -309,18 +311,14 @@ function GroupedComparisonBarChart({ title, data = [] }) {
     [yMax]
   );
   const slotW = chartW / Math.max(1, data.length);
-  const groupW = Math.min(slotW * 0.78, 28);
-  const barGap = Math.min(2, groupW * 0.08);
-  const barW = Math.max(2, (groupW - barGap * 2) / 3);
+  const barW = Math.min(Math.max(8, slotW * 0.55), 26);
   const dateEvery = Math.max(1, Math.ceil(data.length / 10));
   const valueEvery = Math.max(1, Math.ceil(data.length / 8));
   const hovered = hoveredIdx !== null ? data[hoveredIdx] : null;
-  const hoverX =
-    hoveredIdx !== null ? padLeft + (hoveredIdx + 0.5) * slotW : null;
+  const hoverX = hoveredIdx !== null ? padLeft + (hoveredIdx + 0.5) * slotW : null;
 
   const shortValue = (value) => {
     const n = Number(value) || 0;
-    if (n >= 10000) return `${(n / 1000).toFixed(1)}k`;
     if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
     return Math.round(n).toLocaleString("en-IN");
   };
@@ -340,16 +338,9 @@ function GroupedComparisonBarChart({ title, data = [] }) {
         <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
           <defs>
             {series.map((s) => (
-              <linearGradient
-                key={s.key}
-                id={`compare_${s.key}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
+              <linearGradient key={s.key} id={`stack_${s.key}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={s.color} stopOpacity="1" />
-                <stop offset="100%" stopColor={s.color} stopOpacity="0.62" />
+                <stop offset="100%" stopColor={s.color} stopOpacity="0.72" />
               </linearGradient>
             ))}
           </defs>
@@ -357,23 +348,9 @@ function GroupedComparisonBarChart({ title, data = [] }) {
             const y = padTop + chartH - (tick / yMax) * chartH;
             return (
               <g key={tick}>
-                <line
-                  x1={padLeft}
-                  y1={y}
-                  x2={width - padRight}
-                  y2={y}
-                  stroke="#e8eef5"
-                  strokeWidth="1"
-                />
-                <text
-                  x={padLeft - 6}
-                  y={y + 3.5}
-                  textAnchor="end"
-                  className="ms-axis-tick"
-                >
-                  {tick >= 1000
-                    ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k`
-                    : tick}
+                <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#e8eef5" strokeWidth="1" />
+                <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
+                  {tick >= 1000 ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k` : tick}
                 </text>
               </g>
             );
@@ -384,44 +361,69 @@ function GroupedComparisonBarChart({ title, data = [] }) {
             </text>
           )}
           {data.map((d, idx) => {
+            if (d.fgKg == null && d.runnerKg == null && d.rejKg == null) return null;
             const centerX = padLeft + (idx + 0.5) * slotW;
-            const startX = centerX - groupW / 2;
+            const x = centerX - barW / 2;
+            const fg = Number(d.fgKg) || 0;
+            const runner = Number(d.runnerKg) || 0;
+            const rej = Number(d.rejKg) || 0;
+            const total = fg + runner + rej;
+            if (total <= 0) return null;
+
+            const hFg = (fg / yMax) * chartH;
+            const hRun = (runner / yMax) * chartH;
+            const hRej = (rej / yMax) * chartH;
+            const yFg = padTop + chartH - hFg;
+            const yRun = yFg - hRun;
+            const yRej = yRun - hRej;
             const showValues = idx % valueEvery === 0 || hoveredIdx === idx;
+            const isHot = hoveredIdx === idx;
+
+            const topY = yRej;
             return (
-              <g key={idx}>
-                {series.map((s, si) => {
-                  const raw = d[s.key];
-                  if (raw === null || raw === undefined) return null;
-                  const value = Number(raw) || 0;
-                  const visualH = Math.max(value > 0 ? 2 : 0, (value / yMax) * chartH);
-                  const x = startX + si * (barW + barGap);
-                  const y = padTop + chartH - visualH;
-                  return (
-                    <g key={s.key}>
-                      <rect
-                        x={x}
-                        y={y}
-                        width={barW}
-                        height={visualH}
-                        rx={Math.min(2.5, barW / 2)}
-                        fill={`url(#compare_${s.key})`}
-                        opacity={hoveredIdx === null || hoveredIdx === idx ? 1 : 0.78}
-                      />
-                      {showValues && value > 0 && (
-                        <text
-                          x={x + barW / 2}
-                          y={Math.max(10, y - 4)}
-                          textAnchor="middle"
-                          fontSize={hoveredIdx === idx ? "8.5" : "7.5"}
-                          fontWeight="700"
-                          fill={s.color}
-                        >
-                          {shortValue(value)}
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
+              <g key={idx} opacity={hoveredIdx === null || isHot ? 1 : 0.72}>
+                {/* Same bar, 3 stacked colours: FG → Runner → Rej */}
+                <rect x={x} y={yFg} width={barW} height={Math.max(0, hFg)} fill="url(#stack_fgKg)" />
+                {hRun > 0 && <rect x={x} y={yRun} width={barW} height={hRun} fill="url(#stack_runnerKg)" />}
+                {hRej > 0 && <rect x={x} y={yRej} width={barW} height={hRej} fill="url(#stack_rejKg)" />}
+                {/* Soft rounded top cap */}
+                <rect
+                  x={x}
+                  y={topY}
+                  width={barW}
+                  height={Math.min(4, hFg + hRun + hRej)}
+                  rx={3}
+                  fill={hRej > 0 ? "#dc2626" : hRun > 0 ? "#d97706" : "#16a34a"}
+                />
+
+                {showValues && (
+                  <text
+                    x={centerX}
+                    y={Math.max(12, topY - 5)}
+                    textAnchor="middle"
+                    fontSize={isHot ? "9" : "8"}
+                    fontWeight="800"
+                    fill="#0f172a"
+                  >
+                    {shortValue(total)}
+                  </text>
+                )}
+                {isHot && hFg > 14 && (
+                  <text x={centerX} y={yFg + hFg / 2 + 3} textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#fff">
+                    {shortValue(fg)}
+                  </text>
+                )}
+                {isHot && hRun > 12 && (
+                  <text x={centerX} y={yRun + hRun / 2 + 3} textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#fff">
+                    {shortValue(runner)}
+                  </text>
+                )}
+                {isHot && hRej > 12 && (
+                  <text x={centerX} y={yRej + hRej / 2 + 3} textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#fff">
+                    {shortValue(rej)}
+                  </text>
+                )}
+
                 <rect
                   x={centerX - slotW / 2}
                   y={padTop}
@@ -451,14 +453,14 @@ function GroupedComparisonBarChart({ title, data = [] }) {
           )}
         </svg>
         {hovered && hoverX != null && hovered.fgKg != null && (
-          <div
-            className="ms-tooltip"
-            style={{ left: `${(hoverX / width) * 100}%`, top: "12%" }}
-          >
+          <div className="ms-tooltip" style={{ left: `${(hoverX / width) * 100}%`, top: "12%" }}>
             <div className="ms-tooltip-date">{hovered.label}</div>
             <div className="ms-tooltip-val"><span className="dot" style={{ background: "#16a34a" }} /> FG {fmtInt(hovered.fgKg)} kg</div>
             <div className="ms-tooltip-val"><span className="dot" style={{ background: "#d97706" }} /> Runner {fmtInt(hovered.runnerKg)} kg</div>
             <div className="ms-tooltip-val"><span className="dot" style={{ background: "#dc2626" }} /> Rej {fmtInt(hovered.rejKg)} kg</div>
+            <div className="ms-tooltip-val" style={{ marginTop: 2, fontWeight: 800 }}>
+              Total {fmtInt((Number(hovered.fgKg) || 0) + (Number(hovered.runnerKg) || 0) + (Number(hovered.rejKg) || 0))} kg
+            </div>
           </div>
         )}
       </div>
@@ -810,7 +812,7 @@ export default function RmConsumptionTrendView({
           unit=" kg"
           showLabelThreshold={20}
         />
-        <GroupedComparisonBarChart title="FG vs RUNNER vs REJ (KG)" data={dailySeries} />
+        <StackedComparisonBarChart title="FG vs RUNNER vs REJ (KG)" data={dailySeries} />
         <RankBarChart title="TOP MACHINES BY RM CONSUMPTION" color="#2563eb" items={topMachines} />
         <RankBarChart title="TOP PARTS BY RM CONSUMPTION" color="#7c3aed" items={topParts} />
       </div>
