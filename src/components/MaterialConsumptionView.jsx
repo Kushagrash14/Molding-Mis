@@ -80,6 +80,7 @@ export default function MaterialConsumptionView({
   const [viewMode, setViewMode] = useState("machine"); // 'machine', 'summary' (part), 'detailed' (shift run)
   const [expandedMachineId, setExpandedMachineId] = useState(null);
   const [selectedExampleSap, setSelectedExampleSap] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Sync internal plant filter with external selectedPlantId if changed
   const activePlantId = plantFilter;
@@ -593,7 +594,7 @@ export default function MaterialConsumptionView({
   };
 
   const filterSelect = {
-    padding: "4px 8px",
+    padding: "5px 10px",
     fontSize: "12px",
     fontWeight: "600",
     border: "1px solid #cbd5e1",
@@ -601,9 +602,15 @@ export default function MaterialConsumptionView({
     background: "#ffffff",
   };
 
+  const extraFilterCount =
+    (dateFilterType !== "month" ? 1 : 0) +
+    (shiftFilter !== "all" ? 1 : 0) +
+    (machineFilter !== "all" ? 1 : 0) +
+    (searchTerm.trim() ? 1 : 0);
+
   return (
     <div style={{ padding: "10px 14px 16px", maxWidth: "1560px", margin: "0 auto", color: "#0f172a" }}>
-      {/* Header + Excel on one tight row */}
+      {/* One row: title · plant · filter · excel */}
       <div
         style={{
           display: "flex",
@@ -630,113 +637,6 @@ export default function MaterialConsumptionView({
           >
             Super Admin
           </span>
-          <span style={{ fontSize: "12px", color: "#64748b" }}>
-            Plant / machine RM, FG, runner &amp; rejection audit
-          </span>
-        </div>
-        <button
-          onClick={handleExportExcel}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            padding: "6px 12px",
-            background: "#16a34a",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "12px",
-            fontWeight: "600",
-            cursor: "pointer",
-          }}
-        >
-          Download Excel
-        </button>
-      </div>
-
-      {/* Compact filter toolbar — one dense block, full width */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "8px",
-          padding: "8px 10px",
-          border: "1px solid #e2e8f0",
-          marginBottom: "10px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
-          {[
-            { id: "today", label: "Today" },
-            { id: "yesterday", label: "Yesterday" },
-            { id: "last7", label: "Last 7 Days" },
-            { id: "month", label: "This Month" },
-            { id: "lastMonth", label: "Last Month" },
-            { id: "selectMonth", label: "Select Month" },
-            { id: "custom", label: "Custom" },
-            { id: "allTime", label: "All Time" },
-          ].map((pill) => (
-            <button
-              key={pill.id}
-              onClick={() => setDateFilterType(pill.id)}
-              style={{
-                padding: "3px 9px",
-                fontSize: "11px",
-                fontWeight: "600",
-                borderRadius: "5px",
-                border: "1px solid",
-                borderColor: dateFilterType === pill.id ? "#3b82f6" : "#cbd5e1",
-                background: dateFilterType === pill.id ? "#eff6ff" : "#ffffff",
-                color: dateFilterType === pill.id ? "#1d4ed8" : "#475569",
-                cursor: "pointer",
-              }}
-            >
-              {pill.label}
-            </button>
-          ))}
-
-          {dateFilterType === "selectMonth" && (
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <select
-                value={selectedYm}
-                onChange={(e) => setSelectedYm(e.target.value)}
-                style={{ ...filterSelect, borderColor: "#3b82f6", background: "#eff6ff", color: "#1d4ed8" }}
-              >
-                {availableMonths.map((ym) => (
-                  <option key={ym} value={ym}>
-                    {fmtMonthLabel(ym)}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="month"
-                value={selectedYm}
-                onChange={(e) => setSelectedYm(e.target.value)}
-                style={filterSelect}
-                title="Or pick any custom month/year directly"
-              />
-            </div>
-          )}
-
-          {dateFilterType === "custom" && (
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <input
-                type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
-                style={filterSelect}
-              />
-              <span style={{ fontSize: "11px", color: "#64748b" }}>to</span>
-              <input
-                type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
-                style={filterSelect}
-              />
-            </div>
-          )}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -746,7 +646,7 @@ export default function MaterialConsumptionView({
               setPlantFilter(e.target.value);
               if (onSelectPlant) onSelectPlant(e.target.value);
             }}
-            style={filterSelect}
+            style={{ ...filterSelect, minWidth: "180px" }}
             title="Plant"
           >
             <option value="all">All Plants</option>
@@ -757,45 +657,164 @@ export default function MaterialConsumptionView({
             ))}
           </select>
 
-          <select value={shiftFilter} onChange={(e) => setShiftFilter(e.target.value)} style={filterSelect} title="Shift">
-            <option value="all">All Shifts</option>
-            {shifts.map((s) => (
-              <option key={s.shift_id} value={s.shift_id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={machineFilter}
-            onChange={(e) => setMachineFilter(e.target.value)}
-            style={{ ...filterSelect, maxWidth: "160px" }}
-            title="Machine"
-          >
-            <option value="all">All Machines</option>
-            {machines
-              .filter((mc) => activePlantId === "all" || String(mc.plant_id || "1040") === activePlantId)
-              .map((mc) => (
-                <option key={mc.machine_id} value={mc.machine_id}>
-                  {mc.machine_no}
-                </option>
-              ))}
-          </select>
-
-          <input
-            type="text"
-            placeholder="Search SAP, part, machine…"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+          <button
+            type="button"
+            onClick={() => setShowFilters((v) => !v)}
             style={{
-              ...filterSelect,
-              flex: "1 1 220px",
-              minWidth: "160px",
-              fontWeight: "500",
+              padding: "5px 12px",
+              fontSize: "12px",
+              fontWeight: "700",
+              borderRadius: "5px",
+              border: "1px solid",
+              borderColor: showFilters || extraFilterCount > 0 ? "#3b82f6" : "#cbd5e1",
+              background: showFilters || extraFilterCount > 0 ? "#eff6ff" : "#ffffff",
+              color: showFilters || extraFilterCount > 0 ? "#1d4ed8" : "#334155",
+              cursor: "pointer",
             }}
-          />
+          >
+            Filters{extraFilterCount > 0 ? ` (${extraFilterCount})` : ""}{showFilters ? " ▴" : " ▾"}
+          </button>
+
+          <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>{dateRangeLabel}</span>
+
+          <button
+            onClick={handleExportExcel}
+            style={{
+              padding: "5px 12px",
+              background: "#16a34a",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "12px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            Download Excel
+          </button>
         </div>
       </div>
+
+      {showFilters && (
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "8px",
+            padding: "10px 12px",
+            border: "1px solid #e2e8f0",
+            marginBottom: "10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
+            {[
+              { id: "today", label: "Today" },
+              { id: "yesterday", label: "Yesterday" },
+              { id: "last7", label: "Last 7 Days" },
+              { id: "month", label: "This Month" },
+              { id: "lastMonth", label: "Last Month" },
+              { id: "selectMonth", label: "Select Month" },
+              { id: "custom", label: "Custom" },
+              { id: "allTime", label: "All Time" },
+            ].map((pill) => (
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => setDateFilterType(pill.id)}
+                style={{
+                  padding: "3px 9px",
+                  fontSize: "11px",
+                  fontWeight: "600",
+                  borderRadius: "5px",
+                  border: "1px solid",
+                  borderColor: dateFilterType === pill.id ? "#3b82f6" : "#cbd5e1",
+                  background: dateFilterType === pill.id ? "#eff6ff" : "#ffffff",
+                  color: dateFilterType === pill.id ? "#1d4ed8" : "#475569",
+                  cursor: "pointer",
+                }}
+              >
+                {pill.label}
+              </button>
+            ))}
+
+            {dateFilterType === "selectMonth" && (
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <select
+                  value={selectedYm}
+                  onChange={(e) => setSelectedYm(e.target.value)}
+                  style={{ ...filterSelect, borderColor: "#3b82f6", background: "#eff6ff", color: "#1d4ed8" }}
+                >
+                  {availableMonths.map((ym) => (
+                    <option key={ym} value={ym}>
+                      {fmtMonthLabel(ym)}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="month"
+                  value={selectedYm}
+                  onChange={(e) => setSelectedYm(e.target.value)}
+                  style={filterSelect}
+                />
+              </div>
+            )}
+
+            {dateFilterType === "custom" && (
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  style={filterSelect}
+                />
+                <span style={{ fontSize: "11px", color: "#64748b" }}>to</span>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  style={filterSelect}
+                />
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <select value={shiftFilter} onChange={(e) => setShiftFilter(e.target.value)} style={filterSelect}>
+              <option value="all">All Shifts</option>
+              {shifts.map((s) => (
+                <option key={s.shift_id} value={s.shift_id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={machineFilter}
+              onChange={(e) => setMachineFilter(e.target.value)}
+              style={{ ...filterSelect, maxWidth: "180px" }}
+            >
+              <option value="all">All Machines</option>
+              {machines
+                .filter((mc) => activePlantId === "all" || String(mc.plant_id || "1040") === activePlantId)
+                .map((mc) => (
+                  <option key={mc.machine_id} value={mc.machine_id}>
+                    {mc.machine_no}
+                  </option>
+                ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Search SAP, part, machine…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ ...filterSelect, flex: "1 1 200px", minWidth: "160px", fontWeight: "500" }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* KPI strip — dense 5-column row */}
       <div
