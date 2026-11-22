@@ -209,6 +209,47 @@ function MetricAreaChart({
     return `${linePath} L ${last.x.toFixed(1)} ${bottomY} L ${first.x.toFixed(1)} ${bottomY} Z`;
   }, [linePath, plotted, padTop, chartH]);
 
+  // Dynamic value labels: skip crowded points so %/numbers never overlap
+  const labelLayout = useMemo(() => {
+    const minGap = isPercent ? 34 : 28;
+    const candidates = [];
+    points.forEach((p, idx) => {
+      if (p.val === null || p.val === undefined) return;
+      if (!(p.val > showLabelThreshold)) return;
+      const prev = idx > 0 ? points[idx - 1] : null;
+      const next = idx < points.length - 1 ? points[idx + 1] : null;
+      const isPeak =
+        (!prev || prev.val === null || p.val >= prev.val) &&
+        (!next || next.val === null || p.val >= next.val);
+      const isValley =
+        (!prev || prev.val === null || p.val <= prev.val) &&
+        (!next || next.val === null || p.val <= next.val);
+      const edge = idx === 0 || idx === points.length - 1;
+      let rank = Math.abs(p.val);
+      if (isPeak) rank += 1000;
+      if (isValley) rank += 500;
+      if (edge) rank += 200;
+      candidates.push({ idx, x: p.x, y: p.y, rank, isPeak, isValley });
+    });
+    candidates.sort((a, b) => b.rank - a.rank);
+
+    const placed = [];
+    const show = new Array(points.length).fill(false);
+    const dy = new Array(points.length).fill(-8);
+
+    candidates.forEach((c) => {
+      const clash = placed.some((p) => Math.abs(p.x - c.x) < minGap && Math.abs(p.y - c.y) < 16);
+      if (clash) return;
+      show[c.idx] = true;
+      // Alternate above/below when neighbors are somewhat close, to stay readable
+      const near = placed.find((p) => Math.abs(p.x - c.x) < minGap * 1.6);
+      dy[c.idx] = near ? (near.dy < 0 ? 14 : -8) : c.isValley ? 14 : -8;
+      placed.push({ x: c.x, y: c.y, dy: dy[c.idx] });
+    });
+
+    return { show, dy };
+  }, [points, showLabelThreshold, isPercent]);
+
   const gradId = `grad_${dataKey}_${color.replace("#", "")}`;
   const labelEvery = Math.max(1, Math.ceil(26 / (chartW / Math.max(1, points.length))));
   const hovered = hoveredIdx !== null ? points[hoveredIdx] : null;
@@ -251,33 +292,35 @@ function MetricAreaChart({
           <path d={linePath} fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
         )}
 
-        {/* Points & Data Labels */}
+        {/* Points & Data Labels (collision-aware) */}
         {points.map((p, idx) => {
           const isHovered = hoveredIdx === idx;
           const hasValue = p.val !== null;
-          const isSignificant = hasValue && p.val > showLabelThreshold;
+          const showLabel = hasValue && (isHovered || labelLayout.show[idx]);
+          const labelDy = isHovered ? -10 : labelLayout.dy[idx];
           return (
             <g key={idx}>
               {hasValue && (
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={isHovered ? 4.5 : isSignificant ? 3 : 2}
+                  r={isHovered ? 4.5 : showLabel ? 3 : 2}
                   fill="#ffffff"
                   stroke={color}
                   strokeWidth={isHovered ? 2.5 : 1.8}
                 />
               )}
 
-              {isSignificant && (
+              {showLabel && (
                 <text
                   x={p.x}
-                  y={p.y - 7}
+                  y={p.y + labelDy}
                   textAnchor="middle"
                   fill="#334155"
-                  fontSize="9.5"
-                  fontWeight="600"
+                  fontSize={isHovered ? "10" : "9"}
+                  fontWeight="700"
                   className="ms-point-label"
+                  style={{ pointerEvents: "none" }}
                 >
                   {p.val.toFixed(decimals)}
                   {isPercent ? "%" : ""}
