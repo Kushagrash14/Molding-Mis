@@ -6959,3 +6959,119 @@ tbody tr:last-child td {
     justify-content: flex-end;
   }
 }
+
+/* RM Consumption freeze: tabs+KPI stay; table body scrolls */
+main.content:has(.mis-dashboard-container.rm-mode) {
+  overflow: hidden;
+}
+.mis-dashboard-container.rm-mode {
+  overflow: hidden;
+  height: 100%;
+  max-height: 100%;
+}
+.mis-dashboard-container.rm-mode .ms-tab-bar {
+  flex-shrink: 0;
+}
+.mis-dashboard-container.rm-mode .ms-rm-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rm-consumption-page.embedded {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 !important;
+}
+.rm-freeze-top {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 6px;
+  background: #f8fafc;
+  z-index: 5;
+}
+.rm-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+}
+.rm-kpi-card {
+  background: #ffffff;
+  border-radius: 7px;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-left-width: 3px;
+  border-left-style: solid;
+  min-width: 0;
+}
+.rm-kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.rm-kpi-value {
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 1px;
+  line-height: 1.2;
+}
+.rm-kpi-sub {
+  font-size: 10px;
+  font-weight: 600;
+}
+.rm-view-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px 8px 0 0;
+}
+.rm-table-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+  overflow: hidden;
+}
+.rm-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.rm-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+.rm-data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #f1f5f9;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 #e2e8f0;
+}
+.rm-filter-panel {
+  flex-shrink: 0;
+}

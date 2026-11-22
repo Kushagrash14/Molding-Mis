@@ -847,7 +847,7 @@ export default function MoldsenseDashboard({
   }, [monthRows, machines]);
 
   return (
-    <div className="mis-dashboard-container">
+    <div className={`mis-dashboard-container${currentTab === "RM Consumption" ? " rm-mode" : ""}`}>
       <div className="ms-tab-bar">
         <div className="ms-tab-group">
           {TABS.map((t) => (

@@ -656,6 +656,7 @@ export default function MaterialConsumptionView({
         </div>
       )}
 
+      <div className="rm-freeze-top">
       {showFilters && (
         <div className="rm-filter-panel">
           <div className="rm-filter-row">
@@ -761,14 +762,7 @@ export default function MaterialConsumptionView({
       )}
 
       {/* KPI strip — dense 5-column row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: "6px",
-          marginBottom: "8px",
-        }}
-      >
+      <div className="rm-kpi-grid">
         {[
           {
             label: "Total RM Consumed",
@@ -811,89 +805,15 @@ export default function MaterialConsumptionView({
             border: "#6366f1",
           },
         ].map((card) => (
-          <div
-            key={card.label}
-            style={{
-              background: "#ffffff",
-              borderRadius: "7px",
-              padding: "6px 8px",
-              border: "1px solid #e2e8f0",
-              borderLeft: `3px solid ${card.border}`,
-              minWidth: 0,
-            }}
-          >
-            <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.02em" }}>
-              {card.label}
-            </div>
-            <div style={{ fontSize: "15px", fontWeight: "800", color: card.color, marginTop: "1px", lineHeight: 1.2 }}>
-              {card.value}
-            </div>
-            <div style={{ fontSize: "10px", color: card.subColor, fontWeight: "600" }}>{card.sub}</div>
+          <div key={card.label} className="rm-kpi-card" style={{ borderLeftColor: card.border }}>
+            <div className="rm-kpi-label">{card.label}</div>
+            <div className="rm-kpi-value" style={{ color: card.color }}>{card.value}</div>
+            <div className="rm-kpi-sub" style={{ color: card.subColor }}>{card.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Material Balance — compact */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "6px",
-          padding: "5px 10px",
-          border: "1px solid #e2e8f0",
-          marginBottom: "8px",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
-          <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569" }}>
-            RM Balance · {dateRangeLabel}
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "11px", fontWeight: "600", flexWrap: "wrap" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#166534" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#16a34a" }} />
-              FG {Math.round(totals.fgPct)}%
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#92400e" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#d97706" }} />
-              Runner {Math.round(totals.runnerPct)}%
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#991b1b" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#dc2626" }} />
-              Rej {Math.round(totals.rejPct)}%
-            </span>
-            <span style={{ color: "#64748b" }}>
-              Yield <strong style={{ color: "#16a34a" }}>{Math.round(totals.fgPct)}%</strong> · Scrap{" "}
-              <strong style={{ color: "#dc2626" }}>{Math.round(totals.scrapPct)}%</strong>
-            </span>
-          </div>
-        </div>
-        <div style={{ height: "10px", display: "flex", borderRadius: "4px", overflow: "hidden", background: "#f1f5f9" }}>
-          <div title={`FG ${Math.round(totals.fgPct)}%`} style={{ width: `${totals.fgPct}%`, background: "#16a34a" }} />
-          <div title={`Runner ${Math.round(totals.runnerPct)}%`} style={{ width: `${totals.runnerPct}%`, background: "#d97706" }} />
-          <div title={`Rej ${Math.round(totals.rejPct)}%`} style={{ width: `${totals.rejPct}%`, background: "#dc2626" }} />
-        </div>
-      </div>
-
-      {/* Main Table Card */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "8px",
-          border: "1px solid #e2e8f0",
-          overflow: "hidden",
-          marginBottom: "12px",
-        }}
-      >
-        <div
-          style={{
-            padding: "6px 10px",
-            background: "#f8fafc",
-            borderBottom: "1px solid #e2e8f0",
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "6px",
-          }}
-        >
+        <div className="rm-view-tabs">
           {[
             { id: "machine", label: `Machine (${machineSummary.length})` },
             { id: "summary", label: `Part (${partSummary.length})` },
@@ -924,14 +844,16 @@ export default function MaterialConsumptionView({
             Excel
           </button>
         </div>
+      </div>
 
+      <div className="rm-table-card">
+      <div className="rm-table-scroll">
         {/* View 1: Machine-Wise Summary Table */}
         {viewMode === "machine" && (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+            <table className="rm-data-table">
               <thead>
-                <tr style={{ background: "#f1f5f9", color: "#475569", borderBottom: "2px solid #e2e8f0" }}>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>#</th>
+                <tr>
+                  <th>#</th>
                   <th style={{ padding: "10px 12px", textAlign: "left" }}>MACHINE NO &amp; TONNAGE</th>
                   <th style={{ padding: "10px 12px", textAlign: "left" }}>PLANT</th>
                   <th style={{ padding: "10px 12px", textAlign: "center" }}>MOLDS RUN</th>
@@ -1097,30 +1019,28 @@ export default function MaterialConsumptionView({
                 </tfoot>
               )}
             </table>
-          </div>
         )}
 
         {/* View 2: Part-Wise Summary Table */}
         {viewMode === "summary" && (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+            <table className="rm-data-table">
               <thead>
-                <tr style={{ background: "#f1f5f9", color: "#475569", borderBottom: "2px solid #e2e8f0" }}>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>#</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>SAP CODE</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>MATERIAL DESCRIPTION</th>
-                  <th style={{ padding: "10px 12px", textAlign: "center" }}>CAV</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PART WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>RUN WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>NET WT/PC</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>OK (PCS)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>REJ (PCS)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PRODUCED</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL RM CONSUMED</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>SHARE %</th>
+                <tr>
+                  <th>#</th>
+                  <th>SAP CODE</th>
+                  <th>MATERIAL DESCRIPTION</th>
+                  <th style={{ textAlign: "center" }}>CAV</th>
+                  <th style={{ textAlign: "right" }}>PART WT (KG)</th>
+                  <th style={{ textAlign: "right" }}>RUN WT (KG)</th>
+                  <th style={{ textAlign: "right" }}>NET WT/PC</th>
+                  <th style={{ textAlign: "right" }}>OK (PCS)</th>
+                  <th style={{ textAlign: "right" }}>REJ (PCS)</th>
+                  <th style={{ textAlign: "right" }}>PRODUCED</th>
+                  <th style={{ textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
+                  <th style={{ textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
+                  <th style={{ textAlign: "right", color: "#991b1b" }}>REJ WT (KG)</th>
+                  <th style={{ textAlign: "right", color: "#1e3a8a" }}>TOTAL RM CONSUMED</th>
+                  <th style={{ textAlign: "right" }}>SHARE %</th>
                 </tr>
               </thead>
               <tbody>
@@ -1216,31 +1136,29 @@ export default function MaterialConsumptionView({
                 </tfoot>
               )}
             </table>
-          </div>
         )}
 
         {/* View 3: Shift-Wise Detailed Log Table */}
         {viewMode === "detailed" && (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+            <table className="rm-data-table">
               <thead>
-                <tr style={{ background: "#f1f5f9", color: "#475569", borderBottom: "2px solid #e2e8f0" }}>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>DATE</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>SHIFT</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>PLANT</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>MACHINE</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>SAP CODE</th>
-                  <th style={{ padding: "10px 12px", textAlign: "left" }}>PART DESCRIPTION</th>
-                  <th style={{ padding: "10px 12px", textAlign: "center" }}>CAV</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>OK</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>REJ</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PRODUCED</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>PART WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right" }}>RUN WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#991b1b" }}>REJ (KG)</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", color: "#1e3a8a", fontWeight: "800" }}>TOTAL RM CONSUMED</th>
+                <tr>
+                  <th>DATE</th>
+                  <th>SHIFT</th>
+                  <th>PLANT</th>
+                  <th>MACHINE</th>
+                  <th>SAP CODE</th>
+                  <th>PART DESCRIPTION</th>
+                  <th style={{ textAlign: "center" }}>CAV</th>
+                  <th style={{ textAlign: "right" }}>OK</th>
+                  <th style={{ textAlign: "right" }}>REJ</th>
+                  <th style={{ textAlign: "right" }}>PRODUCED</th>
+                  <th style={{ textAlign: "right" }}>PART WT (KG)</th>
+                  <th style={{ textAlign: "right" }}>RUN WT (KG)</th>
+                  <th style={{ textAlign: "right", color: "#166534" }}>FG WT (KG)</th>
+                  <th style={{ textAlign: "right", color: "#92400e" }}>RUNNER (KG)</th>
+                  <th style={{ textAlign: "right", color: "#991b1b" }}>REJ (KG)</th>
+                  <th style={{ textAlign: "right", color: "#1e3a8a" }}>TOTAL RM CONSUMED</th>
                 </tr>
               </thead>
               <tbody>
@@ -1284,10 +1202,11 @@ export default function MaterialConsumptionView({
                 )}
               </tbody>
             </table>
-          </div>
         )}
       </div>
+      </div>
 
+      {!embedded && (
       <details
         style={{
           background: "#f8fafc",
@@ -1415,6 +1334,7 @@ export default function MaterialConsumptionView({
         </div>
         </div>
       </details>
+      )}
     </div>
   );
 }
