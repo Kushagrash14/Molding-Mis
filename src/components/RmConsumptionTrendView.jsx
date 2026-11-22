@@ -273,14 +273,14 @@ function AreaChart({
   );
 }
 
-/** 3-line comparison: FG / Runner / Rej on same scale */
-function CompareThreeLineChart({ title, data = [] }) {
+/** Professional grouped bars: FG / Runner / Rej on the same actual kg scale */
+function GroupedComparisonBarChart({ title, data = [] }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize();
-  const padLeft = 42;
+  const padLeft = 44;
   const padRight = 14;
-  const padTop = 18;
-  const padBottom = 34;
+  const padTop = 28;
+  const padBottom = 38;
   const chartW = Math.max(1, width - padLeft - padRight);
   const chartH = Math.max(1, height - padTop - padBottom);
 
@@ -308,26 +308,22 @@ function CompareThreeLineChart({ title, data = [] }) {
     () => [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(yMax * f)),
     [yMax]
   );
-
-  const buildPts = (key) =>
-    data.map((d, i) => {
-      const x = padLeft + (i / Math.max(1, data.length - 1)) * chartW;
-      const raw = d[key];
-      const has = raw !== null && raw !== undefined;
-      const val = has ? Number(raw) : null;
-      const y = has ? padTop + chartH - Math.min(1, Math.max(0, val / yMax)) * chartH : null;
-      return { x, y, val, label: d.label };
-    });
-
-  const ptsFg = useMemo(() => buildPts("fgKg"), [data, chartW, chartH, yMax]);
-  const ptsRun = useMemo(() => buildPts("runnerKg"), [data, chartW, chartH, yMax]);
-  const ptsRej = useMemo(() => buildPts("rejKg"), [data, chartW, chartH, yMax]);
-  const pathFg = useMemo(() => createSmoothPath(ptsFg.filter((p) => p.val !== null)), [ptsFg]);
-  const pathRun = useMemo(() => createSmoothPath(ptsRun.filter((p) => p.val !== null)), [ptsRun]);
-  const pathRej = useMemo(() => createSmoothPath(ptsRej.filter((p) => p.val !== null)), [ptsRej]);
-  const labelEvery = Math.max(1, Math.ceil(data.length / 10));
+  const slotW = chartW / Math.max(1, data.length);
+  const groupW = Math.min(slotW * 0.78, 28);
+  const barGap = Math.min(2, groupW * 0.08);
+  const barW = Math.max(2, (groupW - barGap * 2) / 3);
+  const dateEvery = Math.max(1, Math.ceil(data.length / 10));
+  const valueEvery = Math.max(1, Math.ceil(data.length / 8));
   const hovered = hoveredIdx !== null ? data[hoveredIdx] : null;
-  const hoverX = hoveredIdx !== null ? ptsFg[hoveredIdx]?.x : null;
+  const hoverX =
+    hoveredIdx !== null ? padLeft + (hoveredIdx + 0.5) * slotW : null;
+
+  const shortValue = (value) => {
+    const n = Number(value) || 0;
+    if (n >= 10000) return `${(n / 1000).toFixed(1)}k`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+    return Math.round(n).toLocaleString("en-IN");
+  };
 
   return (
     <div className="ms-graph-card">
@@ -342,12 +338,43 @@ function CompareThreeLineChart({ title, data = [] }) {
       </div>
       <div className="ms-graph-svg-wrap" ref={wrapRef}>
         <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
+          <defs>
+            {series.map((s) => (
+              <linearGradient
+                key={s.key}
+                id={`compare_${s.key}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor={s.color} stopOpacity="1" />
+                <stop offset="100%" stopColor={s.color} stopOpacity="0.62" />
+              </linearGradient>
+            ))}
+          </defs>
           {yTicks.map((tick) => {
             const y = padTop + chartH - (tick / yMax) * chartH;
             return (
               <g key={tick}>
-                <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">{tick}</text>
+                <line
+                  x1={padLeft}
+                  y1={y}
+                  x2={width - padRight}
+                  y2={y}
+                  stroke="#e8eef5"
+                  strokeWidth="1"
+                />
+                <text
+                  x={padLeft - 6}
+                  y={y + 3.5}
+                  textAnchor="end"
+                  className="ms-axis-tick"
+                >
+                  {tick >= 1000
+                    ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k`
+                    : tick}
+                </text>
               </g>
             );
           })}
@@ -356,48 +383,67 @@ function CompareThreeLineChart({ title, data = [] }) {
               No RM data for this month
             </text>
           )}
-          {pathFg && <path d={pathFg} fill="none" stroke="#16a34a" strokeWidth="2.4" strokeLinecap="round" />}
-          {pathRun && <path d={pathRun} fill="none" stroke="#d97706" strokeWidth="2.4" strokeLinecap="round" />}
-          {pathRej && <path d={pathRej} fill="none" stroke="#dc2626" strokeWidth="2.4" strokeLinecap="round" />}
-          {[ptsFg, ptsRun, ptsRej].map((pts, si) =>
-            pts.map((p, idx) =>
-              p.val == null ? null : (
-                <circle
-                  key={`${si}-${idx}`}
-                  cx={p.x}
-                  cy={p.y}
-                  r={hoveredIdx === idx ? 4 : 2.2}
-                  fill="#fff"
-                  stroke={series[si].color}
-                  strokeWidth="1.8"
-                />
-              )
-            )
-          )}
-          {data.map((_, idx) => {
-            const x = padLeft + (idx / Math.max(1, data.length - 1)) * chartW;
+          {data.map((d, idx) => {
+            const centerX = padLeft + (idx + 0.5) * slotW;
+            const startX = centerX - groupW / 2;
+            const showValues = idx % valueEvery === 0 || hoveredIdx === idx;
             return (
-              <rect
-                key={idx}
-                x={x - 7}
-                y={padTop}
-                width="14"
-                height={chartH}
-                fill="transparent"
-                onMouseEnter={() => setHoveredIdx(idx)}
-                onMouseLeave={() => setHoveredIdx(null)}
-              />
+              <g key={idx}>
+                {series.map((s, si) => {
+                  const raw = d[s.key];
+                  if (raw === null || raw === undefined) return null;
+                  const value = Number(raw) || 0;
+                  const visualH = Math.max(value > 0 ? 2 : 0, (value / yMax) * chartH);
+                  const x = startX + si * (barW + barGap);
+                  const y = padTop + chartH - visualH;
+                  return (
+                    <g key={s.key}>
+                      <rect
+                        x={x}
+                        y={y}
+                        width={barW}
+                        height={visualH}
+                        rx={Math.min(2.5, barW / 2)}
+                        fill={`url(#compare_${s.key})`}
+                        opacity={hoveredIdx === null || hoveredIdx === idx ? 1 : 0.78}
+                      />
+                      {showValues && value > 0 && (
+                        <text
+                          x={x + barW / 2}
+                          y={Math.max(10, y - 4)}
+                          textAnchor="middle"
+                          fontSize={hoveredIdx === idx ? "8.5" : "7.5"}
+                          fontWeight="700"
+                          fill={s.color}
+                        >
+                          {shortValue(value)}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+                <rect
+                  x={centerX - slotW / 2}
+                  y={padTop}
+                  width={slotW}
+                  height={chartH}
+                  fill="transparent"
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                />
+              </g>
             );
           })}
           {data.map((d, idx) =>
-            idx % labelEvery !== 0 ? null : (
+            idx % dateEvery !== 0 ? null : (
               <text
                 key={`x-${idx}`}
-                x={padLeft + (idx / Math.max(1, data.length - 1)) * chartW}
+                x={padLeft + (idx + 0.5) * slotW}
                 y={height - 12}
                 textAnchor="middle"
                 className="ms-axis-tick x-tick"
-                transform={`rotate(-25, ${padLeft + (idx / Math.max(1, data.length - 1)) * chartW}, ${height - 12})`}
+                transform={`rotate(-25, ${padLeft + (idx + 0.5) * slotW}, ${height - 12})`}
               >
                 {d.label}
               </text>
@@ -405,7 +451,10 @@ function CompareThreeLineChart({ title, data = [] }) {
           )}
         </svg>
         {hovered && hoverX != null && hovered.fgKg != null && (
-          <div className="ms-tooltip" style={{ left: `${(hoverX / width) * 100}%`, top: "18%" }}>
+          <div
+            className="ms-tooltip"
+            style={{ left: `${(hoverX / width) * 100}%`, top: "12%" }}
+          >
             <div className="ms-tooltip-date">{hovered.label}</div>
             <div className="ms-tooltip-val"><span className="dot" style={{ background: "#16a34a" }} /> FG {fmtInt(hovered.fgKg)} kg</div>
             <div className="ms-tooltip-val"><span className="dot" style={{ background: "#d97706" }} /> Runner {fmtInt(hovered.runnerKg)} kg</div>
@@ -761,7 +810,7 @@ export default function RmConsumptionTrendView({
           unit=" kg"
           showLabelThreshold={20}
         />
-        <CompareThreeLineChart title="FG vs RUNNER vs REJ (KG)" data={dailySeries} />
+        <GroupedComparisonBarChart title="FG vs RUNNER vs REJ (KG)" data={dailySeries} />
         <RankBarChart title="TOP MACHINES BY RM CONSUMPTION" color="#2563eb" items={topMachines} />
         <RankBarChart title="TOP PARTS BY RM CONSUMPTION" color="#7c3aed" items={topParts} />
       </div>
