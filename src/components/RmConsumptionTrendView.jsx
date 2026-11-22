@@ -83,6 +83,7 @@ function AreaChart({
   dataKey,
   defaultYMax = 20,
   defaultYTicks = [0, 5, 10, 15, 20],
+  yMin = 0,
   isPercent = false,
   unit = "",
   decimals = 1,
@@ -98,33 +99,48 @@ function AreaChart({
   const chartW = width - padLeft - padRight;
   const chartH = height - padTop - padBottom;
 
-  const { yMax, yTicks } = useMemo(() => {
-    const maxVal = Math.max(...data.map((d) => Number(d[dataKey]) || 0), 0);
-    if (maxVal <= defaultYMax) return { yMax: defaultYMax, yTicks: defaultYTicks };
-    let ceiling = maxVal * 1.15;
-    if (ceiling <= 10) ceiling = Math.ceil(ceiling);
-    else if (ceiling <= 50) ceiling = Math.ceil(ceiling / 5) * 5;
-    else if (ceiling <= 100) ceiling = Math.ceil(ceiling / 10) * 10;
-    else if (ceiling <= 500) ceiling = Math.ceil(ceiling / 50) * 50;
-    else if (ceiling <= 5000) ceiling = Math.ceil(ceiling / 100) * 100;
-    else ceiling = Math.ceil(ceiling / 1000) * 1000;
+  const { yMax, yTicks, minY } = useMemo(() => {
+    const vals = data.map((d) => d[dataKey]).filter((v) => v !== null && v !== undefined).map(Number);
+    const maxVal = vals.length ? Math.max(...vals) : 0;
+    const minVal = vals.length ? Math.min(...vals) : 0;
+    let floor = Number(yMin) || 0;
+    if (isPercent && floor > 0) {
+      floor = Math.min(floor, Math.max(0, Math.floor(minVal - 5)));
+    }
+    let ceiling;
+    if (maxVal <= defaultYMax && !(isPercent && floor > 0)) {
+      ceiling = defaultYMax;
+    } else {
+      ceiling = Math.max(maxVal * 1.12, floor + 1);
+      if (isPercent) ceiling = Math.min(100, Math.ceil(ceiling));
+      else if (ceiling <= 10) ceiling = Math.ceil(ceiling);
+      else if (ceiling <= 50) ceiling = Math.ceil(ceiling / 5) * 5;
+      else if (ceiling <= 100) ceiling = Math.ceil(ceiling / 10) * 10;
+      else if (ceiling <= 500) ceiling = Math.ceil(ceiling / 50) * 50;
+      else if (ceiling <= 5000) ceiling = Math.ceil(ceiling / 100) * 100;
+      else ceiling = Math.ceil(ceiling / 1000) * 1000;
+    }
+    if (isPercent && floor > 0 && maxVal <= defaultYMax) {
+      ceiling = Math.min(100, Math.max(defaultYMax, Math.ceil(maxVal + 2)));
+    }
     const steps = 4;
-    const step = ceiling / steps;
+    const span = ceiling - floor || 1;
     const ticks = Array.from({ length: steps + 1 }, (_, i) => {
-      const v = i * step;
+      const v = floor + (span * i) / steps;
       return isPercent ? Number(v.toFixed(1)) : Math.round(v);
     });
-    return { yMax: ceiling, yTicks: ticks };
-  }, [data, dataKey, defaultYMax, defaultYTicks, isPercent]);
+    return { yMax: ceiling, yTicks: ticks, minY: floor };
+  }, [data, dataKey, defaultYMax, defaultYTicks, isPercent, yMin]);
 
   const points = useMemo(() => {
     if (!data.length) return [];
+    const span = yMax - minY || 1;
     return data.map((d, i) => {
       const x = padLeft + (i / Math.max(1, data.length - 1)) * chartW;
       const raw = d[dataKey];
       const hasValue = raw !== null && raw !== undefined;
       const val = hasValue ? Number(raw) : null;
-      const normY = hasValue ? Math.min(1, Math.max(0, val / (yMax || 1))) : 0;
+      const normY = hasValue ? Math.min(1, Math.max(0, (val - minY) / span)) : 0;
       return {
         x,
         y: padTop + chartH - normY * chartH,
@@ -132,7 +148,7 @@ function AreaChart({
         label: d.label || String(d.day).padStart(2, "0"),
       };
     });
-  }, [data, dataKey, yMax, chartW, chartH]);
+  }, [data, dataKey, yMax, minY, chartW, chartH]);
 
   const plotted = useMemo(() => points.filter((p) => p.val !== null), [points]);
   const linePath = useMemo(() => createSmoothPath(plotted), [plotted]);
@@ -163,12 +179,13 @@ function AreaChart({
             </linearGradient>
           </defs>
           {yTicks.map((tickVal) => {
-            const y = padTop + chartH - (tickVal / yMax) * chartH;
+            const span = yMax - minY || 1;
+            const y = padTop + chartH - ((tickVal - minY) / span) * chartH;
             return (
               <g key={tickVal}>
                 <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
                 <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
-                  {isPercent && yMax <= 5 ? tickVal.toFixed(1) : tickVal}
+                  {isPercent ? tickVal.toFixed(tickVal % 1 ? 1 : 0) : tickVal}
                   {isPercent ? "%" : ""}
                 </text>
               </g>
@@ -199,10 +216,9 @@ function AreaChart({
                     strokeWidth={isHovered ? 2.5 : 1.8}
                   />
                 )}
-                {isSignificant && (
+                {isSignificant && !isPercent && (
                   <text x={p.x} y={p.y - 7} textAnchor="middle" fill="#334155" fontSize="9.5" fontWeight="600">
                     {p.val.toFixed(decimals)}
-                    {isPercent ? "%" : ""}
                   </text>
                 )}
                 <rect
@@ -257,10 +273,11 @@ function AreaChart({
   );
 }
 
+/** Smooth stacked area — same visual language as Daily RM area charts */
 function StackedRmChart({ title, data = [] }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize();
-  const padLeft = 40;
+  const padLeft = 42;
   const padRight = 14;
   const padTop = 18;
   const padBottom = 34;
@@ -268,18 +285,62 @@ function StackedRmChart({ title, data = [] }) {
   const chartH = Math.max(1, height - padTop - padBottom);
 
   const yMax = useMemo(() => {
-    const maxVal = Math.max(...data.map((d) => (Number(d.fgKg) || 0) + (Number(d.runnerKg) || 0) + (Number(d.rejKg) || 0)), 0);
-    if (maxVal <= 100) return 100;
-    if (maxVal <= 500) return Math.ceil(maxVal / 50) * 50;
-    if (maxVal <= 2000) return Math.ceil(maxVal / 100) * 100;
-    return Math.ceil(maxVal * 1.1 / 500) * 500;
+    const maxVal = Math.max(
+      ...data.map((d) => (Number(d.fgKg) || 0) + (Number(d.runnerKg) || 0) + (Number(d.rejKg) || 0)),
+      0
+    );
+    if (maxVal <= 0) return 100;
+    let ceiling = maxVal * 1.12;
+    if (ceiling <= 500) return Math.ceil(ceiling / 50) * 50;
+    if (ceiling <= 2000) return Math.ceil(ceiling / 100) * 100;
+    if (ceiling <= 10000) return Math.ceil(ceiling / 500) * 500;
+    return Math.ceil(ceiling / 1000) * 1000;
   }, [data]);
 
-  const yTicks = [0, yMax * 0.25, yMax * 0.5, yMax * 0.75, yMax].map((v) => Math.round(v));
-  const slot = chartW / Math.max(1, data.length);
-  const barW = Math.min(18, slot * 0.55);
-  const hovered = hoveredIdx !== null ? data[hoveredIdx] : null;
-  const labelEvery = Math.max(1, Math.ceil(data.length / 12));
+  const yTicks = useMemo(
+    () => [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(yMax * f)),
+    [yMax]
+  );
+
+  const seriesPoints = useMemo(() => {
+    return data.map((d, i) => {
+      const x = padLeft + (i / Math.max(1, data.length - 1)) * chartW;
+      const fg = d.fgKg == null ? null : Number(d.fgKg) || 0;
+      const runner = d.runnerKg == null ? null : Number(d.runnerKg) || 0;
+      const rej = d.rejKg == null ? null : Number(d.rejKg) || 0;
+      const has = fg !== null;
+      const y0 = padTop + chartH;
+      if (!has) return { x, has: false, label: d.label, fg: null, runner: null, rej: null };
+      const yFg = y0 - (fg / yMax) * chartH;
+      const yRunner = yFg - (runner / yMax) * chartH;
+      const yRej = yRunner - (rej / yMax) * chartH;
+      return { x, has: true, label: d.label, fg, runner, rej, y0, yFg, yRunner, yRej };
+    });
+  }, [data, chartW, chartH, yMax]);
+
+  const plotted = useMemo(() => seriesPoints.filter((p) => p.has), [seriesPoints]);
+
+  const makeBand = (topKey, bottomKey) => {
+    if (plotted.length < 2) return "";
+    const top = createSmoothPath(plotted.map((p) => ({ x: p.x, y: p[topKey] })));
+    let d = top;
+    for (let i = plotted.length - 1; i >= 0; i -= 1) {
+      d += ` L ${plotted[i].x.toFixed(1)} ${plotted[i][bottomKey].toFixed(1)}`;
+    }
+    return `${d} Z`;
+  };
+
+  const fgBand = useMemo(() => makeBand("yFg", "y0"), [plotted]);
+  const runnerBand = useMemo(() => makeBand("yRunner", "yFg"), [plotted]);
+  const rejBand = useMemo(() => makeBand("yRej", "yRunner"), [plotted]);
+  const totalLine = useMemo(
+    () => createSmoothPath(plotted.map((p) => ({ x: p.x, y: p.yRej }))),
+    [plotted]
+  );
+
+  const labelEvery = Math.max(1, Math.ceil(data.length / 10));
+  const hovered = hoveredIdx !== null ? seriesPoints[hoveredIdx] : null;
+  const hoveredData = hoveredIdx !== null ? data[hoveredIdx] : null;
 
   return (
     <div className="ms-graph-card">
@@ -294,6 +355,20 @@ function StackedRmChart({ title, data = [] }) {
       </div>
       <div className="ms-graph-svg-wrap" ref={wrapRef}>
         <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
+          <defs>
+            <linearGradient id="rmtFgGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#16a34a" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#16a34a" stopOpacity="0.12" />
+            </linearGradient>
+            <linearGradient id="rmtRunGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#d97706" stopOpacity="0.65" />
+              <stop offset="100%" stopColor="#d97706" stopOpacity="0.2" />
+            </linearGradient>
+            <linearGradient id="rmtRejGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#dc2626" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#dc2626" stopOpacity="0.25" />
+            </linearGradient>
+          </defs>
           {yTicks.map((tick) => {
             const y = padTop + chartH - (tick / yMax) * chartH;
             return (
@@ -303,67 +378,59 @@ function StackedRmChart({ title, data = [] }) {
               </g>
             );
           })}
-          {data.length === 0 && (
+          {plotted.length === 0 && (
             <text x={width / 2} y={padTop + chartH / 2} textAnchor="middle" fill="#94a3b8" fontSize="11" fontWeight="600">
               No RM data for this month
             </text>
           )}
-          {data.map((d, idx) => {
-            const cx = padLeft + (idx + 0.5) * slot;
-            const x = cx - barW / 2;
-            const fg = Number(d.fgKg) || 0;
-            const runner = Number(d.runnerKg) || 0;
-            const rej = Number(d.rejKg) || 0;
-            const total = fg + runner + rej;
-            if (total <= 0) return null;
-            const hFg = (fg / yMax) * chartH;
-            const hRunner = (runner / yMax) * chartH;
-            const hRej = (rej / yMax) * chartH;
-            let y = padTop + chartH;
-            y -= hFg;
-            const yFg = y;
-            y -= hRunner;
-            const yRunner = y;
-            y -= hRej;
-            const yRej = y;
-            return (
-              <g key={idx}>
-                <rect x={x} y={yFg} width={barW} height={hFg} fill="#16a34a" rx="2" />
-                <rect x={x} y={yRunner} width={barW} height={hRunner} fill="#d97706" />
-                <rect x={x} y={yRej} width={barW} height={hRej} fill="#dc2626" rx="2" />
-                <rect
-                  x={cx - slot / 2}
-                  y={padTop}
-                  width={slot}
-                  height={chartH}
-                  fill="transparent"
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                />
-              </g>
-            );
-          })}
-          {data.map((d, idx) =>
+          {plotted.length > 1 && (
+            <>
+              <path d={fgBand} fill="url(#rmtFgGrad)" />
+              <path d={runnerBand} fill="url(#rmtRunGrad)" />
+              <path d={rejBand} fill="url(#rmtRejGrad)" />
+              <path d={totalLine} fill="none" stroke="#0f172a" strokeWidth="1.6" strokeOpacity="0.35" />
+            </>
+          )}
+          {seriesPoints.map((p, idx) => (
+            <g key={idx}>
+              {p.has && (
+                <circle cx={p.x} cy={p.yRej} r={hoveredIdx === idx ? 4 : 2.2} fill="#fff" stroke="#0f172a" strokeWidth="1.4" />
+              )}
+              <rect
+                x={p.x - 8}
+                y={padTop}
+                width="16"
+                height={chartH}
+                fill="transparent"
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              />
+            </g>
+          ))}
+          {seriesPoints.map((p, idx) =>
             idx % labelEvery !== 0 ? null : (
               <text
                 key={`lx-${idx}`}
-                x={padLeft + (idx + 0.5) * slot}
+                x={p.x}
                 y={height - 12}
                 textAnchor="middle"
                 className="ms-axis-tick x-tick"
-                transform={`rotate(-25, ${padLeft + (idx + 0.5) * slot}, ${height - 12})`}
+                transform={`rotate(-25, ${p.x}, ${height - 12})`}
               >
-                {d.label}
+                {p.label}
               </text>
             )
           )}
         </svg>
-        {hovered && (
-          <div className="ms-tooltip" style={{ left: "50%", top: "18%" }}>
+        {hovered?.has && hoveredData && (
+          <div
+            className="ms-tooltip"
+            style={{ left: `${(hovered.x / width) * 100}%`, top: `${(hovered.yRej / height) * 100}%` }}
+          >
             <div className="ms-tooltip-date">{hovered.label}</div>
-            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#16a34a" }} /> FG {fmtInt(hovered.fgKg)} kg</div>
-            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#d97706" }} /> Runner {fmtInt(hovered.runnerKg)} kg</div>
-            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#dc2626" }} /> Rej {fmtInt(hovered.rejKg)} kg</div>
+            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#16a34a" }} /> FG {fmtInt(hovered.fg)} kg</div>
+            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#d97706" }} /> Runner {fmtInt(hovered.runner)} kg</div>
+            <div className="ms-tooltip-val"><span className="dot" style={{ background: "#dc2626" }} /> Rej {fmtInt(hovered.rej)} kg</div>
           </div>
         )}
       </div>
@@ -380,8 +447,23 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
   const padBottom = 34;
   const chartW = Math.max(1, width - padLeft - padRight);
   const chartH = Math.max(1, height - padTop - padBottom);
-  const yMax = 100;
-  const yTicks = [0, 25, 50, 75, 100];
+
+  const { yMax, yTicks } = useMemo(() => {
+    const vals = data
+      .flatMap((d) => [d[keyA], d[keyB]])
+      .filter((v) => v !== null && v !== undefined)
+      .map(Number);
+    const peak = vals.length ? Math.max(...vals) : 0;
+    let ceiling = Math.max(8, Math.ceil(peak * 1.25));
+    if (ceiling <= 10) ceiling = 10;
+    else if (ceiling <= 20) ceiling = 20;
+    else if (ceiling <= 30) ceiling = 30;
+    else ceiling = Math.ceil(ceiling / 5) * 5;
+    ceiling = Math.min(100, ceiling);
+    const steps = 4;
+    const ticks = Array.from({ length: steps + 1 }, (_, i) => Math.round((ceiling * i) / steps));
+    return { yMax: ceiling, yTicks: ticks };
+  }, [data, keyA, keyB]);
 
   const buildPoints = (key) =>
     data.map((d, i) => {
@@ -393,12 +475,20 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
       return { x, y, val, label: d.label };
     });
 
-  const ptsA = useMemo(() => buildPoints(keyA), [data, keyA, chartW, chartH]);
-  const ptsB = useMemo(() => buildPoints(keyB), [data, keyB, chartW, chartH]);
-  const pathA = useMemo(() => createSmoothPath(ptsA.filter((p) => p.val !== null)), [ptsA]);
-  const pathB = useMemo(() => createSmoothPath(ptsB.filter((p) => p.val !== null)), [ptsB]);
+  const ptsA = useMemo(() => buildPoints(keyA), [data, keyA, chartW, chartH, yMax]);
+  const ptsB = useMemo(() => buildPoints(keyB), [data, keyB, chartW, chartH, yMax]);
+  const plottedA = ptsA.filter((p) => p.val !== null);
+  const plottedB = ptsB.filter((p) => p.val !== null);
+  const pathA = useMemo(() => createSmoothPath(plottedA), [plottedA]);
+  const pathB = useMemo(() => createSmoothPath(plottedB), [plottedB]);
+  const areaA = useMemo(() => {
+    if (plottedA.length < 2) return "";
+    const bottomY = padTop + chartH;
+    return `${pathA} L ${plottedA[plottedA.length - 1].x} ${bottomY} L ${plottedA[0].x} ${bottomY} Z`;
+  }, [pathA, plottedA, chartH]);
   const labelEvery = Math.max(1, Math.ceil(26 / (chartW / Math.max(1, data.length))));
   const hovered = hoveredIdx !== null ? data[hoveredIdx] : null;
+  const hoverX = hoveredIdx !== null ? ptsA[hoveredIdx]?.x : null;
 
   return (
     <div className="ms-graph-card">
@@ -412,6 +502,12 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
       </div>
       <div className="ms-graph-svg-wrap" ref={wrapRef}>
         <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
+          <defs>
+            <linearGradient id="rmtDualA" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={colorA} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={colorA} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
           {yTicks.map((tick) => {
             const y = padTop + chartH - (tick / yMax) * chartH;
             return (
@@ -421,13 +517,24 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
               </g>
             );
           })}
-          {data.every((d) => d[keyA] == null && d[keyB] == null) && (
+          {plottedA.length === 0 && plottedB.length === 0 && (
             <text x={width / 2} y={padTop + chartH / 2} textAnchor="middle" fill="#94a3b8" fontSize="11" fontWeight="600">
               No RM data for this month
             </text>
           )}
+          {areaA && <path d={areaA} fill="url(#rmtDualA)" />}
           {pathA && <path d={pathA} fill="none" stroke={colorA} strokeWidth="2.4" strokeLinecap="round" />}
           {pathB && <path d={pathB} fill="none" stroke={colorB} strokeWidth="2.4" strokeLinecap="round" />}
+          {ptsA.map((p, idx) =>
+            p.val == null ? null : (
+              <circle key={`a-${idx}`} cx={p.x} cy={p.y} r={hoveredIdx === idx ? 4 : 2.5} fill="#fff" stroke={colorA} strokeWidth="1.8" />
+            )
+          )}
+          {ptsB.map((p, idx) =>
+            p.val == null ? null : (
+              <circle key={`b-${idx}`} cx={p.x} cy={p.y} r={hoveredIdx === idx ? 4 : 2.5} fill="#fff" stroke={colorB} strokeWidth="1.8" />
+            )
+          )}
           {data.map((d, idx) => {
             const x = padLeft + (idx / Math.max(1, data.length - 1)) * chartW;
             return (
@@ -458,8 +565,8 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
             )
           )}
         </svg>
-        {hovered && (
-          <div className="ms-tooltip" style={{ left: "50%", top: "20%" }}>
+        {hovered && hoverX != null && (
+          <div className="ms-tooltip" style={{ left: `${(hoverX / width) * 100}%`, top: "22%" }}>
             <div className="ms-tooltip-date">{hovered.label}</div>
             <div className="ms-tooltip-val">
               <span className="dot" style={{ background: colorA }} />
@@ -476,16 +583,31 @@ function DualLineChart({ title, data = [], keyA, keyB, colorA, colorB, labelA, l
   );
 }
 
-function HorizontalBarChart({ title, color, items = [], unit = "kg", emptyMessage = "No data" }) {
+function shortMachineLabel(raw) {
+  const s = String(raw || "").replace(/^M\/C:?\s*/i, "").trim();
+  const ton = s.match(/^(\d+)\s*[-–]?\s*(\d+)\s*TON/i);
+  if (ton) return `${ton[1]}-${ton[2]}T`;
+  const m = s.match(/^([A-Za-z0-9_-]{1,10})/);
+  return m ? m[1] : s.slice(0, 10);
+}
+
+/** Ranked vertical bars — same card language as Daily MIS charts */
+function RankBarChart({ title, color, items = [], unit = "kg", emptyMessage = "No data" }) {
+  const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize({ width: 500, height: 220 });
-  const padLeft = 108;
-  const padRight = 56;
-  const padTop = 12;
-  const padBottom = 12;
+  const padLeft = 36;
+  const padRight = 12;
+  const padTop = 28;
+  const padBottom = 42;
   const chartW = Math.max(1, width - padLeft - padRight);
   const chartH = Math.max(1, height - padTop - padBottom);
   const maxVal = Math.max(...items.map((i) => Number(i.value) || 0), 1);
-  const rowH = chartH / Math.max(1, items.length);
+  const yMax = Math.ceil(maxVal * 1.12 / (maxVal > 10000 ? 1000 : maxVal > 1000 ? 100 : 10)) * (maxVal > 10000 ? 1000 : maxVal > 1000 ? 100 : 10) || maxVal;
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(yMax * f));
+  const slot = chartW / Math.max(1, items.length);
+  const barW = Math.min(28, slot * 0.55);
+  const gradId = `rmtRank_${color.replace("#", "")}`;
+  const hovered = hoveredIdx !== null ? items[hoveredIdx] : null;
 
   return (
     <div className="ms-graph-card">
@@ -498,37 +620,82 @@ function HorizontalBarChart({ title, color, items = [], unit = "kg", emptyMessag
           <div className="rmt-empty">{emptyMessage}</div>
         ) : (
           <svg viewBox={`0 0 ${width} ${height}`} className="ms-graph-svg">
-            {items.map((item, idx) => {
-              const y = padTop + idx * rowH + rowH * 0.18;
-              const barH = rowH * 0.58;
-              const w = ((Number(item.value) || 0) / maxVal) * chartW;
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.95" />
+                <stop offset="100%" stopColor={color} stopOpacity="0.45" />
+              </linearGradient>
+            </defs>
+            {yTicks.map((tick) => {
+              const y = padTop + chartH - (tick / yMax) * chartH;
               return (
-                <g key={item.id || idx}>
-                  <text
-                    x={padLeft - 8}
-                    y={y + barH / 2 + 3.5}
-                    textAnchor="end"
-                    className="ms-axis-tick"
-                    fontSize="10"
-                    fontWeight="700"
-                  >
-                    {item.label.length > 14 ? `${item.label.slice(0, 13)}…` : item.label}
-                  </text>
-                  <rect x={padLeft} y={y} width={Math.max(2, w)} height={barH} fill={color} rx="3" opacity="0.88" />
-                  <text
-                    x={padLeft + Math.max(2, w) + 6}
-                    y={y + barH / 2 + 3.5}
-                    className="ms-axis-tick"
-                    fontSize="10"
-                    fontWeight="700"
-                    fill="#334155"
-                  >
-                    {fmtInt(item.value)} {unit}
+                <g key={tick}>
+                  <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                  <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
+                    {tick >= 1000 ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k` : tick}
                   </text>
                 </g>
               );
             })}
+            {items.map((item, idx) => {
+              const cx = padLeft + (idx + 0.5) * slot;
+              const h = ((Number(item.value) || 0) / yMax) * chartH;
+              const y = padTop + chartH - h;
+              const isHot = hoveredIdx === idx;
+              return (
+                <g key={item.id || idx}>
+                  <rect
+                    x={cx - barW / 2}
+                    y={y}
+                    width={barW}
+                    height={Math.max(2, h)}
+                    fill={`url(#${gradId})`}
+                    rx="4"
+                    opacity={isHot ? 1 : 0.92}
+                  />
+                  <text
+                    x={cx}
+                    y={y - 6}
+                    textAnchor="middle"
+                    fontSize="9"
+                    fontWeight="700"
+                    fill="#334155"
+                  >
+                    {Number(item.value) >= 1000 ? `${(item.value / 1000).toFixed(1)}k` : fmtInt(item.value)}
+                  </text>
+                  <text
+                    x={cx}
+                    y={height - 18}
+                    textAnchor="middle"
+                    className="ms-axis-tick"
+                    fontSize="9"
+                    fontWeight="700"
+                    transform={`rotate(-28, ${cx}, ${height - 18})`}
+                  >
+                    {item.shortLabel || item.label}
+                  </text>
+                  <rect
+                    x={cx - slot / 2}
+                    y={padTop}
+                    width={slot}
+                    height={chartH + 20}
+                    fill="transparent"
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                  />
+                </g>
+              );
+            })}
           </svg>
+        )}
+        {hovered && (
+          <div className="ms-tooltip" style={{ left: "50%", top: "16%" }}>
+            <div className="ms-tooltip-date">{hovered.label}</div>
+            <div className="ms-tooltip-val">
+              <span className="dot" style={{ backgroundColor: color }} />
+              <strong>{fmtInt(hovered.value)}</strong> {unit}
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -690,8 +857,12 @@ export default function RmConsumptionTrendView({
     });
     return Array.from(map.values())
       .sort((a, b) => b.value - a.value)
-      .slice(0, 10)
-      .map((x) => ({ ...x, value: Math.round(x.value) }));
+      .slice(0, 8)
+      .map((x) => ({
+        ...x,
+        value: Math.round(x.value),
+        shortLabel: shortMachineLabel(x.label),
+      }));
   }, [records]);
 
   const topParts = useMemo(() => {
@@ -703,8 +874,12 @@ export default function RmConsumptionTrendView({
     });
     return Array.from(map.values())
       .sort((a, b) => b.value - a.value)
-      .slice(0, 10)
-      .map((x) => ({ ...x, value: Math.round(x.value) }));
+      .slice(0, 8)
+      .map((x) => ({
+        ...x,
+        value: Math.round(x.value),
+        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
+      }));
   }, [records]);
 
   return (
@@ -737,14 +912,15 @@ export default function RmConsumptionTrendView({
           data={dailySeries}
           dataKey="yieldPct"
           defaultYMax={100}
-          defaultYTicks={[0, 25, 50, 75, 100]}
+          defaultYTicks={[75, 80, 85, 90, 95, 100]}
+          yMin={75}
           isPercent
           decimals={1}
           unit="%"
-          showLabelThreshold={50}
+          showLabelThreshold={999}
         />
-        <HorizontalBarChart title="TOP MACHINES BY RM" color="#2563eb" items={topMachines} />
-        <HorizontalBarChart title="TOP PARTS BY RM" color="#7c3aed" items={topParts} />
+        <RankBarChart title="TOP MACHINES BY RM" color="#2563eb" items={topMachines} />
+        <RankBarChart title="TOP PARTS BY RM" color="#7c3aed" items={topParts} />
         <DualLineChart
           title="SCRAP SPLIT %"
           data={dailySeries}
