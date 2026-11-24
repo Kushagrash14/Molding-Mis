@@ -3106,6 +3106,7 @@ export default function MasterAdmin({
                   <option value="operator">Operator (Entry &amp; My entries)</option>
                   <option value="supervisor">Supervisor (Plant Register)</option>
                   <option value="plant_head">Plant Head (Dashboard &amp; Cycle Time)</option>
+                  <option value="dashboard_viewer">Dashboard Viewer (Dashboard View-Only)</option>
                   <option value="admin">Administrator (Full Access)</option>
                 </select>
               </div>
@@ -3206,6 +3207,7 @@ export default function MasterAdmin({
                   <option value="operator">Operator</option>
                   <option value="supervisor">Supervisor</option>
                   <option value="plant_head">Plant Head</option>
+                  <option value="dashboard_viewer">Dashboard Viewer (Dashboard View-Only)</option>
                   <option value="admin">Administrator</option>
                 </select>
               </div>

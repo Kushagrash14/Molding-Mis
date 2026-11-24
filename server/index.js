@@ -115,7 +115,7 @@ app.get("/api/users", requireAuth, requireRole("admin"), (_req, res) => {
 
 app.post("/api/users", requireAuth, requireRole("admin"), (req, res) => {
   try {
-    const role = ["operator", "supervisor", "plant_head", "admin"].includes(req.body?.role)
+    const role = ["operator", "supervisor", "plant_head", "dashboard_viewer", "viewer", "admin"].includes(req.body?.role)
       ? req.body.role
       : "operator";
     const user = cloudStorage.saveUser({ ...req.body, role });

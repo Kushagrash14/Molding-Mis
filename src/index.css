@@ -7188,3 +7188,5 @@ main.content:has(.mis-dashboard-container.rm-mode) {
 .rm-filter-panel {
   flex-shrink: 0;
 }
+
+.role-pill.role-dashboard_viewer, .role-pill.role-viewer { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }

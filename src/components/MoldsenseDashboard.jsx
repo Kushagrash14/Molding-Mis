@@ -671,8 +671,9 @@ export default function MoldsenseDashboard({
   const isOperator = userRole === "operator";
   const isAdmin = userRole === "admin";
   const isPlantHead = userRole === "plant_head";
-  // Yearly MIS + both RM tabs: admin and plant head
-  const canSeeRm = isAdmin || isPlantHead;
+  const isViewer = userRole === "dashboard_viewer" || userRole === "viewer";
+  // Yearly MIS + both RM tabs: admin, plant head, and dashboard viewer
+  const canSeeRm = isAdmin || isPlantHead || isViewer;
   const [activeTab, setActiveTab] = useState("Monthly MIS");
   const [showFilters, setShowFilters] = useState(false);
   const [rmViewMode, setRmViewMode] = useState("machine");
@@ -1080,6 +1081,26 @@ export default function MoldsenseDashboard({
                   </button>
                 ))}
               </div>
+            )}
+
+            {isViewer && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  background: "#f0fdf4",
+                  color: "#166534",
+                  border: "1px solid #bbf7d0",
+                }}
+                title="Your account has view-only access to plant dashboards"
+              >
+                👁️ View Only
+              </span>
             )}
 
             <label className="ms-plant-label">

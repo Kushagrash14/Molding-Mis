@@ -49,6 +49,12 @@ const TABS_BY_ROLE = {
     ["browse", "Plant entries"],
     ["requests", "Requests"],
   ],
+  dashboard_viewer: [
+    ["dashboard", "Dashboard"],
+  ],
+  viewer: [
+    ["dashboard", "Dashboard"],
+  ],
   admin: [
     ["all", "All entries"],
     ["daily_update", "Daily Update"],
@@ -65,6 +71,7 @@ function defaultTabFor(role) {
   if (role === "operator") return "entry";
   if (role === "supervisor") return "browse";
   if (role === "plant_head") return "dashboard";
+  if (role === "dashboard_viewer" || role === "viewer") return "dashboard";
   if (role === "admin") return "all";
   return "entry";
 }
@@ -216,8 +223,17 @@ export default function App() {
     return entries.filter((e) => accessiblePlants.some((p) => p.plant_id === e.plant_id));
   }, [entries, currentUser, accessiblePlants]);
 
-  const [tab, setTab] = useState("entry");
+  const [tab, setTab] = useState(() => defaultTabFor(currentUser?.role || "operator"));
   const [editing, setEditing] = useState(null);
+
+  // Strictly enforce tab accessibility by role (e.g. Dashboard Viewer only sees Dashboard)
+  useEffect(() => {
+    if (!currentUser) return;
+    const allowed = (TABS_BY_ROLE[currentUser.role] || []).map(([k]) => k);
+    if (allowed.length > 0 && !allowed.includes(tab)) {
+      setTab(defaultTabFor(currentUser.role));
+    }
+  }, [currentUser?.role, tab]);
 
   // Persist master data, config, and entries to localStorage
   useEffect(() => {
