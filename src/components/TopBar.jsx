@@ -219,7 +219,7 @@ export default function TopBar({
               {userRole !== "plant_head" && (
                 <span className={`role-pill role-${userRole}`}>
                   {userRole === "dashboard_viewer" || userRole === "viewer"
-                    ? "DASHBOARD VIEWER"
+                    ? "VIEWER"
                     : userRole?.replace("_", " ")?.toUpperCase()}
                 </span>
               )}

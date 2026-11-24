@@ -1083,26 +1083,6 @@ export default function MoldsenseDashboard({
               </div>
             )}
 
-            {isViewer && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  background: "#f0fdf4",
-                  color: "#166534",
-                  border: "1px solid #bbf7d0",
-                }}
-                title="Your account has view-only access to plant dashboards"
-              >
-                👁️ View Only
-              </span>
-            )}
-
             <label className="ms-plant-label">
               <span>Plant</span>
               <select

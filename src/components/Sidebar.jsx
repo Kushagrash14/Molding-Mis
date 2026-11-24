@@ -49,7 +49,7 @@ export default function Sidebar({ tabs, activeTab, onTabChange, currentUser }) {
                   : currentUser.role === "supervisor"
                   ? "Shift Incharge"
                   : currentUser.role === "dashboard_viewer" || currentUser.role === "viewer"
-                  ? "Dashboard Viewer"
+                  ? "Viewer"
                   : "Machine Operator"}
               </div>
             )}
