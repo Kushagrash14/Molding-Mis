@@ -503,6 +503,10 @@ export default function App() {
   }
 
   function addEntry(entry) {
+    if (currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
+      alert("Dashboard Viewers have strictly read-only access and cannot submit entries.");
+      return;
+    }
     const entryToSave = {
       ...entry,
       entry_id: entry.entry_id || `ent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -667,6 +671,10 @@ export default function App() {
   }
 
   function tryEdit(entry) {
+    if (currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
+      alert("Dashboard Viewers have strictly read-only access and cannot edit entries.");
+      return;
+    }
     const granted = grantCovers(accessRequests, entry.entered_by, entry.plant_id, entry.shift_date);
     const isLocked = isShiftEntryLocked(entry, shifts) && !granted;
     if (currentUser?.role !== "admin" && isLocked) {
@@ -724,7 +732,7 @@ export default function App() {
 
       <div className="shell">
         <main className="content">
-          {tab === "entry" && (
+          {tab === "entry" && (role === "operator" || role === "admin") && (
             <EntryForm
               entries={authorizedEntries}
               master={master}
@@ -746,7 +754,7 @@ export default function App() {
             />
           )}
 
-          {tab === "mine" && (
+          {tab === "mine" && (role === "operator" || role === "admin") && (
             <EntriesTable
               entries={authorizedEntries}
               master={master}
@@ -764,7 +772,7 @@ export default function App() {
             />
           )}
 
-          {tab === "browse" && (
+          {tab === "browse" && (role === "supervisor" || role === "plant_head" || role === "admin") && (
             <div className="entries-workspace-wrapper">
               <div className="page-head" style={{ marginBottom: "10px" }}>
                 <div>
@@ -790,7 +798,7 @@ export default function App() {
             </div>
           )}
 
-          {tab === "all" && (
+          {tab === "all" && role === "admin" && (
             <div className="entries-workspace-wrapper">
               <div className="page-head" style={{ marginBottom: "10px" }}>
                 <div>
