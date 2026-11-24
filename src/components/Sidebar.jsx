@@ -48,8 +48,8 @@ export default function Sidebar({ tabs, activeTab, onTabChange, currentUser }) {
                   ? "Plant Admin"
                   : currentUser.role === "supervisor"
                   ? "Shift Incharge"
-                  : currentUser.role === "dashboard_viewer" || currentUser.role === "viewer"
-                  ? "Viewer"
+                  : currentUser.role === "analyst" || currentUser.role === "dashboard_viewer" || currentUser.role === "viewer"
+                  ? "Analyst"
                   : "Machine Operator"}
               </div>
             )}

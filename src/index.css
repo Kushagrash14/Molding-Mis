@@ -7189,4 +7189,4 @@ main.content:has(.mis-dashboard-container.rm-mode) {
   flex-shrink: 0;
 }
 
-.role-pill.role-dashboard_viewer, .role-pill.role-viewer { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+.role-pill.role-analyst, .role-pill.role-dashboard_viewer, .role-pill.role-viewer { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }

@@ -671,7 +671,7 @@ export default function MoldsenseDashboard({
   const isOperator = userRole === "operator";
   const isAdmin = userRole === "admin";
   const isPlantHead = userRole === "plant_head";
-  const isViewer = userRole === "dashboard_viewer" || userRole === "viewer";
+  const isViewer = userRole === "analyst" || userRole === "dashboard_viewer" || userRole === "viewer";
   // Yearly MIS + both RM tabs: admin, plant head, and dashboard viewer
   const canSeeRm = isAdmin || isPlantHead || isViewer;
   const [activeTab, setActiveTab] = useState("Monthly MIS");

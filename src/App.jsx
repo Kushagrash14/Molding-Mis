@@ -49,6 +49,9 @@ const TABS_BY_ROLE = {
     ["browse", "Plant entries"],
     ["requests", "Requests"],
   ],
+  analyst: [
+    ["dashboard", "Dashboard"],
+  ],
   dashboard_viewer: [
     ["dashboard", "Dashboard"],
   ],
@@ -71,7 +74,7 @@ function defaultTabFor(role) {
   if (role === "operator") return "entry";
   if (role === "supervisor") return "browse";
   if (role === "plant_head") return "dashboard";
-  if (role === "dashboard_viewer" || role === "viewer") return "dashboard";
+  if (role === "analyst" || role === "dashboard_viewer" || role === "viewer") return "dashboard";
   if (role === "admin") return "all";
   return "entry";
 }
@@ -503,8 +506,8 @@ export default function App() {
   }
 
   function addEntry(entry) {
-    if (currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
-      alert("Dashboard Viewers have strictly read-only access and cannot submit entries.");
+    if (currentUser?.role === "analyst" || currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
+      alert("Analysts have strictly read-only access and cannot submit entries.");
       return;
     }
     const entryToSave = {
@@ -671,8 +674,8 @@ export default function App() {
   }
 
   function tryEdit(entry) {
-    if (currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
-      alert("Dashboard Viewers have strictly read-only access and cannot edit entries.");
+    if (currentUser?.role === "analyst" || currentUser?.role === "dashboard_viewer" || currentUser?.role === "viewer") {
+      alert("Analysts have strictly read-only access and cannot edit entries.");
       return;
     }
     const granted = grantCovers(accessRequests, entry.entered_by, entry.plant_id, entry.shift_date);
