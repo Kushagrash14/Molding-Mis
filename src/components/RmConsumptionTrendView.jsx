@@ -237,7 +237,7 @@ function AreaChart({
                     strokeWidth={isHovered ? 2.5 : 1.8}
                   />
                 )}
-                {(isSignificant || isHovered) && !isPercent && (
+                {hasValue && (isSignificant || isHovered) && !isPercent && (
                   <text
                     x={p.x}
                     y={isHovered ? (labelInfo?.y ?? p.y - 8) : labelInfo.y}
@@ -248,7 +248,7 @@ function AreaChart({
                     className="ms-point-label"
                     style={{ pointerEvents: "none" }}
                   >
-                    {p.val.toFixed(decimals)}
+                    {Number(p.val).toFixed(decimals)}
                   </text>
                 )}
                 <rect
@@ -506,6 +506,33 @@ function shortMachineLabel(raw) {
   return m ? m[1] : s.slice(0, 10);
 }
 
+function shortMoldLabel(raw) {
+  if (!raw) return "";
+  let s = String(raw).trim();
+  s = s.replace(/\s*\([^)]*\)/g, ""); // strip parens like (116x820)MM or (CAP COVER)
+  s = s.replace(/\s+/g, " ").trim();
+  if (s.length <= 13) return s;
+  const words = s.split(" ");
+  if (words.length > 1) {
+    const two = words[0] + " " + words[1];
+    if (two.length <= 13) return two;
+    const first = words[0];
+    if (first.length <= 12) return first;
+  }
+  return s.slice(0, 12);
+}
+
+function findProductSmart(master, sap, plantId) {
+  if (!Array.isArray(master) || !sap) return null;
+  const s = String(sap).trim();
+  const match1 = findProduct(master, s, plantId);
+  if (match1) return match1;
+  const match2 = master.find((m) => String(m.sap_code).trim() === s);
+  if (match2) return match2;
+  const suffix = s.length >= 6 ? s.slice(-6) : s;
+  return master.find((m) => String(m.sap_code || "").trim().endsWith(suffix)) || null;
+}
+
 /** Ranked vertical bars — same card language as Daily MIS charts */
 function RankBarChart({
   title,
@@ -612,10 +639,14 @@ function RankBarChart({
         )}
         {hovered && (
           <div className="ms-tooltip" style={{ left: "50%", top: "16%" }}>
-            <div className="ms-tooltip-date">{hovered.label}</div>
-            {hovered.fullName && hovered.fullName !== hovered.label && (
-              <div style={{ fontSize: "10.5px", color: "#64748b", marginBottom: 3 }}>
-                {hovered.fullName}
+            <div className="ms-tooltip-date" style={{ fontWeight: 800, color: "#0f172a" }}>
+              {hovered.label}
+            </div>
+            {(hovered.partNo || (hovered.sapCode && hovered.sapCode !== hovered.label)) && (
+              <div style={{ fontSize: "10px", color: "#64748b", marginTop: 2, marginBottom: 4 }}>
+                {hovered.partNo ? `Part: ${hovered.partNo}` : ""}
+                {hovered.partNo && hovered.sapCode ? " · " : ""}
+                {hovered.sapCode ? `SAP: ${hovered.sapCode}` : ""}
               </div>
             )}
             <div className="ms-tooltip-val">
@@ -678,7 +709,7 @@ export default function RmConsumptionTrendView({
         const runHour = Number(m.net_run_time) || Number(run.run_hour) || 0;
         if (produced <= 0 && runHour <= 0) return;
 
-        const product = findProduct(master, sap, runPlant);
+        const product = findProductSmart(master, sap, runPlant);
         const family = familyInPlant(master, sap, runPlant);
         const partWt = Number(product?.part_wt || run.part_wt || 0);
         const runWt = Number(product?.run_wt || run.run_wt || 0);
@@ -693,13 +724,22 @@ export default function RmConsumptionTrendView({
         const unitPrice = Number(product?.price || run.price || 0);
         const rejValue = rej * unitPrice;
 
+        const moldName =
+          product?.material_description ||
+          run?.material_description ||
+          entry?.material_description ||
+          product?.part_no ||
+          run?.part_no ||
+          sap;
+        const partNo = product?.part_no || run?.part_no || "";
+
         out.push({
           day: parseInt(entry.shift_date.split("-")[2], 10),
           machineId: entry.machine_id,
           machineNo: mcObj?.machine_no || entry.machine_id,
           sapCode: sap,
-          partLabel: product?.part_no || sap,
-          partName: product?.part_name || product?.part_no || sap,
+          partNo,
+          moldName,
           rejQty: rej,
           rejWeight,
           rejValue,
@@ -806,16 +846,25 @@ export default function RmConsumptionTrendView({
     const map = new Map();
     records.forEach((r) => {
       const key = r.sapCode;
-      if (!map.has(key)) map.set(key, { id: key, label: r.partLabel || key, value: 0 });
+      if (!map.has(key)) {
+        map.set(key, {
+          id: key,
+          label: r.moldName,
+          shortLabel: shortMoldLabel(r.moldName),
+          sapCode: r.sapCode,
+          partNo: r.partNo,
+          value: 0,
+        });
+      }
       map.get(key).value += r.totalConsumption;
     });
     return Array.from(map.values())
+      .filter((x) => x.value > 0)
       .sort((a, b) => b.value - a.value)
       .slice(0, 8)
       .map((x) => ({
         ...x,
         value: Math.round(x.value),
-        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
       }));
   }, [records]);
 
@@ -857,8 +906,10 @@ export default function RmConsumptionTrendView({
       if (!map.has(key)) {
         map.set(key, {
           id: key,
-          label: r.partLabel || key,
-          fullName: r.partName || r.partLabel || key,
+          label: r.moldName,
+          shortLabel: shortMoldLabel(r.moldName),
+          sapCode: r.sapCode,
+          partNo: r.partNo,
           value: 0,
           rejKg: 0,
         });
@@ -874,7 +925,6 @@ export default function RmConsumptionTrendView({
       .map((x) => ({
         ...x,
         value: Math.round(x.value),
-        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
         extra: `${Math.round(x.rejKg).toLocaleString("en-IN")} kg scrap`,
       }));
   }, [records]);
@@ -889,8 +939,10 @@ export default function RmConsumptionTrendView({
       if (!map.has(key)) {
         map.set(key, {
           id: key,
-          label: r.partLabel || key,
-          fullName: r.partName || r.partLabel || key,
+          label: r.moldName,
+          shortLabel: shortMoldLabel(r.moldName),
+          sapCode: r.sapCode,
+          partNo: r.partNo,
           rejValue: 0,
           rejKg: 0,
           rejQty: 0,
@@ -915,7 +967,6 @@ export default function RmConsumptionTrendView({
       .slice(0, 8)
       .map((x) => ({
         ...x,
-        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
         extra: x.useCurrency
           ? `${Math.round(x.rejKg).toLocaleString("en-IN")} kg scrap (${Math.round(x.rejQty).toLocaleString("en-IN")} pcs)`
           : `${Math.round(x.rejQty).toLocaleString("en-IN")} pcs rejected`,
