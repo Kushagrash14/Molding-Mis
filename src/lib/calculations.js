@@ -184,9 +184,19 @@ export function computeMetrics(entry, master, reasonCodes = REASON_CODES) {
 
   const planned_base = Number(entry.planned_hours) || 12;
   const run_hour = entry.run_hour !== undefined && entry.run_hour !== "" ? Number(entry.run_hour) : 0;
+  const parseCavityVal = (v) => {
+    if (v === undefined || v === null || v === "") return 0;
+    if (typeof v === "number") return isNaN(v) ? 0 : v;
+    const str = String(v).trim();
+    if (str.includes("+")) {
+      return str.split("+").reduce((a, b) => a + (Number(b) || 0), 0);
+    }
+    const n = Number(str);
+    return isNaN(n) ? 0 : n;
+  };
   const stdCavity =
-    Number(itemMaster?.cavity || entry.std_cavity || (entry.runs && entry.runs[0]?.std_cavity)) || 0;
-  const enteredCavity = Number(entry.running_cavity) || 0;
+    parseCavityVal(itemMaster?.cavity || entry.std_cavity || (entry.runs && entry.runs[0]?.std_cavity));
+  const enteredCavity = parseCavityVal(entry.running_cavity);
   const running_cavity = stdCavity > 0 ? Math.min(enteredCavity, stdCavity) : enteredCavity;
   const ok_prod = Number(entry.ok_prod) || 0;
 

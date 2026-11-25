@@ -36,7 +36,12 @@ export default function MultiCavityModal({
     );
   const stdCavity = family
     ? family.pieceFactor
-    : Math.max(1, Number(rMaster?.cavity || run.std_cavity || 1));
+    : Math.max(
+        1,
+        (typeof rMaster?.cavity === "string" && rMaster.cavity.includes("+")
+          ? rMaster.cavity.split("+").reduce((a, b) => a + (Number(b) || 0), 0)
+          : Number(rMaster?.cavity || run.std_cavity || 1))
+      );
 
   const [totalCavity, setTotalCavity] = useState(stdCavity);
   const [parts, setParts] = useState([]);

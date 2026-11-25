@@ -99,7 +99,11 @@ function MachineSheetRow({
         const dtMins = calculateTotalDowntimeMinutes(r.reasons, reasonCodes);
         const rMaster = findProduct(master, r.sap_code, machine.plant_id);
         const family = familyInPlant(master, r.sap_code, machine.plant_id);
-        const stdCavity = family ? family.pieceFactor : Number(rMaster?.cavity || r.std_cavity || 1);
+        const stdCavity = family
+          ? family.pieceFactor
+          : (typeof rMaster?.cavity === "string" && rMaster.cavity.includes("+")
+              ? rMaster.cavity.split("+").reduce((a, b) => a + (Number(b) || 0), 0)
+              : Number(rMaster?.cavity || r.std_cavity || 1));
         const slotHours = Number(r.planned_hours) || shiftPlannedHours;
         const maxRunHour = Math.max(0, Number((slotHours - dtMins / 60).toFixed(1)));
 

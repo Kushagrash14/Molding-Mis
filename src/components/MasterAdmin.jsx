@@ -317,7 +317,7 @@ export default function MasterAdmin({
       sap_code: cleanSap,
       part_no: newProduct.part_no.trim(),
       material_description: newProduct.material_description.trim(),
-      cavity: Number(newProduct.cavity) || 1,
+      cavity: String(newProduct.cavity || "1").trim(),
       shots_per_hour: Number(newProduct.shots_per_hour) || 60,
       price: Number(newProduct.price) || 0,
       part_wt: Number(newProduct.part_wt) || 0,
@@ -357,10 +357,14 @@ export default function MasterAdmin({
 
   async function handleSaveProductEdit() {
     if (!editingProduct) return;
+    const cleanProd = {
+      ...editingProduct,
+      cavity: typeof editingProduct.cavity === "string" ? editingProduct.cavity.trim() : (editingProduct.cavity || 1),
+    };
     setMaster((prev) =>
       prev.map((m) =>
-        m.sap_code === editingProduct.sap_code && String(m.plant_id || "1040") === String(editingProduct.plant_id || "1040")
-          ? editingProduct
+        m.sap_code === cleanProd.sap_code && String(m.plant_id || "1040") === String(cleanProd.plant_id || "1040")
+          ? cleanProd
           : m
       )
     );
@@ -368,11 +372,11 @@ export default function MasterAdmin({
       const res = await fetch("/api/master/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingProduct),
+        body: JSON.stringify(cleanProd),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || "Failed to update product");
-      alert(`Product "${editingProduct.sap_code}" updated successfully!`);
+      alert(`Product "${cleanProd.sap_code}" updated successfully!`);
     } catch (err) {
       console.error("Cloud product update error:", err);
       alert(`Error updating product: ${err.message}`);
@@ -1772,9 +1776,9 @@ export default function MasterAdmin({
               <div className="form-row">
                 <label>Mold Cavity</label>
                 <input
-                  type="number"
-                  min="1"
+                  type="text"
                   value={newProduct.cavity}
+                  placeholder="e.g. 1 or 1+1"
                   onChange={(e) => setNewProduct({ ...newProduct, cavity: e.target.value })}
                 />
               </div>
@@ -1904,11 +1908,11 @@ export default function MasterAdmin({
                         : ""}
                     </label>
                     <input
-                      type="number"
-                      min="1"
-                      value={editingProduct.cavity}
+                      type="text"
+                      value={editingProduct.cavity ?? ""}
+                      placeholder="e.g. 1 or 1+1"
                       onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, cavity: Number(e.target.value) })
+                        setEditingProduct({ ...editingProduct, cavity: e.target.value })
                       }
                     />
                   </div>

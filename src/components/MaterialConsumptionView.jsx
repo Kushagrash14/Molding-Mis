@@ -211,7 +211,13 @@ export default function MaterialConsumptionView({
         const partWt = Number(product?.part_wt || run.part_wt || 0);
         const runWt = Number(product?.run_wt || run.run_wt || 0);
 
-        const ownCavity = Number(product?.cavity) || Number(run.running_cavity) || Number(run.std_cavity) || 1;
+        const ownCavity =
+          (typeof product?.cavity === "string" && product.cavity.includes("+")
+            ? product.cavity.split("+").reduce((a, b) => a + (Number(b) || 0), 0)
+            : Number(product?.cavity)) ||
+          Number(run.running_cavity) ||
+          Number(run.std_cavity) ||
+          1;
         const cavityFactor = family ? family.pieceFactor : ownCavity > 0 ? ownCavity : 1;
         const moldCombo = family?.combo || product?.mold_combo || String(ownCavity);
 

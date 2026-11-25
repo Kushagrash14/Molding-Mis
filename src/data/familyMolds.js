@@ -273,9 +273,10 @@ export function applyFamilyMoldsToMaster(master) {
             (m) => String(m.sap_code) === p.sap && String(m.plant_id || "1040") === pid
           );
           if (!row) return;
-          const same = Number(row.cavity) === p.cavity && row.mold_combo === combo && row.manual_family;
+          const targetCavity = combo || p.cavity;
+          const same = (row.cavity === targetCavity || String(row.cavity) === String(targetCavity)) && row.mold_combo === combo && row.manual_family;
           if (same) return;
-          row.cavity = p.cavity;
+          row.cavity = targetCavity;
           row.mold_combo = combo;
           row.family_saps = [p.sap];
           row.manual_family = true;
@@ -292,8 +293,9 @@ export function applyFamilyMoldsToMaster(master) {
       group.parts.forEach((p, i) => {
         const row = rows[i];
         const sameSaps = Array.isArray(row.family_saps) && row.family_saps.join() === familySaps.join();
-        if (Number(row.cavity) === p.cavity && row.mold_combo === combo && sameSaps) return;
-        row.cavity = p.cavity;
+        const targetCavity = combo || p.cavity;
+        if ((row.cavity === targetCavity || String(row.cavity) === String(targetCavity)) && row.mold_combo === combo && sameSaps) return;
+        row.cavity = targetCavity;
         row.mold_combo = combo;
         row.family_saps = familySaps;
         changed++;
