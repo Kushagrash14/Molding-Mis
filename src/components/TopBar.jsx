@@ -95,7 +95,7 @@ export default function TopBar({
           <div className="brand-header-row">
             <div className="brand-feature-pill title-pill">
               <span className="pill-accent-bar purple" />
-              <span className="pill-text-title">MoldSense-Manual MIS</span>
+              <span className="pill-text-title">MoldSense</span>
             </div>
           </div>
         </div>
