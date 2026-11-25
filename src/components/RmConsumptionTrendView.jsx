@@ -164,6 +164,26 @@ function AreaChart({
   const labelEvery = Math.max(1, Math.ceil(26 / (chartW / Math.max(1, points.length))));
   const hovered = hoveredIdx !== null ? points[hoveredIdx] : null;
 
+  // Dynamic alternating label position: strictly alternate UP and DOWN to prevent horizontal overlap
+  const labelOffsets = useMemo(() => {
+    let lastWasUp = false;
+    return points.map((p) => {
+      const hasValue = p.val !== null && p.val !== undefined;
+      const isSignificant = hasValue && p.val > showLabelThreshold;
+      if (!isSignificant) {
+        return { show: false, y: p.y - 8 };
+      }
+      const goUp = !lastWasUp;
+      lastWasUp = goUp;
+
+      let y = goUp ? p.y - 8 : p.y + 14;
+      if (y < padTop + 2) y = p.y + 14;
+      else if (y > padTop + chartH + 2) y = p.y - 8;
+
+      return { show: true, y };
+    });
+  }, [points, showLabelThreshold, padTop, chartH]);
+
   return (
     <div className="ms-graph-card">
       <div className="ms-graph-header">
@@ -203,7 +223,8 @@ function AreaChart({
           {points.map((p, idx) => {
             const isHovered = hoveredIdx === idx;
             const hasValue = p.val !== null;
-            const isSignificant = hasValue && p.val > showLabelThreshold;
+            const labelInfo = labelOffsets[idx];
+            const isSignificant = labelInfo?.show;
             return (
               <g key={idx}>
                 {hasValue && (
@@ -216,8 +237,17 @@ function AreaChart({
                     strokeWidth={isHovered ? 2.5 : 1.8}
                   />
                 )}
-                {isSignificant && !isPercent && (
-                  <text x={p.x} y={p.y - 7} textAnchor="middle" fill="#334155" fontSize="9.5" fontWeight="600">
+                {(isSignificant || isHovered) && !isPercent && (
+                  <text
+                    x={p.x}
+                    y={isHovered ? (labelInfo?.y ?? p.y - 8) : labelInfo.y}
+                    textAnchor="middle"
+                    fill={isHovered ? "#0f172a" : "#334155"}
+                    fontSize={isHovered ? "9.5" : "8.5"}
+                    fontWeight={isHovered ? "700" : "600"}
+                    className="ms-point-label"
+                    style={{ pointerEvents: "none" }}
+                  >
                     {p.val.toFixed(decimals)}
                   </text>
                 )}
@@ -477,7 +507,14 @@ function shortMachineLabel(raw) {
 }
 
 /** Ranked vertical bars — same card language as Daily MIS charts */
-function RankBarChart({ title, color, items = [], unit = "kg", emptyMessage = "No data" }) {
+function RankBarChart({
+  title,
+  color,
+  items = [],
+  unit = "kg",
+  prefix = "",
+  emptyMessage = "No data",
+}) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [wrapRef, { width, height }] = useElementSize({ width: 500, height: 220 });
   const padLeft = 36;
@@ -517,7 +554,7 @@ function RankBarChart({ title, color, items = [], unit = "kg", emptyMessage = "N
                 <g key={tick}>
                   <line x1={padLeft} y1={y} x2={width - padRight} y2={y} stroke="#f1f5f9" strokeWidth="1" />
                   <text x={padLeft - 6} y={y + 3.5} textAnchor="end" className="ms-axis-tick">
-                    {tick >= 1000 ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k` : tick}
+                    {prefix}{tick >= 1000 ? `${(tick / 1000).toFixed(tick % 1000 ? 1 : 0)}k` : tick}
                   </text>
                 </g>
               );
@@ -546,7 +583,7 @@ function RankBarChart({ title, color, items = [], unit = "kg", emptyMessage = "N
                     fontWeight="700"
                     fill="#334155"
                   >
-                    {Number(item.value) >= 1000 ? `${(item.value / 1000).toFixed(1)}k` : fmtInt(item.value)}
+                    {prefix}{Number(item.value) >= 1000 ? `${(item.value / 1000).toFixed(1)}k` : fmtInt(item.value)}
                   </text>
                   <text
                     x={cx}
@@ -576,10 +613,20 @@ function RankBarChart({ title, color, items = [], unit = "kg", emptyMessage = "N
         {hovered && (
           <div className="ms-tooltip" style={{ left: "50%", top: "16%" }}>
             <div className="ms-tooltip-date">{hovered.label}</div>
+            {hovered.fullName && hovered.fullName !== hovered.label && (
+              <div style={{ fontSize: "10.5px", color: "#64748b", marginBottom: 3 }}>
+                {hovered.fullName}
+              </div>
+            )}
             <div className="ms-tooltip-val">
               <span className="dot" style={{ backgroundColor: color }} />
-              <strong>{fmtInt(hovered.value)}</strong> {unit}
+              <strong>{prefix}{fmtInt(hovered.value)}</strong> {unit ? ` ${unit}` : ""}
             </div>
+            {hovered.extra && (
+              <div style={{ fontSize: "10.5px", color: "#475569", marginTop: 2, fontWeight: 600 }}>
+                {hovered.extra}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -643,6 +690,8 @@ export default function RmConsumptionTrendView({
         const totalConsumption = Number(m.total_consumption) || netWt * produced;
         const runnerScrap = Math.max(0, totalConsumption - fgWeight - rejWeight);
         const mcObj = machines.find((mc) => mc.machine_id === entry.machine_id);
+        const unitPrice = Number(product?.price || run.price || 0);
+        const rejValue = rej * unitPrice;
 
         out.push({
           day: parseInt(entry.shift_date.split("-")[2], 10),
@@ -650,8 +699,11 @@ export default function RmConsumptionTrendView({
           machineNo: mcObj?.machine_no || entry.machine_id,
           sapCode: sap,
           partLabel: product?.part_no || sap,
-          fgWeight,
+          partName: product?.part_name || product?.part_no || sap,
+          rejQty: rej,
           rejWeight,
+          rejValue,
+          fgWeight,
           runnerScrap,
           totalConsumption,
         });
@@ -767,6 +819,109 @@ export default function RmConsumptionTrendView({
       }));
   }, [records]);
 
+  // Chart 7: Machine with High Rejection (Scrap pieces & kg)
+  const topRejMachines = useMemo(() => {
+    const map = new Map();
+    records.forEach((r) => {
+      if (!r.machineId) return;
+      if (!map.has(r.machineId)) {
+        map.set(r.machineId, {
+          id: r.machineId,
+          label: r.machineNo || r.machineId,
+          value: 0,
+          rejKg: 0,
+        });
+      }
+      const item = map.get(r.machineId);
+      item.value += Number(r.rejQty) || 0;
+      item.rejKg += Number(r.rejWeight) || 0;
+    });
+    return Array.from(map.values())
+      .filter((x) => x.value > 0 || x.rejKg > 0)
+      .sort((a, b) => (b.value !== a.value ? b.value - a.value : b.rejKg - a.rejKg))
+      .slice(0, 8)
+      .map((x) => ({
+        ...x,
+        value: Math.round(x.value),
+        shortLabel: shortMachineLabel(x.label),
+        extra: `${Math.round(x.rejKg).toLocaleString("en-IN")} kg scrap`,
+      }));
+  }, [records]);
+
+  // Chart 8: Parts / Molds with Highest Rejection (Defect pieces)
+  const topRejParts = useMemo(() => {
+    const map = new Map();
+    records.forEach((r) => {
+      const key = r.sapCode;
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: key,
+          label: r.partLabel || key,
+          fullName: r.partName || r.partLabel || key,
+          value: 0,
+          rejKg: 0,
+        });
+      }
+      const item = map.get(key);
+      item.value += Number(r.rejQty) || 0;
+      item.rejKg += Number(r.rejWeight) || 0;
+    });
+    return Array.from(map.values())
+      .filter((x) => x.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8)
+      .map((x) => ({
+        ...x,
+        value: Math.round(x.value),
+        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
+        extra: `${Math.round(x.rejKg).toLocaleString("en-IN")} kg scrap`,
+      }));
+  }, [records]);
+
+  // Chart 9: Highest RM Loss by Rejection (Value ₹ / Weight kg)
+  const topRmLossParts = useMemo(() => {
+    const map = new Map();
+    let hasAnyPrice = false;
+    records.forEach((r) => {
+      const key = r.sapCode;
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: key,
+          label: r.partLabel || key,
+          fullName: r.partName || r.partLabel || key,
+          rejValue: 0,
+          rejKg: 0,
+          rejQty: 0,
+        });
+      }
+      const item = map.get(key);
+      const val = Number(r.rejValue) || 0;
+      if (val > 0) hasAnyPrice = true;
+      item.rejValue += val;
+      item.rejKg += Number(r.rejWeight) || 0;
+      item.rejQty += Number(r.rejQty) || 0;
+    });
+
+    return Array.from(map.values())
+      .map((item) => ({
+        ...item,
+        value: hasAnyPrice && item.rejValue > 0 ? Math.round(item.rejValue) : Math.round(item.rejKg),
+        useCurrency: hasAnyPrice && item.rejValue > 0,
+      }))
+      .filter((x) => x.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8)
+      .map((x) => ({
+        ...x,
+        shortLabel: String(x.label).length > 8 ? String(x.label).slice(-6) : String(x.label),
+        extra: x.useCurrency
+          ? `${Math.round(x.rejKg).toLocaleString("en-IN")} kg scrap (${Math.round(x.rejQty).toLocaleString("en-IN")} pcs)`
+          : `${Math.round(x.rejQty).toLocaleString("en-IN")} pcs rejected`,
+      }));
+  }, [records]);
+
   return (
     <div className="ms-content-area">
       <div className="ms-kpi-grid">
@@ -813,8 +968,30 @@ export default function RmConsumptionTrendView({
           showLabelThreshold={20}
         />
         <StackedComparisonBarChart title="FG vs RUNNER vs REJ (KG)" data={dailySeries} />
-        <RankBarChart title="TOP MACHINES BY RM CONSUMPTION" color="#2563eb" items={topMachines} />
-        <RankBarChart title="TOP PARTS BY RM CONSUMPTION" color="#7c3aed" items={topParts} />
+        <RankBarChart title="TOP MACHINES BY RM CONSUMPTION" color="#2563eb" items={topMachines} unit="kg" />
+        <RankBarChart title="TOP PARTS BY RM CONSUMPTION" color="#7c3aed" items={topParts} unit="kg" />
+        <RankBarChart
+          title="TOP MACHINES BY HIGH REJECTION"
+          color="#ef4444"
+          items={topRejMachines}
+          unit="pcs"
+          emptyMessage="No machine rejections logged"
+        />
+        <RankBarChart
+          title="TOP REJECTED PARTS / MOLDS"
+          color="#ea580c"
+          items={topRejParts}
+          unit="pcs"
+          emptyMessage="No part rejections logged"
+        />
+        <RankBarChart
+          title={topRmLossParts[0]?.useCurrency ? "HIGHEST RM LOSS BY REJECTION (VALUE)" : "HIGHEST RM LOSS BY REJECTION (KG)"}
+          color="#dc2626"
+          items={topRmLossParts}
+          prefix={topRmLossParts[0]?.useCurrency ? "₹" : ""}
+          unit={topRmLossParts[0]?.useCurrency ? "" : "kg"}
+          emptyMessage="No rejection RM loss logged"
+        />
       </div>
     </div>
   );

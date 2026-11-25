@@ -1218,6 +1218,7 @@ export default function MoldsenseDashboard({
               dataKey="prodK"
               defaultYMax={100}
               defaultYTicks={[0, 25, 50, 75, 100]}
+              decimals={0}
               unit=" K pcs"
               showLabelThreshold={1}
               emptyMessage={`No entries logged for ${selectedYear}`}
@@ -1230,7 +1231,7 @@ export default function MoldsenseDashboard({
               dataKey="plannedDtHrs"
               defaultYMax={100}
               defaultYTicks={[0, 25, 50, 75, 100]}
-              decimals={1}
+              decimals={0}
               unit=" hrs"
               showLabelThreshold={2}
               emptyMessage={`No entries logged for ${selectedYear}`}
@@ -1258,7 +1259,7 @@ export default function MoldsenseDashboard({
               defaultYMax={100}
               defaultYTicks={[0, 25, 50, 75, 100]}
               isPercent={true}
-              decimals={1}
+              decimals={0}
               unit="%"
               showLabelThreshold={40}
               emptyMessage={`No entries logged for ${selectedYear}`}
@@ -1271,7 +1272,7 @@ export default function MoldsenseDashboard({
               dataKey="unplannedDtHrs"
               defaultYMax={200}
               defaultYTicks={[0, 50, 100, 150, 200]}
-              decimals={1}
+              decimals={0}
               unit=" hrs"
               showLabelThreshold={5}
               emptyMessage={`No entries logged for ${selectedYear}`}
