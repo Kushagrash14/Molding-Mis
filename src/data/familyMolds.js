@@ -23,6 +23,11 @@ const pgelMold = (combo, ...saps) => {
 const lone = (sap) => ({ plants: PGEL, manual: true, combo: "1+1", parts: [{ sap, cavity: 1 }] });
 
 const PGEL_PUNE_11 = [
+  one("9010004192", "9010004193"), // SMR59 - CASE REAR LH/RH GRAINED U171 ORVM
+  one("9010004194", "9010004195"), // SMR58 - BACKING PLATE LH/RH U171 ORVM
+  one("9010004196", "9010004197"), // SMR57 - BREAKE FACE GASKET LH/RH U171 ORV
+  one("9010004198", "9010004199"), // SMR61 - GROMMET CAMERA LH/RH U171 ORVM
+  one("9010004200", "9010004201"), // SMR60 - GROMMET NON CAMERA LH/RH U171
   one("9010003780", "9010003781"),
   one("9010002960", "9010002961"),
   one("9010003059", "9010003060"),

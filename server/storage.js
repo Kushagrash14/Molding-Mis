@@ -22,6 +22,7 @@ const MASTER_SYNC_FIELDS = [
   "part_wt",
   "run_wt",
   "manpower",
+  "tool",
 ];
 
 function applyMasterRows(master, rows) {
