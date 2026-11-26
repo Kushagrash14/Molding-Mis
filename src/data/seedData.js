@@ -132,6 +132,42 @@ export const SEED_MASTER = [
     "manpower": 0.5
   },
   {
+    "sap_code": "7020001737",
+    "plant_id": "1040",
+    "part_no": "1+5+1",
+    "material_description": "SWING MOTOR HOUSING RH ONE WAY CASSETTE",
+    "cavity": "1+5+1",
+    "shots_per_hour": 120,
+    "price": 1.24,
+    "part_wt": 0.005,
+    "run_wt": 0.002,
+    "manpower": 1
+  },
+  {
+    "sap_code": "7020001742",
+    "plant_id": "1040",
+    "part_no": "",
+    "material_description": "AIR GUIDE FRAME ONE WAY CASSETTE",
+    "cavity": 5,
+    "shots_per_hour": 120,
+    "price": 0.35,
+    "part_wt": 0.001,
+    "run_wt": 0.001,
+    "manpower": 1
+  },
+  {
+    "sap_code": "7020001747",
+    "plant_id": "1040",
+    "part_no": "",
+    "material_description": "LINKAGE MOTOR COUPLING ONE WAY CASSETTE",
+    "cavity": 1,
+    "shots_per_hour": 120,
+    "price": 1.34,
+    "part_wt": 0.003,
+    "run_wt": 0.002,
+    "manpower": 1
+  },
+  {
     "sap_code": "7010000205",
     "plant_id": "1040",
     "part_no": "MBL66498405",
@@ -19574,13 +19610,13 @@ export const SEED_MASTER = [
   {
     "sap_code": "7020001737",
     "plant_id": "2020",
-    "part_no": "",
-    "material_description": "MOTOR HOUSING RH",
-    "cavity": 1,
+    "part_no": "1+5+1",
+    "material_description": "SWING MOTOR HOUSING RH ONE WAY CASSETTE",
+    "cavity": "1+5+1",
     "shots_per_hour": 120,
-    "price": 1.2,
+    "price": 1.24,
     "part_wt": 0.005,
-    "run_wt": 0.009,
+    "run_wt": 0.002,
     "manpower": 1
   },
   {
@@ -23714,13 +23750,13 @@ export const SEED_MASTER = [
   {
     "sap_code": "7020001737",
     "plant_id": "4010",
-    "part_no": "",
-    "material_description": "MOTOR HOUSING RH",
-    "cavity": 1,
+    "part_no": "1+5+1",
+    "material_description": "SWING MOTOR HOUSING RH ONE WAY CASSETTE",
+    "cavity": "1+5+1",
     "shots_per_hour": 120,
-    "price": 1.2,
+    "price": 1.24,
     "part_wt": 0.005,
-    "run_wt": 0.009,
+    "run_wt": 0.002,
     "manpower": 2
   },
   {

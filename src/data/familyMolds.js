@@ -166,6 +166,8 @@ export const FAMILY_MOLDS = [
   { parts: [{ sap: "7020001736", cavity: 1 }, { sap: "7020001735", cavity: 1 }] },
   { parts: [{ sap: "7020001745", cavity: 1 }, { sap: "7020001744", cavity: 1 }] },
   { parts: [{ sap: "7020001753", cavity: 1 }, { sap: "7020001752", cavity: 1 }, { sap: "7020001751", cavity: 1 }] },
+  { parts: [{ sap: "7020001749", cavity: 2 }, { sap: "7020001748", cavity: 10 }] },
+  { parts: [{ sap: "7020001737", cavity: 1 }, { sap: "7020001742", cavity: 5 }, { sap: "7020001747", cavity: 1 }] },
   { parts: [{ sap: "7020001725", cavity: 1 }, { sap: "7020001727", cavity: 1 }] },
   { parts: [{ sap: "7020003754", cavity: 1 }, { sap: "7020003755", cavity: 1 }] },
   { parts: [{ sap: "7020004389", cavity: 1 }, { sap: "7020004390", cavity: 1 }] },
